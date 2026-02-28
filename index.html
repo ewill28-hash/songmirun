@@ -6,9 +6,7 @@
     <title>Songmirun - 크루 매니저</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- Chart.js Library -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Firebase App & Services -->
     <script type="importmap">
     {
       "imports": {
@@ -39,6 +37,8 @@
         .hidden { display: none !important; }
         .loading-spinner { animation: spin 1s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .stat-grid-label { font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; }
+        .stat-grid-val { font-size: 13px; font-weight: 900; color: #1e293b; font-style: italic; }
     </style>
 </head>
 <body class="pb-20">
@@ -118,7 +118,6 @@
                     <input type="hidden" id="edit-id">
                     <div class="grid grid-cols-2 gap-4 mb-6">
                         <div class="col-span-2">
-                            <label class="text-[10px] text-gray-400 font-bold block mb-1">러너 닉네임</label>
                             <input type="text" id="log-username" class="w-full border border-green-100 p-3 rounded-xl text-sm font-bold outline-none focus:ring-2 ring-brand-200">
                         </div>
                         <div class="col-span-1">
@@ -180,8 +179,19 @@
             <!-- Section: Members (Only Admin) -->
             <div id="section-members" class="hidden space-y-6">
                 <section class="bg-white p-6 rounded-[2.5rem] border border-brand-100 shadow-sm">
+                    <div class="flex justify-between items-center mb-6">
+                         <h2 class="font-black text-sm flex items-center gap-2 text-gray-800">
+                            <i class="fa-solid fa-users-viewfinder text-brand-500"></i> 일괄 회원 입력
+                        </h2>
+                        <span class="text-[10px] text-gray-400 font-bold">형식: 날짜, 닉네임, 성별 (줄바꿈 구분)</span>
+                    </div>
+                    <textarea id="bulk-members-input" rows="4" placeholder="예: 2024-03-01, 홍길동, 남성&#10;2024-03-02, 김영희, 여성" class="w-full bg-gray-50 border border-gray-200 p-4 rounded-2xl text-[11px] font-bold outline-none focus:ring-2 ring-brand-200 mb-4 font-mono"></textarea>
+                    <button id="btn-bulk-import" class="w-full bg-brand-100 text-brand-700 font-black py-4 rounded-2xl active:scale-95 transition-transform hover:bg-brand-200 text-sm">일괄 등록 시작하기</button>
+                </section>
+
+                <section class="bg-white p-6 rounded-[2.5rem] border border-brand-100 shadow-sm">
                     <h2 id="mem-form-title" class="font-black text-sm mb-6 flex items-center gap-2 text-gray-800">
-                        <i class="fa-solid fa-user-plus text-brand-500"></i> 회원 등록
+                        <i class="fa-solid fa-user-plus text-brand-500"></i> 개별 회원 등록
                     </h2>
                     <input type="hidden" id="mem-edit-id">
                     <div class="grid grid-cols-2 gap-4 mb-6">
@@ -205,8 +215,9 @@
                             <input type="text" id="mem-memo" class="w-full bg-green-50/30 border border-green-100 p-3 rounded-xl text-sm font-bold outline-none">
                         </div>
                     </div>
-                    <button id="mem-submit-btn" class="w-full bg-gray-800 text-white font-black py-4 rounded-2xl shadow-lg active:scale-95 transition-transform hover:bg-black">등록하기</button>
+                    <button id="mem-submit-btn" class="w-full bg-gray-800 text-white font-black py-4 rounded-2xl shadow-lg active:scale-95 transition-transform hover:bg-black">저장하기</button>
                 </section>
+
                 <div class="bg-white rounded-[2rem] border border-brand-100 shadow-sm overflow-hidden overflow-x-auto">
                     <table class="w-full text-left min-w-[400px]">
                         <thead class="bg-gray-50 text-[10px] text-gray-400 font-bold uppercase">
@@ -225,7 +236,34 @@
         </main>
     </div>
 
-    <!-- Custom Modal -->
+    <!-- User Stat Detail Modal -->
+    <div id="stat-detail-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[250] hidden items-center justify-center p-4">
+        <div class="bg-white rounded-[2.5rem] w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="bg-brand-500 p-8 text-white relative">
+                <button id="close-stat-modal" class="absolute top-6 right-6 w-10 h-10 bg-black/10 rounded-full flex items-center justify-center hover:bg-black/20 transition-colors">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+                <div class="flex items-center gap-4 mb-2">
+                    <div id="modal-user-avatar" class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-3xl font-black italic">S</div>
+                    <div>
+                        <h2 id="modal-user-name" class="text-2xl font-black italic">Runner Name</h2>
+                        <p class="text-[10px] font-bold text-brand-100 uppercase tracking-widest opacity-80">Activity Insights</p>
+                    </div>
+                </div>
+                <div class="mt-4 inline-flex items-center gap-2 bg-black/10 px-3 py-1.5 rounded-full">
+                    <span class="text-[10px] font-bold text-brand-100 uppercase">최근 접속일</span>
+                    <span id="modal-last-active" class="text-[10px] font-black italic">2024-00-00</span>
+                </div>
+            </div>
+            
+            <div id="modal-stats-content" class="p-6 overflow-y-auto space-y-6 bg-gray-50">
+                <!-- Stat Card Template -->
+                <div id="stat-periods-container" class="space-y-4"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Common Modal (Alert/Confirm) -->
     <div id="custom-modal" class="fixed inset-0 bg-black/50 z-[200] hidden items-center justify-center p-4">
         <div class="bg-white rounded-[2rem] p-6 max-w-sm w-full shadow-2xl">
             <h3 id="modal-title" class="text-base font-black text-gray-800 mb-2">알림</h3>
@@ -241,7 +279,6 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut } from "firebase/auth";
         import { getFirestore, collection, doc, onSnapshot, getDocs, addDoc, updateDoc, deleteDoc, serverTimestamp, query } from "firebase/firestore";
 
-        // --- Firebase Config (User Provided) ---
         const firebaseConfig = {
             apiKey: "AIzaSyD1pj4uw9LyUUTtWn_a28ABN0BC-0zkynY",
             authDomain: "tele-486906.firebaseapp.com",
@@ -252,7 +289,6 @@
         };
         const appId = "c_4d3b99e1ebe4d8df_todo_app.html-690";
 
-        // Global State
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
@@ -279,57 +315,126 @@
             document.getElementById('modal-message').innerText = msg;
             const btnContainer = document.getElementById('modal-buttons');
             btnContainer.innerHTML = '';
-
             if (type === 'confirm') {
                 const cancelBtn = document.createElement('button');
                 cancelBtn.className = "px-4 py-2 text-xs font-bold text-gray-500 bg-gray-100 rounded-xl hover:bg-gray-200";
                 cancelBtn.innerText = "취소";
-                cancelBtn.onclick = () => {
-                    modal.classList.add('hidden');
-                    modal.classList.remove('flex');
-                };
-                
+                cancelBtn.onclick = () => { modal.classList.add('hidden'); modal.classList.remove('flex'); };
                 const confirmBtn = document.createElement('button');
                 confirmBtn.className = "px-4 py-2 text-xs font-bold text-white bg-red-500 rounded-xl hover:bg-red-600 shadow-lg shadow-red-200";
                 confirmBtn.innerText = "확인";
-                confirmBtn.onclick = () => {
-                    modal.classList.add('hidden');
-                    modal.classList.remove('flex');
-                    if (onConfirm) onConfirm();
-                };
+                confirmBtn.onclick = () => { modal.classList.add('hidden'); modal.classList.remove('flex'); if (onConfirm) onConfirm(); };
                 btnContainer.appendChild(cancelBtn);
                 btnContainer.appendChild(confirmBtn);
             } else {
                 const okBtn = document.createElement('button');
                 okBtn.className = "px-4 py-2 text-xs font-bold text-white bg-brand-500 rounded-xl hover:bg-brand-600 shadow-lg shadow-brand-200";
                 okBtn.innerText = "확인";
-                okBtn.onclick = () => {
-                    modal.classList.add('hidden');
-                    modal.classList.remove('flex');
-                };
+                okBtn.onclick = () => { modal.classList.add('hidden'); modal.classList.remove('flex'); };
                 btnContainer.appendChild(okBtn);
             }
+            modal.classList.remove('hidden'); modal.classList.add('flex');
+        };
+
+        // --- Stats Analysis for Modal ---
+        window.openUserStatModal = (nickname) => {
+            const modal = document.getElementById('stat-detail-modal');
+            const userLogs = allLogs.filter(l => l.userName === nickname);
+            
+            document.getElementById('modal-user-name').innerText = nickname;
+            document.getElementById('modal-user-avatar').innerText = nickname.charAt(0);
+            
+            const lastActive = userLogs.length > 0 
+                ? [...userLogs].sort((a,b) => new Date(b.date) - new Date(a.date))[0].date 
+                : '기록 없음';
+            document.getElementById('modal-last-active').innerText = lastActive;
+
+            const now = new Date();
+            const thisYear = now.getFullYear();
+            const thisMonth = now.getMonth();
+            const lastYear = thisYear - 1;
+            
+            const firstOfThisMonth = new Date(thisYear, thisMonth, 1);
+            const firstOfLastMonth = new Date(thisYear, thisMonth - 1, 1);
+            const lastOfLastMonth = new Date(thisYear, thisMonth, 0);
+
+            const calculatePeriodStat = (logs) => {
+                const count = logs.length;
+                const distance = logs.reduce((sum, l) => sum + Number(l.distance || 0), 0);
+                const duration = logs.reduce((sum, l) => sum + Number(l.duration || 0), 0);
+                const pace = distance > 0 ? (duration / distance) : 0;
+                const mm = Math.floor(pace);
+                const ss = Math.round((pace - mm) * 60);
+                return {
+                    count,
+                    distance: distance.toFixed(1),
+                    duration,
+                    pace: pace > 0 ? `${mm}'${ss.toString().padStart(2, '0')}"` : '0\'00"'
+                };
+            };
+
+            const periods = [
+                { label: '전체 (Lifetime)', logs: userLogs },
+                { label: '올해 (' + thisYear + ')', logs: userLogs.filter(l => new Date(l.date).getFullYear() === thisYear) },
+                { label: '작년 (' + lastYear + ')', logs: userLogs.filter(l => new Date(l.date).getFullYear() === lastYear) },
+                { label: '이번달 (' + (thisMonth + 1) + '월)', logs: userLogs.filter(l => {
+                    const d = new Date(l.date);
+                    return d >= firstOfThisMonth;
+                })},
+                { label: '지난달 (' + (lastOfLastMonth.getMonth() + 1) + '월)', logs: userLogs.filter(l => {
+                    const d = new Date(l.date);
+                    return d >= firstOfLastMonth && d <= lastOfLastMonth;
+                })}
+            ];
+
+            const container = document.getElementById('stat-periods-container');
+            container.innerHTML = periods.map(p => {
+                const s = calculatePeriodStat(p.logs);
+                return `
+                    <div class="bg-white rounded-3xl p-5 border border-brand-100 shadow-sm">
+                        <h4 class="text-[11px] font-black text-brand-600 mb-4 flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 bg-brand-400 rounded-full"></span> ${p.label}
+                        </h4>
+                        <div class="grid grid-cols-4 gap-2">
+                            <div class="text-center bg-gray-50 py-3 rounded-2xl">
+                                <p class="stat-grid-label">Count</p>
+                                <p class="stat-grid-val text-brand-500">${s.count}</p>
+                            </div>
+                            <div class="text-center bg-gray-50 py-3 rounded-2xl">
+                                <p class="stat-grid-label">Distance</p>
+                                <p class="stat-grid-val">${s.distance}<span class="text-[8px] ml-0.5">km</span></p>
+                            </div>
+                            <div class="text-center bg-gray-50 py-3 rounded-2xl">
+                                <p class="stat-grid-label">Time</p>
+                                <p class="stat-grid-val">${s.duration}<span class="text-[8px] ml-0.5">m</span></p>
+                            </div>
+                            <div class="text-center bg-gray-50 py-3 rounded-2xl">
+                                <p class="stat-grid-label">Pace</p>
+                                <p class="stat-grid-val text-orange-500">${s.pace}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
 
             modal.classList.remove('hidden');
             modal.classList.add('flex');
         };
 
-        // Window exposed functions for Global Access
+        document.getElementById('close-stat-modal').onclick = () => {
+            const modal = document.getElementById('stat-detail-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        };
+
+        // --- Log/Member Logic ---
         window.deleteLog = async (id) => {
-            if(!auth.currentUser) {
-                showToast("권한이 없습니다. 다시 로그인 해주세요.");
-                return;
-            }
-            
+            if(!auth.currentUser) return;
             showModal("이 기록을 정말 삭제하시겠습니까?", "confirm", async () => {
                 try {
-                    const logDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'songmirun_logs', id);
-                    await deleteDoc(logDocRef);
-                    showToast("기록이 성공적으로 삭제되었습니다.");
-                } catch(e) { 
-                    console.error("Delete Log Error:", e);
-                    showToast("삭제 중 오류가 발생했습니다.");
-                }
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'songmirun_logs', id));
+                    showToast("기록 삭제 완료");
+                } catch(e) { console.error(e); }
             });
         };
 
@@ -345,23 +450,18 @@
             document.getElementById('in-cadence').value = l.cadence;
             document.getElementById('in-date').value = l.date;
             document.getElementById('run-type').value = l.runType;
-            document.getElementById('form-title').innerHTML = '<i class="fa-solid fa-pen text-brand-500"></i> 러닝 기록 수정';
+            document.getElementById('form-title').innerHTML = '<i class="fa-solid fa-pen text-brand-500"></i> 기록 수정';
             document.getElementById('tab-logs').click();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
         window.deleteMember = async (id) => {
             if(!auth.currentUser) return;
-            
             showModal("회원 정보를 삭제하시겠습니까?", "confirm", async () => {
                 try {
-                    const memberDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'songmirun_members', id);
-                    await deleteDoc(memberDocRef);
-                    showToast("회원이 삭제되었습니다.");
-                } catch(e) { 
-                    console.error("Delete Member Error:", e);
-                    showToast("삭제 중 오류가 발생했습니다.");
-                }
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'songmirun_members', id));
+                    showToast("회원 삭제 완료");
+                } catch(e) { console.error(e); }
             });
         };
 
@@ -373,7 +473,7 @@
             document.getElementById('mem-gender').value = m.gender;
             document.getElementById('mem-joindate').value = m.joinDate;
             document.getElementById('mem-memo').value = m.memo || '';
-            document.getElementById('mem-form-title').innerHTML = '<i class="fa-solid fa-user-pen text-brand-500"></i> 회원 정보 수정';
+            document.getElementById('mem-form-title').innerHTML = '<i class="fa-solid fa-user-pen text-brand-500"></i> 정보 수정';
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
@@ -381,17 +481,15 @@
             const loginScreen = document.getElementById('login-screen');
             const mainContent = document.getElementById('main-content');
             const isLoggedIn = auth.currentUser && userNickname;
-
             if (isLoggedIn) {
                 loginScreen.classList.add('hidden');
                 mainContent.classList.remove('hidden');
                 document.getElementById('display-nickname').innerText = userNickname;
                 isAdmin = userNickname.toLowerCase().startsWith('admin');
-                
                 document.getElementById('tab-members').classList.toggle('hidden', !isAdmin);
                 document.getElementById('admin-badge').classList.toggle('hidden', !isAdmin);
-                
-                const logUserField = document.getElementById('log-username');
+                document.getElementById('log-username').classList.toggle('hidden', !isAdmin);
+               const logUserField = document.getElementById('log-username');
                 if (isAdmin) {
                     logUserField.readOnly = false;
                     logUserField.classList.remove('bg-gray-100');
@@ -410,17 +508,13 @@
         const renderMonthlyChart = () => {
             const ctxEl = document.getElementById('monthlyChart');
             if (!ctxEl) return;
-
             const monthsData = Array(12).fill(0);
             const currentYearLogs = allLogs.filter(l => l.date && new Date(l.date).getFullYear() === parseInt(selectedYear));
-            
             currentYearLogs.forEach(l => {
                 const m = new Date(l.date).getMonth();
                 monthsData[m] += Number(l.distance || 0);
             });
-
             if (chartInstance) chartInstance.destroy();
-
             chartInstance = new Chart(ctxEl, {
                 type: 'bar',
                 data: {
@@ -433,8 +527,7 @@
                     }]
                 },
                 options: { 
-                    responsive: true,
-                    maintainAspectRatio: false,
+                    responsive: true, maintainAspectRatio: false,
                     scales: { y: { beginAtZero: true } }
                 }
             });
@@ -445,11 +538,9 @@
             const totalDist = currentYearLogs.reduce((sum, l) => sum + Number(l.distance || 0), 0);
             const totalTime = currentYearLogs.reduce((sum, l) => sum + Number(l.duration || 0), 0);
             const avgBpm = currentYearLogs.length ? Math.round(currentYearLogs.reduce((sum, l) => sum + Number(l.bpm || 0), 0) / currentYearLogs.length) : 0;
-            
             document.getElementById('stat-dist').innerText = totalDist.toFixed(1) + ' km';
             document.getElementById('stat-time').innerText = totalTime + ' m';
             document.getElementById('stat-bpm').innerText = avgBpm + ' b';
-            
             renderMonthlyChart();
         };
 
@@ -457,21 +548,17 @@
             const list = document.getElementById('ranking-list');
             const userStats = {};
             const yearLogs = allLogs.filter(l => l.date && new Date(l.date).getFullYear() === parseInt(selectedYear));
-            
-            yearLogs.forEach(l => {
-                userStats[l.userName] = (userStats[l.userName] || 0) + Number(l.distance || 0);
-            });
+            yearLogs.forEach(l => { userStats[l.userName] = (userStats[l.userName] || 0) + Number(l.distance || 0); });
             const sorted = Object.entries(userStats).sort((a,b) => b[1] - a[1]);
-            
             list.innerHTML = sorted.map(([name, dist], i) => `
                 <div class="flex items-center justify-between p-3">
                     <div class="flex items-center gap-3">
                         <span class="text-[10px] font-black w-4 ${i < 3 ? 'text-brand-600' : 'text-gray-300'}">${i+1}</span>
-                        <span class="text-xs font-bold ${name === userNickname ? 'text-brand-700 underline underline-offset-4 decoration-brand-200' : 'text-gray-600'}">${name}</span>
+                        <span class="text-xs font-bold ${name === userNickname ? 'text-brand-700 underline underline-offset-4' : 'text-gray-600'}">${name}</span>
                     </div>
                     <span class="text-xs font-black text-brand-500">${dist.toFixed(1)} km</span>
                 </div>
-            `).join('') || '<div class="p-6 text-center text-[10px] text-gray-300 font-bold">랭킹 데이터 없음</div>';
+            `).join('') || '<div class="p-6 text-center text-gray-300 font-bold">랭킹 정보 없음</div>';
         };
 
         const renderLogs = () => {
@@ -479,18 +566,13 @@
             const displayLogs = (isAdmin ? allLogs : allLogs.filter(l => l.userName === userNickname))
                                .filter(l => l.date && new Date(l.date).getFullYear() === parseInt(selectedYear));
             const sorted = [...displayLogs].sort((a,b) => new Date(b.date) - new Date(a.date));
-            
             list.innerHTML = sorted.map(l => `
-                <div class="bg-white p-4 rounded-2xl border border-brand-100 shadow-sm relative overflow-hidden">
+                <div class="bg-white p-4 rounded-2xl border border-brand-100 shadow-sm relative">
                     <div class="flex justify-between items-start mb-2">
                         <span class="text-[9px] font-black text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full">${l.date} | ${l.runType || '번개'}</span>
                         <div class="flex gap-2">
-                            <button onclick="window.editLog('${l.id}')" class="text-gray-300 hover:text-brand-500 transition-colors cursor-pointer p-1">
-                                <i class="fa-solid fa-pen-to-square text-xs"></i>
-                            </button>
-                            <button onclick="window.deleteLog('${l.id}')" class="text-gray-300 hover:text-red-500 transition-colors cursor-pointer p-1">
-                                <i class="fa-solid fa-trash-can text-xs"></i>
-                            </button>
+                            <button onclick="window.editLog('${l.id}')" class="text-gray-300 hover:text-brand-500 p-1"><i class="fa-solid fa-pen-to-square text-xs"></i></button>
+                            <button onclick="window.deleteLog('${l.id}')" class="text-gray-300 hover:text-red-500 p-1"><i class="fa-solid fa-trash-can text-xs"></i></button>
                         </div>
                     </div>
                     <div class="flex items-center gap-2 mb-3">
@@ -498,10 +580,10 @@
                         <span class="text-xs font-bold text-gray-700">${l.userName}</span>
                     </div>
                     <div class="grid grid-cols-4 gap-1 text-center bg-brand-50/50 p-2 rounded-xl">
-                        <div><p class="text-[7px] text-gray-400 font-bold uppercase">Km</p><p class="text-[11px] font-black">${l.distance}</p></div>
-                        <div><p class="text-[7px] text-gray-400 font-bold uppercase">Min</p><p class="text-[11px] font-black">${l.duration}</p></div>
-                        <div><p class="text-[7px] text-gray-400 font-bold uppercase">Bpm</p><p class="text-[11px] font-black text-red-500">${l.bpm}</p></div>
-                        <div><p class="text-[7px] text-gray-400 font-bold uppercase">Cad</p><p class="text-[11px] font-black text-brand-600">${l.cadence}</p></div>
+                        <div><p class="text-[7px] text-gray-400 font-bold">Km</p><p class="text-[11px] font-black">${l.distance}</p></div>
+                        <div><p class="text-[7px] text-gray-400 font-bold">Min</p><p class="text-[11px] font-black">${l.duration}</p></div>
+                        <div><p class="text-[7px] text-gray-400 font-bold text-red-400">Bpm</p><p class="text-[11px] font-black text-red-500">${l.bpm}</p></div>
+                        <div><p class="text-[7px] text-gray-400 font-bold">Cad</p><p class="text-[11px] font-black text-brand-600">${l.cadence}</p></div>
                     </div>
                 </div>
             `).join('') || '<div class="p-12 text-center text-gray-300 text-xs font-bold">활동 기록이 없습니다.</div>';
@@ -511,183 +593,100 @@
             const list = document.getElementById('member-list');
             list.innerHTML = [...crewMembers].sort((a,b) => a.nickname.localeCompare(b.nickname)).map(m => `
                 <tr class="hover:bg-brand-50/30 transition-colors">
-                    <td class="p-4 text-xs font-bold text-gray-700">${m.nickname}</td>
+                    <td class="p-4 text-xs font-bold">
+                        <button onclick="window.openUserStatModal('${m.nickname}')" class="text-brand-600 hover:underline text-left font-black">
+                            ${m.nickname}
+                        </button>
+                    </td>
                     <td class="p-4 text-[10px] font-bold ${m.gender === '남성' ? 'text-blue-500' : 'text-pink-500'}">${m.gender}</td>
                     <td class="p-4 text-[10px] text-gray-400 font-medium">${m.joinDate}</td>
-                    <td class="p-4 text-[10px] text-gray-400 max-w-[100px] truncate">${m.memo || '-'}</td>
-                    <td class="p-4 text-right">
-                        <button onclick="window.editMember('${m.id}')" class="text-brand-400 p-1 cursor-pointer"><i class="fa-solid fa-user-pen"></i></button>
-                        <button onclick="window.deleteMember('${m.id}')" class="text-red-300 p-1 cursor-pointer"><i class="fa-solid fa-user-minus"></i></button>
+                    <td class="p-4 text-[10px] text-gray-400 max-w-[80px] truncate">${m.memo || '-'}</td>
+                    <td class="p-4 text-right flex gap-1 justify-end">
+                        <button onclick="window.editMember('${m.id}')" class="text-brand-400 p-1"><i class="fa-solid fa-user-pen"></i></button>
+                        <button onclick="window.deleteMember('${m.id}')" class="text-red-300 p-1"><i class="fa-solid fa-user-minus"></i></button>
                     </td>
                 </tr>
-            `).join('') || '<tr><td colspan="5" class="p-8 text-center text-[10px] text-gray-300 font-bold">등록된 회원이 없습니다.</td></tr>';
+            `).join('') || '<tr><td colspan="5" class="p-8 text-center text-gray-300 font-bold">등록된 회원이 없습니다.</td></tr>';
         };
 
         const setupListeners = () => {
             if (!auth.currentUser) return;
-            
             const logsColRef = collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_logs');
             if (unsubLogs) unsubLogs();
             unsubLogs = onSnapshot(logsColRef, (snap) => {
                 allLogs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                renderStats();
-                renderRanking();
-                renderLogs();
-            }, (err) => {
-                console.error("Logs Snapshot Error:", err);
-            });
+                renderStats(); renderRanking(); renderLogs();
+            }, (err) => console.error(err));
 
             const membersColRef = collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_members');
             if (unsubMembers) unsubMembers();
             unsubMembers = onSnapshot(membersColRef, (snap) => {
                 crewMembers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 renderMembers();
-            }, (err) => {
-                console.error("Members Snapshot Error:", err);
-            });
+            }, (err) => console.error(err));
         };
 
         const handleLogin = async () => {
-            const nickInput = document.getElementById('login-nick');
-            const nick = nickInput.value.trim();
+            const nick = document.getElementById('login-nick').value.trim();
             if (!nick) return showModal("닉네임을 입력해 주세요.", "alert");
-            
-            const loader = document.getElementById('login-loader');
-            const btnText = document.getElementById('login-text');
-            
-            loader.classList.remove('hidden');
-            btnText.innerText = "확인 중...";
-
+            document.getElementById('login-loader').classList.remove('hidden');
+            document.getElementById('login-text').innerText = "확인 중...";
             try {
-                if (!auth.currentUser) {
-                    // Try Custom token first, fallback to anonymous if token fails due to custom project mismatch
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        try {
-                            await signInWithCustomToken(auth, __initial_auth_token);
-                        } catch(e) {
-                            console.warn("Custom token failed (likely different Firebase project), falling back to anonymous auth.");
-                            await signInAnonymously(auth);
-                        }
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-                }
-
-                const isSystemAdmin = nick.toLowerCase().startsWith('admin');
-                
-                if (isSystemAdmin) {
+                if (!auth.currentUser) await signInAnonymously(auth);
+                if (nick.toLowerCase().startsWith('admin')) {
                     localStorage.setItem('songmirun_nickname', nick);
-                    userNickname = nick;
-                    updateUI();
-                    setupListeners();
-                    showToast(`관리자님, 반갑습니다!`);
-                    return;
+                    userNickname = nick; updateUI(); setupListeners();
+                    showToast(`관리자 로그인 성공`); return;
                 }
-
-                if (auth.currentUser) {
-                    const membersColRef = collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_members');
-                    const snap = await getDocs(query(membersColRef));
-                    const registeredNicks = snap.docs.map(d => d.data().nickname);
-                    
-                    if (registeredNicks.includes(nick)) {
-                        localStorage.setItem('songmirun_nickname', nick);
-                        userNickname = nick;
-                        updateUI();
-                        setupListeners();
-                        showToast(`${nick}님, 소소한 달리기의 즐거움을 누리세요!`);
-                    } else {
-                        showModal("등록되지 않은 회원입니다. Jake에게 문의하세요.", "alert");
-                    }
-                }
-            } catch (err) {
-                console.error("Login Error:", err);
-                showModal("로그인 중 오류가 발생했습니다.", "alert");
-            } finally {
-                loader.classList.add('hidden');
-                btnText.innerText = "입장하기";
-            }
-        };
-
-        const initAuth = async () => {
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    try {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } catch(e) {
-                        console.warn("Custom token failed (likely different Firebase project), falling back to anonymous auth.");
-                        await signInAnonymously(auth);
-                    }
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (err) {
-                console.error("Initial Auth Error:", err);
+                const membersColRef = collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_members');
+                const snap = await getDocs(query(membersColRef));
+                const registeredNicks = snap.docs.map(d => d.data().nickname);
+                if (registeredNicks.includes(nick)) {
+                    localStorage.setItem('songmirun_nickname', nick);
+                    userNickname = nick; updateUI(); setupListeners();
+                    showToast(`${nick}님 환영합니다!`);
+                } else showModal("등록되지 않은 회원입니다.", "alert");
+            } catch (err) { console.error(err); } finally {
+                document.getElementById('login-loader').classList.add('hidden');
+                document.getElementById('login-text').innerText = "입장하기";
             }
         };
 
         const init = async () => {
-            await initAuth();
-
             onAuthStateChanged(auth, (user) => {
                 if (user) {
                     const savedNick = localStorage.getItem('songmirun_nickname');
-                    if (savedNick) {
-                        userNickname = savedNick;
-                        updateUI();
-                        setupListeners();
-                    } else {
-                        updateUI();
-                    }
-                } else {
-                    updateUI();
-                }
+                    if (savedNick) { userNickname = savedNick; updateUI(); setupListeners(); }
+                    else updateUI();
+                } else updateUI();
             });
 
             document.getElementById('btn-login').onclick = handleLogin;
-            
-            document.getElementById('btn-logout').onclick = async () => {
+            document.getElementById('btn-logout').onclick = () => {
                 showModal("로그아웃 하시겠습니까?", "confirm", async () => {
                     localStorage.removeItem('songmirun_nickname');
-                    userNickname = '';
-                    if (unsubLogs) unsubLogs();
-                    if (unsubMembers) unsubMembers();
-                    await signOut(auth);
-                    updateUI();
-                    location.reload(); 
+                    userNickname = ''; if (unsubLogs) unsubLogs(); if (unsubMembers) unsubMembers();
+                    await signOut(auth); updateUI(); location.reload(); 
                 });
             };
 
-            // Navigation
-            const tabs = {
-                'tab-logs': 'section-logs',
-                'tab-stats': 'section-stats',
-                'tab-members': 'section-members'
-            };
-
+            const tabs = { 'tab-logs': 'section-logs', 'tab-stats': 'section-stats', 'tab-members': 'section-members' };
             Object.keys(tabs).forEach(tabId => {
                 document.getElementById(tabId).onclick = () => {
-                    Object.values(tabs).forEach(sectionId => document.getElementById(sectionId).classList.add('hidden'));
+                    Object.values(tabs).forEach(sec => document.getElementById(sec).classList.add('hidden'));
                     document.getElementById(tabs[tabId]).classList.remove('hidden');
-                    
                     Object.keys(tabs).forEach(id => {
                         const el = document.getElementById(id);
                         el.classList.remove('border-brand-500', 'text-brand-600');
                         el.classList.add('border-transparent', 'text-gray-400');
                     });
-                    
                     const activeEl = document.getElementById(tabId);
-                    activeEl.classList.remove('border-transparent', 'text-gray-400');
                     activeEl.classList.add('border-brand-500', 'text-brand-600');
-                    
-                    if (tabId === 'tab-stats') {
-                        setTimeout(renderMonthlyChart, 100);
-                    }
+                    if (tabId === 'tab-stats') setTimeout(renderMonthlyChart, 100);
                 };
             });
 
-            // Save Log
             document.getElementById('btn-save-log').onclick = async () => {
-                if(!auth.currentUser) return showModal("다시 로그인하세요.", "alert");
                 const data = {
                     userName: document.getElementById('log-username').value.trim(),
                     distance: Number(document.getElementById('in-dist').value),
@@ -698,28 +697,20 @@
                     runType: document.getElementById('run-type').value,
                     updatedAt: serverTimestamp()
                 };
-                if(!data.userName || !data.distance || !data.date) return showModal("필수 데이터를 모두 입력하세요.", "alert");
-                
+                if(!data.userName || !data.distance || !data.date) return showModal("데이터를 모두 입력하세요.", "alert");
                 const editId = document.getElementById('edit-id').value;
                 try {
-                    const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_logs');
-                    if (editId) await updateDoc(doc(colRef, editId), data);
-                    else await addDoc(colRef, { ...data, createdAt: serverTimestamp() });
-                    
+                    const col = collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_logs');
+                    if (editId) await updateDoc(doc(col, editId), data);
+                    else await addDoc(col, { ...data, createdAt: serverTimestamp() });
                     ['in-dist','in-time','in-bpm','in-cadence'].forEach(id => document.getElementById(id).value = '');
                     document.getElementById('edit-id').value = '';
-                    document.getElementById('form-title').innerHTML = '<i class="fa-solid fa-circle-plus text-brand-500"></i> 새 러닝 기록';
-                    if(isAdmin) {
-                        document.getElementById('log-username').value = '';
-                        delete document.getElementById('log-username').dataset.edited;
-                    }
-                    showToast("기록이 저장되었습니다.");
+                    document.getElementById('form-title').innerHTML = '<i class="fa-solid fa-circle-plus text-brand-500"></i> 새 기록';
+                    showToast("기록 저장 완료");
                 } catch(e) { console.error(e); }
             };
 
-            // Save Member
             document.getElementById('mem-submit-btn').onclick = async () => {
-                if(!auth.currentUser) return;
                 const data = {
                     nickname: document.getElementById('mem-nickname').value.trim(),
                     gender: document.getElementById('mem-gender').value,
@@ -728,22 +719,38 @@
                     updatedAt: serverTimestamp()
                 };
                 if(!data.nickname) return showModal("닉네임을 입력하세요.", "alert");
-                
                 const editId = document.getElementById('mem-edit-id').value;
                 try {
-                    const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_members');
-                    if(editId) await updateDoc(doc(colRef, editId), data);
-                    else await addDoc(colRef, data);
-                    
+                    const col = collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_members');
+                    if(editId) await updateDoc(doc(col, editId), data);
+                    else await addDoc(col, data);
                     document.getElementById('mem-edit-id').value = '';
                     document.getElementById('mem-nickname').value = '';
                     document.getElementById('mem-memo').value = '';
-                    document.getElementById('mem-form-title').innerHTML = '<i class="fa-solid fa-user-plus text-brand-500"></i> 회원 등록';
-                    showToast("회원 정보 저장 완료!");
+                    showToast("회원 정보 저장 완료");
                 } catch(e) { console.error(e); }
             };
 
-            // Year selector
+            document.getElementById('btn-bulk-import').onclick = async () => {
+                const raw = document.getElementById('bulk-members-input').value.trim();
+                if(!raw) return showModal("데이터를 입력하세요.", "alert");
+                const lines = raw.split('\n');
+                let count = 0;
+                const col = collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_members');
+                showToast("데이터 처리 중...");
+                for(let line of lines) {
+                    const parts = line.split(',').map(p => p.trim());
+                    if(parts.length >= 3) {
+                        try {
+                            await addDoc(col, { nickname: parts[1], joinDate: parts[0], gender: parts[2], memo: '일괄 등록됨', updatedAt: serverTimestamp() });
+                            count++;
+                        } catch(e) { console.error(e); }
+                    }
+                }
+                document.getElementById('bulk-members-input').value = '';
+                showModal(`${count}명의 회원이 등록되었습니다.`, "alert");
+            };
+
             const select = document.getElementById('year-select');
             const thisYear = new Date().getFullYear();
             for(let y=thisYear; y>=thisYear-2; y--) {
@@ -751,16 +758,16 @@
                 opt.value = y; opt.textContent = `${y}년 기록`;
                 select.appendChild(opt);
             }
-            select.onchange = (e) => { 
-                selectedYear = e.target.value; 
-                renderStats(); 
-                renderRanking();
-                renderLogs();
-            };
-            
+            select.onchange = (e) => { selectedYear = e.target.value; renderStats(); renderRanking(); renderLogs(); };
             document.getElementById('in-date').valueAsDate = new Date();
             document.getElementById('mem-joindate').valueAsDate = new Date();
-            document.getElementById('export-end').valueAsDate = new Date();
+            document.getElementById('export-end').valueAsDate = new Date()                      ;
+
+            //document.getElementById('export-start').valueAsDate = new Date(new Date().getFullYear(), 0, 1);
+
+            const date = new Date(new Date().getFullYear(), 0, 1);
+            date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+        document.getElementById('export-start').valueAsDate = date;
 
             document.getElementById('btn-csv').onclick = () => {
                 const start = document.getElementById('export-start').value;
@@ -771,10 +778,9 @@
                           filtered.map(l => `${l.date},${l.userName},${l.runType},${l.distance},${l.duration},${l.bpm},${l.cadence}`).join('\n');
                 const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
                 const a = document.createElement("a");
-                a.href = URL.createObjectURL(blob); a.download = `songmirun_logs.csv`; a.click();
+                a.href = URL.createObjectURL(blob); a.download = `songmirun_export.csv`; a.click();
             };
         };
-
         window.onload = init;
     </script>
 </body>
