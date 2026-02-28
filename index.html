@@ -358,6 +358,20 @@
                         </div>
                     </section>
                 </div>
+                <div class="bg-white p-4 rounded-2xl border border-brand-100">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-xs font-bold text-gray-400 uppercase">기록 데이터 내보내기</h3>
+                        <span id="export-scope-badge" class="text-[8px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-black">Run</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input type="date" id="export-start" class="flex-1 text-[10px] p-2 bg-gray-50 border border-gray-100 rounded-lg outline-none font-bold">
+                        <span class="text-gray-300">~</span>
+                        <input type="date" id="export-end" class="flex-1 text-[10px] p-2 bg-gray-50 border border-gray-100 rounded-lg outline-none font-bold">
+                        <button id="btn-csv" class="bg-brand-500 hover:bg-brand-600 text-white px-3 py-2 rounded-lg text-[10px] font-bold shadow-sm flex items-center gap-1.5">
+                            <i class="fa-solid fa-download"></i> CSV 다운로드
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <!-- Section: Members (Only Admin) -->
@@ -390,6 +404,15 @@
                     </div>
                     <button id="mem-submit-btn" class="w-full bg-gray-800 text-white font-black py-4 rounded-2xl shadow-lg active:scale-95 transition-transform hover:bg-black">저장하기</button>
                 </section>
+                <section class="bg-white p-6 rounded-[2.5rem] border border-brand-100 shadow-sm">
+                    <div class="flex justify-between items-center mb-6">
+                         <h2 class="font-black text-sm flex items-center gap-2 text-gray-800">
+                            <i class="fa-solid fa-users-viewfinder text-brand-500"></i> 일괄 크루 입력
+                        </h2>
+                    </div>
+                    <textarea id="bulk-members-input" rows="4" placeholder="예: 2024-03-01, 홍길동, 남성..." class="w-full bg-gray-50 border border-gray-200 p-4 rounded-2xl text-[11px] font-bold outline-none focus:ring-2 ring-brand-200 mb-4 font-mono"></textarea>
+                    <button id="btn-bulk-import" class="w-full bg-brand-100 text-brand-700 font-black py-4 rounded-2xl active:scale-95 transition-transform hover:bg-brand-200 text-sm">일괄 등록 시작하기</button>
+                </section>
 
                 <div class="space-y-4">
                     <div class="flex flex-col sm:flex-row gap-3">
@@ -417,6 +440,18 @@
                         </table>
                     </div>
                 </div>
+
+                <!-- Section: Bulk Log Upload -->
+                <section class="bg-white p-6 rounded-[2.5rem] border border-brand-100 shadow-sm">
+                    <div class="flex justify-between items-center mb-6">
+                         <h2 class="font-black text-sm flex items-center gap-2 text-gray-800">
+                            <i class="fa-solid fa-upload text-brand-500"></i> 러닝 기록 일괄 업로드
+                        </h2>
+                    </div>
+                    <p class="text-[10px] text-gray-400 font-bold mb-3 ml-1">형식: 날짜, 이름, 유형, 거리, 시간, 심박, 케이던스</p>
+                    <textarea id="bulk-logs-input" rows="5" placeholder="2026-01-15, 홍길동, 번개, 10, 50, 160, 180&#10;2026-01-16, 김철수, 정규, 5, 25, 150, 175" class="w-full bg-gray-50 border border-gray-200 p-4 rounded-2xl text-[11px] font-bold outline-none focus:ring-2 ring-brand-200 mb-4 font-mono"></textarea>
+                    <button id="btn-bulk-logs-import" class="w-full bg-gray-800 text-white font-black py-4 rounded-2xl shadow-lg active:scale-95 transition-transform hover:bg-black text-sm">기록 일괄 등록하기</button>
+                </section>
             </div>
         </main>
     </div>
@@ -729,6 +764,17 @@
             renderMembers();
         };
 
+        const getFilteredMembers = () => {
+            let filtered = crewMembers.filter(m => (m.nickname + m.gender + m.joinDate + (m.memo || '')).toLowerCase().includes(memberSearchTerm.toLowerCase()));
+            filtered.sort((a, b) => {
+                let vA = a[sortConfig.key] || '', vB = b[sortConfig.key] || '';
+                if (vA < vB) return sortConfig.direction === 'asc' ? -1 : 1;
+                if (vA > vB) return sortConfig.direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+            return filtered;
+        };
+
         const renderMembers = () => {
             const list = document.getElementById('member-list');
             let filtered = crewMembers.filter(m => (m.nickname + m.gender + m.joinDate).toLowerCase().includes(memberSearchTerm.toLowerCase()));
@@ -815,6 +861,33 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
+        window.deleteMember = async (id) => {
+            if(!auth.currentUser) return;
+            
+            showModal("크루 정보를 삭제하시겠습니까?", "confirm", async () => {
+                try {
+                    const memberDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'songmirun_members', id);
+                    await deleteDoc(memberDocRef);
+                    showToast("해당 크루가 삭제되었습니다.");
+                } catch(e) { 
+                    console.error("Delete Member Error:", e);
+                    showToast("삭제 중 오류가 발생했습니다.");
+                }
+            });
+        };
+
+        window.editMember = (id) => {
+            const m = crewMembers.find(x => x.id === id);
+            if(!m) return;
+            document.getElementById('mem-edit-id').value = id;
+            document.getElementById('mem-nickname').value = m.nickname;
+            document.getElementById('mem-gender').value = m.gender;
+            document.getElementById('mem-joindate').value = m.joinDate;
+            document.getElementById('mem-memo').value = m.memo || '';
+            document.getElementById('mem-form-title').innerText = "회원 정보 수정";
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
         const setupListeners = () => {
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_logs'), (snap) => {
                 allLogs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -860,6 +933,7 @@
                     if (target) await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'songmirun_members', target.id), { lastLogin: new Date().toISOString().split('T')[0] });
                     localStorage.setItem('songmirun_nickname', nick);
                     userNickname = nick; updateUI(); setupListeners();
+                    showToast(`${nick}님 환영합니다!`);
                 } catch(e) { showModal("로그인 오류", "alert"); }
                 finally { document.getElementById('login-loader').classList.add('hidden'); }
             };
@@ -907,6 +981,43 @@
                 } catch(e) { showToast("저장 실패"); }
             };
 
+
+            document.getElementById('btn-csv').onclick = () => {
+                const start = document.getElementById('export-start').value;
+                const end = document.getElementById('export-end').value;
+                if(!start || !end) return showModal("기간을 선택하세요.", "alert");
+
+                const filtered = allLogs.filter(l => {
+                    const isWithinDate = l.date >= start && l.date <= end;
+                    const isAuthorized = isAdmin || l.userName === userNickname;
+                    return isWithinDate && isAuthorized;
+                }).sort((a,b) => new Date(a.date) - new Date(b.date));
+
+                if(filtered.length === 0) return showModal("내보낼 데이터가 없습니다.", "alert");
+
+                let csv = "\uFEFF날짜,이름,유형,거리(km),시간(분),심박(bpm),케이던스(spm)\n";
+                filtered.forEach(l => { csv += `${l.date},${l.userName},${l.runType || '일반'},${l.distance},${l.duration},${l.bpm || 0},${l.cadence || 0}\n`; });
+                
+                const typeLabel = isAdmin ? "AllRecords" : "MyRecords";
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement("a");
+                link.setAttribute("href", URL.createObjectURL(blob));
+                link.setAttribute("download", `songmirun_${typeLabel}_${start}_${end}.csv`);
+                link.click();
+            };
+
+            document.getElementById('btn-member-csv').onclick = () => {
+                const filtered = getFilteredMembers();
+                if(filtered.length === 0) return showModal("내보낼 크루가 없습니다.", "alert");
+                let csv = "\uFEFFNo,닉네임,성별,가입일,최근접속일,메모\n";
+                filtered.forEach((m, idx) => { csv += `${idx + 1},${m.nickname},${m.gender},${m.joinDate},${m.lastLogin || '-'},${(m.memo || '').replace(/,/g, ' ')}\n`; });
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement("a");
+                link.setAttribute("href", URL.createObjectURL(blob));
+                link.setAttribute("download", `songmirun_members_${new Date().toISOString().split('T')[0]}.csv`);
+                link.click();
+            };
+
             document.getElementById('mem-submit-btn').onclick = async () => {
                 const data = {
                     nickname: document.getElementById('mem-nickname').value.trim(),
@@ -923,8 +1034,54 @@
                     else await addDoc(colRef, data);
                     document.getElementById('mem-edit-id').value = '';
                     document.getElementById('mem-nickname').value = '';
-                    showToast("저장 완료");
+                    showToast("크루 정보 저장 완료");
                 } catch(e) { console.error(e); }
+            };
+
+
+            document.getElementById('btn-bulk-import').onclick = async () => {
+                const raw = document.getElementById('bulk-members-input').value.trim();
+                if(!raw) return showModal("데이터를 입력하세요.", "alert");
+                const lines = raw.split('\n');
+                let count = 0;
+                const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_members');
+                showToast("처리 중...");
+                for(let line of lines) {
+                    const parts = line.split(',').map(p => p.trim());
+                    if(parts.length >= 3) {
+                        try {
+                            await addDoc(colRef, { nickname: parts[1], joinDate: parts[0], gender: parts[2], memo: '일괄 등록됨', updatedAt: serverTimestamp() });
+                            count++;
+                        } catch(e) {}
+                    }
+                }
+                document.getElementById('bulk-members-input').value = '';
+                showModal(`${count}명 등록 완료`, "alert");
+            };
+
+            document.getElementById('btn-bulk-logs-import').onclick = async () => {
+                const raw = document.getElementById('bulk-logs-input').value.trim();
+                if(!raw) return showModal("데이터를 입력하세요.", "alert");
+                const lines = raw.split('\n');
+                let count = 0;
+                const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_logs');
+                showToast("처리 중...");
+                for(let line of lines) {
+                    const p = line.split(',').map(x => x.trim());
+                    if(p.length >= 5) {
+                        try {
+                            await addDoc(colRef, {
+                                date: p[0], userName: p[1], runType: p[2] || '번개',
+                                distance: Number(p[3]), duration: Number(p[4]),
+                                bpm: Number(p[5] || 0), cadence: Number(p[6] || 0),
+                                createdAt: serverTimestamp(), updatedAt: serverTimestamp()
+                            });
+                            count++;
+                        } catch(e) {}
+                    }
+                }
+                document.getElementById('bulk-logs-input').value = '';
+                showModal(`${count}건 등록 완료`, "alert");
             };
 
             const yr = document.getElementById('year-select');
@@ -932,7 +1089,10 @@
             for(let i=nowY; i>=nowY-2; i--) { const o = document.createElement('option'); o.value = i; o.innerText = i + '년'; yr.appendChild(o); }
             yr.onchange = (e) => { selectedYear = e.target.value; renderStats(); renderRanking(); renderLogs(); };
             document.getElementById('in-date').valueAsDate = new Date();
-            document.getElementById('mem-joindate').valueAsDate = new Date();            
+            document.getElementById('mem-joindate').valueAsDate = new Date();        
+            document.getElementById('export-start').value = `${nowY}-01-01`;
+            document.getElementById('export-end').value = new Date().toISOString().split('T')[0];
+    
         };
 
         init();
