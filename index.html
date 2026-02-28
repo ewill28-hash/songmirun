@@ -49,8 +49,8 @@
             <div class="w-16 h-16 bg-brand-100 text-brand-500 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
                 <i class="fa-solid fa-person-running"></i>
             </div>
-            <h2 class="text-3xl font-black text-gray-800 mb-1 tracking-tighter italic">Songmirun</h2>
-            <p class="text-xs text-gray-400 mb-8 font-bold">러닝 크루 데이터 센터</p>
+            <h2 class="text-3xl font-black text-gray-800 mb-3 tracking-tighter italic">Songmirun </h2>
+            <p class="text-xs text-gray-400 mb-8 font-bold">Since 2024</p>
             <div class="space-y-4">
                 <input type="text" id="login-nick" placeholder="등록된 닉네임을 입력하세요" class="w-full bg-gray-50 border-gray-100 border p-4 rounded-2xl outline-none focus:ring-2 ring-brand-400 font-bold placeholder:text-gray-300 text-center text-lg">
                 <button id="btn-login" class="w-full bg-brand-500 text-white font-black py-4 rounded-2xl shadow-lg shadow-brand-200 active:scale-95 transition-transform text-lg flex items-center justify-center gap-2">
@@ -88,7 +88,7 @@
             <nav id="main-nav" class="flex max-w-2xl mx-auto border-t border-brand-50">
                 <button id="tab-logs" class="flex-1 py-3 text-xs font-bold tab-btn border-brand-500 text-brand-600">러닝 기록</button>
                 <button id="tab-stats" class="flex-1 py-3 text-xs font-bold tab-btn border-transparent text-gray-400">통계</button>
-                <button id="tab-members" class="hidden flex-1 py-3 text-xs font-bold tab-btn border-transparent text-gray-400">회원 관리</button>
+                <button id="tab-members" class="hidden flex-1 py-3 text-xs font-bold tab-btn border-transparent text-gray-400">크루 관리</button>
             </nav>
         </header>
 
@@ -170,7 +170,7 @@
                     </div>
                 </section>
 
-                <!-- 1. Monthly Distance Chart -->
+                <!-- Charts -->
                 <section class="bg-white p-6 rounded-[2.5rem] border border-brand-100 shadow-sm">
                     <h2 class="font-black text-xs mb-4 flex items-center gap-2 text-gray-700 uppercase">
                         <i class="fa-solid fa-chart-simple text-blue-500"></i> Monthly Distance (km)
@@ -180,7 +180,6 @@
                     </div>
                 </section>
 
-                <!-- 2. Monthly Duration Chart -->
                 <section class="bg-white p-6 rounded-[2.5rem] border border-brand-100 shadow-sm">
                     <h2 class="font-black text-xs mb-4 flex items-center gap-2 text-gray-700 uppercase">
                         <i class="fa-solid fa-clock text-orange-500"></i> Monthly Time (min)
@@ -190,7 +189,6 @@
                     </div>
                 </section>
 
-                <!-- 3. Monthly Activity Frequency Chart -->
                 <section class="bg-white p-6 rounded-[2.5rem] border border-brand-100 shadow-sm">
                     <h2 class="font-black text-xs mb-4 flex items-center gap-2 text-gray-700 uppercase">
                         <i class="fa-solid fa-list-check text-purple-500"></i> Activity Frequency (count)
@@ -216,7 +214,7 @@
                 <section class="bg-white p-6 rounded-[2.5rem] border border-brand-100 shadow-sm">
                     <div class="flex justify-between items-center mb-6">
                          <h2 class="font-black text-sm flex items-center gap-2 text-gray-800">
-                            <i class="fa-solid fa-users-viewfinder text-brand-500"></i> 일괄 회원 입력
+                            <i class="fa-solid fa-users-viewfinder text-brand-500"></i> 일괄 크루 입력
                         </h2>
                         <span class="text-[10px] text-gray-400 font-bold">형식: 날짜, 닉네임, 성별 (줄바꿈 구분)</span>
                     </div>
@@ -226,7 +224,7 @@
 
                 <section class="bg-white p-6 rounded-[2.5rem] border border-brand-100 shadow-sm">
                     <h2 id="mem-form-title" class="font-black text-sm mb-6 flex items-center gap-2 text-gray-800">
-                        <i class="fa-solid fa-user-plus text-brand-500"></i> 개별 회원 등록
+                        <i class="fa-solid fa-user-plus text-brand-500"></i> 개별 크루 등록
                     </h2>
                     <input type="hidden" id="mem-edit-id">
                     <div class="grid grid-cols-2 gap-4 mb-6">
@@ -253,25 +251,37 @@
                     <button id="mem-submit-btn" class="w-full bg-gray-800 text-white font-black py-4 rounded-2xl shadow-lg active:scale-95 transition-transform hover:bg-black">저장하기</button>
                 </section>
 
-                <div class="bg-white rounded-[2rem] border border-brand-100 shadow-sm overflow-hidden overflow-x-auto">
-                    <table class="w-full text-left min-w-[400px]">
-                        <thead class="bg-gray-50 text-[10px] text-gray-400 font-bold uppercase">
-                            <tr>
-                                <th class="p-4">닉네임</th>
-                                <th class="p-4">성별</th>
-                                <th class="p-4">가입일</th>
-                                <th class="p-4">메모</th>
-                                <th class="p-4 text-right">관리</th>
-                            </tr>
-                        </thead>
-                        <tbody id="member-list" class="divide-y divide-green-50"></tbody>
-                    </table>
+                <!-- Member Search & List -->
+                <div class="space-y-4">
+                    <div class="relative px-1">
+                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                        <input type="text" id="member-search" placeholder="닉네임, 성별, 가입일(YYYY-MM) 검색..." class="w-full bg-white border border-brand-100 p-4 pl-12 rounded-2xl text-[11px] font-bold outline-none focus:ring-2 ring-brand-200 shadow-sm transition-all focus:border-brand-500">
+                        <div class="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                             <span id="member-count-badge" class="text-[9px] bg-brand-100 text-brand-600 px-2 py-0.5 rounded-full font-black">0명</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-[2rem] border border-brand-100 shadow-sm overflow-hidden overflow-x-auto">
+                        <table class="w-full text-left min-w-[450px]">
+                            <thead class="bg-gray-50 text-[10px] text-gray-400 font-bold uppercase">
+                                <tr>
+                                    <th class="p-4 w-12 text-center">No.</th>
+                                    <th class="p-4">닉네임</th>
+                                    <th class="p-4">성별</th>
+                                    <th class="p-4">가입일</th>
+                                    <th class="p-4">메모</th>
+                                    <th class="p-4 text-right">관리</th>
+                                </tr>
+                            </thead>
+                            <tbody id="member-list" class="divide-y divide-green-50"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Modals (Same as before) -->
+    <!-- Modals -->
     <div id="stat-detail-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[250] hidden items-center justify-center p-4">
         <div class="bg-white rounded-[2.5rem] w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
             <div class="bg-brand-500 p-8 text-white relative">
@@ -329,12 +339,10 @@
         let isAdmin = false;
         let allLogs = [];
         let crewMembers = [];
+        let memberSearchTerm = '';
         let selectedYear = new Date().getFullYear();
         let selectedGender = '전체';
-        let unsubLogs = null;
-        let unsubMembers = null;
-
-        // Chart Instances
+        
         let distChart = null;
         let timeChart = null;
         let freqChart = null;
@@ -412,39 +420,26 @@
             });
 
             const labels = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
-            const getThemeColor = () => selectedGender === '여성' ? '#f472b6' : (selectedGender === '남성' ? '#3b82f6' : '#22c55e');
-            const themeColor = getThemeColor();
+            const themeColor = selectedGender === '여성' ? '#f472b6' : (selectedGender === '남성' ? '#3b82f6' : '#22c55e');
 
-            // Dist Chart
             if (distChart) distChart.destroy();
             distChart = new Chart(document.getElementById('monthlyDistChart'), {
                 type: 'bar',
-                data: {
-                    labels,
-                    datasets: [{ label: '거리 (km)', data: distData, backgroundColor: themeColor, borderRadius: 6 }]
-                },
+                data: { labels, datasets: [{ label: '거리 (km)', data: distData, backgroundColor: themeColor, borderRadius: 6 }] },
                 options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
             });
 
-            // Time Chart
             if (timeChart) timeChart.destroy();
             timeChart = new Chart(document.getElementById('monthlyTimeChart'), {
                 type: 'bar',
-                data: {
-                    labels,
-                    datasets: [{ label: '시간 (min)', data: timeData, backgroundColor: '#f97316', borderRadius: 6 }]
-                },
+                data: { labels, datasets: [{ label: '시간 (min)', data: timeData, backgroundColor: '#f97316', borderRadius: 6 }] },
                 options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
             });
 
-            // Freq Chart
             if (freqChart) freqChart.destroy();
             freqChart = new Chart(document.getElementById('monthlyFreqChart'), {
                 type: 'line',
-                data: {
-                    labels,
-                    datasets: [{ label: '등록 횟수', data: freqData, borderColor: '#a855f7', backgroundColor: '#a855f733', fill: true, tension: 0.4, pointRadius: 4 }]
-                },
+                data: { labels, datasets: [{ label: '등록 횟수', data: freqData, borderColor: '#a855f7', backgroundColor: '#a855f733', fill: true, tension: 0.4, pointRadius: 4 }] },
                 options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
             });
         };
@@ -460,9 +455,6 @@
             renderAllCharts();
         };
 
-        // ... (Remaining Logic: Ranking, Logs, Members, Firebase Setup - Inherited from previous version)
-        
-        // --- Ranking Render ---
         const renderRanking = () => {
             const list = document.getElementById('ranking-list');
             const userStats = {};
@@ -480,7 +472,6 @@
             `).join('') || '<div class="p-6 text-center text-gray-300 font-bold">랭킹 정보 없음</div>';
         };
 
-        // --- Logs Render ---
         const renderLogs = () => {
             const list = document.getElementById('log-list');
             const displayLogs = (isAdmin ? allLogs : allLogs.filter(l => l.userName === userNickname))
@@ -511,20 +502,30 @@
 
         const renderMembers = () => {
             const list = document.getElementById('member-list');
-            list.innerHTML = [...crewMembers].sort((a,b) => a.nickname.localeCompare(b.nickname)).map(m => `
+            const countBadge = document.getElementById('member-count-badge');
+            
+            const filteredMembers = crewMembers.filter(m => {
+                const searchStr = (m.nickname + m.gender + m.joinDate).toLowerCase();
+                return searchStr.includes(memberSearchTerm.toLowerCase());
+            });
+            
+            const sortedMembers = [...filteredMembers].sort((a,b) => a.nickname.localeCompare(b.nickname));
+            countBadge.innerText = `${sortedMembers.length}명`;
+            
+            list.innerHTML = sortedMembers.map((m, index) => `
                 <tr class="hover:bg-brand-50/30 transition-colors">
-                    <td class="p-4 text-xs font-bold"><button onclick="window.openUserStatModal('${m.nickname}')" class="text-brand-600 hover:underline text-left font-black">${m.nickname}</button></td>
-                    <td class="p-4 text-[10px] font-bold ${m.gender === '남성' ? 'text-blue-500' : 'text-pink-500'}">${m.gender}</td>
-                    <td class="p-4 text-[10px] text-gray-400 font-medium">${m.joinDate}</td>
-                    <td class="p-4 text-[10px] text-gray-400 max-w-[80px] truncate">${m.memo || '-'}</td>
-                    <td class="p-4 text-right flex gap-1 justify-end">
-                        <button onclick="window.editMember('${m.id}')" class="text-brand-400 p-1"><i class="fa-solid fa-user-pen"></i></button>
-                        <button onclick="window.deleteMember('${m.id}')" class="text-red-300 p-1"><i class="fa-solid fa-user-minus"></i></button>
+                    <td class="p-3 text-[10px] font-bold text-gray-400 text-center">${index + 1}</td>
+                    <td class="p-3 text-xs font-bold"><button onclick="window.openUserStatModal('${m.nickname}')" class="text-brand-600 hover:underline text-left font-black">${m.nickname}</button></td>
+                    <td class="p-3 text-[10px] font-bold ${m.gender === '남성' ? 'text-blue-500' : 'text-pink-500'}">${m.gender}</td>
+                    <td class="p-3 text-[10px] text-gray-400 font-medium">${m.joinDate}</td>
+                    <td class="p-3 text-[10px] text-gray-400 max-w-[80px] truncate">${m.memo || '-'}</td>
+                    <td class="p-3 text-right flex gap-1 justify-end">
+                        <button onclick="window.editMember('${m.id}')" class="text-brand-400 p-1"><i class="fa-solid fa-user-pen text-xs"></i></button>
+                        <button onclick="window.deleteMember('${m.id}')" class="text-red-300 p-1"><i class="fa-solid fa-user-minus text-xs"></i></button>
                     </td>
                 </tr>
-            `).join('') || '<tr><td colspan="5" class="p-8 text-center text-gray-300 font-bold">등록된 회원이 없습니다.</td></tr>';
+            `).join('') || `<tr><td colspan="6" class="p-8 text-center text-gray-300 font-bold">${memberSearchTerm ? '검색 결과가 없습니다.' : '등록된 크루가 없습니다.'}</td></tr>`;
         };
-
 
         window.openUserStatModal = (nickname) => {
             const modal = document.getElementById('stat-detail-modal');
@@ -533,14 +534,11 @@
             document.getElementById('modal-user-avatar').innerText = nickname.charAt(0);
             const lastActive = userLogs.length > 0 ? [...userLogs].sort((a,b) => new Date(b.date) - new Date(a.date))[0].date : '기록 없음';
             document.getElementById('modal-last-active').innerText = lastActive;
+            
             const now = new Date();
             const thisYear = now.getFullYear();
             const thisMonth = now.getMonth();
-            const lastYear = thisYear - 1;
-            const firstOfThisMonth = new Date(thisYear, thisMonth, 1);
-            const firstOfLastMonth = new Date(thisYear, thisMonth - 1, 1);
-            const lastOfLastMonth = new Date(thisYear, thisMonth, 0);
-
+            
             const calculatePeriodStat = (logs) => {
                 const count = logs.length;
                 const distance = logs.reduce((sum, l) => sum + Number(l.distance || 0), 0);
@@ -554,12 +552,7 @@
             const periods = [
                 { label: '전체 (Lifetime)', logs: userLogs },
                 { label: '올해 (' + thisYear + ')', logs: userLogs.filter(l => new Date(l.date).getFullYear() === thisYear) },
-                { label: '작년 (' + lastYear + ')', logs: userLogs.filter(l => new Date(l.date).getFullYear() === lastYear) },
-                { label: '이번달 (' + (thisMonth + 1) + '월)', logs: userLogs.filter(l => new Date(l.date) >= firstOfThisMonth) },
-                { label: '지난달 (' + (lastOfLastMonth.getMonth() + 1) + '월)', logs: userLogs.filter(l => {
-                    const d = new Date(l.date);
-                    return d >= firstOfLastMonth && d <= lastOfLastMonth;
-                })}
+                { label: '이번달 (' + (thisMonth + 1) + '월)', logs: userLogs.filter(l => new Date(l.date) >= new Date(thisYear, thisMonth, 1)) }
             ];
 
             const container = document.getElementById('stat-periods-container');
@@ -599,14 +592,13 @@
             modal.classList.add('hidden'); modal.classList.remove('flex');
         };
 
-
-        // --- Window Helpers ---
         window.deleteLog = async (id) => {
             showModal("기록을 삭제하시겠습니까?", "confirm", async () => {
                 await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'songmirun_logs', id));
                 showToast("삭제되었습니다.");
             });
         };
+        
         window.editLog = (id) => {
             const l = allLogs.find(x => x.id === id);
             if(!l) return;
@@ -622,12 +614,14 @@
             document.getElementById('tab-logs').click();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
+
         window.deleteMember = async (id) => {
-            showModal("회원 정보를 삭제하시겠습니까?", "confirm", async () => {
+            showModal("크루 정보를 삭제하시겠습니까?", "confirm", async () => {
                 await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'songmirun_members', id));
                 showToast("삭제되었습니다.");
             });
         };
+
         window.editMember = (id) => {
             const m = crewMembers.find(x => x.id === id);
             if(!m) return;
@@ -637,6 +631,7 @@
             document.getElementById('mem-joindate').value = m.joinDate;
             document.getElementById('mem-memo').value = m.memo || '';
             document.getElementById('mem-form-title').innerHTML = '<i class="fa-solid fa-user-pen text-brand-500"></i> 정보 수정';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
         const setupListeners = () => {
@@ -661,7 +656,6 @@
                 isAdmin = userNickname.toLowerCase().startsWith('admin');
                 document.getElementById('tab-members').classList.toggle('hidden', !isAdmin);
                 document.getElementById('admin-badge').classList.toggle('hidden', !isAdmin);
-                                document.getElementById('log-username').classList.toggle('hidden', !isAdmin);
                 
                 const userField = document.getElementById('log-username');
                 userField.value = userNickname;
@@ -691,7 +685,7 @@
                     if(!nick.toLowerCase().startsWith('admin')) {
                         const snap = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_members'));
                         if(!snap.docs.find(d => d.data().nickname === nick)) {
-                            showModal("등록된 회원이 아닙니다.\n\n Jake에게 문의하세요", "alert");
+                            showModal("등록된 크루가 아닙니다.\n\n Jake에게 문의하세요", "alert");
                             return;
                         }
                     }
@@ -760,8 +754,32 @@
                 document.getElementById('mem-nickname').value = '';
                 document.getElementById('mem-memo').value = '';
                 document.getElementById('mem-edit-id').value = '';
-                showToast("회원 정보 저장됨");
+                showToast("크루 정보 저장됨");
             };
+
+            document.getElementById('btn-bulk-import').onclick = async () => {
+                const raw = document.getElementById('bulk-members-input').value.trim();
+                if(!raw) return showModal("데이터를 입력하세요.", "alert");
+                const lines = raw.split('\n');
+                let count = 0;
+                const col = collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_members');
+                showToast("데이터 처리 중...");
+                for(let line of lines) {
+                    const parts = line.split(',').map(p => p.trim());
+                    if(parts.length >= 3) {
+                        try { await addDoc(col, { nickname: parts[1], joinDate: parts[0], gender: parts[2], memo: '일괄 등록됨', updatedAt: serverTimestamp() }); count++; } catch(e) { console.error(e); }
+                    }
+                }
+                document.getElementById('bulk-members-input').value = '';
+                showModal(`${count}명의 크루가 등록되었습니다.`, "alert");
+            };
+
+
+            // Enhanced Member Search Handler (Multi-column search)
+            document.getElementById('member-search').addEventListener('input', (e) => {
+                memberSearchTerm = e.target.value;
+                renderMembers();
+            });
 
             const yrSelect = document.getElementById('year-select');
             const nowY = new Date().getFullYear();
@@ -772,11 +790,6 @@
             
             document.getElementById('in-date').valueAsDate = new Date();
             document.getElementById('mem-joindate').valueAsDate = new Date();
-            document.getElementById('export-end').valueAsDate = new Date();
-            const date = new Date(new Date().getFullYear(), 0, 1);
-            date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
-            document.getElementById('export-start').valueAsDate = date;
-
         };
 
         init();
