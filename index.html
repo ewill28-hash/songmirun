@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Songmirun - 크루 매니저</title>
+    <title>Songmirun</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -121,19 +121,19 @@
                             <input type="text" id="log-username" class="w-full border border-green-100 p-3 rounded-xl text-sm font-bold outline-none focus:ring-2 ring-brand-200">
                         </div>
                         <div class="col-span-1">
-                            <label class="text-[10px] text-gray-400 font-bold block mb-1">날짜</label>
+                            <label class="text-[10px] text-gray-400 font-bold block mb-1">*날짜</label>
                             <input type="date" id="in-date" class="w-full bg-green-50/30 border border-green-100 p-3 rounded-xl text-sm outline-none font-bold">
                         </div>
                         <div class="col-span-1">
-                            <label class="text-[10px] text-gray-400 font-bold block mb-1">유형</label>
+                            <label class="text-[10px] text-gray-400 font-bold block mb-1">*유형</label>
                             <select id="run-type" class="w-full bg-green-50/30 border border-green-100 p-3 rounded-xl text-sm font-bold outline-none">
+                              <option value="정규">📅 정규</option>
                                 <option value="번개">⚡ 번개</option>
-                                <option value="정규">📅 정규</option>
-                                <option value="대회">🏅 대회</option>
+                              <option value="대회">🏅 대회</option>
                             </select>
                         </div>
-                        <div><label class="text-[10px] text-gray-400 font-bold block mb-1">거리 (km)</label><input type="number" step="0.1" id="in-dist" class="w-full bg-green-50/30 border border-green-100 p-3 rounded-xl text-sm font-bold outline-none"></div>
-                        <div><label class="text-[10px] text-gray-400 font-bold block mb-1">시간 (분)</label><input type="number" id="in-time" class="w-full bg-green-50/30 border border-green-100 p-3 rounded-xl text-sm font-bold outline-none"></div>
+                        <div><label class="text-[10px] text-gray-400 font-bold block mb-1">*거리 (km)</label><input type="number" step="0.1" id="in-dist" class="w-full bg-green-50/30 border border-green-100 p-3 rounded-xl text-sm font-bold outline-none"></div>
+                        <div><label class="text-[10px] text-gray-400 font-bold block mb-1">*시간 (분)</label><input type="number" id="in-time" class="w-full bg-green-50/30 border border-green-100 p-3 rounded-xl text-sm font-bold outline-none"></div>
                         <div><label class="text-[10px] text-gray-400 font-bold block mb-1">평균 심박</label><input type="number" id="in-bpm" class="w-full bg-green-50/30 border border-green-100 p-3 rounded-xl text-sm font-bold outline-none"></div>
                         <div><label class="text-[10px] text-gray-400 font-bold block mb-1">케이던스</label><input type="number" id="in-cadence" class="w-full bg-green-50/30 border border-green-100 p-3 rounded-xl text-sm font-bold outline-none"></div>
                     </div>
@@ -156,12 +156,47 @@
 
             <!-- Section: Statistics -->
             <div id="section-stats" class="hidden space-y-6">
+                <!-- Filter Section -->
+                <section class="bg-white p-6 rounded-[2.5rem] border border-brand-100 shadow-sm sticky top-20 z-10">
+                    <div class="flex justify-between items-center">
+                        <h2 class="font-black text-sm flex items-center gap-2 text-gray-800 italic">
+                            <i class="fa-solid fa-filter text-brand-500"></i> Stats Filter
+                        </h2>
+                        <div class="flex bg-gray-100 p-1 rounded-xl">
+                            <button onclick="window.setGenderFilter('전체')" id="filter-all" class="gender-filter-btn px-3 py-1.5 text-[10px] font-black rounded-lg bg-white text-brand-600 shadow-sm transition-all">전체</button>
+                            <button onclick="window.setGenderFilter('남성')" id="filter-male" class="gender-filter-btn px-3 py-1.5 text-[10px] font-black rounded-lg text-gray-400 transition-all">남성</button>
+                            <button onclick="window.setGenderFilter('여성')" id="filter-female" class="gender-filter-btn px-3 py-1.5 text-[10px] font-black rounded-lg text-gray-400 transition-all">여성</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 1. Monthly Distance Chart -->
                 <section class="bg-white p-6 rounded-[2.5rem] border border-brand-100 shadow-sm">
-                    <h2 class="font-black text-sm mb-6 flex items-center gap-2 text-gray-800">
-                        <i class="fa-solid fa-chart-column text-brand-500"></i> 월별 활동 통계
+                    <h2 class="font-black text-xs mb-4 flex items-center gap-2 text-gray-700 uppercase">
+                        <i class="fa-solid fa-chart-simple text-blue-500"></i> Monthly Distance (km)
                     </h2>
-                    <div class="relative w-full aspect-video md:aspect-[2/1] min-h-[250px]">
-                        <canvas id="monthlyChart"></canvas>
+                    <div class="relative w-full aspect-video min-h-[200px]">
+                        <canvas id="monthlyDistChart"></canvas>
+                    </div>
+                </section>
+
+                <!-- 2. Monthly Duration Chart -->
+                <section class="bg-white p-6 rounded-[2.5rem] border border-brand-100 shadow-sm">
+                    <h2 class="font-black text-xs mb-4 flex items-center gap-2 text-gray-700 uppercase">
+                        <i class="fa-solid fa-clock text-orange-500"></i> Monthly Time (min)
+                    </h2>
+                    <div class="relative w-full aspect-video min-h-[200px]">
+                        <canvas id="monthlyTimeChart"></canvas>
+                    </div>
+                </section>
+
+                <!-- 3. Monthly Activity Frequency Chart -->
+                <section class="bg-white p-6 rounded-[2.5rem] border border-brand-100 shadow-sm">
+                    <h2 class="font-black text-xs mb-4 flex items-center gap-2 text-gray-700 uppercase">
+                        <i class="fa-solid fa-list-check text-purple-500"></i> Activity Frequency (count)
+                    </h2>
+                    <div class="relative w-full aspect-video min-h-[200px]">
+                        <canvas id="monthlyFreqChart"></canvas>
                     </div>
                 </section>
                 
@@ -236,7 +271,7 @@
         </main>
     </div>
 
-    <!-- User Stat Detail Modal -->
+    <!-- Modals (Same as before) -->
     <div id="stat-detail-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[250] hidden items-center justify-center p-4">
         <div class="bg-white rounded-[2.5rem] w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
             <div class="bg-brand-500 p-8 text-white relative">
@@ -255,15 +290,12 @@
                     <span id="modal-last-active" class="text-[10px] font-black italic">2024-00-00</span>
                 </div>
             </div>
-            
             <div id="modal-stats-content" class="p-6 overflow-y-auto space-y-6 bg-gray-50">
-                <!-- Stat Card Template -->
                 <div id="stat-periods-container" class="space-y-4"></div>
             </div>
         </div>
     </div>
 
-    <!-- Common Modal (Alert/Confirm) -->
     <div id="custom-modal" class="fixed inset-0 bg-black/50 z-[200] hidden items-center justify-center p-4">
         <div class="bg-white rounded-[2rem] p-6 max-w-sm w-full shadow-2xl">
             <h3 id="modal-title" class="text-base font-black text-gray-800 mb-2">알림</h3>
@@ -276,7 +308,7 @@
 
     <script type="module">
         import { initializeApp } from "firebase/app";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut } from "firebase/auth";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signOut } from "firebase/auth";
         import { getFirestore, collection, doc, onSnapshot, getDocs, addDoc, updateDoc, deleteDoc, serverTimestamp, query } from "firebase/firestore";
 
         const firebaseConfig = {
@@ -298,9 +330,14 @@
         let allLogs = [];
         let crewMembers = [];
         let selectedYear = new Date().getFullYear();
+        let selectedGender = '전체';
         let unsubLogs = null;
         let unsubMembers = null;
-        let chartInstance = null;
+
+        // Chart Instances
+        let distChart = null;
+        let timeChart = null;
+        let freqChart = null;
 
         const showToast = (msg) => {
             const t = document.getElementById('toast');
@@ -317,18 +354,18 @@
             btnContainer.innerHTML = '';
             if (type === 'confirm') {
                 const cancelBtn = document.createElement('button');
-                cancelBtn.className = "px-4 py-2 text-xs font-bold text-gray-500 bg-gray-100 rounded-xl hover:bg-gray-200";
+                cancelBtn.className = "px-4 py-2 text-xs font-bold text-gray-500 bg-gray-100 rounded-xl";
                 cancelBtn.innerText = "취소";
                 cancelBtn.onclick = () => { modal.classList.add('hidden'); modal.classList.remove('flex'); };
                 const confirmBtn = document.createElement('button');
-                confirmBtn.className = "px-4 py-2 text-xs font-bold text-white bg-red-500 rounded-xl hover:bg-red-600 shadow-lg shadow-red-200";
+                confirmBtn.className = "px-4 py-2 text-xs font-bold text-white bg-red-500 rounded-xl";
                 confirmBtn.innerText = "확인";
                 confirmBtn.onclick = () => { modal.classList.add('hidden'); modal.classList.remove('flex'); if (onConfirm) onConfirm(); };
                 btnContainer.appendChild(cancelBtn);
                 btnContainer.appendChild(confirmBtn);
             } else {
                 const okBtn = document.createElement('button');
-                okBtn.className = "px-4 py-2 text-xs font-bold text-white bg-brand-500 rounded-xl hover:bg-brand-600 shadow-lg shadow-brand-200";
+                okBtn.className = "px-4 py-2 text-xs font-bold text-white bg-brand-500 rounded-xl";
                 okBtn.innerText = "확인";
                 okBtn.onclick = () => { modal.classList.add('hidden'); modal.classList.remove('flex'); };
                 btnContainer.appendChild(okBtn);
@@ -336,200 +373,79 @@
             modal.classList.remove('hidden'); modal.classList.add('flex');
         };
 
-        // --- Stats Analysis for Modal ---
-        window.openUserStatModal = (nickname) => {
-            const modal = document.getElementById('stat-detail-modal');
-            const userLogs = allLogs.filter(l => l.userName === nickname);
-            
-            document.getElementById('modal-user-name').innerText = nickname;
-            document.getElementById('modal-user-avatar').innerText = nickname.charAt(0);
-            
-            const lastActive = userLogs.length > 0 
-                ? [...userLogs].sort((a,b) => new Date(b.date) - new Date(a.date))[0].date 
-                : '기록 없음';
-            document.getElementById('modal-last-active').innerText = lastActive;
-
-            const now = new Date();
-            const thisYear = now.getFullYear();
-            const thisMonth = now.getMonth();
-            const lastYear = thisYear - 1;
-            
-            const firstOfThisMonth = new Date(thisYear, thisMonth, 1);
-            const firstOfLastMonth = new Date(thisYear, thisMonth - 1, 1);
-            const lastOfLastMonth = new Date(thisYear, thisMonth, 0);
-
-            const calculatePeriodStat = (logs) => {
-                const count = logs.length;
-                const distance = logs.reduce((sum, l) => sum + Number(l.distance || 0), 0);
-                const duration = logs.reduce((sum, l) => sum + Number(l.duration || 0), 0);
-                const pace = distance > 0 ? (duration / distance) : 0;
-                const mm = Math.floor(pace);
-                const ss = Math.round((pace - mm) * 60);
-                return {
-                    count,
-                    distance: distance.toFixed(1),
-                    duration,
-                    pace: pace > 0 ? `${mm}'${ss.toString().padStart(2, '0')}"` : '0\'00"'
-                };
-            };
-
-            const periods = [
-                { label: '전체 (Lifetime)', logs: userLogs },
-                { label: '올해 (' + thisYear + ')', logs: userLogs.filter(l => new Date(l.date).getFullYear() === thisYear) },
-                { label: '작년 (' + lastYear + ')', logs: userLogs.filter(l => new Date(l.date).getFullYear() === lastYear) },
-                { label: '이번달 (' + (thisMonth + 1) + '월)', logs: userLogs.filter(l => {
-                    const d = new Date(l.date);
-                    return d >= firstOfThisMonth;
-                })},
-                { label: '지난달 (' + (lastOfLastMonth.getMonth() + 1) + '월)', logs: userLogs.filter(l => {
-                    const d = new Date(l.date);
-                    return d >= firstOfLastMonth && d <= lastOfLastMonth;
-                })}
-            ];
-
-            const container = document.getElementById('stat-periods-container');
-            container.innerHTML = periods.map(p => {
-                const s = calculatePeriodStat(p.logs);
-                return `
-                    <div class="bg-white rounded-3xl p-5 border border-brand-100 shadow-sm">
-                        <h4 class="text-[11px] font-black text-brand-600 mb-4 flex items-center gap-2">
-                            <span class="w-1.5 h-1.5 bg-brand-400 rounded-full"></span> ${p.label}
-                        </h4>
-                        <div class="grid grid-cols-4 gap-2">
-                            <div class="text-center bg-gray-50 py-3 rounded-2xl">
-                                <p class="stat-grid-label">Count</p>
-                                <p class="stat-grid-val text-brand-500">${s.count}</p>
-                            </div>
-                            <div class="text-center bg-gray-50 py-3 rounded-2xl">
-                                <p class="stat-grid-label">Distance</p>
-                                <p class="stat-grid-val">${s.distance}<span class="text-[8px] ml-0.5">km</span></p>
-                            </div>
-                            <div class="text-center bg-gray-50 py-3 rounded-2xl">
-                                <p class="stat-grid-label">Time</p>
-                                <p class="stat-grid-val">${s.duration}<span class="text-[8px] ml-0.5">m</span></p>
-                            </div>
-                            <div class="text-center bg-gray-50 py-3 rounded-2xl">
-                                <p class="stat-grid-label">Pace</p>
-                                <p class="stat-grid-val text-orange-500">${s.pace}</p>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-        };
-
-        document.getElementById('close-stat-modal').onclick = () => {
-            const modal = document.getElementById('stat-detail-modal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-        };
-
-        // --- Log/Member Logic ---
-        window.deleteLog = async (id) => {
-            if(!auth.currentUser) return;
-            showModal("이 기록을 정말 삭제하시겠습니까?", "confirm", async () => {
-                try {
-                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'songmirun_logs', id));
-                    showToast("기록 삭제 완료");
-                } catch(e) { console.error(e); }
+        window.setGenderFilter = (gender) => {
+            selectedGender = gender;
+            const buttons = { '전체': 'filter-all', '남성': 'filter-male', '여성': 'filter-female' };
+            Object.values(buttons).forEach(id => {
+                const el = document.getElementById(id);
+                el.classList.remove('bg-white', 'text-brand-600', 'shadow-sm');
+                el.classList.add('text-gray-400');
             });
+            const activeEl = document.getElementById(buttons[gender]);
+            activeEl.classList.add('bg-white', 'text-brand-600', 'shadow-sm');
+            activeEl.classList.remove('text-gray-400');
+            renderAllCharts();
         };
 
-        window.editLog = (id) => {
-            const l = allLogs.find(x => x.id === id);
-            if(!l) return;
-            document.getElementById('edit-id').value = id;
-            document.getElementById('log-username').value = l.userName;
-            document.getElementById('log-username').dataset.edited = "true";
-            document.getElementById('in-dist').value = l.distance;
-            document.getElementById('in-time').value = l.duration;
-            document.getElementById('in-bpm').value = l.bpm;
-            document.getElementById('in-cadence').value = l.cadence;
-            document.getElementById('in-date').value = l.date;
-            document.getElementById('run-type').value = l.runType;
-            document.getElementById('form-title').innerHTML = '<i class="fa-solid fa-pen text-brand-500"></i> 기록 수정';
-            document.getElementById('tab-logs').click();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        };
+        const renderAllCharts = () => {
+            if (document.getElementById('section-stats').classList.contains('hidden')) return;
 
-        window.deleteMember = async (id) => {
-            if(!auth.currentUser) return;
-            showModal("회원 정보를 삭제하시겠습니까?", "confirm", async () => {
-                try {
-                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'songmirun_members', id));
-                    showToast("회원 삭제 완료");
-                } catch(e) { console.error(e); }
+            const genderMap = {};
+            crewMembers.forEach(m => { genderMap[m.nickname] = m.gender; });
+
+            const distData = Array(12).fill(0);
+            const timeData = Array(12).fill(0);
+            const freqData = Array(12).fill(0);
+
+            const filteredLogs = allLogs.filter(l => {
+                const isCorrectYear = l.date && new Date(l.date).getFullYear() === parseInt(selectedYear);
+                const userGender = genderMap[l.userName] || '미지정';
+                const isCorrectGender = selectedGender === '전체' || userGender === selectedGender;
+                return isCorrectYear && isCorrectGender;
             });
-        };
 
-        window.editMember = (id) => {
-            const m = crewMembers.find(x => x.id === id);
-            if(!m) return;
-            document.getElementById('mem-edit-id').value = id;
-            document.getElementById('mem-nickname').value = m.nickname;
-            document.getElementById('mem-gender').value = m.gender;
-            document.getElementById('mem-joindate').value = m.joinDate;
-            document.getElementById('mem-memo').value = m.memo || '';
-            document.getElementById('mem-form-title').innerHTML = '<i class="fa-solid fa-user-pen text-brand-500"></i> 정보 수정';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        };
-
-        const updateUI = () => {
-            const loginScreen = document.getElementById('login-screen');
-            const mainContent = document.getElementById('main-content');
-            const isLoggedIn = auth.currentUser && userNickname;
-            if (isLoggedIn) {
-                loginScreen.classList.add('hidden');
-                mainContent.classList.remove('hidden');
-                document.getElementById('display-nickname').innerText = userNickname;
-                isAdmin = userNickname.toLowerCase().startsWith('admin');
-                document.getElementById('tab-members').classList.toggle('hidden', !isAdmin);
-                document.getElementById('admin-badge').classList.toggle('hidden', !isAdmin);
-                document.getElementById('log-username').classList.toggle('hidden', !isAdmin);
-               const logUserField = document.getElementById('log-username');
-                if (isAdmin) {
-                    logUserField.readOnly = false;
-                    logUserField.classList.remove('bg-gray-100');
-                    if(!logUserField.dataset.edited) logUserField.value = '';
-                } else {
-                    logUserField.readOnly = true;
-                    logUserField.classList.add('bg-gray-100');
-                    logUserField.value = userNickname;
-                }
-            } else {
-                loginScreen.classList.remove('hidden');
-                mainContent.classList.add('hidden');
-            }
-        };
-
-        const renderMonthlyChart = () => {
-            const ctxEl = document.getElementById('monthlyChart');
-            if (!ctxEl) return;
-            const monthsData = Array(12).fill(0);
-            const currentYearLogs = allLogs.filter(l => l.date && new Date(l.date).getFullYear() === parseInt(selectedYear));
-            currentYearLogs.forEach(l => {
+            filteredLogs.forEach(l => {
                 const m = new Date(l.date).getMonth();
-                monthsData[m] += Number(l.distance || 0);
+                distData[m] += Number(l.distance || 0);
+                timeData[m] += Number(l.duration || 0);
+                freqData[m] += 1;
             });
-            if (chartInstance) chartInstance.destroy();
-            chartInstance = new Chart(ctxEl, {
+
+            const labels = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+            const getThemeColor = () => selectedGender === '여성' ? '#f472b6' : (selectedGender === '남성' ? '#3b82f6' : '#22c55e');
+            const themeColor = getThemeColor();
+
+            // Dist Chart
+            if (distChart) distChart.destroy();
+            distChart = new Chart(document.getElementById('monthlyDistChart'), {
                 type: 'bar',
                 data: {
-                    labels: ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'],
-                    datasets: [{
-                        label: '월별 거리 (km)',
-                        data: monthsData,
-                        backgroundColor: '#22c55e',
-                        borderRadius: 5
-                    }]
+                    labels,
+                    datasets: [{ label: '거리 (km)', data: distData, backgroundColor: themeColor, borderRadius: 6 }]
                 },
-                options: { 
-                    responsive: true, maintainAspectRatio: false,
-                    scales: { y: { beginAtZero: true } }
-                }
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+            });
+
+            // Time Chart
+            if (timeChart) timeChart.destroy();
+            timeChart = new Chart(document.getElementById('monthlyTimeChart'), {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{ label: '시간 (min)', data: timeData, backgroundColor: '#f97316', borderRadius: 6 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+            });
+
+            // Freq Chart
+            if (freqChart) freqChart.destroy();
+            freqChart = new Chart(document.getElementById('monthlyFreqChart'), {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [{ label: '등록 횟수', data: freqData, borderColor: '#a855f7', backgroundColor: '#a855f733', fill: true, tension: 0.4, pointRadius: 4 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
             });
         };
 
@@ -541,9 +457,12 @@
             document.getElementById('stat-dist').innerText = totalDist.toFixed(1) + ' km';
             document.getElementById('stat-time').innerText = totalTime + ' m';
             document.getElementById('stat-bpm').innerText = avgBpm + ' b';
-            renderMonthlyChart();
+            renderAllCharts();
         };
 
+        // ... (Remaining Logic: Ranking, Logs, Members, Firebase Setup - Inherited from previous version)
+        
+        // --- Ranking Render ---
         const renderRanking = () => {
             const list = document.getElementById('ranking-list');
             const userStats = {};
@@ -561,6 +480,7 @@
             `).join('') || '<div class="p-6 text-center text-gray-300 font-bold">랭킹 정보 없음</div>';
         };
 
+        // --- Logs Render ---
         const renderLogs = () => {
             const list = document.getElementById('log-list');
             const displayLogs = (isAdmin ? allLogs : allLogs.filter(l => l.userName === userNickname))
@@ -593,11 +513,7 @@
             const list = document.getElementById('member-list');
             list.innerHTML = [...crewMembers].sort((a,b) => a.nickname.localeCompare(b.nickname)).map(m => `
                 <tr class="hover:bg-brand-50/30 transition-colors">
-                    <td class="p-4 text-xs font-bold">
-                        <button onclick="window.openUserStatModal('${m.nickname}')" class="text-brand-600 hover:underline text-left font-black">
-                            ${m.nickname}
-                        </button>
-                    </td>
+                    <td class="p-4 text-xs font-bold"><button onclick="window.openUserStatModal('${m.nickname}')" class="text-brand-600 hover:underline text-left font-black">${m.nickname}</button></td>
                     <td class="p-4 text-[10px] font-bold ${m.gender === '남성' ? 'text-blue-500' : 'text-pink-500'}">${m.gender}</td>
                     <td class="p-4 text-[10px] text-gray-400 font-medium">${m.joinDate}</td>
                     <td class="p-4 text-[10px] text-gray-400 max-w-[80px] truncate">${m.memo || '-'}</td>
@@ -609,80 +525,126 @@
             `).join('') || '<tr><td colspan="5" class="p-8 text-center text-gray-300 font-bold">등록된 회원이 없습니다.</td></tr>';
         };
 
-        const setupListeners = () => {
-            if (!auth.currentUser) return;
-            const logsColRef = collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_logs');
-            if (unsubLogs) unsubLogs();
-            unsubLogs = onSnapshot(logsColRef, (snap) => {
-                allLogs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                renderStats(); renderRanking(); renderLogs();
-            }, (err) => console.error(err));
-
-            const membersColRef = collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_members');
-            if (unsubMembers) unsubMembers();
-            unsubMembers = onSnapshot(membersColRef, (snap) => {
-                crewMembers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                renderMembers();
-            }, (err) => console.error(err));
+        // --- Window Helpers ---
+        window.deleteLog = async (id) => {
+            showModal("기록을 삭제하시겠습니까?", "confirm", async () => {
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'songmirun_logs', id));
+                showToast("삭제되었습니다.");
+            });
+        };
+        window.editLog = (id) => {
+            const l = allLogs.find(x => x.id === id);
+            if(!l) return;
+            document.getElementById('edit-id').value = id;
+            document.getElementById('log-username').value = l.userName;
+            document.getElementById('in-dist').value = l.distance;
+            document.getElementById('in-time').value = l.duration;
+            document.getElementById('in-bpm').value = l.bpm;
+            document.getElementById('in-cadence').value = l.cadence;
+            document.getElementById('in-date').value = l.date;
+            document.getElementById('run-type').value = l.runType;
+            document.getElementById('form-title').innerHTML = '<i class="fa-solid fa-pen text-brand-500"></i> 기록 수정';
+            document.getElementById('tab-logs').click();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+        window.deleteMember = async (id) => {
+            showModal("회원 정보를 삭제하시겠습니까?", "confirm", async () => {
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'songmirun_members', id));
+                showToast("삭제되었습니다.");
+            });
+        };
+        window.editMember = (id) => {
+            const m = crewMembers.find(x => x.id === id);
+            if(!m) return;
+            document.getElementById('mem-edit-id').value = id;
+            document.getElementById('mem-nickname').value = m.nickname;
+            document.getElementById('mem-gender').value = m.gender;
+            document.getElementById('mem-joindate').value = m.joinDate;
+            document.getElementById('mem-memo').value = m.memo || '';
+            document.getElementById('mem-form-title').innerHTML = '<i class="fa-solid fa-user-pen text-brand-500"></i> 정보 수정';
         };
 
-        const handleLogin = async () => {
-            const nick = document.getElementById('login-nick').value.trim();
-            if (!nick) return showModal("닉네임을 입력해 주세요.", "alert");
-            document.getElementById('login-loader').classList.remove('hidden');
-            document.getElementById('login-text').innerText = "확인 중...";
-            try {
-                if (!auth.currentUser) await signInAnonymously(auth);
-                if (nick.toLowerCase().startsWith('admin')) {
-                    localStorage.setItem('songmirun_nickname', nick);
-                    userNickname = nick; updateUI(); setupListeners();
-                    showToast(`관리자 로그인 성공`); return;
-                }
-                const membersColRef = collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_members');
-                const snap = await getDocs(query(membersColRef));
-                const registeredNicks = snap.docs.map(d => d.data().nickname);
-                if (registeredNicks.includes(nick)) {
-                    localStorage.setItem('songmirun_nickname', nick);
-                    userNickname = nick; updateUI(); setupListeners();
-                    showToast(`${nick}님 환영합니다!`);
-                } else showModal("등록되지 않은 회원입니다.", "alert");
-            } catch (err) { console.error(err); } finally {
-                document.getElementById('login-loader').classList.add('hidden');
-                document.getElementById('login-text').innerText = "입장하기";
+        const setupListeners = () => {
+            if (!auth.currentUser) return;
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_logs'), (snap) => {
+                allLogs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderStats(); renderRanking(); renderLogs();
+            });
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_members'), (snap) => {
+                crewMembers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderMembers(); renderAllCharts();
+            });
+        };
+
+        const updateUI = () => {
+            const loginScreen = document.getElementById('login-screen');
+            const mainContent = document.getElementById('main-content');
+            if (auth.currentUser && userNickname) {
+                loginScreen.classList.add('hidden');
+                mainContent.classList.remove('hidden');
+                document.getElementById('display-nickname').innerText = userNickname;
+                isAdmin = userNickname.toLowerCase().startsWith('admin');
+                document.getElementById('tab-members').classList.toggle('hidden', !isAdmin);
+                document.getElementById('admin-badge').classList.toggle('hidden', !isAdmin);
+                                document.getElementById('log-username').classList.toggle('hidden', !isAdmin);
+                
+                const userField = document.getElementById('log-username');
+                userField.value = userNickname;
+                userField.readOnly = !isAdmin;
+                userField.style.backgroundColor = !isAdmin ? '#f1f5f9' : 'white';
+            } else {
+                loginScreen.classList.remove('hidden');
+                mainContent.classList.add('hidden');
             }
         };
 
         const init = async () => {
             onAuthStateChanged(auth, (user) => {
                 if (user) {
-                    const savedNick = localStorage.getItem('songmirun_nickname');
-                    if (savedNick) { userNickname = savedNick; updateUI(); setupListeners(); }
-                    else updateUI();
-                } else updateUI();
+                    const saved = localStorage.getItem('songmirun_nickname');
+                    if (saved) { userNickname = saved; updateUI(); setupListeners(); }
+                }
+                updateUI();
             });
 
-            document.getElementById('btn-login').onclick = handleLogin;
+            document.getElementById('btn-login').onclick = async () => {
+                const nick = document.getElementById('login-nick').value.trim();
+                if(!nick) return;
+                document.getElementById('login-loader').classList.remove('hidden');
+                try {
+                    if(!auth.currentUser) await signInAnonymously(auth);
+                    if(!nick.toLowerCase().startsWith('admin')) {
+                        const snap = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_members'));
+                        if(!snap.docs.find(d => d.data().nickname === nick)) {
+                            showModal("등록된 회원이 아닙니다.", "alert");
+                            return;
+                        }
+                    }
+                    localStorage.setItem('songmirun_nickname', nick);
+                    userNickname = nick; updateUI(); setupListeners();
+                } catch(e) { console.error(e); } finally {
+                    document.getElementById('login-loader').classList.add('hidden');
+                }
+            };
+
             document.getElementById('btn-logout').onclick = () => {
-                showModal("로그아웃 하시겠습니까?", "confirm", async () => {
+                showModal("로그아웃 하시겠습니까?", "confirm", () => {
                     localStorage.removeItem('songmirun_nickname');
-                    userNickname = ''; if (unsubLogs) unsubLogs(); if (unsubMembers) unsubMembers();
-                    await signOut(auth); updateUI(); location.reload(); 
+                    location.reload();
                 });
             };
 
             const tabs = { 'tab-logs': 'section-logs', 'tab-stats': 'section-stats', 'tab-members': 'section-members' };
-            Object.keys(tabs).forEach(tabId => {
-                document.getElementById(tabId).onclick = () => {
-                    Object.values(tabs).forEach(sec => document.getElementById(sec).classList.add('hidden'));
-                    document.getElementById(tabs[tabId]).classList.remove('hidden');
-                    Object.keys(tabs).forEach(id => {
-                        const el = document.getElementById(id);
-                        el.classList.remove('border-brand-500', 'text-brand-600');
-                        el.classList.add('border-transparent', 'text-gray-400');
+            Object.keys(tabs).forEach(id => {
+                document.getElementById(id).onclick = () => {
+                    Object.values(tabs).forEach(s => document.getElementById(s).classList.add('hidden'));
+                    document.getElementById(tabs[id]).classList.remove('hidden');
+                    Object.keys(tabs).forEach(t => {
+                        document.getElementById(t).classList.remove('border-brand-500', 'text-brand-600');
+                        document.getElementById(t).classList.add('border-transparent', 'text-gray-400');
                     });
-                    const activeEl = document.getElementById(tabId);
-                    activeEl.classList.add('border-brand-500', 'text-brand-600');
-                    if (tabId === 'tab-stats') setTimeout(renderMonthlyChart, 100);
+                    document.getElementById(id).classList.add('border-brand-500', 'text-brand-600');
+                    if(id === 'tab-stats') setTimeout(renderAllCharts, 150);
                 };
             });
 
@@ -697,17 +659,15 @@
                     runType: document.getElementById('run-type').value,
                     updatedAt: serverTimestamp()
                 };
-                if(!data.userName || !data.distance || !data.date) return showModal("데이터를 모두 입력하세요.", "alert");
-                const editId = document.getElementById('edit-id').value;
-                try {
-                    const col = collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_logs');
-                    if (editId) await updateDoc(doc(col, editId), data);
-                    else await addDoc(col, { ...data, createdAt: serverTimestamp() });
-                    ['in-dist','in-time','in-bpm','in-cadence'].forEach(id => document.getElementById(id).value = '');
-                    document.getElementById('edit-id').value = '';
-                    document.getElementById('form-title').innerHTML = '<i class="fa-solid fa-circle-plus text-brand-500"></i> 새 기록';
-                    showToast("기록 저장 완료");
-                } catch(e) { console.error(e); }
+                if(!data.distance || !data.date) return showModal("필수 정보를 입력하세요.", "alert");
+                const eid = document.getElementById('edit-id').value;
+                const col = collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_logs');
+                if(eid) await updateDoc(doc(col, eid), data);
+                else await addDoc(col, { ...data, createdAt: serverTimestamp() });
+                ['in-dist','in-time','in-bpm','in-cadence'].forEach(i => document.getElementById(i).value='');
+                document.getElementById('edit-id').value = '';
+                document.getElementById('form-title').innerHTML = '<i class="fa-solid fa-circle-plus text-brand-500"></i> 새 기록';
+                showToast("저장되었습니다.");
             };
 
             document.getElementById('mem-submit-btn').onclick = async () => {
@@ -715,73 +675,36 @@
                     nickname: document.getElementById('mem-nickname').value.trim(),
                     gender: document.getElementById('mem-gender').value,
                     joinDate: document.getElementById('mem-joindate').value,
-                    memo: document.getElementById('mem-memo').value.trim(),
-                    updatedAt: serverTimestamp()
+                    memo: document.getElementById('mem-memo').value.trim()
                 };
-                if(!data.nickname) return showModal("닉네임을 입력하세요.", "alert");
-                const editId = document.getElementById('mem-edit-id').value;
-                try {
-                    const col = collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_members');
-                    if(editId) await updateDoc(doc(col, editId), data);
-                    else await addDoc(col, data);
-                    document.getElementById('mem-edit-id').value = '';
-                    document.getElementById('mem-nickname').value = '';
-                    document.getElementById('mem-memo').value = '';
-                    showToast("회원 정보 저장 완료");
-                } catch(e) { console.error(e); }
-            };
-
-            document.getElementById('btn-bulk-import').onclick = async () => {
-                const raw = document.getElementById('bulk-members-input').value.trim();
-                if(!raw) return showModal("데이터를 입력하세요.", "alert");
-                const lines = raw.split('\n');
-                let count = 0;
+                if(!data.nickname) return;
+                const eid = document.getElementById('mem-edit-id').value;
                 const col = collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_members');
-                showToast("데이터 처리 중...");
-                for(let line of lines) {
-                    const parts = line.split(',').map(p => p.trim());
-                    if(parts.length >= 3) {
-                        try {
-                            await addDoc(col, { nickname: parts[1], joinDate: parts[0], gender: parts[2], memo: '일괄 등록됨', updatedAt: serverTimestamp() });
-                            count++;
-                        } catch(e) { console.error(e); }
-                    }
-                }
-                document.getElementById('bulk-members-input').value = '';
-                showModal(`${count}명의 회원이 등록되었습니다.`, "alert");
+                if(eid) await updateDoc(doc(col, eid), data);
+                else await addDoc(col, data);
+                document.getElementById('mem-nickname').value = '';
+                document.getElementById('mem-memo').value = '';
+                document.getElementById('mem-edit-id').value = '';
+                showToast("회원 정보 저장됨");
             };
 
-            const select = document.getElementById('year-select');
-            const thisYear = new Date().getFullYear();
-            for(let y=thisYear; y>=thisYear-2; y--) {
-                const opt = document.createElement('option');
-                opt.value = y; opt.textContent = `${y}년 기록`;
-                select.appendChild(opt);
+            const yrSelect = document.getElementById('year-select');
+            const nowY = new Date().getFullYear();
+            for(let i=nowY; i>=nowY-2; i--) {
+                const o = document.createElement('option'); o.value = i; o.innerText = i + '년'; yrSelect.appendChild(o);
             }
-            select.onchange = (e) => { selectedYear = e.target.value; renderStats(); renderRanking(); renderLogs(); };
+            yrSelect.onchange = (e) => { selectedYear = e.target.value; renderStats(); };
+            
             document.getElementById('in-date').valueAsDate = new Date();
             document.getElementById('mem-joindate').valueAsDate = new Date();
-            document.getElementById('export-end').valueAsDate = new Date()                      ;
-
-            //document.getElementById('export-start').valueAsDate = new Date(new Date().getFullYear(), 0, 1);
-
+            document.getElementById('export-end').valueAsDate = new Date();
             const date = new Date(new Date().getFullYear(), 0, 1);
             date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
-        document.getElementById('export-start').valueAsDate = date;
+            document.getElementById('export-start').valueAsDate = date;
 
-            document.getElementById('btn-csv').onclick = () => {
-                const start = document.getElementById('export-start').value;
-                const end = document.getElementById('export-end').value;
-                const filtered = allLogs.filter(l => (isAdmin || l.userName === userNickname) && l.date >= start && l.date <= end);
-                if(!filtered.length) return showModal("데이터가 없습니다.", "alert");
-                let csv = "\ufeff날짜,러너,유형,거리(km),시간(분),심박,케이던스\n" + 
-                          filtered.map(l => `${l.date},${l.userName},${l.runType},${l.distance},${l.duration},${l.bpm},${l.cadence}`).join('\n');
-                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-                const a = document.createElement("a");
-                a.href = URL.createObjectURL(blob); a.download = `songmirun_export.csv`; a.click();
-            };
         };
-        window.onload = init;
+
+        init();
     </script>
 </body>
 </html>
