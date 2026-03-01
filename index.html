@@ -74,7 +74,7 @@
         
         .rank-item {
             position: relative;
-            padding: 0.75rem 1rem;
+            padding: 0.35rem 1rem;
             transition: background 0.2s;
         }
         .rank-progress {
@@ -102,6 +102,17 @@
         .medal-1 { color: #fbbf24; }
         .medal-2 { color: #94a3b8; }
         .medal-3 { color: #b45309; }
+
+        .runner-grade-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            border-radius: 9999px;
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: -0.025em;
+            text-transform: uppercase;
+        }
     </style>
 </head>
 <body class="pb-20">
@@ -168,17 +179,17 @@
             </nav>
         </header>
 
-        <main class="p-3 max-w-2xl mx-auto space-y-5">
+        <main class="p-3 max-w-2xl mx-auto space-y-3">
                     
             <!-- Stats Summary Cards -->
-            <section class="grid grid-cols-3 sm:grid-cols-3 gap-2">
+            <section class="grid grid-cols-3 sm:grid-cols-3 gap-1">
                 <div class="bg-brand-500 p-3 rounded-2xl text-white shadow-lg shadow-brand-200">
                     <p class="text-[9px] font-bold text-brand-100 uppercase tracking-tighter">Distance</p>
                     <p id="stat-dist" class="text-xl font-black italic leading-none mt-1">0 km</p>
                 </div>
                 <div class="bg-white p-3 rounded-2xl border border-brand-100 shadow-sm">
                     <p class="text-[9px] text-gray-400 font-bold uppercase tracking-tighter">Time</p>
-                    <p id="stat-time" class="text-[20px] font-black text-gray-500 italic leading-none mt-1">0 m</p>
+                    <p id="stat-time" class="text-[15px] font-black text-gray-500 italic leading-none mt-1">0 m</p>
                 </div>
                 <div class="bg-white p-3 rounded-2xl border border-brand-100 shadow-sm">
                     <p class="text-[9px] text-gray-400 font-bold uppercase tracking-tighter">Count</p>
@@ -187,14 +198,14 @@
             </section>
 
             <!-- Section: Logs -->
-            <div id="section-logs" class="space-y-6">
-                <section id="entry-form" class="bg-brand-50 p-6 rounded-[2.5rem] border-2 border-brand-200 shadow-xl shadow-brand-100/50">
+            <div id="section-logs" class="space-y-3">
+                <section id="entry-form" class="bg-brand-50 p-3 rounded-[2.5rem] border-2 border-brand-200 shadow-xl shadow-brand-100/50">
                     <h2 id="form-title" class="font-black text-base mb-6 flex items-center gap-2 text-brand-900 italic tracking-tight">
                         <i class="fa-solid fa-fire-flame-curved text-brand-600 animate-pulse"></i> 새 러닝 기록 입력
                     </h2>
                     <input type="hidden" id="edit-id">
                     
-                    <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="grid grid-cols-2 gap-4 mb-3">
                         <div id="username-field-container" class="col-span-2 hidden">
                             <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1">작성자 (관리자)</label>
                             <input type="text" id="log-username" class="w-full bg-white border-2 border-brand-100 p-3.5 rounded-2xl text-sm font-bold outline-none shadow-sm">
@@ -247,13 +258,13 @@
 
                 <div class="space-y-3">
                     <h2 class="font-bold text-sm text-gray-800 px-1">활동 타임라인(최근 10)</h2>
-                    <div id="log-list" class="space-y-3"></div>
+                    <div id="log-list" class="space-y-2"></div>
                 </div>
             </div>
 
             <!-- Section: Ranking -->
-            <div id="section-ranking" class="hidden space-y-6">
-                <section class="bg-white p-4 rounded-[1.5rem] border border-brand-100 shadow-sm">
+            <div id="section-ranking" class="hidden space-y-3">
+                <section class="bg-white p-3 rounded-[1.5rem] border border-brand-100 shadow-sm">
                     <div class="flex items-center justify-between gap-4">
                         <div class="flex items-center gap-2">
                              <div class="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center text-yellow-600">
@@ -268,7 +279,7 @@
                     </div>
                 </section>
 
-                <div class="grid grid-cols-1 gap-5">
+                <div class="grid grid-cols-1 gap-3">
                     <div class="rank-card">
                         <div class="rank-header">
                             <i class="fa-solid fa-route text-brand-500"></i>
@@ -317,7 +328,7 @@
             </div>
 
             <!-- Section: Statistics -->
-            <div id="section-stats" class="hidden space-y-6">
+            <div id="section-stats" class="hidden space-y-5">
                 <section class="bg-white p-4 rounded-[2.5rem] border border-brand-100 shadow-sm sticky top-20 z-10">
                     <div class="flex flex-col gap-4">
                         <div class="flex justify-between items-center">
@@ -491,34 +502,27 @@
     <!-- Modals -->
     <div id="stat-detail-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[250] hidden items-center justify-center p-4">
         <div class="bg-white rounded-[2.5rem] w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div class="bg-brand-500 p-5 text-white relative">
+            <div class="bg-brand-500 p-4 text-white relative">
                 <button id="close-stat-modal" class="absolute top-6 right-6 w-10 h-10 bg-black/10 rounded-full flex items-center justify-center hover:bg-black/20 transition-colors">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
                 <div class="flex items-center gap-4 mb-2">
                     <div id="modal-user-avatar" class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-3xl font-black italic">S</div>
                     <div>
-                        <h2 id="modal-user-name" class="text-2xl font-black italic">Runner Name</h2>
+                        <div class="flex items-center gap-2">
+                            <h2 id="modal-user-name" class="text-2xl font-black italic">Runner Name</h2>
+                            <div id="modal-runner-grade" class="runner-grade-badge"></div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div id="modal-stats-content" class="p-4 overflow-y-auto space-y-6 bg-gray-50">
+            <div id="modal-stats-content" class="p-3 overflow-y-auto space-y-6 bg-gray-50">
                 <div id="lifetime-stats-container"></div>
                 <div class="modal-comparison-card">
-                    <div class="bg-white px-4 py-3 border-b border-gray-50 flex items-center justify-between">
-                        <span class="text-[11px] font-black text-blue-600 flex items-center gap-2">
-                             <i class="fa-solid fa-calendar-check"></i> 연도별 기록 비교
-                        </span>
-                    </div>
-                    <div id="yearly-comparison-container" class="grid grid-cols-2 divide-x divide-gray-50"></div>
+                    <div id="yearly-comparison-container" class="grid grid-cols-1 divide-x divide-gray-50"></div>
                 </div>
                 <div class="modal-comparison-card">
-                    <div class="bg-white px-4 py-3 border-b border-gray-50 flex items-center justify-between">
-                        <span class="text-[11px] font-black text-emerald-600 flex items-center gap-2">
-                             <i class="fa-solid fa-calendar-day"></i> 최근 월별 기록 비교
-                        </span>
-                    </div>
-                    <div id="monthly-comparison-container" class="grid grid-cols-2 divide-x divide-gray-50"></div>
+                    <div id="monthly-comparison-container" class="grid grid-cols-1 divide-x divide-gray-50"></div>
                 </div>
             </div>
         </div>
@@ -600,7 +604,6 @@
             modal.classList.remove('hidden'); modal.classList.add('flex');
         };
 
-        // Utility: Format minutes to string HH:MM:SS
         const formatTimeHMS = (totalMinutes) => {
             if (!totalMinutes || totalMinutes <= 0) return "0s";
             const totalSeconds = Math.round(totalMinutes * 60);
@@ -615,7 +618,6 @@
             return parts.join(' ');
         };
 
-        // Utility: Convert minutes to HH:MM:SS object
         const minToHMS = (totalMinutes) => {
             const totalSeconds = Math.round(totalMinutes * 60);
             const h = Math.floor(totalSeconds / 3600);
@@ -624,7 +626,6 @@
             return { h, m, s };
         };
 
-        // Utility: Convert HH:MM:SS to minutes
         const hmsToMin = (h, m, s) => {
             return (Number(h || 0) * 60) + Number(m || 0) + (Number(s || 0) / 60);
         };
@@ -749,16 +750,15 @@
                     const medalClass = i === 0 ? 'medal-1' : i === 1 ? 'medal-2' : i === 2 ? 'medal-3' : 'text-gray-300';
                     const progressWidth = (Number(item.valRaw || item.val) / maxVal) * 100;
                     
-                    // Display value formatting
                     let displayValue = item.val;
                     let displayUnit = unit;
                     if (isTimeFormat) {
                         displayValue = formatTimeHMS(item.valRaw || item.val);
-                        displayUnit = ""; // formatTimeHMS includes units
+                        displayUnit = ""; 
                     }
 
                     return `
-                    <div class="rank-item ${item.name === userNickname ? 'bg-brand-50/50' : ''}">
+                    <div class="rank-item ${item.name === userNickname ? 'bg-rose-50/50' : ''}">
                         <div class="flex items-center justify-between relative z-10">
                             <div class="flex items-center gap-1">
                                 <div class="w-7 h-7 flex items-center justify-center">
@@ -830,7 +830,6 @@
                 const hms = minToHMS(l.duration);
                 const timeStr = `${hms.h > 0 ? hms.h + ':' : ''}${hms.m.toString().padStart(2, '0')}:${hms.s.toString().padStart(2, '0')}`;
                 
-                // Calculate Pace
                 const dist = Number(l.distance || 0);
                 const duration = Number(l.duration || 0);
                 let paceStr = "0'00\"";
@@ -842,7 +841,7 @@
                 }
 
                 return `
-                <div class="bg-white p-4 rounded-2xl border border-brand-100 shadow-sm relative">
+                <div class="bg-white p-3 rounded-2xl border border-brand-100 shadow-sm relative">
                     <div class="flex justify-between items-start mb-2">
                         <span class="text-[9px] font-black text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full">${l.date} | ${l.runType || '번개'}</span>
                         <div class="flex gap-2">
@@ -862,7 +861,7 @@
                         <div><p class="text-[7px] text-gray-400 font-bold">Cad</p><p class="text-[11px] font-black text-brand-600">${l.cadence}</p></div>
                     </div>
                 </div>
-            `;}).join('') || '<div class="p-12 text-center text-gray-300 text-xs font-bold">활동 기록이 없습니다.</div>';
+            `;}).join('') || '<div class="p-10 text-center text-gray-300 text-xs font-bold">활동 기록이 없습니다.</div>';
         };
 
         window.toggleSort = (key) => {
@@ -912,12 +911,75 @@
             modal.classList.remove('flex');
         };
 
+        // --- Runner Grade Calculation ---
+        const calculateRunnerGrade = (logs) => {
+            const now = new Date();
+            const currMonthStr = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
+            const monthLogs = logs.filter(l => l.date && l.date.startsWith(currMonthStr));
+            
+            // 1. Monthly Count (Max 40)
+            const count = monthLogs.length;
+            let scoreCount = 5;
+            if (count >= 20) scoreCount = 40;
+            else if (count >= 16) scoreCount = 35;
+            else if (count >= 12) scoreCount = 30;
+            else if (count >= 8) scoreCount = 20;
+            else if (count >= 4) scoreCount = 10;
+            else if (count >= 1) scoreCount = 5;
+
+            // 2. Monthly Distance (Max 40)
+            const dist = monthLogs.reduce((sum, l) => sum + Number(l.distance || 0), 0);
+            let scoreDist = 5;
+            if (dist >= 200) scoreDist = 40;
+            else if (dist >= 150) scoreDist = 35;
+            else if (dist >= 120) scoreDist = 30;
+            else if (dist >= 80) scoreDist = 20;
+            else if (dist >= 50) scoreDist = 10;
+
+            // 3. Weekly Consistency (Max 20)
+            // Calculate activity for each of the last 4 weeks
+            const weekActive = [false, false, false, false];
+            for(let i=0; i<4; i++) {
+                const start = new Date(now);
+                start.setDate(now.getDate() - (i + 1) * 7);
+                const end = new Date(now);
+                end.setDate(now.getDate() - i * 7);
+                
+                const weeklyCount = logs.filter(l => {
+                    const d = new Date(l.date);
+                    return d >= start && d < end;
+                }).length;
+                if(weeklyCount >= 2) weekActive[i] = true;
+            }
+            const activeWeeks = weekActive.filter(x => x).length;
+            let scoreBonus = 5;
+            if (activeWeeks === 4) scoreBonus = 20;
+            else if (activeWeeks === 3) scoreBonus = 15;
+            else if (activeWeeks === 2) scoreBonus = 10;
+
+            const totalScore = scoreCount + scoreDist + scoreBonus;
+            
+            let grade = { name: '🐣 Starter', color: 'bg-gray-100 text-gray-500' };
+            if (totalScore >= 90) grade = { name: '🏔 Iron Runner', color: 'bg-slate-800 text-white' };
+            else if (totalScore >= 75) grade = { name: '🔥 Steady Flame', color: 'bg-orange-500 text-white' };
+            else if (totalScore >= 60) grade = { name: '🌊 Rhythm Runner', color: 'bg-blue-500 text-white' };
+            else if (totalScore >= 45) grade = { name: '🌱 Growing Runner', color: 'bg-green-500 text-white' };
+
+            return grade;
+        };
+
         window.openUserStatModal = (nickname) => {
             const modal = document.getElementById('stat-detail-modal');
             const userLogs = allLogs.filter(l => l.userName === nickname);
             document.getElementById('modal-user-name').innerText = nickname;
             document.getElementById('modal-user-avatar').innerText = nickname.charAt(0);
             
+            // Set Grade Badge
+            const grade = calculateRunnerGrade(userLogs);
+            const gradeBadge = document.getElementById('modal-runner-grade');
+            gradeBadge.innerText = grade.name;
+            gradeBadge.className = `runner-grade-badge ${grade.color}`;
+
             const calculate = (logs) => {
                 const count = logs.length;
                 const distance = logs.reduce((sum, l) => sum + Number(l.distance || 0), 0);
@@ -972,14 +1034,34 @@
                 </div>
             </div>`;
 
-            document.getElementById('yearly-comparison-container').innerHTML = 
+            const yearlyContent = 
                 genStatCol(`올해 (${currYear})`, userLogs.filter(l => l.date && l.date.startsWith(currYear.toString())), 'blue') +
                 genStatCol(`작년 (${lastYear})`, userLogs.filter(l => l.date && l.date.startsWith(lastYear.toString())), 'blue');
 
-            document.getElementById('monthly-comparison-container').innerHTML = 
+            document.getElementById('yearly-comparison-container').innerHTML = `
+                <div class="bg-white rounded-3xl p-5 border border-brand-100 shadow-sm">
+                    <h4 class="text-[11px] font-black text-brand-600 mb-4 flex items-center gap-2 uppercase tracking-tight">
+                        <i class="fa-solid fa-calendar-days"></i> Yearly Comparison
+                    </h4>
+                    <div class="flex justify-center items-center gap-4">
+                        ${yearlyContent}
+                    </div>
+                </div>`;
+
+            const monthlyContent = 
                 genStatCol('이번달', userLogs.filter(l => l.date && l.date.startsWith(currMonthStr)), 'emerald') +
                 genStatCol('지난달', userLogs.filter(l => l.date && l.date.startsWith(lastMonthStr)), 'emerald');
 
+            document.getElementById('monthly-comparison-container').innerHTML = `
+                <div class="bg-white rounded-3xl p-5 border border-brand-100 shadow-sm">
+                    <h4 class="text-[11px] font-black text-emerald-600 mb-4 flex items-center gap-2 uppercase tracking-tight">
+                        <i class="fa-solid fa-chart-bar"></i> Monthly Comparison
+                    </h4>
+                    <div class="flex justify-center items-center gap-4">
+                        ${monthlyContent}
+                    </div>
+                </div>`;
+    
             modal.classList.remove('hidden'); modal.classList.add('flex');
         };
 
@@ -992,7 +1074,6 @@
             document.getElementById('log-username').value = l.userName;
             document.getElementById('in-dist').value = l.distance;
             
-            // Re-map duration to H:M:S
             const hms = minToHMS(l.duration);
             document.getElementById('in-time-h').value = hms.h || '';
             document.getElementById('in-time-m').value = hms.m;
@@ -1106,7 +1187,6 @@
                 const s = document.getElementById('in-time-s').value || 0;
                 const totalMin = hmsToMin(h, m, s);
 
-                // Validation logic
                 const bpm = Number(document.getElementById('in-bpm').value);
                 const cadence = Number(document.getElementById('in-cadence').value);
                 const dist = Number(document.getElementById('in-dist').value);
@@ -1126,7 +1206,7 @@
 
                 const data = {
                     userName: isAdmin ? document.getElementById('log-username').value.trim() : userNickname,
-                    distance: Number(dist.toFixed(3)), // Round to 3 decimal places
+                    distance: Number(dist.toFixed(3)),
                     duration: totalMin,
                     bpm: bpm,
                     cadence: cadence,
@@ -1231,10 +1311,15 @@
             const nowY = new Date().getFullYear();
             for(let i=nowY; i>=nowY-2; i--) { const o = document.createElement('option'); o.value = i; o.innerText = i + '년'; yr.appendChild(o); }
             yr.onchange = (e) => { selectedYear = e.target.value; renderStats(); renderLogs(); };
-            document.getElementById('in-date').valueAsDate = new Date();
-            document.getElementById('mem-joindate').valueAsDate = new Date();        
+
+            // 'en-CA' 포맷은 YYYY-MM-DD 형식을 반환하므로 날짜 인풋에 딱 맞습니다.
+            const today = new Date().toLocaleDateString('en-CA'); 
+            //document.getElementById('in-date').value = today;
+
+            document.getElementById('in-date').value = today;
+            document.getElementById('mem-joindate').value = today;        
             document.getElementById('export-start').value = `${nowY}-01-01`;
-            document.getElementById('export-end').value = new Date().toISOString().split('T')[0];
+            document.getElementById('export-end').value = today;
         };
         init();
     </script>
