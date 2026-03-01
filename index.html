@@ -56,7 +56,6 @@
         .sortable-header { cursor: pointer; user-select: none; transition: background-color 0.2s; }
         .sortable-header:hover { background-color: #f1f5f9; }
 
-        /* Ranking UI Improvements */
         .rank-card {
             background: white;
             border-radius: 1.5rem;
@@ -91,7 +90,6 @@
             z-index: 0;
         }
 
-        /* Filter styling */
         .filter-group { display: flex; background-color: #f1f5f9; padding: 4px; border-radius: 12px; }
         .filter-btn { padding: 6px 12px; font-size: 10px; font-weight: 800; border-radius: 8px; transition: all 0.2s; }
         .filter-btn.active { background-color: white; color: #16a34a; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
@@ -244,7 +242,7 @@
             </div>
 
  
-            <!-- Section: Ranking (UI IMPROVED) -->
+            <!-- Section: Ranking -->
             <div id="section-ranking" class="hidden space-y-6">
                 <!-- Month Filter for Ranking -->
                 <section class="bg-white p-4 rounded-[1.5rem] border border-brand-100 shadow-sm">
@@ -431,9 +429,15 @@
 
                 <div class="space-y-4">
                     <div class="flex flex-col sm:flex-row gap-3">
-                        <div class="relative flex-1">
-                            <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-                            <input type="text" id="member-search" placeholder="검색..." class="w-full bg-white border border-brand-100 p-4 pl-12 rounded-2xl text-[11px] font-bold outline-none shadow-sm transition-all">
+                        <div class="flex-1">
+                            <!-- New Search UI Requested by User -->
+                            <div class="relative px-1">
+                                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                                <input type="text" id="member-search" placeholder="닉네임, 성별, 가입일(YYYY-MM) 검색..." class="w-full bg-white border border-brand-100 p-4 pl-12 rounded-2xl text-[11px] font-bold outline-none focus:ring-2 ring-brand-200 shadow-sm transition-all focus:border-brand-500">
+                                <div class="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                                     <span id="member-count-badge" class="text-[9px] bg-brand-100 text-brand-600 px-2 py-0.5 rounded-full font-black">0명</span>
+                                </div>
+                            </div>
                         </div>
                         <button id="btn-member-csv" class="bg-brand-500 hover:bg-brand-600 text-white px-6 py-4 rounded-2xl text-[11px] font-black shadow-lg transition-all flex items-center justify-center gap-2">
                             <i class="fa-solid fa-file-export"></i> CSV 다운로드
@@ -444,10 +448,18 @@
                             <thead class="bg-gray-50 text-[10px] text-gray-400 font-bold uppercase">
                                 <tr>
                                     <th class="p-4 w-12 text-center">No.</th>
-                                    <th class="p-4 sortable-header" onclick="window.toggleSort('nickname')">닉네임</th>
-                                    <th class="p-4">성별</th>
-                                    <th class="p-4">가입일</th>
-                                    <th class="p-4">최근 접속</th>
+                                    <th class="p-4 sortable-header" onclick="window.toggleSort('nickname')">
+                                        닉네임 <i id="sort-nickname" class="fa-solid fa-sort sort-icon"></i>
+                                    </th>
+                                    <th class="p-4 sortable-header" onclick="window.toggleSort('gender')">
+                                        성별 <i id="sort-gender" class="fa-solid fa-sort sort-icon"></i>
+                                    </th>
+                                    <th class="p-4 sortable-header" onclick="window.toggleSort('joinDate')">
+                                        가입일 <i id="sort-joinDate" class="fa-solid fa-sort sort-icon"></i>
+                                    </th>
+                                    <th class="p-4 sortable-header" onclick="window.toggleSort('lastLogin')">
+                                        최근 접속 <i id="sort-lastLogin" class="fa-solid fa-sort sort-icon"></i>
+                                    </th>
                                     <th class="p-4 text-right">관리</th>
                                 </tr>
                             </thead>
@@ -485,8 +497,8 @@
                     </div>
                 </div>
             </div>
-            <div id="modal-stats-content" class="p-4 overflow-y-auto space-y-6 bg-gray-50">
-                <div id="stat-periods-container" class="space-y-4"></div>
+            <div id="modal-stats-content" class="p-6 overflow-y-auto space-y-4 bg-gray-50">
+                <div id="stat-periods-container" class="space-y-1"></div>
             </div>
         </div>
     </div>
@@ -528,7 +540,7 @@
         let selectedYear = new Date().getFullYear();
         let selectedGender = '전체';
         let selectedTarget = '전체'; 
-        let selectedRankingPeriod = 'this'; // Ranking filter: 'this' (current month), 'last' (previous month)
+        let selectedRankingPeriod = 'this'; 
         let sortConfig = { key: 'nickname', direction: 'asc' };
 
         let distChart, paceChart, countChart, timeChart;
@@ -589,7 +601,6 @@
             renderAllCharts();
         };
 
-        // NEW: Function to set Ranking Period filter
         window.setRankingPeriod = (period) => {
             selectedRankingPeriod = period;
             ['rank-period-this', 'rank-period-last'].forEach(id => {
@@ -657,7 +668,6 @@
             timeChart = createChart('monthlyTimeChart', 'bar', '시간 (min)', timeData, '#f97316', { dataset: { borderRadius: 6 } });
         };
 
-          // IMPROVED: Hall of Fame Ranking List with Filter and better UI
         const renderRankingLists = () => {
             const now = new Date();
             let year = now.getFullYear();
@@ -670,9 +680,6 @@
 
             const monthStr = month.toString().padStart(2, '0');
             const prefix = `${year}-${monthStr}`;
-
-            //document.getElementById('ranking-month-title').innerText = `${month}월`;
-            //document.getElementById('current-month-label').innerText = `${year}년 ${month}월`;
 
             const monthLogs = allLogs.filter(l => l.date && l.date.startsWith(prefix));
 
@@ -749,36 +756,21 @@
             const mins = roundedTotalTime % 60;
 
             let timeHTML = '';
-
-            // 1. '일' 단위 (값이 있을 때만 줄바꿈 포함)
-            if (days > 0) {
-                timeHTML += `<strong>${days.toLocaleString()}d</strong> `;
-            }
-
-            // 2. '시간' 단위 (일이 있거나 시간이 있을 때)
-            if (hours > 0 || days > 0) {
-                timeHTML += `${hours}h `;
-            }
-
-            // 3. '분' 단위
+            if (days > 0) timeHTML += `<strong>${days.toLocaleString()}d</strong> `;
+            if (hours > 0 || days > 0) timeHTML += `${hours}h `;
             timeHTML += `${mins}m`;
 
-            // innerHTML을 사용해야 <br> 태그가 작동합니다.
             document.getElementById('stat-time').innerHTML = timeHTML;
-
-            // 3자리마다 콤마를 찍고 뒤에 ' 회'를 붙입니다.
             document.getElementById('stat-count').innerText = totalCount.toLocaleString() + ' 회';
             
             renderAllCharts();
         };
 
-
         const renderLogs = () => {
             const list = document.getElementById('log-list');
             const displayLogs = (isAdmin ? allLogs : allLogs.filter(l => l.userName === userNickname))
                                .filter(l => l.date && new Date(l.date).getFullYear() === parseInt(selectedYear));
-            const sorted = [...displayLogs].sort((a,b) => new Date(b.date) - new Date(a.date))
-                            .slice(0, 10); // 이 부분이 추가되었습니다.
+            const sorted = [...displayLogs].sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0, 10);
             list.innerHTML = sorted.map(l => `
                 <div class="bg-white p-4 rounded-2xl border border-brand-100 shadow-sm relative">
                     <div class="flex justify-between items-start mb-2">
@@ -803,13 +795,17 @@
         };
 
         window.toggleSort = (key) => {
-            if (sortConfig.key === key) { sortConfig.direction = sortConfig.direction === 'asc' ? 'desc' : 'asc'; } 
-            else { sortConfig.key = key; sortConfig.direction = 'asc'; }
+            if (sortConfig.key === key) { 
+                sortConfig.direction = sortConfig.direction === 'asc' ? 'desc' : 'asc'; 
+            } else { 
+                sortConfig.key = key; 
+                sortConfig.direction = 'asc'; 
+            }
             renderMembers();
         };
 
         const getFilteredMembers = () => {
-            let filtered = crewMembers.filter(m => (m.nickname + m.gender + m.joinDate + (m.memo || '')).toLowerCase().includes(memberSearchTerm.toLowerCase()));
+            let filtered = crewMembers.filter(m => (m.nickname + m.gender + m.joinDate).toLowerCase().includes(memberSearchTerm.toLowerCase()));
             filtered.sort((a, b) => {
                 let vA = a[sortConfig.key] || '', vB = b[sortConfig.key] || '';
                 if (vA < vB) return sortConfig.direction === 'asc' ? -1 : 1;
@@ -821,14 +817,11 @@
 
         const renderMembers = () => {
             const list = document.getElementById('member-list');
-            let filtered = crewMembers.filter(m => (m.nickname + m.gender + m.joinDate).toLowerCase().includes(memberSearchTerm.toLowerCase()));
+            const filtered = getFilteredMembers();
             
-            filtered.sort((a, b) => {
-                let vA = a[sortConfig.key] || '', vB = b[sortConfig.key] || '';
-                if (vA < vB) return sortConfig.direction === 'asc' ? -1 : 1;
-                if (vA > vB) return sortConfig.direction === 'asc' ? 1 : -1;
-                return 0;
-            });
+            // Update the count badge
+            const countBadge = document.getElementById('member-count-badge');
+            if(countBadge) countBadge.innerText = `${filtered.length}명`;
 
             list.innerHTML = filtered.map((m, idx) => `
                 <tr class="hover:bg-brand-50/30 transition-colors">
@@ -842,7 +835,7 @@
                         <button onclick="window.deleteMember('${m.id}')" class="text-red-300 p-1"><i class="fa-solid fa-user-minus text-xs"></i></button>
                     </td>
                 </tr>
-            `).join('') || `<tr><td colspan="6" class="p-8 text-center text-gray-300 font-bold">No members found</td></tr>`;
+            `).join('') || `<tr><td colspan="6" class="p-8 text-center text-gray-300 font-bold">검색 결과가 없습니다.</td></tr>`;
         };
 
         const closeUserStatModal = () => {
@@ -866,21 +859,35 @@
                 return { count, distance: distance.toFixed(1), duration, pace: pace > 0 ? `${mm}'${ss.toString().padStart(2, '0')}"` : '0\'00"' };
             };
 
+            const now = new Date();
+            const currYear = now.getFullYear();
+            const lastYear = currYear - 1;
+            const currMonthStr = `${currYear}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
+            
+            let lastMonthDate = new Date();
+            lastMonthDate.setMonth(now.getMonth() - 1);
+            const lastMonthStr = `${lastMonthDate.getFullYear()}-${(lastMonthDate.getMonth() + 1).toString().padStart(2, '0')}`;
+
             const periods = [
-                { label: '전체 (Lifetime)', logs: userLogs },
-                { label: `올해 (${new Date().getFullYear()})`, logs: userLogs.filter(l => new Date(l.date).getFullYear() === new Date().getFullYear()) }
+                { label: '전체 (Lifetime)', logs: userLogs, icon: 'fa-globe', color: 'text-brand-600' },
+                { label: `올해 (${currYear})`, logs: userLogs.filter(l => l.date && l.date.startsWith(currYear.toString())), icon: 'fa-calendar-check', color: 'text-blue-600' },
+                { label: `지난해 (${lastYear})`, logs: userLogs.filter(l => l.date && l.date.startsWith(lastYear.toString())), icon: 'fa-clock-rotate-left', color: 'text-gray-500' },
+                { label: '이번 달', logs: userLogs.filter(l => l.date && l.date.startsWith(currMonthStr)), icon: 'fa-calendar-day', color: 'text-emerald-600' },
+                { label: '지난달', logs: userLogs.filter(l => l.date && l.date.startsWith(lastMonthStr)), icon: 'fa-calendar-minus', color: 'text-orange-500' }
             ];
 
             document.getElementById('stat-periods-container').innerHTML = periods.map(p => {
                 const s = calculate(p.logs);
                 return `
-                    <div class="bg-white rounded-3xl p-5 border border-brand-100 shadow-sm">
-                        <h4 class="text-[11px] font-black text-brand-600 mb-4 flex items-center gap-2"><span class="w-1.5 h-1.5 bg-brand-400 rounded-full"></span> ${p.label}</h4>
+                    <div class="bg-white rounded-3xl p-3 border border-brand-100 shadow-sm">
+                        <h4 class="text-[11px] font-black ${p.color} mb-3 flex items-center gap-2">
+                           <i class="fa-solid ${p.icon} opacity-70"></i> ${p.label}
+                        </h4>
                         <div class="grid grid-cols-4 gap-2">
-                            <div class="text-center bg-gray-50 py-3 rounded-2xl"><p class="stat-grid-label">Count</p><p class="stat-grid-val text-brand-500">${s.count}</p></div>
+                            <div class="text-center bg-gray-50 py-3 rounded-2xl"><p class="stat-grid-label">Count</p><p class="stat-grid-val ${p.color}">${s.count}</p></div>
                             <div class="text-center bg-gray-50 py-3 rounded-2xl"><p class="stat-grid-label">Distance</p><p class="stat-grid-val">${s.distance}</p></div>
                             <div class="text-center bg-gray-50 py-3 rounded-2xl"><p class="stat-grid-label">Time</p><p class="stat-grid-val">${s.duration}</p></div>
-                            <div class="text-center bg-gray-50 py-3 rounded-2xl"><p class="stat-grid-label">Pace</p><p class="stat-grid-val text-orange-500">${s.pace}</p></div>
+                            <div class="text-center bg-gray-50 py-3 rounded-2xl"><p class="stat-grid-label">Pace</p><p class="stat-grid-val text-brand-400 font-medium">${s.pace}</p></div>
                         </div>
                     </div>`;
             }).join('');
@@ -907,14 +914,11 @@
 
         window.deleteMember = async (id) => {
             if(!auth.currentUser) return;
-            
             showModal("크루 정보를 삭제하시겠습니까?", "confirm", async () => {
                 try {
-                    const memberDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'songmirun_members', id);
-                    await deleteDoc(memberDocRef);
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'songmirun_members', id));
                     showToast("해당 크루가 삭제되었습니다.");
                 } catch(e) { 
-                    console.error("Delete Member Error:", e);
                     showToast("삭제 중 오류가 발생했습니다.");
                 }
             });
@@ -946,6 +950,15 @@
             const statModal = document.getElementById('stat-detail-modal');
             if(closeBtn) closeBtn.onclick = closeUserStatModal;
             if(statModal) statModal.onclick = (e) => { if (e.target === statModal) closeUserStatModal(); };
+
+            // Real-time Search Listener
+            const searchInput = document.getElementById('member-search');
+            if(searchInput) {
+                searchInput.addEventListener('input', (e) => {
+                    memberSearchTerm = e.target.value;
+                    renderMembers();
+                });
+            }
         };
 
         const updateUI = () => {
@@ -998,6 +1011,7 @@
                     });
                     if(id === 'tab-stats') setTimeout(renderAllCharts, 150);
                     if(id === 'tab-ranking') setTimeout(renderRankingLists, 50);
+                    if(id === 'tab-members') setTimeout(renderMembers, 50);
                 };
             });
 
@@ -1025,28 +1039,18 @@
                 } catch(e) { showToast("저장 실패"); }
             };
 
-
             document.getElementById('btn-csv').onclick = () => {
                 const start = document.getElementById('export-start').value;
                 const end = document.getElementById('export-end').value;
                 if(!start || !end) return showModal("기간을 선택하세요.", "alert");
-
-                const filtered = allLogs.filter(l => {
-                    const isWithinDate = l.date >= start && l.date <= end;
-                    const isAuthorized = isAdmin || l.userName === userNickname;
-                    return isWithinDate && isAuthorized;
-                }).sort((a,b) => new Date(a.date) - new Date(b.date));
-
+                const filtered = allLogs.filter(l => (l.date >= start && l.date <= end) && (isAdmin || l.userName === userNickname)).sort((a,b) => new Date(a.date) - new Date(b.date));
                 if(filtered.length === 0) return showModal("내보낼 데이터가 없습니다.", "alert");
-
                 let csv = "\uFEFF날짜,이름,유형,거리(km),시간(분),심박(bpm),케이던스(spm)\n";
                 filtered.forEach(l => { csv += `${l.date},${l.userName},${l.runType || '일반'},${l.distance},${l.duration},${l.bpm || 0},${l.cadence || 0}\n`; });
-                
-                const typeLabel = isAdmin ? "AllRecords" : "MyRecords";
                 const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement("a");
                 link.setAttribute("href", URL.createObjectURL(blob));
-                link.setAttribute("download", `songmirun_${typeLabel}_${start}_${end}.csv`);
+                link.setAttribute("download", `songmirun_records_${start}_${end}.csv`);
                 link.click();
             };
 
@@ -1058,7 +1062,7 @@
                 const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement("a");
                 link.setAttribute("href", URL.createObjectURL(blob));
-                link.setAttribute("download", `songmirun_members_${new Date().toISOString().split('T')[0]}.csv`);
+                link.setAttribute("download", `songmirun_members.csv`);
                 link.click();
             };
 
@@ -1077,11 +1081,11 @@
                     if(editId) await updateDoc(doc(colRef, editId), data);
                     else await addDoc(colRef, data);
                     document.getElementById('mem-edit-id').value = '';
-                    document.getElementById('mem-nickname').value = '';
+                    ['mem-nickname','mem-memo'].forEach(i => document.getElementById(i).value='');
+                    document.getElementById('mem-form-title').innerText = "개별 크루 등록";
                     showToast("크루 정보 저장 완료");
-                } catch(e) { console.error(e); }
+                } catch(e) { showToast("저장 실패"); }
             };
-
 
             document.getElementById('btn-bulk-import').onclick = async () => {
                 const raw = document.getElementById('bulk-members-input').value.trim();
@@ -1089,14 +1093,10 @@
                 const lines = raw.split('\n');
                 let count = 0;
                 const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_members');
-                showToast("처리 중...");
                 for(let line of lines) {
-                    const parts = line.split(',').map(p => p.trim());
-                    if(parts.length >= 3) {
-                        try {
-                            await addDoc(colRef, { nickname: parts[1], joinDate: parts[0], gender: parts[2], memo: '일괄 등록됨', updatedAt: serverTimestamp() });
-                            count++;
-                        } catch(e) {}
+                    const p = line.split(',').map(x => x.trim());
+                    if(p.length >= 3) {
+                        try { await addDoc(colRef, { nickname: p[1], joinDate: p[0], gender: p[2], memo: '일괄 등록됨', updatedAt: serverTimestamp() }); count++; } catch(e) {}
                     }
                 }
                 document.getElementById('bulk-members-input').value = '';
@@ -1109,19 +1109,10 @@
                 const lines = raw.split('\n');
                 let count = 0;
                 const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_logs');
-                showToast("처리 중...");
                 for(let line of lines) {
                     const p = line.split(',').map(x => x.trim());
                     if(p.length >= 5) {
-                        try {
-                            await addDoc(colRef, {
-                                date: p[0], userName: p[1], runType: p[2] || '번개',
-                                distance: Number(p[3]), duration: Number(p[4]),
-                                bpm: Number(p[5] || 0), cadence: Number(p[6] || 0),
-                                createdAt: serverTimestamp(), updatedAt: serverTimestamp()
-                            });
-                            count++;
-                        } catch(e) {}
+                        try { await addDoc(colRef, { date: p[0], userName: p[1], runType: p[2] || '번개', distance: Number(p[3]), duration: Number(p[4]), bpm: Number(p[5] || 0), cadence: Number(p[6] || 0), createdAt: serverTimestamp(), updatedAt: serverTimestamp() }); count++; } catch(e) {}
                     }
                 }
                 document.getElementById('bulk-logs-input').value = '';
@@ -1131,12 +1122,11 @@
             const yr = document.getElementById('year-select');
             const nowY = new Date().getFullYear();
             for(let i=nowY; i>=nowY-2; i--) { const o = document.createElement('option'); o.value = i; o.innerText = i + '년'; yr.appendChild(o); }
-            yr.onchange = (e) => { selectedYear = e.target.value; renderStats();  renderLogs(); };
+            yr.onchange = (e) => { selectedYear = e.target.value; renderStats(); renderLogs(); };
             document.getElementById('in-date').valueAsDate = new Date();
             document.getElementById('mem-joindate').valueAsDate = new Date();        
             document.getElementById('export-start').value = `${nowY}-01-01`;
             document.getElementById('export-end').value = new Date().toISOString().split('T')[0];
-    
         };
 
         init();
