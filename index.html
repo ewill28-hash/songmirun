@@ -66,11 +66,11 @@
         }
         .rank-header {
             padding: 1rem;
-            border-bottom: 1px solid #f8fafc;
+            border-bottom: 1px solid #f0fdf4;
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            background: #fbfcfd;
+            background: #f0fdf4;
         }
         .medal-1 { color: #fbbf24; }
         .medal-2 { color: #94a3b8; }
@@ -142,27 +142,42 @@
                 </div>
             </div>
             
-            <nav id="main-nav" class="flex max-w-2xl mx-auto border-t border-brand-50">
-                <button id="tab-logs" class="flex-1 py-3 text-xs font-bold tab-btn active-tab border-brand-500 text-brand-600">러닝 기록</button>
-                <button id="tab-ranking" class="flex-1 py-3 text-xs font-bold tab-btn border-transparent text-gray-400">랭킹</button>
-                <button id="tab-stats" class="flex-1 py-3 text-xs font-bold tab-btn border-transparent text-gray-400">통계</button>
-                <button id="tab-members" class="hidden flex-1 py-3 text-xs font-bold tab-btn border-transparent text-gray-400">크루 관리</button>
-            </nav>
+<nav id="main-nav" class="flex max-w-2xl mx-auto border-t border-brand-50 bg-white">
+    <button id="tab-logs" class="flex-1 flex flex-col items-center py-2 text-[10px] font-bold tab-btn active-tab border-brand-500 text-brand-600">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-1"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        <span>러닝 기록</span>
+    </button>
+
+    <button id="tab-ranking" class="flex-1 flex flex-col items-center py-2 text-[10px] font-bold tab-btn border-transparent text-gray-400">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-1"><path d="M6 9H4v11h2Z"/><path d="M11 3h2v17h-2Z"/><path d="M18 13h2v7h-2Z"/></svg>
+        <span>랭킹</span>
+    </button>
+
+    <button id="tab-stats" class="flex-1 flex flex-col items-center py-2 text-[10px] font-bold tab-btn border-transparent text-gray-400">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-1"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+        <span>통계</span>
+    </button>
+
+    <button id="tab-members" class="hidden flex-1 flex flex-col items-center py-2 text-[10px] font-bold tab-btn border-transparent text-gray-400">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-1"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>크루</span>
+    </button>
+</nav>
         </header>
 
-        <main class="p-4 max-w-2xl mx-auto space-y-6">
+        <main class="p-3 max-w-2xl mx-auto space-y-5">
                     
             <!-- Stats Summary Cards -->
             <section class="grid grid-cols-3 sm:grid-cols-3 gap-2">
-                <div class="bg-brand-500 p-4 rounded-2xl text-white shadow-lg shadow-brand-200">
+                <div class="bg-brand-500 p-3 rounded-2xl text-white shadow-lg shadow-brand-200">
                     <p class="text-[9px] font-bold text-brand-100 uppercase tracking-tighter">Distance</p>
                     <p id="stat-dist" class="text-xl font-black italic leading-none mt-1">0 km</p>
                 </div>
-                <div class="bg-white p-4 rounded-2xl border border-brand-100 shadow-sm">
+                <div class="bg-white p-3 rounded-2xl border border-brand-100 shadow-sm">
                     <p class="text-[9px] text-gray-400 font-bold uppercase tracking-tighter">Time</p>
-                    <p id="stat-time" class="text-xl font-black text-gray-800 italic leading-none mt-1">0 m</p>
+                    <p id="stat-time" class="text-[20px] font-black text-gray-500 italic leading-none mt-1">0 m</p>
                 </div>
-                <div class="bg-white p-4 rounded-2xl border border-brand-100 shadow-sm">
+                <div class="bg-white p-3 rounded-2xl border border-brand-100 shadow-sm">
                     <p class="text-[9px] text-gray-400 font-bold uppercase tracking-tighter">Count</p>
                     <p id="stat-count" class="text-xl font-black text-purple-500 italic leading-none mt-1">>0 회</p>
                 </div>
@@ -222,48 +237,50 @@
                     </button>
                 </section>
 
-                <section class="bg-white rounded-[2rem] border border-brand-100 shadow-sm overflow-hidden">
-                    <div class="p-4 bg-brand-50 border-b border-brand-100 flex justify-between items-center">
-                        <h3 class="font-black text-[10px] text-brand-800 tracking-widest uppercase">Distance Rank</h3>
-                        <i class="fa-solid fa-trophy text-yellow-500 text-xs"></i>
-                    </div>
-                    <div id="ranking-list" class="divide-y divide-green-50"></div>
-                </section>
-
                 <div class="space-y-3">
-                    <h2 class="font-bold text-sm text-gray-800 px-1">활동 타임라인</h2>
+                    <h2 class="font-bold text-sm text-gray-800 px-1">활동 타임라인(최근 10)</h2>
                     <div id="log-list" class="space-y-3"></div>
                 </div>
             </div>
 
+ 
             <!-- Section: Ranking (UI IMPROVED) -->
             <div id="section-ranking" class="hidden space-y-6">
-                <div class="flex items-center justify-between px-1">
-                    <h2 class="font-black text-base text-gray-800 italic">
-                        <i class="fa-solid fa-medal text-yellow-500"></i> 이번 달 명예의 전당
-                    </h2>
-                    <span id="current-month-label" class="text-[10px] font-bold text-brand-600 bg-brand-50 px-2 py-1 rounded-full uppercase tracking-tighter"></span>
-                </div>
+                <!-- Month Filter for Ranking -->
+                <section class="bg-white p-4 rounded-[1.5rem] border border-brand-100 shadow-sm">
+                    <div class="flex items-center justify-between gap-4">
+                        <div class="flex items-center gap-2">
+                             <div class="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center text-yellow-600">
+                                <i class="fa-solid fa-medal"></i>
+                            </div>
+                            <h2 class="font-black text-sm text-gray-800 italic">명예의 전당</h2>
+                        </div>
+                        <div class="filter-group">
+                            <button onclick="window.setRankingPeriod('this')" id="rank-period-this" class="rank-period-btn filter-btn active">이번 달</button>
+                            <button onclick="window.setRankingPeriod('last')" id="rank-period-last" class="rank-period-btn filter-btn inactive">지난 달</button>
+                        </div>
+                    </div>
+                </section>
 
                 <div class="grid grid-cols-1 gap-5">
                     <div class="rank-card">
                         <div class="rank-header">
                             <i class="fa-solid fa-route text-brand-500"></i>
-                            <span class="text-xs font-black text-gray-700">이번 달 누적 거리 TOP 5</span>
+                            <span class="text-xs font-black text-gray-7rank-header00">누적 거리 TOP 5</span>
                         </div>
                         <div id="rank-dist-list" class="divide-y divide-gray-50"></div>
                     </div>
                     <div class="rank-card">
                         <div class="rank-header">
                             <i class="fa-solid fa-stopwatch text-orange-500"></i>
-                            <span class="text-xs font-black text-gray-700">이번 달 누적 시간 TOP 5</span>
+                            <span class="text-xs font-black text-gray-700">누적 시간 TOP 5</span>
                         </div>
                         <div id="rank-time-list" class="divide-y divide-gray-50"></div>
                     </div>
                     <div class="rank-card">
                         <div class="rank-header">
                             <i class="fa-solid fa-calendar-check text-purple-500"></i>
-                            <span class="text-xs font-black text-gray-700">이번 달 러닝 횟수 TOP 5</span>
+                            <span class="text-xs font-black text-gray-700">러닝 횟수 TOP 5</span>
                         </div>
                         <div id="rank-count-list" class="divide-y divide-gray-50"></div>
                     </div>
@@ -271,7 +288,7 @@
 
                 <div class="flex items-center px-1 pt-4">
                     <h2 class="font-black text-base text-gray-800 italic">
-                        <i class="fa-solid fa-bolt text-blue-500"></i> 이번 달 단일 최고 기록
+                        <i class="fa-solid fa-bolt text-blue-500"></i> 한 번에 제일 멀리, 오래
                     </h2>
                 </div>
 
@@ -305,7 +322,6 @@
                         
                         <div class="flex flex-wrap gap-4">
                             <div class="flex-1 min-w-[140px]">
-                                <p class="text-[9px] font-black text-gray-400 uppercase mb-1.5 ml-1">분석 대상</p>
                                 <div class="filter-group">
                                     <button onclick="window.setTargetFilter('전체')" id="target-all" class="target-filter-btn filter-btn flex-1 active">전체 통계</button>
                                     <button onclick="window.setTargetFilter('나')" id="target-me" class="target-filter-btn filter-btn flex-1 inactive">내 기록</button>
@@ -313,7 +329,6 @@
                             </div>
                             
                             <div class="flex-1 min-w-[140px]">
-                                <p class="text-[9px] font-black text-gray-400 uppercase mb-1.5 ml-1">성별 필터</p>
                                 <div class="filter-group">
                                     <button onclick="window.setGenderFilter('전체')" id="filter-all" class="gender-filter-btn filter-btn flex-1 active">전체</button>
                                     <button onclick="window.setGenderFilter('남성')" id="filter-male" class="gender-filter-btn filter-btn flex-1 inactive">남성</button>
@@ -361,7 +376,7 @@
                 <div class="bg-white p-4 rounded-2xl border border-brand-100">
                     <div class="flex justify-between items-center mb-3">
                         <h3 class="text-xs font-bold text-gray-400 uppercase">기록 데이터 내보내기</h3>
-                        <span id="export-scope-badge" class="text-[8px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-black">Run</span>
+                        <span id="export-scope-badge" class="text-[8px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-black">Excel</span>
                     </div>
                     <div class="flex items-center gap-2">
                         <input type="date" id="export-start" class="flex-1 text-[10px] p-2 bg-gray-50 border border-gray-100 rounded-lg outline-none font-bold">
@@ -376,9 +391,9 @@
 
             <!-- Section: Members (Only Admin) -->
             <div id="section-members" class="hidden space-y-6">
-                <section class="bg-white p-6 rounded-[2.5rem] border border-brand-100 shadow-sm">
+                <section class="bg-brand-50 p-6 rounded-[2.5rem] border-2 border-brand-200 shadow-xl shadow-brand-100/50">
                     <h2 id="mem-form-title" class="font-black text-sm mb-6 flex items-center gap-2 text-gray-800">
-                        <i class="fa-solid fa-user-plus text-brand-500"></i> 개별 크루 등록
+                        <i class="fa-solid fa-fire-flame-curved text-brand-600 animate-pulse"></i> 개별 크루 등록
                     </h2>
                     <input type="hidden" id="mem-edit-id">
                     <div class="grid grid-cols-2 gap-4 mb-6">
@@ -421,7 +436,7 @@
                             <input type="text" id="member-search" placeholder="검색..." class="w-full bg-white border border-brand-100 p-4 pl-12 rounded-2xl text-[11px] font-bold outline-none shadow-sm transition-all">
                         </div>
                         <button id="btn-member-csv" class="bg-brand-500 hover:bg-brand-600 text-white px-6 py-4 rounded-2xl text-[11px] font-black shadow-lg transition-all flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-file-export"></i> 내보내기 CSV
+                            <i class="fa-solid fa-file-export"></i> CSV 다운로드
                         </button>
                     </div>
                     <div class="bg-white rounded-[2rem] border border-brand-100 shadow-sm overflow-hidden overflow-x-auto">
@@ -459,7 +474,7 @@
     <!-- Modals -->
     <div id="stat-detail-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[250] hidden items-center justify-center p-4">
         <div class="bg-white rounded-[2.5rem] w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div class="bg-brand-500 p-8 text-white relative">
+            <div class="bg-brand-500 p-5 text-white relative">
                 <button id="close-stat-modal" class="absolute top-6 right-6 w-10 h-10 bg-black/10 rounded-full flex items-center justify-center hover:bg-black/20 transition-colors">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
@@ -470,7 +485,7 @@
                     </div>
                 </div>
             </div>
-            <div id="modal-stats-content" class="p-6 overflow-y-auto space-y-6 bg-gray-50">
+            <div id="modal-stats-content" class="p-4 overflow-y-auto space-y-6 bg-gray-50">
                 <div id="stat-periods-container" class="space-y-4"></div>
             </div>
         </div>
@@ -513,6 +528,7 @@
         let selectedYear = new Date().getFullYear();
         let selectedGender = '전체';
         let selectedTarget = '전체'; 
+        let selectedRankingPeriod = 'this'; // Ranking filter: 'this' (current month), 'last' (previous month)
         let sortConfig = { key: 'nickname', direction: 'asc' };
 
         let distChart, paceChart, countChart, timeChart;
@@ -573,6 +589,18 @@
             renderAllCharts();
         };
 
+        // NEW: Function to set Ranking Period filter
+        window.setRankingPeriod = (period) => {
+            selectedRankingPeriod = period;
+            ['rank-period-this', 'rank-period-last'].forEach(id => {
+                const el = document.getElementById(id);
+                const isActive = (id === 'rank-period-this' && period === 'this') || (id === 'rank-period-last' && period === 'last');
+                el.classList.toggle('active', isActive);
+                el.classList.toggle('inactive', !isActive);
+            });
+            renderRankingLists();
+        };
+
         const renderAllCharts = () => {
             if (document.getElementById('section-stats').classList.contains('hidden')) return;
             const distData = Array(12).fill(0);
@@ -623,21 +651,28 @@
             });
 
             if (countChart) countChart.destroy();
-            countChart = createChart('monthlyCountChart', 'bar', '등록 건수 (회)', countData, '#8b5cf6', { dataset: { borderRadius: 6 } });
+            countChart = createChart('monthlyCountChart', 'bar', '러닝 횟수 (회)', countData, '#8b5cf6', { dataset: { borderRadius: 6 } });
 
             if (timeChart) timeChart.destroy();
             timeChart = createChart('monthlyTimeChart', 'bar', '시간 (min)', timeData, '#f97316', { dataset: { borderRadius: 6 } });
         };
 
-        // IMPROVED: Hall of Fame Ranking List with better UI
+          // IMPROVED: Hall of Fame Ranking List with Filter and better UI
         const renderRankingLists = () => {
             const now = new Date();
-            const year = now.getFullYear();
-            const month = now.getMonth() + 1;
+            let year = now.getFullYear();
+            let month = now.getMonth() + 1;
+
+            if (selectedRankingPeriod === 'last') {
+                month -= 1;
+                if (month === 0) { month = 12; year -= 1; }
+            }
+
             const monthStr = month.toString().padStart(2, '0');
             const prefix = `${year}-${monthStr}`;
 
-            document.getElementById('current-month-label').innerText = `${year}년 ${month}월`;
+            //document.getElementById('ranking-month-title').innerText = `${month}월`;
+            //document.getElementById('current-month-label').innerText = `${year}년 ${month}월`;
 
             const monthLogs = allLogs.filter(l => l.date && l.date.startsWith(prefix));
 
@@ -681,7 +716,7 @@
                         <div class="rank-progress" style="width: ${progressWidth}%"></div>
                     </div>
                     `;
-                }).join('') || '<div class="p-8 text-center text-gray-300 text-[10px] font-bold italic">No records this month</div>';
+                }).join('') || '<div class="p-8 text-center text-gray-300 text-[10px] font-bold italic">기록이 없습니다.</div>';
             };
 
             const distRank = Object.entries(userAgg).map(([name, obj]) => ({ name, val: obj.distance.toFixed(1) })).sort((a,b) => b.val - a.val);
@@ -706,35 +741,44 @@
             const totalTime = currentYearLogs.reduce((sum, l) => sum + Number(l.duration || 0), 0);
             const totalCount = currentYearLogs.length;
             
-            document.getElementById('stat-dist').innerText = totalDist.toFixed(1) + ' km';
-            document.getElementById('stat-time').innerText = totalTime + ' m';
-            document.getElementById('stat-count').innerText = totalCount + ' 회';
+            document.getElementById('stat-dist').innerText = Math.round(totalDist).toLocaleString()+ ' km';
+            
+            const roundedTotalTime = Math.round(totalTime);
+            const days = Math.floor(roundedTotalTime / 1440);
+            const hours = Math.floor((roundedTotalTime % 1440) / 60);
+            const mins = roundedTotalTime % 60;
+
+            let timeHTML = '';
+
+            // 1. '일' 단위 (값이 있을 때만 줄바꿈 포함)
+            if (days > 0) {
+                timeHTML += `<strong>${days.toLocaleString()}d</strong> `;
+            }
+
+            // 2. '시간' 단위 (일이 있거나 시간이 있을 때)
+            if (hours > 0 || days > 0) {
+                timeHTML += `${hours}h `;
+            }
+
+            // 3. '분' 단위
+            timeHTML += `${mins}m`;
+
+            // innerHTML을 사용해야 <br> 태그가 작동합니다.
+            document.getElementById('stat-time').innerHTML = timeHTML;
+
+            // 3자리마다 콤마를 찍고 뒤에 ' 회'를 붙입니다.
+            document.getElementById('stat-count').innerText = totalCount.toLocaleString() + ' 회';
             
             renderAllCharts();
         };
 
-        const renderRanking = () => {
-            const list = document.getElementById('ranking-list');
-            const userStats = {};
-            const yearLogs = allLogs.filter(l => l.date && new Date(l.date).getFullYear() === parseInt(selectedYear));
-            yearLogs.forEach(l => { userStats[l.userName] = (userStats[l.userName] || 0) + Number(l.distance || 0); });
-            const sorted = Object.entries(userStats).sort((a,b) => b[1] - a[1]);
-            list.innerHTML = sorted.map(([name, dist], i) => `
-                <div class="flex items-center justify-between p-3">
-                    <div class="flex items-center gap-3">
-                        <span class="text-[10px] font-black w-4 ${i < 3 ? 'text-brand-600' : 'text-gray-300'}">${i+1}</span>
-                        <span class="text-xs font-bold ${name === userNickname ? 'text-brand-700 underline underline-offset-4' : 'text-gray-600'}">${name}</span>
-                    </div>
-                    <span class="text-xs font-black text-brand-500">${dist.toFixed(1)} km</span>
-                </div>
-            `).join('') || '<div class="p-6 text-center text-gray-300 font-bold">랭킹 정보 없음</div>';
-        };
 
         const renderLogs = () => {
             const list = document.getElementById('log-list');
             const displayLogs = (isAdmin ? allLogs : allLogs.filter(l => l.userName === userNickname))
                                .filter(l => l.date && new Date(l.date).getFullYear() === parseInt(selectedYear));
-            const sorted = [...displayLogs].sort((a,b) => new Date(b.date) - new Date(a.date));
+            const sorted = [...displayLogs].sort((a,b) => new Date(b.date) - new Date(a.date))
+                            .slice(0, 10); // 이 부분이 추가되었습니다.
             list.innerHTML = sorted.map(l => `
                 <div class="bg-white p-4 rounded-2xl border border-brand-100 shadow-sm relative">
                     <div class="flex justify-between items-start mb-2">
@@ -788,12 +832,12 @@
 
             list.innerHTML = filtered.map((m, idx) => `
                 <tr class="hover:bg-brand-50/30 transition-colors">
-                    <td class="p-4 text-[10px] font-bold text-gray-400 text-center">${idx + 1}</td>
-                    <td class="p-4 text-xs font-bold"><button onclick="window.openUserStatModal('${m.nickname}')" class="text-brand-600 hover:underline text-left font-black">${m.nickname}</button></td>
-                    <td class="p-4 text-[10px] font-bold ${m.gender === '남성' ? 'text-blue-500' : 'text-pink-500'}">${m.gender}</td>
-                    <td class="p-4 text-[10px] text-gray-400 font-medium">${m.joinDate}</td>
-                    <td class="p-4 text-[10px] text-brand-600 font-black italic">${m.lastLogin || '-'}</td>
-                    <td class="p-4 text-right flex gap-1 justify-end">
+                    <td class="p-2 text-[10px] font-bold text-gray-400 text-center">${idx + 1}</td>
+                    <td class="p-2 text-xs font-bold"><button onclick="window.openUserStatModal('${m.nickname}')" class="text-brand-600 hover:underline text-left font-black">${m.nickname}</button></td>
+                    <td class="p-2 text-[10px] font-bold ${m.gender === '남성' ? 'text-blue-500' : 'text-pink-500'}">${m.gender}</td>
+                    <td class="p-2 text-[10px] text-gray-400 font-medium">${m.joinDate}</td>
+                    <td class="p-2 text-[10px] text-brand-600 font-black italic">${m.lastLogin || '-'}</td>
+                    <td class="p-2 text-right flex gap-1 justify-end">
                         <button onclick="window.editMember('${m.id}')" class="text-brand-400 p-1"><i class="fa-solid fa-user-pen text-xs"></i></button>
                         <button onclick="window.deleteMember('${m.id}')" class="text-red-300 p-1"><i class="fa-solid fa-user-minus text-xs"></i></button>
                     </td>
@@ -891,7 +935,7 @@
         const setupListeners = () => {
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_logs'), (snap) => {
                 allLogs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                renderStats(); renderRanking(); renderLogs(); renderRankingLists();
+                renderStats();  renderLogs(); renderRankingLists();
             });
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_members'), (snap) => {
                 crewMembers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -929,7 +973,7 @@
                     if(!auth.currentUser) await signInAnonymously(auth);
                     const membersSnap = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_members'));
                     const target = membersSnap.docs.find(d => d.data().nickname === nick);
-                    if(!nick.toLowerCase().startsWith('admin') && !target) return showModal("등록된 크루가 아닙니다.", "alert");
+                    if(!nick.toLowerCase().startsWith('admin') && !target) return showModal("등록된 크루가 아닙니다.\n\n Jake에게 문의하세요", "alert");
                     if (target) await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'songmirun_members', target.id), { lastLogin: new Date().toISOString().split('T')[0] });
                     localStorage.setItem('songmirun_nickname', nick);
                     userNickname = nick; updateUI(); setupListeners();
@@ -1087,7 +1131,7 @@
             const yr = document.getElementById('year-select');
             const nowY = new Date().getFullYear();
             for(let i=nowY; i>=nowY-2; i--) { const o = document.createElement('option'); o.value = i; o.innerText = i + '년'; yr.appendChild(o); }
-            yr.onchange = (e) => { selectedYear = e.target.value; renderStats(); renderRanking(); renderLogs(); };
+            yr.onchange = (e) => { selectedYear = e.target.value; renderStats();  renderLogs(); };
             document.getElementById('in-date').valueAsDate = new Date();
             document.getElementById('mem-joindate').valueAsDate = new Date();        
             document.getElementById('export-start').value = `${nowY}-01-01`;
