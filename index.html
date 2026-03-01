@@ -50,8 +50,8 @@
         .loading-spinner { animation: spin 1s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         
-        .stat-grid-label { font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; }
-        .stat-grid-val { font-size: 13px; font-weight: 900; color: #1e293b; font-style: italic; }
+        .stat-grid-label { font-size: 8px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 2px; }
+        .stat-grid-val { font-size: 11px; font-weight: 900; color: #1e293b; font-style: italic; }
 
         .sortable-header { cursor: pointer; user-select: none; transition: background-color 0.2s; }
         .sortable-header:hover { background-color: #f1f5f9; }
@@ -71,9 +71,6 @@
             gap: 0.5rem;
             background: #f0fdf4;
         }
-        .medal-1 { color: #fbbf24; }
-        .medal-2 { color: #94a3b8; }
-        .medal-3 { color: #b45309; }
         
         .rank-item {
             position: relative;
@@ -94,6 +91,17 @@
         .filter-btn { padding: 6px 12px; font-size: 10px; font-weight: 800; border-radius: 8px; transition: all 0.2s; }
         .filter-btn.active { background-color: white; color: #16a34a; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
         .filter-btn.inactive { color: #94a3b8; }
+
+        .modal-comparison-card {
+            background: white;
+            border-radius: 1.5rem;
+            border: 1px solid #f1f5f9;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .medal-1 { color: #fbbf24; }
+        .medal-2 { color: #94a3b8; }
+        .medal-3 { color: #b45309; }
     </style>
 </head>
 <body class="pb-20">
@@ -140,27 +148,24 @@
                 </div>
             </div>
             
-<nav id="main-nav" class="flex max-w-2xl mx-auto border-t border-brand-50 bg-white">
-    <button id="tab-logs" class="flex-1 flex flex-col items-center py-2 text-[10px] font-bold tab-btn active-tab border-brand-500 text-brand-600">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-1"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-        <span>러닝 기록</span>
-    </button>
-
-    <button id="tab-ranking" class="flex-1 flex flex-col items-center py-2 text-[10px] font-bold tab-btn border-transparent text-gray-400">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-1"><path d="M6 9H4v11h2Z"/><path d="M11 3h2v17h-2Z"/><path d="M18 13h2v7h-2Z"/></svg>
-        <span>랭킹</span>
-    </button>
-
-    <button id="tab-stats" class="flex-1 flex flex-col items-center py-2 text-[10px] font-bold tab-btn border-transparent text-gray-400">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-1"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
-        <span>통계</span>
-    </button>
-
-    <button id="tab-members" class="hidden flex-1 flex flex-col items-center py-2 text-[10px] font-bold tab-btn border-transparent text-gray-400">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-1"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        <span>크루</span>
-    </button>
-</nav>
+            <nav id="main-nav" class="flex max-w-2xl mx-auto border-t border-brand-50 bg-white">
+                <button id="tab-logs" class="flex-1 flex flex-col items-center py-2 text-[10px] font-bold tab-btn active-tab border-brand-500 text-brand-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-1"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                    <span>러닝 기록</span>
+                </button>
+                <button id="tab-ranking" class="flex-1 flex flex-col items-center py-2 text-[10px] font-bold tab-btn border-transparent text-gray-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-1"><path d="M6 9H4v11h2Z"/><path d="M11 3h2v17h-2Z"/><path d="M18 13h2v7h-2Z"/></svg>
+                    <span>랭킹</span>
+                </button>
+                <button id="tab-stats" class="flex-1 flex flex-col items-center py-2 text-[10px] font-bold tab-btn border-transparent text-gray-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-1"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+                    <span>통계</span>
+                </button>
+                <button id="tab-members" class="hidden flex-1 flex flex-col items-center py-2 text-[10px] font-bold tab-btn border-transparent text-gray-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-1"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    <span>크루</span>
+                </button>
+            </nav>
         </header>
 
         <main class="p-3 max-w-2xl mx-auto space-y-5">
@@ -177,7 +182,7 @@
                 </div>
                 <div class="bg-white p-3 rounded-2xl border border-brand-100 shadow-sm">
                     <p class="text-[9px] text-gray-400 font-bold uppercase tracking-tighter">Count</p>
-                    <p id="stat-count" class="text-xl font-black text-purple-500 italic leading-none mt-1">>0 회</p>
+                    <p id="stat-count" class="text-xl font-black text-purple-500 italic leading-none mt-1">0 회</p>
                 </div>
             </section>
 
@@ -192,41 +197,46 @@
                     <div class="grid grid-cols-2 gap-4 mb-6">
                         <div id="username-field-container" class="col-span-2 hidden">
                             <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1">작성자 (관리자)</label>
-                            <input type="text" id="log-username" class="w-full bg-white border-2 border-brand-100 p-3.5 rounded-2xl text-sm font-bold outline-none form-input-focus shadow-sm">
+                            <input type="text" id="log-username" class="w-full bg-white border-2 border-brand-100 p-3.5 rounded-2xl text-sm font-bold outline-none shadow-sm">
                         </div>
                         
                         <div class="col-span-1">
                             <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1">러닝 날짜</label>
-                            <input type="date" id="in-date" class="w-full bg-white border-2 border-brand-100 p-3.5 rounded-2xl text-sm outline-none font-bold form-input-focus shadow-sm">
+                            <input type="date" id="in-date" class="w-full bg-white border-2 border-brand-100 p-3.5 rounded-2xl text-sm outline-none font-bold shadow-sm">
                         </div>
                         
                         <div class="col-span-1">
                             <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1">러닝 유형</label>
-                            <select id="run-type" class="w-full bg-white border-2 border-brand-100 p-3.5 rounded-2xl text-sm font-bold outline-none form-input-focus shadow-sm">
+                            <select id="run-type" class="w-full bg-white border-2 border-brand-100 p-3.5 rounded-2xl text-sm font-bold outline-none shadow-sm">
                                 <option value="정규">📅 정규</option>
                                 <option value="번개">⚡ 번개</option>
                                 <option value="대회">🏅 대회</option>
                             </select>
                         </div>
                         
-                        <div>
+                        <div class="col-span-1">
                             <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1">거리 (km)</label>
-                            <input type="number" step="0.1" id="in-dist" placeholder="0.0" class="w-full bg-white border-2 border-brand-100 p-3.5 rounded-2xl text-sm font-bold outline-none form-input-focus shadow-sm">
+                            <input type="number" step="0.001" id="in-dist" placeholder="0.000" class="w-full bg-white border-2 border-brand-100 p-3.5 rounded-2xl text-sm font-bold outline-none shadow-sm">
+                        </div>
+
+                        <!-- Improved Time Input Section -->
+                        <div class="col-span-1">
+                            <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1">러닝 시간 (시/분/초)</label>
+                            <div class="grid grid-cols-3 gap-1">
+                                <input type="number" id="in-time-h" placeholder="시" min="0" class="w-full bg-white border-2 border-brand-100 p-3 rounded-xl text-center text-xs font-bold outline-none shadow-sm">
+                                <input type="number" id="in-time-m" placeholder="분" min="0" max="59" class="w-full bg-white border-2 border-brand-100 p-3 rounded-xl text-center text-xs font-bold outline-none shadow-sm">
+                                <input type="number" id="in-time-s" placeholder="초" min="0" max="59" class="w-full bg-white border-2 border-brand-100 p-3 rounded-xl text-center text-xs font-bold outline-none shadow-sm">
+                            </div>
                         </div>
                         
                         <div>
-                            <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1">시간 (분)</label>
-                            <input type="number" id="in-time" placeholder="0" class="w-full bg-white border-2 border-brand-100 p-3.5 rounded-2xl text-sm font-bold outline-none form-input-focus shadow-sm">
+                            <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1">심박수(bpm)</label>
+                            <input type="number" id="in-bpm" min="60" max="300" placeholder="0" class="w-full bg-white border-2 border-brand-100 p-3.5 rounded-2xl text-sm font-bold outline-none shadow-sm">
                         </div>
                         
                         <div>
-                            <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1">심박수 (BPM)</label>
-                            <input type="number" id="in-bpm" placeholder="0" class="w-full bg-white border-2 border-brand-100 p-3.5 rounded-2xl text-sm font-bold outline-none form-input-focus shadow-sm">
-                        </div>
-                        
-                        <div>
-                            <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1">케이던스 (SPM)</label>
-                            <input type="number" id="in-cadence" placeholder="0" class="w-full bg-white border-2 border-brand-100 p-3.5 rounded-2xl text-sm font-bold outline-none form-input-focus shadow-sm">
+                            <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1">케이던스 (spm)</label>
+                            <input type="number" id="in-cadence" min="60" max="300" placeholder="0" class="w-full bg-white border-2 border-brand-100 p-3.5 rounded-2xl text-sm font-bold outline-none shadow-sm">
                         </div>
                     </div>
                     
@@ -241,10 +251,8 @@
                 </div>
             </div>
 
- 
             <!-- Section: Ranking -->
             <div id="section-ranking" class="hidden space-y-6">
-                <!-- Month Filter for Ranking -->
                 <section class="bg-white p-4 rounded-[1.5rem] border border-brand-100 shadow-sm">
                     <div class="flex items-center justify-between gap-4">
                         <div class="flex items-center gap-2">
@@ -264,7 +272,7 @@
                     <div class="rank-card">
                         <div class="rank-header">
                             <i class="fa-solid fa-route text-brand-500"></i>
-                            <span class="text-xs font-black text-gray-7rank-header00">누적 거리 TOP 5</span>
+                            <span class="text-xs font-black text-gray-700">누적 거리 TOP 5</span>
                         </div>
                         <div id="rank-dist-list" class="divide-y divide-gray-50"></div>
                     </div>
@@ -317,7 +325,6 @@
                                 <i class="fa-solid fa-filter text-brand-500"></i> Stats Filter
                             </h2>
                         </div>
-                        
                         <div class="flex flex-wrap gap-4">
                             <div class="flex-1 min-w-[140px]">
                                 <div class="filter-group">
@@ -325,7 +332,6 @@
                                     <button onclick="window.setTargetFilter('나')" id="target-me" class="target-filter-btn filter-btn flex-1 inactive">내 기록</button>
                                 </div>
                             </div>
-                            
                             <div class="flex-1 min-w-[140px]">
                                 <div class="filter-group">
                                     <button onclick="window.setGenderFilter('전체')" id="filter-all" class="gender-filter-btn filter-btn flex-1 active">전체</button>
@@ -430,7 +436,6 @@
                 <div class="space-y-4">
                     <div class="flex flex-col sm:flex-row gap-3">
                         <div class="flex-1">
-                            <!-- New Search UI Requested by User -->
                             <div class="relative px-1">
                                 <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
                                 <input type="text" id="member-search" placeholder="닉네임, 성별, 가입일(YYYY-MM) 검색..." class="w-full bg-white border border-brand-100 p-4 pl-12 rounded-2xl text-[11px] font-bold outline-none focus:ring-2 ring-brand-200 shadow-sm transition-all focus:border-brand-500">
@@ -497,8 +502,24 @@
                     </div>
                 </div>
             </div>
-            <div id="modal-stats-content" class="p-6 overflow-y-auto space-y-4 bg-gray-50">
-                <div id="stat-periods-container" class="space-y-1"></div>
+            <div id="modal-stats-content" class="p-4 overflow-y-auto space-y-6 bg-gray-50">
+                <div id="lifetime-stats-container"></div>
+                <div class="modal-comparison-card">
+                    <div class="bg-white px-4 py-3 border-b border-gray-50 flex items-center justify-between">
+                        <span class="text-[11px] font-black text-blue-600 flex items-center gap-2">
+                             <i class="fa-solid fa-calendar-check"></i> 연도별 기록 비교
+                        </span>
+                    </div>
+                    <div id="yearly-comparison-container" class="grid grid-cols-2 divide-x divide-gray-50"></div>
+                </div>
+                <div class="modal-comparison-card">
+                    <div class="bg-white px-4 py-3 border-b border-gray-50 flex items-center justify-between">
+                        <span class="text-[11px] font-black text-emerald-600 flex items-center gap-2">
+                             <i class="fa-solid fa-calendar-day"></i> 최근 월별 기록 비교
+                        </span>
+                    </div>
+                    <div id="monthly-comparison-container" class="grid grid-cols-2 divide-x divide-gray-50"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -577,6 +598,20 @@
                 btnContainer.appendChild(okBtn);
             }
             modal.classList.remove('hidden'); modal.classList.add('flex');
+        };
+
+        // Utility: Convert minutes to HH:MM:SS
+        const minToHMS = (totalMinutes) => {
+            const totalSeconds = Math.round(totalMinutes * 60);
+            const h = Math.floor(totalSeconds / 3600);
+            const m = Math.floor((totalSeconds % 3600) / 60);
+            const s = totalSeconds % 60;
+            return { h, m, s };
+        };
+
+        // Utility: Convert HH:MM:SS to minutes
+        const hmsToMin = (h, m, s) => {
+            return (Number(h || 0) * 60) + Number(m || 0) + (Number(s || 0) / 60);
         };
 
         window.setTargetFilter = (target) => {
@@ -672,15 +707,12 @@
             const now = new Date();
             let year = now.getFullYear();
             let month = now.getMonth() + 1;
-
             if (selectedRankingPeriod === 'last') {
                 month -= 1;
                 if (month === 0) { month = 12; year -= 1; }
             }
-
             const monthStr = month.toString().padStart(2, '0');
             const prefix = `${year}-${monthStr}`;
-
             const monthLogs = allLogs.filter(l => l.date && l.date.startsWith(prefix));
 
             const userAgg = {};
@@ -701,7 +733,6 @@
                     const isTop3 = i < 3;
                     const medalClass = i === 0 ? 'medal-1' : i === 1 ? 'medal-2' : i === 2 ? 'medal-3' : 'text-gray-300';
                     const progressWidth = (Number(item.val) / maxVal) * 100;
-                    
                     return `
                     <div class="rank-item ${item.name === userNickname ? 'bg-brand-50/50' : ''}">
                         <div class="flex items-center justify-between relative z-10">
@@ -726,20 +757,16 @@
                 }).join('') || '<div class="p-8 text-center text-gray-300 text-[10px] font-bold italic">기록이 없습니다.</div>';
             };
 
-            const distRank = Object.entries(userAgg).map(([name, obj]) => ({ name, val: obj.distance.toFixed(1) })).sort((a,b) => b.val - a.val);
+            const distRank = Object.entries(userAgg).map(([name, obj]) => ({ name, val: obj.distance.toFixed(3) })).sort((a,b) => b.val - a.val);
             drawRankList('rank-dist-list', distRank, 'km');
-
-            const timeRank = Object.entries(userAgg).map(([name, obj]) => ({ name, val: obj.duration })).sort((a,b) => b.val - a.val);
+            const timeRank = Object.entries(userAgg).map(([name, obj]) => ({ name, val: obj.duration.toFixed(0) })).sort((a,b) => b.val - a.val);
             drawRankList('rank-time-list', timeRank, 'm');
-
             const countRank = Object.entries(userAgg).map(([name, obj]) => ({ name, val: obj.count })).sort((a,b) => b.val - a.val);
             drawRankList('rank-count-list', countRank, '회');
-
-            const singleDistRank = monthLogs.map(l => ({ name: l.userName, val: Number(l.distance || 0).toFixed(1) })).sort((a,b) => b.val - a.val);
-            drawRankList('rank-single-dist-list', singleDistRank, 'km', true);
-
-            const singleTimeRank = monthLogs.map(l => ({ name: l.userName, val: Number(l.duration || 0) })).sort((a,b) => b.val - a.val);
-            drawRankList('rank-single-time-list', singleTimeRank, 'm', true);
+            const singleDistRank = monthLogs.map(l => ({ name: l.userName, val: Number(l.distance || 0).toFixed(3) })).sort((a,b) => b.val - a.val);
+            drawRankList('rank-single-dist-list', singleDistRank, 'km');
+            const singleTimeRank = monthLogs.map(l => ({ name: l.userName, val: Number(l.duration || 0).toFixed(0) })).sort((a,b) => b.val - a.val);
+            drawRankList('rank-single-time-list', singleTimeRank, 'm');
         };
 
         const renderStats = () => {
@@ -748,7 +775,7 @@
             const totalTime = currentYearLogs.reduce((sum, l) => sum + Number(l.duration || 0), 0);
             const totalCount = currentYearLogs.length;
             
-            document.getElementById('stat-dist').innerText = Math.round(totalDist).toLocaleString()+ ' km';
+            document.getElementById('stat-dist').innerText = totalDist.toFixed(0).toLocaleString()+ ' km';
             
             const roundedTotalTime = Math.round(totalTime);
             const days = Math.floor(roundedTotalTime / 1440);
@@ -771,7 +798,22 @@
             const displayLogs = (isAdmin ? allLogs : allLogs.filter(l => l.userName === userNickname))
                                .filter(l => l.date && new Date(l.date).getFullYear() === parseInt(selectedYear));
             const sorted = [...displayLogs].sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0, 10);
-            list.innerHTML = sorted.map(l => `
+            list.innerHTML = sorted.map(l => {
+                const hms = minToHMS(l.duration);
+                const timeStr = `${hms.h > 0 ? hms.h + ':' : ''}${hms.m.toString().padStart(2, '0')}:${hms.s.toString().padStart(2, '0')}`;
+                
+                // Calculate Pace
+                const dist = Number(l.distance || 0);
+                const duration = Number(l.duration || 0);
+                let paceStr = "0'00\"";
+                if (dist > 0) {
+                    const pace = duration / dist;
+                    const mm = Math.floor(pace);
+                    const ss = Math.round((pace - mm) * 60);
+                    paceStr = `${mm}'${ss.toString().padStart(2, '0')}"`;
+                }
+
+                return `
                 <div class="bg-white p-4 rounded-2xl border border-brand-100 shadow-sm relative">
                     <div class="flex justify-between items-start mb-2">
                         <span class="text-[9px] font-black text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full">${l.date} | ${l.runType || '번개'}</span>
@@ -784,14 +826,15 @@
                         <div class="w-5 h-5 bg-brand-100 rounded-full flex items-center justify-center text-[8px] font-bold text-brand-600">${l.userName?.charAt(0) || '?'}</div>
                         <span class="text-xs font-bold text-gray-700">${l.userName}</span>
                     </div>
-                    <div class="grid grid-cols-4 gap-1 text-center bg-brand-50/50 p-2 rounded-xl">
+                    <div class="grid grid-cols-5 gap-1 text-center bg-brand-50/50 p-2 rounded-xl">
                         <div><p class="text-[7px] text-gray-400 font-bold">Km</p><p class="text-[11px] font-black">${l.distance}</p></div>
-                        <div><p class="text-[7px] text-gray-400 font-bold">Min</p><p class="text-[11px] font-black">${l.duration}</p></div>
+                        <div><p class="text-[7px] text-gray-400 font-bold">Time</p><p class="text-[11px] font-black">${timeStr}</p></div>
+                        <div><p class="text-[7px] text-emerald-600 font-bold">Pace</p><p class="text-[11px] font-black text-emerald-600">${paceStr}</p></div>
                         <div><p class="text-[7px] text-gray-400 font-bold text-red-400">Bpm</p><p class="text-[11px] font-black text-red-500">${l.bpm}</p></div>
                         <div><p class="text-[7px] text-gray-400 font-bold">Cad</p><p class="text-[11px] font-black text-brand-600">${l.cadence}</p></div>
                     </div>
                 </div>
-            `).join('') || '<div class="p-12 text-center text-gray-300 text-xs font-bold">활동 기록이 없습니다.</div>';
+            `;}).join('') || '<div class="p-12 text-center text-gray-300 text-xs font-bold">활동 기록이 없습니다.</div>';
         };
 
         window.toggleSort = (key) => {
@@ -818,11 +861,8 @@
         const renderMembers = () => {
             const list = document.getElementById('member-list');
             const filtered = getFilteredMembers();
-            
-            // Update the count badge
             const countBadge = document.getElementById('member-count-badge');
             if(countBadge) countBadge.innerText = `${filtered.length}명`;
-
             list.innerHTML = filtered.map((m, idx) => `
                 <tr class="hover:bg-brand-50/30 transition-colors">
                     <td class="p-2 text-[10px] font-bold text-gray-400 text-center">${idx + 1}</td>
@@ -856,41 +896,61 @@
                 const duration = logs.reduce((sum, l) => sum + Number(l.duration || 0), 0);
                 const pace = distance > 0 ? (duration / distance) : 0;
                 const mm = Math.floor(pace), ss = Math.round((pace - mm) * 60);
-                return { count, distance: distance.toFixed(1), duration, pace: pace > 0 ? `${mm}'${ss.toString().padStart(2, '0')}"` : '0\'00"' };
+                return { 
+                    count, 
+                    distance: distance.toFixed(3), 
+                    duration: Math.round(duration), 
+                    pace: pace > 0 ? `${mm}'${ss.toString().padStart(2, '0')}"` : '0\'00"' 
+                };
             };
 
             const now = new Date();
             const currYear = now.getFullYear();
             const lastYear = currYear - 1;
             const currMonthStr = `${currYear}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
-            
             let lastMonthDate = new Date();
             lastMonthDate.setMonth(now.getMonth() - 1);
             const lastMonthStr = `${lastMonthDate.getFullYear()}-${(lastMonthDate.getMonth() + 1).toString().padStart(2, '0')}`;
 
-            const periods = [
-                { label: '전체 (Lifetime)', logs: userLogs, icon: 'fa-globe', color: 'text-brand-600' },
-                { label: `올해 (${currYear})`, logs: userLogs.filter(l => l.date && l.date.startsWith(currYear.toString())), icon: 'fa-calendar-check', color: 'text-blue-600' },
-                { label: `지난해 (${lastYear})`, logs: userLogs.filter(l => l.date && l.date.startsWith(lastYear.toString())), icon: 'fa-clock-rotate-left', color: 'text-gray-500' },
-                { label: '이번 달', logs: userLogs.filter(l => l.date && l.date.startsWith(currMonthStr)), icon: 'fa-calendar-day', color: 'text-emerald-600' },
-                { label: '지난달', logs: userLogs.filter(l => l.date && l.date.startsWith(lastMonthStr)), icon: 'fa-calendar-minus', color: 'text-orange-500' }
-            ];
-
-            document.getElementById('stat-periods-container').innerHTML = periods.map(p => {
-                const s = calculate(p.logs);
+            const genStatCol = (title, logs, theme) => {
+                const s = calculate(logs);
                 return `
-                    <div class="bg-white rounded-3xl p-3 border border-brand-100 shadow-sm">
-                        <h4 class="text-[11px] font-black ${p.color} mb-3 flex items-center gap-2">
-                           <i class="fa-solid ${p.icon} opacity-70"></i> ${p.label}
-                        </h4>
-                        <div class="grid grid-cols-4 gap-2">
-                            <div class="text-center bg-gray-50 py-3 rounded-2xl"><p class="stat-grid-label">Count</p><p class="stat-grid-val ${p.color}">${s.count}</p></div>
-                            <div class="text-center bg-gray-50 py-3 rounded-2xl"><p class="stat-grid-label">Distance</p><p class="stat-grid-val">${s.distance}</p></div>
-                            <div class="text-center bg-gray-50 py-3 rounded-2xl"><p class="stat-grid-label">Time</p><p class="stat-grid-val">${s.duration}</p></div>
-                            <div class="text-center bg-gray-50 py-3 rounded-2xl"><p class="stat-grid-label">Pace</p><p class="stat-grid-val text-brand-400 font-medium">${s.pace}</p></div>
-                        </div>
-                    </div>`;
-            }).join('');
+                <div class="p-4 bg-white">
+                    <div class="flex items-center gap-1.5 mb-4">
+                        <div class="w-2 h-2 rounded-full ${theme === 'blue' ? 'bg-blue-500' : 'bg-emerald-500'}"></div>
+                        <span class="text-[10px] font-black text-gray-600">${title}</span>
+                    </div>
+                    <div class="space-y-4">
+                        <div><p class="stat-grid-label">Count</p><p class="stat-grid-val ${theme === 'blue' ? 'text-blue-600' : 'text-emerald-600'}">${s.count}회</p></div>
+                        <div><p class="stat-grid-label">Dist</p><p class="stat-grid-val">${s.distance}km</p></div>
+                        <div><p class="stat-grid-label">Time</p><p class="stat-grid-val">${s.duration}m</p></div>
+                        <div><p class="stat-grid-label">Pace</p><p class="stat-grid-val text-brand-400 font-medium">${s.pace}</p></div>
+                    </div>
+                </div>`;
+            };
+
+            const lifetimeStats = calculate(userLogs);
+            document.getElementById('lifetime-stats-container').innerHTML = `
+            <div class="bg-white rounded-3xl p-5 border border-brand-100 shadow-sm">
+                <h4 class="text-[11px] font-black text-brand-600 mb-4 flex items-center gap-2 uppercase tracking-tight">
+                   <i class="fa-solid fa-globe"></i> Lifetime Performance
+                </h4>
+                <div class="grid grid-cols-4 gap-3">
+                    <div class="text-center bg-brand-50/50 py-3 rounded-2xl"><p class="stat-grid-label text-brand-600">Count</p><p class="stat-grid-val">${lifetimeStats.count}</p></div>
+                    <div class="text-center bg-gray-50 py-3 rounded-2xl"><p class="stat-grid-label">Dist</p><p class="stat-grid-val">${lifetimeStats.distance}</p></div>
+                    <div class="text-center bg-gray-50 py-3 rounded-2xl"><p class="stat-grid-label">Time</p><p class="stat-grid-val">${lifetimeStats.duration}</p></div>
+                    <div class="text-center bg-gray-50 py-3 rounded-2xl"><p class="stat-grid-label">Avg Pace</p><p class="stat-grid-val text-brand-400">${lifetimeStats.pace}</p></div>
+                </div>
+            </div>`;
+
+            document.getElementById('yearly-comparison-container').innerHTML = 
+                genStatCol(`올해 (${currYear})`, userLogs.filter(l => l.date && l.date.startsWith(currYear.toString())), 'blue') +
+                genStatCol(`작년 (${lastYear})`, userLogs.filter(l => l.date && l.date.startsWith(lastYear.toString())), 'blue');
+
+            document.getElementById('monthly-comparison-container').innerHTML = 
+                genStatCol('이번달', userLogs.filter(l => l.date && l.date.startsWith(currMonthStr)), 'emerald') +
+                genStatCol('지난달', userLogs.filter(l => l.date && l.date.startsWith(lastMonthStr)), 'emerald');
+
             modal.classList.remove('hidden'); modal.classList.add('flex');
         };
 
@@ -902,7 +962,13 @@
             document.getElementById('edit-id').value = id;
             document.getElementById('log-username').value = l.userName;
             document.getElementById('in-dist').value = l.distance;
-            document.getElementById('in-time').value = l.duration;
+            
+            // Re-map duration to H:M:S
+            const hms = minToHMS(l.duration);
+            document.getElementById('in-time-h').value = hms.h || '';
+            document.getElementById('in-time-m').value = hms.m;
+            document.getElementById('in-time-s').value = hms.s;
+
             document.getElementById('in-bpm').value = l.bpm;
             document.getElementById('in-cadence').value = l.cadence;
             document.getElementById('in-date').value = l.date;
@@ -918,9 +984,7 @@
                 try {
                     await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'songmirun_members', id));
                     showToast("해당 크루가 삭제되었습니다.");
-                } catch(e) { 
-                    showToast("삭제 중 오류가 발생했습니다.");
-                }
+                } catch(e) { showToast("삭제 중 오류가 발생했습니다."); }
             });
         };
 
@@ -945,20 +1009,12 @@
                 crewMembers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 renderMembers(); renderAllCharts();
             });
-
             const closeBtn = document.getElementById('close-stat-modal');
             const statModal = document.getElementById('stat-detail-modal');
             if(closeBtn) closeBtn.onclick = closeUserStatModal;
             if(statModal) statModal.onclick = (e) => { if (e.target === statModal) closeUserStatModal(); };
-
-            // Real-time Search Listener
             const searchInput = document.getElementById('member-search');
-            if(searchInput) {
-                searchInput.addEventListener('input', (e) => {
-                    memberSearchTerm = e.target.value;
-                    renderMembers();
-                });
-            }
+            if(searchInput) searchInput.addEventListener('input', (e) => { memberSearchTerm = e.target.value; renderMembers(); });
         };
 
         const updateUI = () => {
@@ -1016,23 +1072,46 @@
             });
 
             document.getElementById('btn-save-log').onclick = async () => {
+                const h = document.getElementById('in-time-h').value || 0;
+                const m = document.getElementById('in-time-m').value || 0;
+                const s = document.getElementById('in-time-s').value || 0;
+                const totalMin = hmsToMin(h, m, s);
+
+                // Validation logic
+                const bpm = Number(document.getElementById('in-bpm').value);
+                const cadence = Number(document.getElementById('in-cadence').value);
+                const dist = Number(document.getElementById('in-dist').value);
+                const date = document.getElementById('in-date').value;
+
+                if(!date || dist <= 0 || totalMin <= 0) {
+                    return showModal("필수 항목(날짜, 거리, 시간)을 모두 정확히 입력하세요.", "alert");
+                }
+                
+                if(bpm !== 0 && (bpm < 70 || bpm > 220)) {
+                    return showModal("심박수는 70 ~ 220 사이로 입력해주세요.", "alert");
+                }
+                
+                if(cadence !== 0 && (cadence < 100 || cadence > 250)) {
+                    return showModal("케이던스는 100 ~ 250 사이로 입력해주세요.", "alert");
+                }
+
                 const data = {
                     userName: isAdmin ? document.getElementById('log-username').value.trim() : userNickname,
-                    distance: Number(document.getElementById('in-dist').value),
-                    duration: Number(document.getElementById('in-time').value),
-                    bpm: Number(document.getElementById('in-bpm').value),
-                    cadence: Number(document.getElementById('in-cadence').value),
-                    date: document.getElementById('in-date').value,
+                    distance: Number(dist.toFixed(3)), // Round to 3 decimal places
+                    duration: totalMin,
+                    bpm: bpm,
+                    cadence: cadence,
+                    date: date,
                     runType: document.getElementById('run-type').value,
                     updatedAt: serverTimestamp()
                 };
-                if(!data.userName || !data.distance || !data.date || !data.duration) return showModal("필수 항목을 모두 입력하세요.", "alert");
+                
                 const eid = document.getElementById('edit-id').value;
                 try {
                     const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_logs');
                     if(eid) await updateDoc(doc(colRef, eid), data);
                     else await addDoc(colRef, { ...data, createdAt: serverTimestamp() });
-                    ['in-dist','in-time','in-bpm','in-cadence'].forEach(i => document.getElementById(i).value='');
+                    ['in-dist','in-time-h','in-time-m','in-time-s','in-bpm','in-cadence'].forEach(i => document.getElementById(i).value='');
                     document.getElementById('edit-id').value = '';
                     document.getElementById('form-title').innerHTML = '<i class="fa-solid fa-fire-flame-curved text-brand-600 animate-pulse"></i> 새 러닝 기록 입력';
                     showToast("저장되었습니다.");
@@ -1046,7 +1125,7 @@
                 const filtered = allLogs.filter(l => (l.date >= start && l.date <= end) && (isAdmin || l.userName === userNickname)).sort((a,b) => new Date(a.date) - new Date(b.date));
                 if(filtered.length === 0) return showModal("내보낼 데이터가 없습니다.", "alert");
                 let csv = "\uFEFF날짜,이름,유형,거리(km),시간(분),심박(bpm),케이던스(spm)\n";
-                filtered.forEach(l => { csv += `${l.date},${l.userName},${l.runType || '일반'},${l.distance},${l.duration},${l.bpm || 0},${l.cadence || 0}\n`; });
+                filtered.forEach(l => { csv += `${l.date},${l.userName},${l.runType || '일반'},${l.distance},${l.duration.toFixed(2)},${l.bpm || 0},${l.cadence || 0}\n`; });
                 const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement("a");
                 link.setAttribute("href", URL.createObjectURL(blob));
@@ -1128,7 +1207,6 @@
             document.getElementById('export-start').value = `${nowY}-01-01`;
             document.getElementById('export-end').value = new Date().toISOString().split('T')[0];
         };
-
         init();
     </script>
 </body>
