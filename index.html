@@ -228,12 +228,26 @@
 
                         <div class="col-span-1">
                             <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1">거리 (km)</label>
-                            <input type="number" step="0.001" id="in-dist" placeholder="0.000" class="w-full bg-white border-2 border-brand-100 p-3.5 rounded-2xl text-sm font-bold outline-none shadow-sm">
+                            <div class="flex items-right gap-2">
+                                <label id="label-dist1" class="text-[11px] text-blue-500 font-black block mb-1 ml cursor-pointer">+1K</label>
+                                <label id="label-dist2" class="text-[11px] text-blue-500 font-black block mb-1 ml cursor-pointer">+2K</label>
+                                <label id="label-dist5" class="text-[11px] text-brand-700 font-black block mb-1 ml cursor-pointer">5K</label>
+                                <label id="label-dist10" class="text-[11px] text-brand-700 font-black block mb-1 ml cursor-pointer">10K</label>
+                                <label id="label-dist21" class="text-[11px] text-brand-700 font-black block mb-1 ml cursor-pointer">Half</label>
+                                <label id="label-dist42" class="text-[11px] text-brand-700 font-black block mb-1 ml cursor-pointer">Full</label>
+                            </div>
+                            <input type="number" step="1.000" id="in-dist" placeholder="0.000" class="w-full bg-white border-2 border-brand-100 p-3.5 rounded-2xl text-sm font-bold outline-none shadow-sm">
                         </div>
 
                         <!-- Improved Time Input Section -->
                         <div class="col-span-1">
-                            <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1">러닝 시간 (시/분/초)</label>
+                            <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1">러닝 시간</label>
+                            <div class="flex items-right gap-2">
+                                <label id="label-timeH" class="text-[11px] text-blue-500 font-black block mb-1 ml cursor-pointer">+1h</label>
+                                <label id="label-timeM" class="text-[11px] text-rose-500 font-black block mb-1 ml cursor-pointer">+10m</label>
+                                <label id="label-timeS" class="text-[11px] text-brand-500 font-black block mb-1 ml cursor-pointer">+10s</label>
+                            </div>
+
                             <div class="grid grid-cols-3 gap-1">
                                 <input type="number" id="in-time-h" placeholder="시" min="0" class="w-full bg-white border-2 border-brand-100 p-3 rounded-xl text-center text-xs font-bold outline-none shadow-sm">
                                 <input type="number" id="in-time-m" placeholder="분" min="0" max="59" class="w-full bg-white border-2 border-brand-100 p-3 rounded-xl text-center text-xs font-bold outline-none shadow-sm">
@@ -928,24 +942,24 @@
             const countBadge = document.getElementById('member-count-badge');
             if(countBadge) countBadge.innerText = `${filtered.length}명`;
             list.innerHTML = filtered.map((m, idx) => `
-<tr class="hover:bg-brand-50/30 transition-colors border-b border-gray-50/50">
-    <td class="px-3 py-0 text-[10px] font-bold text-gray-400 text-center leading-tight">${idx + 1}</td>
-    <td class="px-3 py-0 text-[11px] font-bold text-blue-700 leading-tight">${m.log_nickname || '-'}</td>
-    <td class="px-3 py-0 text-xs font-bold leading-tight">
-        <button onclick="window.openUserStatModal('${m.nickname}')" class="text-brand-600 hover:underline text-left font-black p-0 m-0 block">
-            ${m.nickname}
-        </button>
-    </td>
-    <td class="px-3 py-0 text-[10px] font-bold ${m.gender === '남성' ? 'text-blue-500' : 'text-pink-500'} leading-tight">${m.gender}</td>
-    <td class="px-3 py-0 text-[10px] text-gray-400 font-medium leading-tight">${m.joinDate}</td>
-    <td class="px-3 py-0 text-[10px] text-brand-600 font-black italic leading-tight">${m.lastLogin || '-'}</td>
-    <td class="px-3 py-0">
-        <div class="flex gap-1 justify-end items-center h-full">
-            <button onclick="window.editMember('${m.id}')" class="text-brand-400 p-0.5 hover:bg-brand-50 rounded"><i class="fa-solid fa-user-pen text-[10px]"></i></button>
-            <button onclick="window.deleteMember('${m.id}')" class="text-red-300 p-0.5 hover:bg-red-50 rounded"><i class="fa-solid fa-user-minus text-[10px]"></i></button>
-        </div>
-    </td>
-</tr>
+                <tr class="hover:bg-brand-50/30 transition-colors border-b border-gray-50/50">
+                    <td class="px-3 py-0 text-[10px] font-bold text-gray-400 text-center leading-tight">${idx + 1}</td>
+                    <td class="px-3 py-0 text-[11px] font-bold text-blue-700 leading-tight">${m.log_nickname || '-'}</td>
+                    <td class="px-3 py-0 text-xs font-bold leading-tight">
+                        <button onclick="window.openUserStatModal('${m.nickname}')" class="text-brand-600 hover:underline text-left font-black p-0 m-0 block">
+                            ${m.nickname}
+                        </button>
+                    </td>
+                    <td class="px-3 py-0 text-[10px] font-bold ${m.gender === '남성' ? 'text-blue-500' : 'text-pink-500'} leading-tight">${m.gender}</td>
+                    <td class="px-3 py-0 text-[10px] text-gray-400 font-medium leading-tight">${m.joinDate}</td>
+                    <td class="px-3 py-0 text-[10px] text-brand-600 font-black italic leading-tight">${m.lastLogin || '-'}</td>
+                    <td class="px-3 py-0">
+                        <div class="flex gap-1 justify-end items-center h-full">
+                            <button onclick="window.editMember('${m.id}')" class="text-brand-400 p-0.5 hover:bg-brand-50 rounded"><i class="fa-solid fa-user-pen text-[10px]"></i></button>
+                            <button onclick="window.deleteMember('${m.id}')" class="text-red-300 p-0.5 hover:bg-red-50 rounded"><i class="fa-solid fa-user-minus text-[10px]"></i></button>
+                        </div>
+                    </td>
+                </tr>
             `).join('') || `<tr><td colspan="6" class="p-8 text-center text-gray-300 font-bold">검색 결과가 없습니다.</td></tr>`;
         };
 
@@ -1045,25 +1059,48 @@
 
         window.deleteLog = async (id) => { showModal("기록을 삭제하시겠습니까?", "confirm", async () => { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'songmirun_logs', id)); showToast("삭제되었습니다."); }); };
         
-        window.editLog = (id) => {
-            const l = allLogs.find(x => x.id === id);
-            if(!l) return;
-            document.getElementById('edit-id').value = id;
-            document.getElementById('log-username').value = l.userName;
-            document.getElementById('in-dist').value = l.distance;
-            const hms = minToHMS(l.duration);
-            document.getElementById('in-time-h').value = hms.h || '';
-            document.getElementById('in-time-m').value = hms.m;
-            document.getElementById('in-time-s').value = hms.s;
-            document.getElementById('in-bpm').value = l.bpm;
-            document.getElementById('in-cadence').value = l.cadence;
-            document.getElementById('in-date').value = l.date;
-            document.getElementById('run-type').value = l.runType;
-            document.getElementById('form-title').innerHTML = '<i class="fa-solid fa-pen text-brand-500"></i> 기록 수정';
-            document.getElementById('tab-logs').click();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        };
+window.editLog = (id) => {
+    const l = allLogs.find(x => x.id === id);
+    if (!l) return;
 
+    /**
+     * 내부 헬퍼: 값을 설정하고 input 이벤트를 수동으로 발생시킴
+     */
+    const setValueAndTrigger = (elementId, value) => {
+        const el = document.getElementById(elementId);
+        if (!el) return;
+        el.value = value ?? ''; // 값이 null/undefined일 경우 빈 문자열 처리
+        // 스크립트로 값을 변경할 때는 이벤트가 자동 발생하지 않으므로 수동 호출
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+    };
+
+    // 1. 기본 정보 설정
+    setValueAndTrigger('edit-id', id);
+    setValueAndTrigger('log-username', l.userName);
+    setValueAndTrigger('in-dist', l.distance);
+
+    // 2. 시간 정보 처리 (분 단위를 시/분/초로 변환)
+    const hms = minToHMS(l.duration);
+    setValueAndTrigger('in-time-h', hms.h || '');
+    setValueAndTrigger('in-time-m', hms.m);
+    setValueAndTrigger('in-time-s', hms.s);
+
+    // 3. 추가 운동 정보 설정
+    setValueAndTrigger('in-bpm', l.bpm);
+    setValueAndTrigger('in-cadence', l.cadence);
+    setValueAndTrigger('in-date', l.date);
+    setValueAndTrigger('run-type', l.runType);
+
+    // 4. UI 상태 변경 (수정 모드 표시 및 탭 전환)
+    const formTitle = document.getElementById('form-title');
+    if (formTitle) {
+        formTitle.innerHTML = '<i class="fa-solid fa-pen text-brand-500"></i> 기록 수정';
+    }
+
+    // 로그 탭으로 이동 및 최상단 스크롤
+    document.getElementById('tab-logs')?.click();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+};
         window.deleteMember = async (id) => {
             if(!auth.currentUser) return;
             showModal("크루 정보를 삭제하시겠습니까?", "confirm", async () => {
@@ -1297,51 +1334,113 @@
             document.getElementById('export-end').value = today;
 
 ///
-        const inDist = document.getElementById('in-dist');
-        const inTimeH = document.getElementById('in-time-h');
-        const inTimeM = document.getElementById('in-time-m');
-        const inTimeS = document.getElementById('in-time-s');
-        const paceDisplay = document.getElementById('pace-display');
+            const inDist = document.getElementById('in-dist');
+            const inTimeH = document.getElementById('in-time-h');
+            const inTimeM = document.getElementById('in-time-m');
+            const inTimeS = document.getElementById('in-time-s');
+            const paceDisplay = document.getElementById('pace-display');
 
-        function calculatePace() {
-            const dist = parseFloat(inDist.value) || 0;
-            const h = parseInt(inTimeH.value) || 0;
-            const m = parseInt(inTimeM.value) || 0;
-            const s = parseInt(inTimeS.value) || 0;
+            function calculatePace() {
+                const dist = parseFloat(inDist.value) || 0;
+                const h = parseInt(inTimeH.value) || 0;
+                const m = parseInt(inTimeM.value) || 0;
+                const s = parseInt(inTimeS.value) || 0;
 
-            // 총 시간을 초 단위로 변환
-            const totalSeconds = (h * 3600) + (m * 60) + s;
+                // 총 시간을 초 단위로 변환
+                const totalSeconds = (h * 3600) + (m * 60) + s;
 
-            // 유효성 검사: 거리와 시간이 모두 0보다 커야 함
-            if (dist > 0 && totalSeconds > 0) {
-                // 1km당 소요되는 초(seconds) 계산
-                const secondsPerKm = totalSeconds / dist;
-                
-                const paceMin = Math.floor(secondsPerKm / 60);
-                const paceSec = Math.round(secondsPerKm % 60);
+                // 유효성 검사: 거리와 시간이 모두 0보다 커야 함
+                if (dist > 0 && totalSeconds > 0) {
+                    // 1km당 소요되는 초(seconds) 계산
+                    const secondsPerKm = totalSeconds / dist;
+                    
+                    const paceMin = Math.floor(secondsPerKm / 60);
+                    const paceSec = Math.round(secondsPerKm % 60);
 
-                // 시각적 출력 업데이트 (분'초" 형식)
-                // 초가 60이 될 경우 처리 (round 때문)
-                let finalMin = paceMin;
-                let finalSec = paceSec;
-                if (finalSec === 60) {
-                    finalMin += 1;
-                    finalSec = 0;
+                    // 시각적 출력 업데이트 (분'초" 형식)
+                    // 초가 60이 될 경우 처리 (round 때문)
+                    let finalMin = paceMin;
+                    let finalSec = paceSec;
+                    if (finalSec === 60) {
+                        finalMin += 1;
+                        finalSec = 0;
+                    }
+
+                    paceDisplay.innerText = `[Pace : ${finalMin}'${finalSec.toString().padStart(2, '0')}"]`;
+                    //showToast(`Pace : ${finalMin}'${finalSec.toString().padStart(2, '0')}"`);
+                } else {
+                    paceDisplay.innerText = "[Pace : 0'00\"]";
+
                 }
-
-                paceDisplay.innerText = `[Pace : ${finalMin}'${finalSec.toString().padStart(2, '0')}"]`;
-                //showToast(`Pace : ${finalMin}'${finalSec.toString().padStart(2, '0')}"`);
-
-
-            } else {
-                paceDisplay.innerText = "[Pace : 0'00\"]";
-
             }
-        }
-        // 모든 입력 필드에 이벤트 리스너 추가
-        [inDist, inTimeH, inTimeM, inTimeS].forEach(el => {
-            el.addEventListener('input', calculatePace);
-        });
+
+            // 모든 입력 필드에 이벤트 리스너 추가
+            [inDist, inTimeH, inTimeM, inTimeS].forEach(el => {
+                el.addEventListener('input', calculatePace);
+            });
+
+
+
+            document.addEventListener('DOMContentLoaded', () => {
+                /**
+                 * 공통: 입력 필드 값 업데이트 및 이벤트 발생 함수
+                 * @param {HTMLElement} inputEl - 대상 input 요소
+                 * @param {number} newValue - 설정할 새로운 값
+                 * @param {number} decimal - 소수점 자리수
+                 */
+                const updateAndDispatch = (inputEl, newValue, decimal) => {
+                    if (!inputEl) return;
+
+                    // 1. 값 업데이트
+                    inputEl.value = newValue.toFixed(decimal);
+
+                    // 2. 수동으로 'input' 이벤트 발생 (스크립트 변경 시 자동 발생 안 함)
+                    // bubbles: true를 통해 부모 요소에서도 이벤트를 감지할 수 있게 함
+                    inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+
+                    // 3. 시각적 피드백 (테두리 강조)
+                    inputEl.classList.add('border-emerald-500');
+                    setTimeout(() => inputEl.classList.remove('border-emerald-500'), 200);
+                };
+
+                // --- 거리(Distance) 설정 ---
+                const distInput = document.getElementById('in-dist');
+                const distMap = {
+                    'label-dist1':  { type: 'add', val: 1 },
+                    'label-dist2':  { type: 'add', val: 2 },
+                    'label-dist5':  { type: 'set', val: 5.000 },
+                    'label-dist10': { type: 'set', val: 10.000 },
+                    'label-dist21': { type: 'set', val: 21.097 },
+                    'label-dist42': { type: 'set', val: 42.195 }
+                };
+
+                Object.entries(distMap).forEach(([id, config]) => {
+                    document.getElementById(id)?.addEventListener('click', () => {
+                        const current = parseFloat(distInput.value) || 0;
+                        const targetVal = config.type === 'add' ? current + config.val : config.val;
+                        updateAndDispatch(distInput, targetVal, 3);
+                    });
+                });
+
+                // --- 시간(Time) 설정 ---
+                const timeConfigs = [
+                    { id: 'label-timeH', targetId: 'in-time-h', increment: 1 },
+                    { id: 'label-timeM', targetId: 'in-time-m', increment: 10 },
+                    { id: 'label-timeS', targetId: 'in-time-s', increment: 10 }
+                ];
+
+                timeConfigs.forEach(({ id, targetId, increment }) => {
+                    const btn = document.getElementById(id);
+                    const input = document.getElementById(targetId);
+
+                    btn?.addEventListener('click', () => {
+                        const current = parseFloat(input.value) || 0;
+                        updateAndDispatch(input, current + increment, 0);
+                    });
+                });
+            });
+
+
 
         };
         init();
