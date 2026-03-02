@@ -873,7 +873,7 @@
             const list = document.getElementById('log-list');
             const displayLogs = (isAdmin ? allLogs : allLogs.filter(l => l.userName === userNickname))
                                .filter(l => l.date && new Date(l.date).getFullYear() === parseInt(selectedYear));
-            const sorted = [...displayLogs].sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0, 10);
+            const sorted = [...displayLogs].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 10);
             list.innerHTML = sorted.map(l => {
                 const hms = minToHMS(l.duration);
                 const timeStr = `${hms.h > 0 ? hms.h + ':' : ''}${hms.m.toString().padStart(2, '0')}:${hms.s.toString().padStart(2, '0')}`;
