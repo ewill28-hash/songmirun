@@ -227,25 +227,25 @@
                         </div>
 
                         <div class="col-span-1">
-                            <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1">거리 (km)</label>
+                            <label id="label-dist0" title="Click Zero" class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1 cursor-pointer">거리 (km)</label>
                             <div class="grid grid-cols-6 gap-1">
-                                <label id="label-dist1" class="text-[11px] text-blue-500 font-black block mb-1 ml cursor-pointer text-center">+1K</label>
-                                <label id="label-dist2" class="text-[11px] text-blue-500 font-black block mb-1 ml cursor-pointer text-center">+2K</label>
-                                <label id="label-dist5" class="text-[11px] text-brand-700 font-black block mb-1 ml cursor-pointer text-center">5K</label>
-                                <label id="label-dist10" class="text-[11px] text-brand-700 font-black block mb-1 ml cursor-pointer text-center">10K</label>
-                                <label id="label-dist21" class="text-[11px] text-brand-700 font-black block mb-1 ml cursor-pointer text-center">Half</label>
-                                <label id="label-dist42" class="text-[11px] text-brand-700 font-black block mb-1 ml cursor-pointer text-center">Full</label>
+                                <label id="label-dist1" title="Click +1" class="text-[11px] text-blue-500 font-black block mb-1 ml cursor-pointer text-center">+1K</label>
+                                <label id="label-dist2" title="Click +2" class="text-[11px] text-blue-500 font-black block mb-1 ml cursor-pointer text-center">+2K</label>
+                                <label id="label-dist5" title="Click 5K" class="text-[11px] text-brand-700 font-black block mb-1 ml cursor-pointer text-center">5K</label>
+                                <label id="label-dist10" title="Click 10K" class="text-[11px] text-brand-700 font-black block mb-1 ml cursor-pointer text-center">10K</label>
+                                <label id="label-dist21" title="Click Half" class="text-[11px] text-brand-700 font-black block mb-1 ml cursor-pointer text-center">Half</label>
+                                <label id="label-dist42" title="Click Full" class="text-[11px] text-brand-700 font-black block mb-1 ml cursor-pointer text-center">Full</label>
                             </div>
                             <input type="number" step="1.000" id="in-dist" placeholder="0.000" class="w-full bg-white border-2 border-brand-100 p-3.5 rounded-2xl text-sm font-bold outline-none shadow-sm">
                         </div>
 
                         <!-- Improved Time Input Section -->
                         <div class="col-span-1">
-                            <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1">러닝 시간</label>
+                            <label id="label-time0" title="Click Zero" class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1">러닝 시간</label>
                             <div class="grid grid-cols-3 gap-1">
-                                <label id="label-timeH" class="text-[11px] text-blue-500 font-black block mb-1 ml cursor-pointer text-center">+1h</label>
-                                <label id="label-timeM" class="text-[11px] text-rose-500 font-black block mb-1 ml cursor-pointer text-center">+10m</label>
-                                <label id="label-timeS" class="text-[11px] text-brand-500 font-black block mb-1 ml cursor-pointer text-center">+10s</label>
+                                <label id="label-timeH" title="Click +1h" class="text-[11px] text-blue-500 font-black block mb-1 ml cursor-pointer text-center">+1h</label>
+                                <label id="label-timeM" title="Click +10m" class="text-[11px] text-rose-500 font-black block mb-1 ml cursor-pointer text-center">+10m</label>
+                                <label id="label-timeS" title="Click +10s" class="text-[11px] text-brand-500 font-black block mb-1 ml cursor-pointer text-center">+10s</label>
                             </div>
 
                             <div class="grid grid-cols-3 gap-1">
@@ -567,14 +567,11 @@
                     </div>
                 </div>
             </div>
-            <div id="modal-stats-content" class="p-3 overflow-y-auto space-y-6 bg-gray-50">
+            <div id="modal-stats-content" class="p-3 overflow-y-auto space-y-3 bg-gray-50">
                 <div id="lifetime-stats-container"></div>
-                <div class="modal-comparison-card">
-                    <div id="yearly-comparison-container" class="grid grid-cols-1 divide-x divide-gray-50"></div>
-                </div>
-                <div class="modal-comparison-card">
-                    <div id="monthly-comparison-container" class="grid grid-cols-1 divide-x divide-gray-50"></div>
-                </div>
+               <div class="modal-comparison-card">
+                    <div id="comparison-container" ></div>
+                </div>                
             </div>
         </div>
     </div>
@@ -1043,64 +1040,133 @@
 
             const genStatCol = (title, logs, theme) => {
                 const s = calculate(logs);
-                return `<div class="p-4 bg-white"><div class="flex items-center gap-1.5 mb-4"><div class="w-2 h-2 rounded-full ${theme === 'blue' ? 'bg-blue-500' : 'bg-emerald-500'}"></div><span class="text-[10px] font-black text-gray-600">${title}</span></div><div class="space-y-4"><div><p class="stat-grid-label">Count</p><p class="stat-grid-val ${theme === 'blue' ? 'text-blue-600' : 'text-emerald-600'}">${s.count}회</p></div><div><p class="stat-grid-label">Dist</p><p class="stat-grid-val">${s.distance}km</p></div><div><p class="stat-grid-label">Time</p><p class="stat-grid-val">${s.durationHMS}</p></div><div><p class="stat-grid-label">Pace</p><p class="stat-grid-val text-brand-400 font-medium">${s.pace}</p></div></div></div>`;
+                return `
+                    <div class="p-1 bg-white">
+                        <div class="flex items-center gap-1 mb-1">
+                            <span class="text-[20px] font-black text-gray-600">${title}</span>
+                        </div>
+                        <div class="space-y-2">
+                            <div>
+                                <p class="stat-grid-val">${s.count}회</p>
+                            </div>
+                            <div>
+                                <p class="stat-grid-val">${Number(s.distance).toFixed(0)}km</p>
+                            </div>
+                            <div>
+                                <p class="stat-grid-val">${s.durationHMS}</p>
+                            </div>
+                            <div>
+                                <p class="stat-grid-val text-brand-400 font-medium">${s.pace}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+
             };
 
             const lifetimeStats = calculate(userLogs);
-            document.getElementById('lifetime-stats-container').innerHTML = `<div class="bg-white rounded-3xl p-5 border border-brand-100 shadow-sm"><h4 class="text-[11px] font-black text-brand-600 mb-4 flex items-center gap-2 uppercase tracking-tight"><i class="fa-solid fa-globe"></i> Lifetime Performance</h4><div class="grid grid-cols-4 gap-3"><div class="text-center bg-brand-50/50 py-3 rounded-2xl"><p class="stat-grid-label text-brand-600">Count</p><p class="stat-grid-val">${lifetimeStats.count}</p></div><div class="text-center bg-gray-50 py-3 rounded-2xl"><p class="stat-grid-label">Dist</p><p class="stat-grid-val">${lifetimeStats.distance}</p></div><div class="text-center bg-gray-50 py-3 rounded-2xl"><p class="stat-grid-label">Time</p><p class="stat-grid-val">${lifetimeStats.durationHMS}</p></div><div class="text-center bg-gray-50 py-3 rounded-2xl"><p class="stat-grid-label">Avg Pace</p><p class="stat-grid-val text-brand-400">${lifetimeStats.pace}</p></div></div></div>`;
+            document.getElementById('lifetime-stats-container').innerHTML = `<div class="bg-white rounded-3xl p-5 border border-brand-100 shadow-sm"><h4 class="text-[11px] font-black text-brand-600 mb-4 flex items-center gap-2 uppercase tracking-tight"><i class="fa-solid fa-globe"></i> Lifetime Performance</h4><div class="grid grid-cols-4 gap-3"><div class="text-center bg-brand-50/50 py-3 rounded-2xl"><p class="stat-grid-label text-brand-600">Count</p><p class="stat-grid-val">${lifetimeStats.count}</p></div><div class="text-center bg-gray-50 py-3 rounded-2xl"><p class="stat-grid-label">Dist</p><p class="stat-grid-val">${Number(lifetimeStats.distance).toFixed(0)}km</p></div><div class="text-center bg-gray-50 py-3 rounded-2xl"><p class="stat-grid-label">Time</p><p class="stat-grid-val">${lifetimeStats.durationHMS}</p></div><div class="text-center bg-gray-50 py-3 rounded-2xl"><p class="stat-grid-label">Avg Pace</p><p class="stat-grid-val text-brand-400">${lifetimeStats.pace}</p></div></div></div>`;
 
-            const yearlyContent = genStatCol(`올해 (${currYear})`, userLogs.filter(l => l.date && l.date.startsWith(currYear.toString())), 'blue') + genStatCol(`작년 (${lastYear})`, userLogs.filter(l => l.date && l.date.startsWith(lastYear.toString())), 'blue');
-            document.getElementById('yearly-comparison-container').innerHTML = `<div class="bg-white rounded-3xl p-5 border border-brand-100 shadow-sm"><h4 class="text-[11px] font-black text-brand-600 mb-4 flex items-center gap-2 uppercase tracking-tight"><i class="fa-solid fa-calendar-days"></i> Yearly Comparison</h4><div class="flex justify-center items-center gap-4">${yearlyContent}</div></div>`;
 
-            const monthlyContent = genStatCol('이번달', userLogs.filter(l => l.date && l.date.startsWith(currMonthStr)), 'emerald') + genStatCol('지난달', userLogs.filter(l => l.date && l.date.startsWith(lastMonthStr)), 'emerald');
-            document.getElementById('monthly-comparison-container').innerHTML = `<div class="bg-white rounded-3xl p-5 border border-brand-100 shadow-sm"><h4 class="text-[11px] font-black text-emerald-600 mb-4 flex items-center gap-2 uppercase tracking-tight"><i class="fa-solid fa-chart-bar"></i> Monthly Comparison</h4><div class="flex justify-center items-center gap-4">${monthlyContent}</div></div>`;
+
+/////
+            // 데이터 필터링 (기존 로직 유지)
+            const curMonthData = userLogs.filter(l => l.date && l.date.startsWith(currMonthStr));
+            const lastMonthData = userLogs.filter(l => l.date && l.date.startsWith(lastMonthStr));
+            const curYearData = userLogs.filter(l => l.date && l.date.startsWith(currYear.toString()));
+            const lastYearData = userLogs.filter(l => l.date && l.date.startsWith(lastYear.toString()));
+
+            // 테이블 HTML 생성
+            const totalComparisonContent = `
+            <div class="bg-white rounded-3xl p-6 border border-brand-100 shadow-sm">
+                <h4 class="text-[11px] font-black text-brand-600 mb-5 flex items-center gap-2 uppercase tracking-tight">
+                    <i class="fa-solid fa-chart-line"></i> Activity Comparison
+                </h4>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-center border-collapse">
+                        <thead>
+                            <tr class="text-[10px] text-gray-400 uppercase tracking-widest border-b border-brand-50">
+                                <th class="pb-3 font-black text-emerald-600">이번달</th>
+                                <th class="pb-3 font-black text-gray-400">지난달</th>
+                                <th class="pb-3 border-l border-brand-50 font-black text-blue-600 pl-4">올해(${currYear})</th>
+                                <th class="pb-3 font-black text-gray-400">작년(${lastYear})</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="py-3">
+                                    ${genStatCol('', curMonthData, 'emerald')}
+                                </td>
+                                <td class="py-3 text-gray-400 opacity-80">
+                                    ${genStatCol('', lastMonthData, 'gray')}
+                                </td>
+                                <td class="py-3 border-l border-brand-50 pl-4">
+                                    ${genStatCol('', curYearData, 'blue')}
+                                </td>
+                                <td class="py-3 text-gray-400 opacity-80">
+                                    ${genStatCol('', lastYearData, 'gray')}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            `;
+
+            // 컨테이너에 삽입 (기존 container ID 중 하나를 사용하거나 새로 만드세요)
+            document.getElementById('comparison-container').innerHTML = totalComparisonContent;
+            /////
+
             modal.classList.remove('hidden'); modal.classList.add('flex');
         };
 
         window.deleteLog = async (id) => { showModal("기록을 삭제하시겠습니까?", "confirm", async () => { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'songmirun_logs', id)); showToast("삭제되었습니다."); }); };
         
-window.editLog = (id) => {
-    const l = allLogs.find(x => x.id === id);
-    if (!l) return;
+        window.editLog = (id) => {
+            const l = allLogs.find(x => x.id === id);
+            if (!l) return;
 
-    /**
-     * 내부 헬퍼: 값을 설정하고 input 이벤트를 수동으로 발생시킴
-     */
-    const setValueAndTrigger = (elementId, value) => {
-        const el = document.getElementById(elementId);
-        if (!el) return;
-        el.value = value ?? ''; // 값이 null/undefined일 경우 빈 문자열 처리
-        // 스크립트로 값을 변경할 때는 이벤트가 자동 발생하지 않으므로 수동 호출
-        el.dispatchEvent(new Event('input', { bubbles: true }));
-    };
+            /**
+             * 내부 헬퍼: 값을 설정하고 input 이벤트를 수동으로 발생시킴
+             */
+            const setValueAndTrigger = (elementId, value) => {
+                const el = document.getElementById(elementId);
+                if (!el) return;
+                el.value = value ?? ''; // 값이 null/undefined일 경우 빈 문자열 처리
+                // 스크립트로 값을 변경할 때는 이벤트가 자동 발생하지 않으므로 수동 호출
+                el.dispatchEvent(new Event('input', { bubbles: true }));
+            };
 
-    // 1. 기본 정보 설정
-    setValueAndTrigger('edit-id', id);
-    setValueAndTrigger('log-username', l.userName);
-    setValueAndTrigger('in-dist', l.distance);
+            // 1. 기본 정보 설정
+            setValueAndTrigger('edit-id', id);
+            setValueAndTrigger('log-username', l.userName);
+            setValueAndTrigger('in-dist', l.distance);
 
-    // 2. 시간 정보 처리 (분 단위를 시/분/초로 변환)
-    const hms = minToHMS(l.duration);
-    setValueAndTrigger('in-time-h', hms.h || '');
-    setValueAndTrigger('in-time-m', hms.m);
-    setValueAndTrigger('in-time-s', hms.s);
+            // 2. 시간 정보 처리 (분 단위를 시/분/초로 변환)
+            const hms = minToHMS(l.duration);
+            setValueAndTrigger('in-time-h', hms.h || '');
+            setValueAndTrigger('in-time-m', hms.m);
+            setValueAndTrigger('in-time-s', hms.s);
 
-    // 3. 추가 운동 정보 설정
-    setValueAndTrigger('in-bpm', l.bpm);
-    setValueAndTrigger('in-cadence', l.cadence);
-    setValueAndTrigger('in-date', l.date);
-    setValueAndTrigger('run-type', l.runType);
+            // 3. 추가 운동 정보 설정
+            setValueAndTrigger('in-bpm', l.bpm);
+            setValueAndTrigger('in-cadence', l.cadence);
+            setValueAndTrigger('in-date', l.date);
+            setValueAndTrigger('run-type', l.runType);
 
-    // 4. UI 상태 변경 (수정 모드 표시 및 탭 전환)
-    const formTitle = document.getElementById('form-title');
-    if (formTitle) {
-        formTitle.innerHTML = '<i class="fa-solid fa-pen text-brand-500"></i> 기록 수정';
-    }
+            // 4. UI 상태 변경 (수정 모드 표시 및 탭 전환)
+            const formTitle = document.getElementById('form-title');
+            if (formTitle) {
+                formTitle.innerHTML = '<i class="fa-solid fa-pen text-brand-500"></i> 기록 수정';
+            }
 
-    // 로그 탭으로 이동 및 최상단 스크롤
-    document.getElementById('tab-logs')?.click();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-};
+            // 로그 탭으로 이동 및 최상단 스크롤
+            document.getElementById('tab-logs')?.click();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+
         window.deleteMember = async (id) => {
             if(!auth.currentUser) return;
             showModal("크루 정보를 삭제하시겠습니까?", "confirm", async () => {
@@ -1379,7 +1445,12 @@ window.editLog = (id) => {
                 el.addEventListener('input', calculatePace);
             });
 
-
+            document.getElementById('label-time0').addEventListener('click', function() {
+                // 각 input의 value를 '0'으로 설정
+                document.getElementById('in-time-h').value = 0;
+                document.getElementById('in-time-m').value = 0;
+                document.getElementById('in-time-s').value = 0;
+            });
 
             document.addEventListener('DOMContentLoaded', () => {
                 /**
@@ -1406,6 +1477,7 @@ window.editLog = (id) => {
                 // --- 거리(Distance) 설정 ---
                 const distInput = document.getElementById('in-dist');
                 const distMap = {
+                    'label-dist0':  { type: 'set', val: 0.000 },                    
                     'label-dist1':  { type: 'add', val: 1 },
                     'label-dist2':  { type: 'add', val: 2 },
                     'label-dist5':  { type: 'set', val: 5.000 },
