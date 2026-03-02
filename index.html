@@ -146,7 +146,7 @@
                     <div>
                         <h1 class="text-sm font-black text-gray-800 italic">Songmirun</h1>
                         <div class="flex items-center gap-1.5">
-                            <span id="display-nickname" class="text-[10px] font-bold text-brand-500">-</span>
+                            <span id="display-nickname" class="text-[10px] font-bold text-brand-500 cursor-pointer hover:bg-brand-50 px-1 rounded transition-colors" title="내 정보 수정">-</span>
                             <span id="admin-badge" class="hidden text-[8px] bg-red-500 text-white px-1.5 rounded-sm font-black uppercase">Admin</span>
                         </div>
                     </div>
@@ -413,26 +413,30 @@
                     <input type="hidden" id="mem-edit-id">
                     <div class="grid grid-cols-2 gap-4 mb-6">
                         <div class="col-span-1">
-                            <label class="text-[10px] text-gray-400 font-bold block mb-1">닉네임</label>
-                            <input type="text" id="mem-nickname" class="w-full bg-green-50/30 border border-green-100 p-3 rounded-xl text-sm font-bold outline-none">
+                            <label class="text-[10px] text-gray-400 font-bold block mb-1">로그인 닉네임 (log_nickname)</label>
+                            <input type="text" id="mem-log-nickname" class="w-full bg-white border border-green-100 p-3 rounded-xl text-sm font-bold outline-none" placeholder="로그인 시 사용">
+                        </div>
+                        <div class="col-span-1">
+                            <label class="text-[10px] text-gray-400 font-bold block mb-1">실제 닉네임 (nickname)</label>
+                            <input type="text" id="mem-nickname" class="w-full bg-white border border-green-100 p-3 rounded-xl text-sm font-bold outline-none" placeholder="화면 표시용">
                         </div>
                         <div class="col-span-1">
                             <label class="text-[10px] text-gray-400 font-bold block mb-1">가입일</label>
-                            <input type="date" id="mem-joindate" class="w-full bg-green-50/30 border border-green-100 p-3 rounded-xl text-sm font-bold outline-none">
+                            <input type="date" id="mem-joindate" class="w-full bg-white border border-green-100 p-3 rounded-xl text-sm font-bold outline-none">
                         </div>
                         <div class="col-span-1">
                             <label class="text-[10px] text-gray-400 font-bold block mb-1">성별</label>
-                            <select id="mem-gender" class="w-full bg-green-50/30 border border-green-100 p-3 rounded-xl text-sm font-bold outline-none">
+                            <select id="mem-gender" class="w-full bg-white border border-green-100 p-3 rounded-xl text-sm font-bold outline-none">
                                 <option value="남성">남성</option>
                                 <option value="여성">여성</option>
                             </select>
                         </div>
-                        <div class="col-span-1">
+                        <div class="col-span-2">
                             <label class="text-[10px] text-gray-400 font-bold block mb-1">메모</label>
-                            <input type="text" id="mem-memo" class="w-full bg-green-50/30 border border-green-100 p-3 rounded-xl text-sm font-bold outline-none">
+                            <input type="text" id="mem-memo" class="w-full bg-white border border-green-100 p-3 rounded-xl text-sm font-bold outline-none">
                         </div>
                     </div>
-                    <button id="mem-submit-btn" class="w-full bg-gray-800 text-white font-black py-4 rounded-2xl shadow-lg active:scale-95 transition-transform hover:bg-black">저장하기</button>
+                    <button id="mem-submit-btn" class="w-full bg-brand-600 text-white font-black py-4 rounded-2xl shadow-lg shadow-brand-200 active:scale-[0.98] transition-all hover:bg-brand-700 text-lg flex items-center justify-center gap-2">저장하기</button>
                 </section>
                 <section class="bg-white p-6 rounded-[2.5rem] border border-brand-100 shadow-sm">
                     <div class="flex justify-between items-center mb-6">
@@ -441,7 +445,7 @@
                         </h2>
                     </div>
                     <textarea id="bulk-members-input" rows="4" placeholder="예: 2024-03-01, 홍길동, 남성..." class="w-full bg-gray-50 border border-gray-200 p-4 rounded-2xl text-[11px] font-bold outline-none focus:ring-2 ring-brand-200 mb-4 font-mono"></textarea>
-                    <button id="btn-bulk-import" class="w-full bg-brand-100 text-brand-700 font-black py-4 rounded-2xl active:scale-95 transition-transform hover:bg-brand-200 text-sm">일괄 등록 시작하기</button>
+                    <button id="btn-bulk-import" class="w-full bg-brand-600 text-white font-black py-4 rounded-2xl shadow-lg shadow-brand-200 active:scale-[0.98] transition-all hover:bg-brand-700 text-lg flex items-center justify-center gap-2">일괄 등록 시작하기</button>
                 </section>
 
                 <div class="space-y-4">
@@ -463,20 +467,23 @@
                         <table class="w-full text-left min-w-[550px]">
                             <thead class="bg-gray-50 text-[10px] text-gray-400 font-bold uppercase">
                                 <tr>
-                                    <th class="p-4 w-12 text-center">No.</th>
-                                    <th class="p-4 sortable-header" onclick="window.toggleSort('nickname')">
-                                        닉네임 <i id="sort-nickname" class="fa-solid fa-sort sort-icon"></i>
+                                    <th class="p-1 w-12 text-center">No.</th>
+                                    <th class="p-1 sortable-header" onclick="window.toggleSort('log_nickname')">
+                                        로긴닉 <i id="sort-log_nickname" class="fa-solid fa-sort sort-icon"></i>
                                     </th>
-                                    <th class="p-4 sortable-header" onclick="window.toggleSort('gender')">
+                                    <th class="p-1 sortable-header" onclick="window.toggleSort('nickname')">
+                                        실제닉 <i id="sort-nickname" class="fa-solid fa-sort sort-icon"></i>
+                                    </th>
+                                    <th class="p-1 sortable-header" onclick="window.toggleSort('gender')">
                                         성별 <i id="sort-gender" class="fa-solid fa-sort sort-icon"></i>
                                     </th>
-                                    <th class="p-4 sortable-header" onclick="window.toggleSort('joinDate')">
+                                    <th class="p-1 sortable-header" onclick="window.toggleSort('joinDate')">
                                         가입일 <i id="sort-joinDate" class="fa-solid fa-sort sort-icon"></i>
                                     </th>
-                                    <th class="p-4 sortable-header" onclick="window.toggleSort('lastLogin')">
+                                    <th class="p-1 sortable-header" onclick="window.toggleSort('lastLogin')">
                                         최근 접속 <i id="sort-lastLogin" class="fa-solid fa-sort sort-icon"></i>
                                     </th>
-                                    <th class="p-4 text-right">관리</th>
+                                    <th class="p-1 text-right">관리</th>
                                 </tr>
                             </thead>
                             <tbody id="member-list" class="divide-y divide-green-50"></tbody>
@@ -493,13 +500,40 @@
                     </div>
                     <p class="text-[10px] text-gray-400 font-bold mb-3 ml-1">형식: 날짜, 이름, 유형, 거리, 시간, 심박, 케이던스</p>
                     <textarea id="bulk-logs-input" rows="5" placeholder="2026-01-15, 홍길동, 번개, 10, 50, 160, 180&#10;2026-01-16, 김철수, 정규, 5, 25, 150, 175" class="w-full bg-gray-50 border border-gray-200 p-4 rounded-2xl text-[11px] font-bold outline-none focus:ring-2 ring-brand-200 mb-4 font-mono"></textarea>
-                    <button id="btn-bulk-logs-import" class="w-full bg-gray-800 text-white font-black py-4 rounded-2xl shadow-lg active:scale-95 transition-transform hover:bg-black text-sm">기록 일괄 등록하기</button>
+                    <button id="btn-bulk-logs-import" class="w-full bg-brand-600 text-white font-black py-4 rounded-2xl shadow-lg shadow-brand-200 active:scale-[0.98] transition-all hover:bg-brand-700 text-lg flex items-center justify-center gap-2">기록 일괄 등록하기</button>
                 </section>
             </div>
         </main>
     </div>
 
     <!-- Modals -->
+    <!-- Profile Edit Modal -->
+    <div id="profile-edit-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[250] hidden items-center justify-center p-4">
+        <div class="bg-white rounded-[2.5rem] w-full max-w-sm shadow-2xl overflow-hidden p-8">
+            <h2 class="text-2xl font-black italic text-gray-800 mb-6 flex items-center gap-2">
+                <i class="fa-solid fa-user-gear text-brand-500"></i> 내 정보 수정
+            </h2>
+            <div class="space-y-5">
+                <div>
+                    <label class="text-[10px] text-gray-400 font-bold block mb-1.5 ml-1 uppercase">Actual Nickname (고정)</label>
+                    <div id="prof-actual-nick" class="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl text-sm font-bold text-gray-400"></div>
+                </div>
+                <div>
+                    <label class="text-[10px] text-gray-400 font-bold block mb-1.5 ml-1 uppercase">Current Login Nick (고정)</label>
+                    <div id="prof-current-log-nick" class="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl text-sm font-bold text-gray-400"></div>
+                </div>
+                <div>
+                    <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1 uppercase">New Login Nickname</label>
+                    <input type="text" id="prof-new-log-nick" class="w-full bg-white border-2 border-brand-100 p-4 rounded-2xl text-sm font-bold outline-none focus:ring-2 ring-brand-400 shadow-sm" placeholder="변경할 로그인 닉네임 입력">
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3 mt-8">
+                <button id="btn-close-profile" class="bg-gray-100 text-gray-500 font-black py-4 rounded-2xl active:scale-95 transition-transform text-sm">취소</button>
+                <button id="btn-save-profile" class="bg-brand-500 text-white font-black py-4 rounded-2xl shadow-lg shadow-brand-200 active:scale-95 transition-transform text-sm">변경 내용 저장</button>
+            </div>
+        </div>
+    </div>
+
     <div id="stat-detail-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[250] hidden items-center justify-center p-4">
         <div class="bg-white rounded-[2.5rem] w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
             <div class="bg-brand-500 p-4 text-white relative">
@@ -566,7 +600,7 @@
         let selectedGender = '전체';
         let selectedTarget = '전체'; 
         let selectedRankingPeriod = 'this'; 
-        let sortConfig = { key: 'nickname', direction: 'asc' };
+        let sortConfig = { key: 'log_nickname', direction: 'asc' };
 
         let distChart, paceChart, countChart, timeChart;
 
@@ -875,8 +909,8 @@
         };
 
         const getFilteredMembers = () => {
-            let filtered = crewMembers.filter(m => (m.nickname + m.gender + m.joinDate).toLowerCase().includes(memberSearchTerm.toLowerCase()));
-            filtered.sort((a, b) => {
+           let filtered = crewMembers.filter(m => (m.nickname + (m.log_nickname || '') + m.gender + m.joinDate).toLowerCase().includes(memberSearchTerm.toLowerCase()));
+             filtered.sort((a, b) => {
                 let vA = a[sortConfig.key] || '', vB = b[sortConfig.key] || '';
                 if (vA < vB) return sortConfig.direction === 'asc' ? -1 : 1;
                 if (vA > vB) return sortConfig.direction === 'asc' ? 1 : -1;
@@ -891,17 +925,24 @@
             const countBadge = document.getElementById('member-count-badge');
             if(countBadge) countBadge.innerText = `${filtered.length}명`;
             list.innerHTML = filtered.map((m, idx) => `
-                <tr class="hover:bg-brand-50/30 transition-colors">
-                    <td class="p-2 text-[10px] font-bold text-gray-400 text-center">${idx + 1}</td>
-                    <td class="p-2 text-xs font-bold"><button onclick="window.openUserStatModal('${m.nickname}')" class="text-brand-600 hover:underline text-left font-black">${m.nickname}</button></td>
-                    <td class="p-2 text-[10px] font-bold ${m.gender === '남성' ? 'text-blue-500' : 'text-pink-500'}">${m.gender}</td>
-                    <td class="p-2 text-[10px] text-gray-400 font-medium">${m.joinDate}</td>
-                    <td class="p-2 text-[10px] text-brand-600 font-black italic">${m.lastLogin || '-'}</td>
-                    <td class="p-2 text-right flex gap-1 justify-end">
-                        <button onclick="window.editMember('${m.id}')" class="text-brand-400 p-1"><i class="fa-solid fa-user-pen text-xs"></i></button>
-                        <button onclick="window.deleteMember('${m.id}')" class="text-red-300 p-1"><i class="fa-solid fa-user-minus text-xs"></i></button>
-                    </td>
-                </tr>
+<tr class="hover:bg-brand-50/30 transition-colors border-b border-gray-50/50">
+    <td class="px-3 py-0 text-[10px] font-bold text-gray-400 text-center leading-tight">${idx + 1}</td>
+    <td class="px-3 py-0 text-[11px] font-bold text-blue-700 leading-tight">${m.log_nickname || '-'}</td>
+    <td class="px-3 py-0 text-xs font-bold leading-tight">
+        <button onclick="window.openUserStatModal('${m.nickname}')" class="text-brand-600 hover:underline text-left font-black p-0 m-0 block">
+            ${m.nickname}
+        </button>
+    </td>
+    <td class="px-3 py-0 text-[10px] font-bold ${m.gender === '남성' ? 'text-blue-500' : 'text-pink-500'} leading-tight">${m.gender}</td>
+    <td class="px-3 py-0 text-[10px] text-gray-400 font-medium leading-tight">${m.joinDate}</td>
+    <td class="px-3 py-0 text-[10px] text-brand-600 font-black italic leading-tight">${m.lastLogin || '-'}</td>
+    <td class="px-3 py-0">
+        <div class="flex gap-1 justify-end items-center h-full">
+            <button onclick="window.editMember('${m.id}')" class="text-brand-400 p-0.5 hover:bg-brand-50 rounded"><i class="fa-solid fa-user-pen text-[10px]"></i></button>
+            <button onclick="window.deleteMember('${m.id}')" class="text-red-300 p-0.5 hover:bg-red-50 rounded"><i class="fa-solid fa-user-minus text-[10px]"></i></button>
+        </div>
+    </td>
+</tr>
             `).join('') || `<tr><td colspan="6" class="p-8 text-center text-gray-300 font-bold">검색 결과가 없습니다.</td></tr>`;
         };
 
@@ -911,13 +952,10 @@
             modal.classList.remove('flex');
         };
 
-        // --- Runner Grade Calculation ---
         const calculateRunnerGrade = (logs) => {
             const now = new Date();
             const currMonthStr = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
             const monthLogs = logs.filter(l => l.date && l.date.startsWith(currMonthStr));
-            
-            // 1. Monthly Count (Max 40)
             const count = monthLogs.length;
             let scoreCount = 5;
             if (count >= 20) scoreCount = 40;
@@ -927,7 +965,6 @@
             else if (count >= 4) scoreCount = 10;
             else if (count >= 1) scoreCount = 5;
 
-            // 2. Monthly Distance (Max 40)
             const dist = monthLogs.reduce((sum, l) => sum + Number(l.distance || 0), 0);
             let scoreDist = 5;
             if (dist >= 200) scoreDist = 40;
@@ -936,19 +973,13 @@
             else if (dist >= 80) scoreDist = 20;
             else if (dist >= 50) scoreDist = 10;
 
-            // 3. Weekly Consistency (Max 20)
-            // Calculate activity for each of the last 4 weeks
             const weekActive = [false, false, false, false];
             for(let i=0; i<4; i++) {
                 const start = new Date(now);
                 start.setDate(now.getDate() - (i + 1) * 7);
                 const end = new Date(now);
                 end.setDate(now.getDate() - i * 7);
-                
-                const weeklyCount = logs.filter(l => {
-                    const d = new Date(l.date);
-                    return d >= start && d < end;
-                }).length;
+                const weeklyCount = logs.filter(l => { const d = new Date(l.date); return d >= start && d < end; }).length;
                 if(weeklyCount >= 2) weekActive[i] = true;
             }
             const activeWeeks = weekActive.filter(x => x).length;
@@ -958,13 +989,11 @@
             else if (activeWeeks === 2) scoreBonus = 10;
 
             const totalScore = scoreCount + scoreDist + scoreBonus;
-            
             let grade = { name: '🐣 Starter', color: 'bg-gray-100 text-gray-500' };
             if (totalScore >= 90) grade = { name: '🏔 Iron Runner', color: 'bg-slate-800 text-white' };
             else if (totalScore >= 75) grade = { name: '🔥 Steady Flame', color: 'bg-orange-500 text-white' };
             else if (totalScore >= 60) grade = { name: '🌊 Rhythm Runner', color: 'bg-blue-500 text-white' };
             else if (totalScore >= 45) grade = { name: '🌱 Growing Runner', color: 'bg-green-500 text-white' };
-
             return grade;
         };
 
@@ -973,8 +1002,6 @@
             const userLogs = allLogs.filter(l => l.userName === nickname);
             document.getElementById('modal-user-name').innerText = nickname;
             document.getElementById('modal-user-avatar').innerText = nickname.charAt(0);
-            
-            // Set Grade Badge
             const grade = calculateRunnerGrade(userLogs);
             const gradeBadge = document.getElementById('modal-runner-grade');
             gradeBadge.innerText = grade.name;
@@ -986,13 +1013,7 @@
                 const duration = logs.reduce((sum, l) => sum + Number(l.duration || 0), 0);
                 const pace = distance > 0 ? (duration / distance) : 0;
                 const mm = Math.floor(pace), ss = Math.round((pace - mm) * 60);
-                return { 
-                    count, 
-                    distance: distance.toFixed(3), 
-                    durationRaw: duration,
-                    durationHMS: formatTimeHMS(duration),
-                    pace: pace > 0 ? `${mm}'${ss.toString().padStart(2, '0')}"` : '0\'00"' 
-                };
+                return { count, distance: distance.toFixed(3), durationRaw: duration, durationHMS: formatTimeHMS(duration), pace: pace > 0 ? `${mm}'${ss.toString().padStart(2, '0')}"` : '0\'00"' };
             };
 
             const now = new Date();
@@ -1005,63 +1026,17 @@
 
             const genStatCol = (title, logs, theme) => {
                 const s = calculate(logs);
-                return `
-                <div class="p-4 bg-white">
-                    <div class="flex items-center gap-1.5 mb-4">
-                        <div class="w-2 h-2 rounded-full ${theme === 'blue' ? 'bg-blue-500' : 'bg-emerald-500'}"></div>
-                        <span class="text-[10px] font-black text-gray-600">${title}</span>
-                    </div>
-                    <div class="space-y-4">
-                        <div><p class="stat-grid-label">Count</p><p class="stat-grid-val ${theme === 'blue' ? 'text-blue-600' : 'text-emerald-600'}">${s.count}회</p></div>
-                        <div><p class="stat-grid-label">Dist</p><p class="stat-grid-val">${s.distance}km</p></div>
-                        <div><p class="stat-grid-label">Time</p><p class="stat-grid-val">${s.durationHMS}</p></div>
-                        <div><p class="stat-grid-label">Pace</p><p class="stat-grid-val text-brand-400 font-medium">${s.pace}</p></div>
-                    </div>
-                </div>`;
+                return `<div class="p-4 bg-white"><div class="flex items-center gap-1.5 mb-4"><div class="w-2 h-2 rounded-full ${theme === 'blue' ? 'bg-blue-500' : 'bg-emerald-500'}"></div><span class="text-[10px] font-black text-gray-600">${title}</span></div><div class="space-y-4"><div><p class="stat-grid-label">Count</p><p class="stat-grid-val ${theme === 'blue' ? 'text-blue-600' : 'text-emerald-600'}">${s.count}회</p></div><div><p class="stat-grid-label">Dist</p><p class="stat-grid-val">${s.distance}km</p></div><div><p class="stat-grid-label">Time</p><p class="stat-grid-val">${s.durationHMS}</p></div><div><p class="stat-grid-label">Pace</p><p class="stat-grid-val text-brand-400 font-medium">${s.pace}</p></div></div></div>`;
             };
 
             const lifetimeStats = calculate(userLogs);
-            document.getElementById('lifetime-stats-container').innerHTML = `
-            <div class="bg-white rounded-3xl p-5 border border-brand-100 shadow-sm">
-                <h4 class="text-[11px] font-black text-brand-600 mb-4 flex items-center gap-2 uppercase tracking-tight">
-                   <i class="fa-solid fa-globe"></i> Lifetime Performance
-                </h4>
-                <div class="grid grid-cols-4 gap-3">
-                    <div class="text-center bg-brand-50/50 py-3 rounded-2xl"><p class="stat-grid-label text-brand-600">Count</p><p class="stat-grid-val">${lifetimeStats.count}</p></div>
-                    <div class="text-center bg-gray-50 py-3 rounded-2xl"><p class="stat-grid-label">Dist</p><p class="stat-grid-val">${lifetimeStats.distance}</p></div>
-                    <div class="text-center bg-gray-50 py-3 rounded-2xl"><p class="stat-grid-label">Time</p><p class="stat-grid-val">${lifetimeStats.durationHMS}</p></div>
-                    <div class="text-center bg-gray-50 py-3 rounded-2xl"><p class="stat-grid-label">Avg Pace</p><p class="stat-grid-val text-brand-400">${lifetimeStats.pace}</p></div>
-                </div>
-            </div>`;
+            document.getElementById('lifetime-stats-container').innerHTML = `<div class="bg-white rounded-3xl p-5 border border-brand-100 shadow-sm"><h4 class="text-[11px] font-black text-brand-600 mb-4 flex items-center gap-2 uppercase tracking-tight"><i class="fa-solid fa-globe"></i> Lifetime Performance</h4><div class="grid grid-cols-4 gap-3"><div class="text-center bg-brand-50/50 py-3 rounded-2xl"><p class="stat-grid-label text-brand-600">Count</p><p class="stat-grid-val">${lifetimeStats.count}</p></div><div class="text-center bg-gray-50 py-3 rounded-2xl"><p class="stat-grid-label">Dist</p><p class="stat-grid-val">${lifetimeStats.distance}</p></div><div class="text-center bg-gray-50 py-3 rounded-2xl"><p class="stat-grid-label">Time</p><p class="stat-grid-val">${lifetimeStats.durationHMS}</p></div><div class="text-center bg-gray-50 py-3 rounded-2xl"><p class="stat-grid-label">Avg Pace</p><p class="stat-grid-val text-brand-400">${lifetimeStats.pace}</p></div></div></div>`;
 
-            const yearlyContent = 
-                genStatCol(`올해 (${currYear})`, userLogs.filter(l => l.date && l.date.startsWith(currYear.toString())), 'blue') +
-                genStatCol(`작년 (${lastYear})`, userLogs.filter(l => l.date && l.date.startsWith(lastYear.toString())), 'blue');
+            const yearlyContent = genStatCol(`올해 (${currYear})`, userLogs.filter(l => l.date && l.date.startsWith(currYear.toString())), 'blue') + genStatCol(`작년 (${lastYear})`, userLogs.filter(l => l.date && l.date.startsWith(lastYear.toString())), 'blue');
+            document.getElementById('yearly-comparison-container').innerHTML = `<div class="bg-white rounded-3xl p-5 border border-brand-100 shadow-sm"><h4 class="text-[11px] font-black text-brand-600 mb-4 flex items-center gap-2 uppercase tracking-tight"><i class="fa-solid fa-calendar-days"></i> Yearly Comparison</h4><div class="flex justify-center items-center gap-4">${yearlyContent}</div></div>`;
 
-            document.getElementById('yearly-comparison-container').innerHTML = `
-                <div class="bg-white rounded-3xl p-5 border border-brand-100 shadow-sm">
-                    <h4 class="text-[11px] font-black text-brand-600 mb-4 flex items-center gap-2 uppercase tracking-tight">
-                        <i class="fa-solid fa-calendar-days"></i> Yearly Comparison
-                    </h4>
-                    <div class="flex justify-center items-center gap-4">
-                        ${yearlyContent}
-                    </div>
-                </div>`;
-
-            const monthlyContent = 
-                genStatCol('이번달', userLogs.filter(l => l.date && l.date.startsWith(currMonthStr)), 'emerald') +
-                genStatCol('지난달', userLogs.filter(l => l.date && l.date.startsWith(lastMonthStr)), 'emerald');
-
-            document.getElementById('monthly-comparison-container').innerHTML = `
-                <div class="bg-white rounded-3xl p-5 border border-brand-100 shadow-sm">
-                    <h4 class="text-[11px] font-black text-emerald-600 mb-4 flex items-center gap-2 uppercase tracking-tight">
-                        <i class="fa-solid fa-chart-bar"></i> Monthly Comparison
-                    </h4>
-                    <div class="flex justify-center items-center gap-4">
-                        ${monthlyContent}
-                    </div>
-                </div>`;
-    
+            const monthlyContent = genStatCol('이번달', userLogs.filter(l => l.date && l.date.startsWith(currMonthStr)), 'emerald') + genStatCol('지난달', userLogs.filter(l => l.date && l.date.startsWith(lastMonthStr)), 'emerald');
+            document.getElementById('monthly-comparison-container').innerHTML = `<div class="bg-white rounded-3xl p-5 border border-brand-100 shadow-sm"><h4 class="text-[11px] font-black text-emerald-600 mb-4 flex items-center gap-2 uppercase tracking-tight"><i class="fa-solid fa-chart-bar"></i> Monthly Comparison</h4><div class="flex justify-center items-center gap-4">${monthlyContent}</div></div>`;
             modal.classList.remove('hidden'); modal.classList.add('flex');
         };
 
@@ -1073,12 +1048,10 @@
             document.getElementById('edit-id').value = id;
             document.getElementById('log-username').value = l.userName;
             document.getElementById('in-dist').value = l.distance;
-            
             const hms = minToHMS(l.duration);
             document.getElementById('in-time-h').value = hms.h || '';
             document.getElementById('in-time-m').value = hms.m;
             document.getElementById('in-time-s').value = hms.s;
-
             document.getElementById('in-bpm').value = l.bpm;
             document.getElementById('in-cadence').value = l.cadence;
             document.getElementById('in-date').value = l.date;
@@ -1091,10 +1064,8 @@
         window.deleteMember = async (id) => {
             if(!auth.currentUser) return;
             showModal("크루 정보를 삭제하시겠습니까?", "confirm", async () => {
-                try {
-                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'songmirun_members', id));
-                    showToast("해당 크루가 삭제되었습니다.");
-                } catch(e) { showToast("삭제 중 오류가 발생했습니다."); }
+                try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'songmirun_members', id)); showToast("해당 크루가 삭제되었습니다."); } 
+                catch(e) { showToast("삭제 중 오류가 발생했습니다."); }
             });
         };
 
@@ -1102,6 +1073,7 @@
             const m = crewMembers.find(x => x.id === id);
             if(!m) return;
             document.getElementById('mem-edit-id').value = id;
+            document.getElementById('mem-log-nickname').value = m.log_nickname || '';
             document.getElementById('mem-nickname').value = m.nickname;
             document.getElementById('mem-gender').value = m.gender;
             document.getElementById('mem-joindate').value = m.joinDate;
@@ -1119,12 +1091,37 @@
                 crewMembers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 renderMembers(); renderAllCharts();
             });
-            const closeBtn = document.getElementById('close-stat-modal');
-            const statModal = document.getElementById('stat-detail-modal');
-            if(closeBtn) closeBtn.onclick = closeUserStatModal;
-            if(statModal) statModal.onclick = (e) => { if (e.target === statModal) closeUserStatModal(); };
-            const searchInput = document.getElementById('member-search');
-            if(searchInput) searchInput.addEventListener('input', (e) => { memberSearchTerm = e.target.value; renderMembers(); });
+            document.getElementById('close-stat-modal').onclick = closeUserStatModal;
+            document.getElementById('stat-detail-modal').onclick = (e) => { if (e.target === document.getElementById('stat-detail-modal')) closeUserStatModal(); };
+            document.getElementById('member-search').addEventListener('input', (e) => { memberSearchTerm = e.target.value; renderMembers(); });
+            
+            // 프로필 수정 모달 관련
+            document.getElementById('display-nickname').onclick = () => {
+                const userObj = crewMembers.find(m => m.nickname === userNickname);
+                if(!userObj) return;
+                document.getElementById('prof-actual-nick').innerText = userNickname;
+                document.getElementById('prof-current-log-nick').innerText = userObj.log_nickname || '-';
+                document.getElementById('prof-new-log-nick').value = userObj.log_nickname || '';
+                document.getElementById('profile-edit-modal').classList.remove('hidden');
+                document.getElementById('profile-edit-modal').classList.add('flex');
+            };
+            document.getElementById('btn-close-profile').onclick = () => {
+                document.getElementById('profile-edit-modal').classList.add('hidden');
+                document.getElementById('profile-edit-modal').classList.remove('flex');
+            };
+            document.getElementById('btn-save-profile').onclick = async () => {
+                const newLogNick = document.getElementById('prof-new-log-nick').value.trim();
+                if(!newLogNick) return showModal("변경할 로그인 닉네임을 입력하세요.", "alert");
+                
+                const userObj = crewMembers.find(m => m.nickname === userNickname);
+                if(!userObj) return;
+                
+                try {
+                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'songmirun_members', userObj.id), { log_nickname: newLogNick });
+                    showToast("로그인 닉네임이 변경되었습니다.");
+                    document.getElementById('btn-close-profile').click();
+                } catch(e) { showToast("변경 실패"); }
+            };
         };
 
         const updateUI = () => {
@@ -1136,8 +1133,10 @@
                 isAdmin = userNickname.toLowerCase().startsWith('admin');
                 document.getElementById('tab-members').classList.toggle('hidden', !isAdmin);
                 document.getElementById('admin-badge').classList.toggle('hidden', !isAdmin);
+    
                 document.getElementById('username-field-container').classList.toggle('hidden', !isAdmin);
                 document.getElementById('log-username').value = isAdmin ? (document.getElementById('log-username').value || userNickname) : userNickname;
+
             }
         };
 
@@ -1151,12 +1150,13 @@
                 try {
                     if(!auth.currentUser) await signInAnonymously(auth);
                     const membersSnap = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_members'));
-                    const target = membersSnap.docs.find(d => d.data().nickname === nick);
-                    if(!nick.toLowerCase().startsWith('admin') && !target) return showModal("등록된 크루가 아닙니다.\n\n Jake에게 문의하세요", "alert");
+                    const target = membersSnap.docs.find(d => { const data = d.data(); return (data.log_nickname === nick); });
+                    if(!nick.toLowerCase().startsWith('admin') && !target) return showModal("등록된 크루가 아닙니다.\n\n Jake 에게 문의하세요", "alert");
+                    const userFinalNickname = target ? target.data().nickname : nick;
                     if (target) await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'songmirun_members', target.id), { lastLogin: new Date().toISOString().split('T')[0] });
-                    localStorage.setItem('songmirun_nickname', nick);
-                    userNickname = nick; updateUI(); setupListeners();
-                    showToast(`${nick}님 환영합니다!`);
+                    localStorage.setItem('songmirun_nickname', userFinalNickname);
+                    userNickname = userFinalNickname; updateUI(); setupListeners();
+                    showToast(`${userFinalNickname}님 환영합니다!`);
                 } catch(e) { showModal("로그인 오류", "alert"); }
                 finally { document.getElementById('login-loader').classList.add('hidden'); }
             };
@@ -1186,35 +1186,15 @@
                 const m = document.getElementById('in-time-m').value || 0;
                 const s = document.getElementById('in-time-s').value || 0;
                 const totalMin = hmsToMin(h, m, s);
-
                 const bpm = Number(document.getElementById('in-bpm').value);
                 const cadence = Number(document.getElementById('in-cadence').value);
                 const dist = Number(document.getElementById('in-dist').value);
                 const date = document.getElementById('in-date').value;
+                if(!date || dist <= 0 || totalMin <= 0) return showModal("필수 항목(날짜, 거리, 시간)을 모두 정확히 입력하세요.", "alert");
+                if(bpm !== 0 && (bpm < 70 || bpm > 220)) return showModal("심박수는 0(미입력) 또는 70 ~ 220 사이로 입력해주세요.", "alert");
+                if(cadence !== 0 && (cadence < 100 || cadence > 250)) return showModal("케이던스는 0(미입력) 또는 100 ~ 250 사이로 입력해주세요.", "alert");
 
-                if(!date || dist <= 0 || totalMin <= 0) {
-                    return showModal("필수 항목(날짜, 거리, 시간)을 모두 정확히 입력하세요.", "alert");
-                }
-                
-                if(bpm !== 0 && (bpm < 70 || bpm > 220)) {
-                    return showModal("심박수는 70 ~ 220 사이로 입력해주세요.", "alert");
-                }
-                
-                if(cadence !== 0 && (cadence < 100 || cadence > 250)) {
-                    return showModal("케이던스는 100 ~ 250 사이로 입력해주세요.", "alert");
-                }
-
-                const data = {
-                    userName: isAdmin ? document.getElementById('log-username').value.trim() : userNickname,
-                    distance: Number(dist.toFixed(3)),
-                    duration: totalMin,
-                    bpm: bpm,
-                    cadence: cadence,
-                    date: date,
-                    runType: document.getElementById('run-type').value,
-                    updatedAt: serverTimestamp()
-                };
-                
+                const data = { userName: isAdmin ? document.getElementById('log-username').value.trim() : userNickname, distance: Number(dist.toFixed(3)), duration: totalMin, bpm: bpm, cadence: cadence, date: date, runType: document.getElementById('run-type').value, updatedAt: serverTimestamp() };
                 const eid = document.getElementById('edit-id').value;
                 try {
                     const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_logs');
@@ -1235,33 +1215,29 @@
                 if(filtered.length === 0) return showModal("내보낼 데이터가 없습니다.", "alert");
                 let csv = "\uFEFF날짜,이름,유형,거리(km),시간(분),심박(bpm),케이던스(spm)\n";
                 filtered.forEach(l => { csv += `${l.date},${l.userName},${l.runType || '일반'},${l.distance},${l.duration.toFixed(2)},${l.bpm || 0},${l.cadence || 0}\n`; });
+                const typeLabel = isAdmin ? "AllRecords" : "MyRecords";
                 const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement("a");
                 link.setAttribute("href", URL.createObjectURL(blob));
-                link.setAttribute("download", `songmirun_records_${start}_${end}.csv`);
+                link.setAttribute("download", `songmirun_${typeLabel}_${start}_${end}.csv`);
                 link.click();
+                showToast("러닝 기록을 다운로드했습니다.");                  
             };
 
             document.getElementById('btn-member-csv').onclick = () => {
                 const filtered = getFilteredMembers();
                 if(filtered.length === 0) return showModal("내보낼 크루가 없습니다.", "alert");
-                let csv = "\uFEFFNo,닉네임,성별,가입일,최근접속일,메모\n";
-                filtered.forEach((m, idx) => { csv += `${idx + 1},${m.nickname},${m.gender},${m.joinDate},${m.lastLogin || '-'},${(m.memo || '').replace(/,/g, ' ')}\n`; });
+                let csv = "\uFEFFNo,로그인닉,닉네임,성별,가입일,최근접속일,메모\n";
+                filtered.forEach((m, idx) => { csv += `${idx + 1},${m.log_nickname || ''},${m.nickname},${m.gender},${m.joinDate},${m.lastLogin || '-'},${(m.memo || '').replace(/,/g, ' ')}\n`; });
                 const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement("a");
                 link.setAttribute("href", URL.createObjectURL(blob));
-                link.setAttribute("download", `songmirun_members.csv`);
+                link.setAttribute("download", `songmirun_members_${new Date().toISOString().split('T')[0]}.csv`);
                 link.click();
+                showToast("크루 목록을 다운로드했습니다.");                
             };
-
             document.getElementById('mem-submit-btn').onclick = async () => {
-                const data = {
-                    nickname: document.getElementById('mem-nickname').value.trim(),
-                    gender: document.getElementById('mem-gender').value,
-                    joinDate: document.getElementById('mem-joindate').value,
-                    memo: document.getElementById('mem-memo').value.trim(),
-                    updatedAt: serverTimestamp()
-                };
+                const data = { log_nickname: document.getElementById('mem-log-nickname').value.trim(), nickname: document.getElementById('mem-nickname').value.trim(), gender: document.getElementById('mem-gender').value, joinDate: document.getElementById('mem-joindate').value, memo: document.getElementById('mem-memo').value.trim(), updatedAt: serverTimestamp() };
                 if(!data.nickname) return showModal("닉네임을 입력하세요.", "alert");
                 const editId = document.getElementById('mem-edit-id').value;
                 try {
@@ -1269,7 +1245,7 @@
                     if(editId) await updateDoc(doc(colRef, editId), data);
                     else await addDoc(colRef, data);
                     document.getElementById('mem-edit-id').value = '';
-                    ['mem-nickname','mem-memo'].forEach(i => document.getElementById(i).value='');
+                    ['mem-log-nickname', 'mem-nickname', 'mem-memo'].forEach(i => document.getElementById(i).value='');
                     document.getElementById('mem-form-title').innerText = "개별 크루 등록";
                     showToast("크루 정보 저장 완료");
                 } catch(e) { showToast("저장 실패"); }
@@ -1283,8 +1259,8 @@
                 const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_members');
                 for(let line of lines) {
                     const p = line.split(',').map(x => x.trim());
-                    if(p.length >= 3) {
-                        try { await addDoc(colRef, { nickname: p[1], joinDate: p[0], gender: p[2], memo: '일괄 등록됨', updatedAt: serverTimestamp() }); count++; } catch(e) {}
+                    if(p.length >= 4) {
+                        try { await addDoc(colRef, { joinDate: p[0], log_nickname: p[1], nickname: p[2], gender: p[3], memo: '일괄 등록됨', updatedAt: serverTimestamp() }); count++; } catch(e) {}
                     }
                 }
                 document.getElementById('bulk-members-input').value = '';
@@ -1311,11 +1287,7 @@
             const nowY = new Date().getFullYear();
             for(let i=nowY; i>=nowY-2; i--) { const o = document.createElement('option'); o.value = i; o.innerText = i + '년'; yr.appendChild(o); }
             yr.onchange = (e) => { selectedYear = e.target.value; renderStats(); renderLogs(); };
-
-            // 'en-CA' 포맷은 YYYY-MM-DD 형식을 반환하므로 날짜 인풋에 딱 맞습니다.
             const today = new Date().toLocaleDateString('en-CA'); 
-            //document.getElementById('in-date').value = today;
-
             document.getElementById('in-date').value = today;
             document.getElementById('mem-joindate').value = today;        
             document.getElementById('export-start').value = `${nowY}-01-01`;
