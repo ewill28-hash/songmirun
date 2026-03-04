@@ -31,6 +31,24 @@
             }
         }
     </script>
+     <script>
+            function toggleMoreOptions() {
+                const options = document.getElementById('more-options');
+                const icon = document.getElementById('more-icon');
+                
+                const isActive = options.classList.toggle('active');
+                icon.classList.toggle('active');
+                
+                // 시각적 피드백을 위해 약간의 여백 조절
+                if (isActive) {
+                    options.style.marginTop = "0.1rem";
+                    options.style.marginBottom = "0.1rem";
+                } else {
+                    options.style.marginTop = "0";
+                    options.style.marginBottom = "0";
+                }
+            }
+    </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
         body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; color: #0f172a; -webkit-tap-highlight-color: transparent; }
@@ -113,6 +131,27 @@
             letter-spacing: -0.025em;
             text-transform: uppercase;
         }
+
+
+        .expandable-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+            opacity: 0;
+        }
+        
+        .expandable-content.active {
+            max-height: 200px;
+            opacity: 1;
+        }
+
+        .rotate-icon {
+            transition: transform 0.3s ease;
+        }
+
+        .rotate-icon.active {
+            transform: rotate(180deg);
+        }        
     </style>
 </head>
 <body class="pb-20">
@@ -247,25 +286,35 @@
                                 <label id="label-timeM" title="Click +10m" class="text-[11px] text-rose-500 font-black block mb-1 ml cursor-pointer text-center">+10m</label>
                                 <label id="label-timeS" title="Click +10s" class="text-[11px] text-brand-500 font-black block mb-1 ml cursor-pointer text-center">+10s</label>
                             </div>
-
                             <div class="grid grid-cols-3 gap-1">
                                 <input type="number" id="in-time-h" placeholder="시" min="0" class="w-full bg-white border-2 border-brand-100 p-3 rounded-xl text-center text-xs font-bold outline-none shadow-sm">
                                 <input type="number" id="in-time-m" placeholder="분" min="0" max="59" class="w-full bg-white border-2 border-brand-100 p-3 rounded-xl text-center text-xs font-bold outline-none shadow-sm">
                                 <input type="number" id="in-time-s" placeholder="초" min="0" max="59" class="w-full bg-white border-2 border-brand-100 p-3 rounded-xl text-center text-xs font-bold outline-none shadow-sm">
                             </div>
                         </div>
-
-                        <div>
-                            <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1">심박수(bpm)</label>
-                            <input type="number" id="in-bpm" min="60" max="300" placeholder="0" class="w-full bg-white border-2 border-brand-100 p-3.5 rounded-2xl text-sm font-bold outline-none shadow-sm">
-                        </div>
-                        
-                        <div>
-                            <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1">케이던스 (spm)</label>
-                            <input type="number" id="in-cadence" min="60" max="300" placeholder="0" class="w-full bg-white border-2 border-brand-100 p-3.5 rounded-2xl text-sm font-bold outline-none shadow-sm">
-                        </div>
                     </div>
-                    
+
+                         <!-- 더보기 버튼 (More) -->
+                        <div class="col-span-1">
+                            <button type="button" onclick="toggleMoreOptions()" class="group flex items-center justify-center w-full py-2 rounded-xl border border-dashed border-slate-300 text-slate-400 text-[10px] font-bold hover:bg-slate-50 hover:border-emerald-300 hover:text-emerald-500 transition-all">
+                                <span>more (심박수, 케이던스)</span>
+                                <i id="more-icon" class="fa-solid fa-chevron-down ml-1 rotate-icon"></i>
+                            </button>
+                        </div>
+
+                    <div class="grid grid-cols-1 gap-4 mb-3">
+                        <div id="more-options" class="expandable-content grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1">심박수(bpm)</label>
+                                <input type="number" id="in-bpm" min="60" max="300" placeholder="0" class="w-full bg-white border-2 border-brand-100 p-3.5 rounded-2xl text-sm font-bold outline-none shadow-sm">
+                            </div>
+                            
+                            <div>
+                                <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1">케이던스 (spm)</label>
+                                <input type="number" id="in-cadence" min="60" max="300" placeholder="0" class="w-full bg-white border-2 border-brand-100 p-3.5 rounded-2xl text-sm font-bold outline-none shadow-sm">
+                            </div>
+                        </div>
+                    </div>                    
                     <button id="btn-save-log" class="w-full bg-brand-600 text-white font-black py-4 rounded-2xl shadow-lg shadow-brand-200 active:scale-[0.98] transition-all hover:bg-brand-700 text-lg flex items-center justify-center gap-2">
                             <div id="pace-display" class="text-[15px] font-black text-white-800">
                                 [Pace : 0'00"]
