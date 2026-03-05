@@ -326,31 +326,22 @@
                             <i class="fa-solid fa-clock text-brand-600 animate-pulse"></i> 
                             </i> Running Activity
                         </h3>                    
-                        <div class="flex flex-col gap-2">
+                        <div class="flex flex-wrap gap-4">
                             <div class="filter-group flex gap-1">
-                                <button onclick="window.setTypeFilter('전체')" id="type-all" class="target-filter-btn filter-btn flex-1 active">전체</button>
-                                <button onclick="window.setTypeFilter('정규')" id="type-j" class="target-filter-btn filter-btn flex-1 inactive">정규</button>
-                                <button onclick="window.setTypeFilter('번개')" id="type-b" class="target-filter-btn filter-btn flex-1 inactive">번개</button>
-                                <button onclick="window.setTypeFilter('대회')" id="type-d" class="target-filter-btn filter-btn flex-1 inactive">대회</button>
+                                <select id="month-select" 
+                                        class="text-[11px] font-bold border border-gray-200 rounded-lg px-2 py-2.5 bg-white outline-none text-gray-700 shadow-sm appearance-none min-h-[40px] flex items-center">
+                                    <option value="전체">🗓️ 모든 월</option>
+                                    </select>
                             </div>
-                            <div class="filter-group grid grid-cols-4 sm:grid-cols-7 gap-1">
-                                <button onclick="window.setMonthFilter('전체')" id="month-all" class="month-filter-btn filter-btn active col-span-4 sm:col-span-1">전체</button>
-                                
-                                <button onclick="window.setMonthFilter(1)" id="month-1" class="month-filter-btn filter-btn inactive">1월</button>
-                                <button onclick="window.setMonthFilter(2)" id="month-2" class="month-filter-btn filter-btn inactive">2월</button>
-                                <button onclick="window.setMonthFilter(3)" id="month-3" class="month-filter-btn filter-btn inactive">3월</button>
-                                <button onclick="window.setMonthFilter(4)" id="month-4" class="month-filter-btn filter-btn inactive">4월</button>
-                                <button onclick="window.setMonthFilter(5)" id="month-5" class="month-filter-btn filter-btn inactive">5월</button>
-                                <button onclick="window.setMonthFilter(6)" id="month-6" class="month-filter-btn filter-btn inactive">6월</button>
-                                <button onclick="window.setMonthFilter(7)" id="month-7" class="month-filter-btn filter-btn inactive">7월</button>
-                                <button onclick="window.setMonthFilter(8)" id="month-8" class="month-filter-btn filter-btn inactive">8월</button>
-                                <button onclick="window.setMonthFilter(9)" id="month-9" class="month-filter-btn filter-btn inactive">9월</button>
-                                <button onclick="window.setMonthFilter(10)" id="month-10" class="month-filter-btn filter-btn inactive">10월</button>
-                                <button onclick="window.setMonthFilter(11)" id="month-11" class="month-filter-btn filter-btn inactive">11월</button>
-                                <button onclick="window.setMonthFilter(12)" id="month-12" class="month-filter-btn filter-btn inactive">12월</button>
+                            <div class="filter-group flex gap-1">
+                                <button onclick="window.setTypeFilter('전체')" id="type-all" class="target-filter-btn filter-btn flex-1 active">🏃 전체</button>
+                                <button onclick="window.setTypeFilter('정규')" id="type-j" class="target-filter-btn filter-btn flex-1 inactive">📅 정규</button>
+                                <button onclick="window.setTypeFilter('번개')" id="type-b" class="target-filter-btn filter-btn flex-1 inactive">⚡ 번개</button>
+                                <button onclick="window.setTypeFilter('대회')" id="type-d"  class="target-filter-btn filter-btn flex-1 inactive">🏅 대회</button>
                             </div>
                         </div>
-                    <div id="log-list" class="space-y-2"></div>
+
+                        <div id="log-list" class="space-y-2"></div>
                 </div>
 
             </div>
@@ -790,6 +781,26 @@
                 el.classList.toggle('inactive', !isActive);
             });
             renderLogs();
+        };
+
+        const mo = document.getElementById('month-select');
+        const smileys = ["😊", "✨", "🏃", "☀️", "🍀", "🌿", "🌊", "⛱️", "🍁", "🍂", "❄️", "🎄"]; // 월별 어울리는 아이콘 (선택사항)
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        for(let i=1; i<=12; i++) {
+            const o = document.createElement('option');
+            o.value = i;
+            
+            const engName = monthNames[i-1];
+            const icon = smileys[i-1]; 
+            
+            o.innerText = ` ${icon} ${i}월 - ${engName}`;
+            mo.appendChild(o);
+        }
+
+        mo.onchange = (e) => {
+            const val = e.target.value;
+            // 기존에 버튼 클릭 시 호출하던 함수를 그대로 연결합니다.
+            window.setMonthFilter(val === '전체' ? '전체' : Number(val));
         };
 
         window.setMonthFilter = (month) => {
@@ -1352,18 +1363,34 @@
                 document.getElementById('profile-edit-modal').classList.add('hidden');
                 document.getElementById('profile-edit-modal').classList.remove('flex');
             };
+
             document.getElementById('btn-save-profile').onclick = async () => {
                 const newLogNick = document.getElementById('prof-new-log-nick').value.trim();
-                if(!newLogNick) return showModal("변경할 로그인 닉네임을 입력하세요.", "alert");
                 
+                if(!newLogNick) return showModal("변경할 로그인 닉네임을 입력하세요.", "alert");
+                const isDuplicate = crewMembers.some(m => 
+                    m.nickname !== userNickname && m.log_nickname === newLogNick
+                );
+                if (isDuplicate) {
+                        showModal(` [${newLogNick}] : 다른 로그인 닉네임을 추천합니다.\n\n (예-전화번호 뒷자리를 추가)`, "alert");
+                        document.getElementById('btn-close-profile').click(); 
+                        return; // 함수 종료
+                    }
                 const userObj = crewMembers.find(m => m.nickname === userNickname);
                 if(!userObj) return;
-                
+                if(userObj.log_nickname === newLogNick) {
+                    return document.getElementById('btn-close-profile').click();
+                }
                 try {
-                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'songmirun_members', userObj.id), { log_nickname: newLogNick });
+                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'songmirun_members', userObj.id), { 
+                        log_nickname: newLogNick 
+                    });
+                    userObj.log_nickname = newLogNick;
                     showToast("로그인 닉네임이 변경되었습니다.");
                     document.getElementById('btn-close-profile').click();
-                } catch(e) { showToast("변경 실패"); }
+                } catch(e) { 
+                    showToast("변경 실패"); 
+                }
             };
         };
 
@@ -1440,6 +1467,19 @@
                 const dist = Number(document.getElementById('in-dist').value);
                 const date = document.getElementById('in-date').value;
                 if(!date || dist <= 0 || totalMin <= 0) return showModal("필수 항목(날짜, 거리, 시간)을 모두 정확히 입력하세요.", "alert");
+
+                const pace = totalMin / dist;
+                if (pace < 2.0) {
+                    return showModal("잠시만요! ⚡ 현재 페이스가 km당 2분 미만입니다. \n혹시 방금 오토바이를 타고 뛰셨나요? \n아니면 성함이 '어벤져스'인가요? \n\n기록을 다시 확인해 주세요 😊", "alert");
+                } 
+                if (pace < 3.0) {
+                    return showModal("세상에, 올림픽 금메달리스트급 기록이네요! \n🏅 이 속도로 뛰셨다면 당장 협회에 등록하셔야 합니다. \n\n다시 한번 확인해 보시겠어요? ✅", "alert");
+                }
+
+                if (pace > 20) {
+                    return showModal("🐢 혹시 달리기 중에 깊은 명상에 빠지셨나요? \n아니면 달팽이와 경주 중이신가요?\n걷는 것보다 뒤로 구르는 게 더 빠를지도 몰라요 😊", "alert");
+                }
+                
                 if(bpm !== 0 && (bpm < 70 || bpm > 220)) return showModal("심박수는 0(미입력) 또는 70 ~ 220 사이로 입력해주세요.", "alert");
                 if(cadence !== 0 && (cadence < 100 || cadence > 250)) return showModal("케이던스는 0(미입력) 또는 100 ~ 250 사이로 입력해주세요.", "alert");
 
@@ -1542,7 +1582,6 @@
             document.getElementById('export-start').value = `${nowY}-01-01`;
             document.getElementById('export-end').value = today;
 
-///
             const inDist = document.getElementById('in-dist');
             const inTimeH = document.getElementById('in-time-h');
             const inTimeM = document.getElementById('in-time-m');
