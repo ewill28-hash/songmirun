@@ -321,34 +321,35 @@
                             </div>  기록 저장하기
                     </button>
                 </section>
-
-                <div class="space-y-3">
-                    <h2 class="font-bold text-sm text-gray-800 px-1">활동 타임라인</h2>
-<div class="flex flex-col gap-4">
-    <div class="filter-group flex gap-1">
-        <button onclick="window.setTypeFilter('전체')" id="type-all" class="target-filter-btn filter-btn flex-1 active">전체</button>
-        <button onclick="window.setTypeFilter('정규')" id="type-j" class="target-filter-btn filter-btn flex-1 inactive">정규</button>
-        <button onclick="window.setTypeFilter('번개')" id="type-b" class="target-filter-btn filter-btn flex-1 inactive">번개</button>
-        <button onclick="window.setTypeFilter('대회')" id="type-d" class="target-filter-btn filter-btn flex-1 inactive">대회</button>
-    </div>
-
-    <div class="filter-group grid grid-cols-4 sm:grid-cols-7 gap-1">
-        <button onclick="window.setMonthFilter('전체')" id="month-all" class="month-filter-btn filter-btn active col-span-4 sm:col-span-1">전체</button>
-        
-        <button onclick="window.setMonthFilter(1)" id="month-1" class="month-filter-btn filter-btn inactive">1월</button>
-        <button onclick="window.setMonthFilter(2)" id="month-2" class="month-filter-btn filter-btn inactive">2월</button>
-        <button onclick="window.setMonthFilter(3)" id="month-3" class="month-filter-btn filter-btn inactive">3월</button>
-        <button onclick="window.setMonthFilter(4)" id="month-4" class="month-filter-btn filter-btn inactive">4월</button>
-        <button onclick="window.setMonthFilter(5)" id="month-5" class="month-filter-btn filter-btn inactive">5월</button>
-        <button onclick="window.setMonthFilter(6)" id="month-6" class="month-filter-btn filter-btn inactive">6월</button>
-        <button onclick="window.setMonthFilter(7)" id="month-7" class="month-filter-btn filter-btn inactive">7월</button>
-        <button onclick="window.setMonthFilter(8)" id="month-8" class="month-filter-btn filter-btn inactive">8월</button>
-        <button onclick="window.setMonthFilter(9)" id="month-9" class="month-filter-btn filter-btn inactive">9월</button>
-        <button onclick="window.setMonthFilter(10)" id="month-10" class="month-filter-btn filter-btn inactive">10월</button>
-        <button onclick="window.setMonthFilter(11)" id="month-11" class="month-filter-btn filter-btn inactive">11월</button>
-        <button onclick="window.setMonthFilter(12)" id="month-12" class="month-filter-btn filter-btn inactive">12월</button>
-    </div>
-</div>
+                <div class="space-y-2">
+                        <h3 class="font-black text-xs mb-4 flex items-center gap-2 text-gray-700 uppercase">
+                            <i class="fa-solid fa-clock text-brand-600 animate-pulse"></i> 
+                            </i> Running Activity
+                        </h3>                    
+                        <div class="flex flex-col gap-2">
+                            <div class="filter-group flex gap-1">
+                                <button onclick="window.setTypeFilter('전체')" id="type-all" class="target-filter-btn filter-btn flex-1 active">전체</button>
+                                <button onclick="window.setTypeFilter('정규')" id="type-j" class="target-filter-btn filter-btn flex-1 inactive">정규</button>
+                                <button onclick="window.setTypeFilter('번개')" id="type-b" class="target-filter-btn filter-btn flex-1 inactive">번개</button>
+                                <button onclick="window.setTypeFilter('대회')" id="type-d" class="target-filter-btn filter-btn flex-1 inactive">대회</button>
+                            </div>
+                            <div class="filter-group grid grid-cols-4 sm:grid-cols-7 gap-1">
+                                <button onclick="window.setMonthFilter('전체')" id="month-all" class="month-filter-btn filter-btn active col-span-4 sm:col-span-1">전체</button>
+                                
+                                <button onclick="window.setMonthFilter(1)" id="month-1" class="month-filter-btn filter-btn inactive">1월</button>
+                                <button onclick="window.setMonthFilter(2)" id="month-2" class="month-filter-btn filter-btn inactive">2월</button>
+                                <button onclick="window.setMonthFilter(3)" id="month-3" class="month-filter-btn filter-btn inactive">3월</button>
+                                <button onclick="window.setMonthFilter(4)" id="month-4" class="month-filter-btn filter-btn inactive">4월</button>
+                                <button onclick="window.setMonthFilter(5)" id="month-5" class="month-filter-btn filter-btn inactive">5월</button>
+                                <button onclick="window.setMonthFilter(6)" id="month-6" class="month-filter-btn filter-btn inactive">6월</button>
+                                <button onclick="window.setMonthFilter(7)" id="month-7" class="month-filter-btn filter-btn inactive">7월</button>
+                                <button onclick="window.setMonthFilter(8)" id="month-8" class="month-filter-btn filter-btn inactive">8월</button>
+                                <button onclick="window.setMonthFilter(9)" id="month-9" class="month-filter-btn filter-btn inactive">9월</button>
+                                <button onclick="window.setMonthFilter(10)" id="month-10" class="month-filter-btn filter-btn inactive">10월</button>
+                                <button onclick="window.setMonthFilter(11)" id="month-11" class="month-filter-btn filter-btn inactive">11월</button>
+                                <button onclick="window.setMonthFilter(12)" id="month-12" class="month-filter-btn filter-btn inactive">12월</button>
+                            </div>
+                        </div>
                     <div id="log-list" class="space-y-2"></div>
                 </div>
 
