@@ -323,11 +323,35 @@
                 </section>
 
                 <div class="space-y-3">
-                    <h2 class="font-bold text-sm text-gray-800 px-1">활동 타임라인(Last 10)</h2>
+                    <h2 class="font-bold text-sm text-gray-800 px-1">활동 타임라인</h2>
+<div class="flex flex-col gap-4">
+    <div class="filter-group flex gap-1">
+        <button onclick="window.setTypeFilter('전체')" id="type-all" class="target-filter-btn filter-btn flex-1 active">전체</button>
+        <button onclick="window.setTypeFilter('정규')" id="type-j" class="target-filter-btn filter-btn flex-1 inactive">정규</button>
+        <button onclick="window.setTypeFilter('번개')" id="type-b" class="target-filter-btn filter-btn flex-1 inactive">번개</button>
+        <button onclick="window.setTypeFilter('대회')" id="type-d" class="target-filter-btn filter-btn flex-1 inactive">대회</button>
+    </div>
+
+    <div class="filter-group grid grid-cols-4 sm:grid-cols-7 gap-1">
+        <button onclick="window.setMonthFilter('전체')" id="month-all" class="month-filter-btn filter-btn active col-span-4 sm:col-span-1">전체</button>
+        
+        <button onclick="window.setMonthFilter(1)" id="month-1" class="month-filter-btn filter-btn inactive">1월</button>
+        <button onclick="window.setMonthFilter(2)" id="month-2" class="month-filter-btn filter-btn inactive">2월</button>
+        <button onclick="window.setMonthFilter(3)" id="month-3" class="month-filter-btn filter-btn inactive">3월</button>
+        <button onclick="window.setMonthFilter(4)" id="month-4" class="month-filter-btn filter-btn inactive">4월</button>
+        <button onclick="window.setMonthFilter(5)" id="month-5" class="month-filter-btn filter-btn inactive">5월</button>
+        <button onclick="window.setMonthFilter(6)" id="month-6" class="month-filter-btn filter-btn inactive">6월</button>
+        <button onclick="window.setMonthFilter(7)" id="month-7" class="month-filter-btn filter-btn inactive">7월</button>
+        <button onclick="window.setMonthFilter(8)" id="month-8" class="month-filter-btn filter-btn inactive">8월</button>
+        <button onclick="window.setMonthFilter(9)" id="month-9" class="month-filter-btn filter-btn inactive">9월</button>
+        <button onclick="window.setMonthFilter(10)" id="month-10" class="month-filter-btn filter-btn inactive">10월</button>
+        <button onclick="window.setMonthFilter(11)" id="month-11" class="month-filter-btn filter-btn inactive">11월</button>
+        <button onclick="window.setMonthFilter(12)" id="month-12" class="month-filter-btn filter-btn inactive">12월</button>
+    </div>
+</div>
                     <div id="log-list" class="space-y-2"></div>
                 </div>
 
-                
             </div>
 
             <!-- Section: Ranking -->
@@ -664,6 +688,9 @@
         let selectedYear = new Date().getFullYear();
         let selectedGender = '전체';
         let selectedTarget = '전체'; 
+        let selectedType = '전체'; 
+        let selectedMonthF = '전체'; 
+
         let selectedRankingPeriod = 'this'; 
         let sortConfig = { key: 'log_nickname', direction: 'asc' };
 
@@ -751,30 +778,30 @@
             renderAllCharts();
         };
 
-        let selectedType_PX = 'all';  // 선택된 운동 종류 상태
-        let selectedMonth_PX = 'all'; // 선택된 월 상태
-        window.setFilter = (category, value) => {
-            if (category === 'type') {
-                selectedType_PX = value;
-                updateButtonUI('filter-btn-type', value);
-            } else if (category === 'month') {
-                selectedMonth_PX = value;
-                updateButtonUI('filter-btn-month', value);
-            }
-            resetPageAndRender();
+
+//z
+        window.setTypeFilter = (type) => {
+            selectedType = type;
+            ['type-all', 'type-j', 'type-b', 'type-d'].forEach(id => {
+                const el = document.getElementById(id);
+                const isActive = (id === 'type-all' && type === '전체') || (id === 'type-j' && type === '정규') || (id === 'type-b' && type === '번개')|| (id === 'type-d' && type === '대회');
+                el.classList.toggle('active', isActive);
+                el.classList.toggle('inactive', !isActive);
+            });
+            renderLogs();
         };
 
-        const updateButtonUI = (className, value) => {
-            const buttons = document.getElementsByClassName(className);
-            for (let btn of buttons) {
-                if (btn.getAttribute('data-value') == value) {
-                    btn.classList.remove('bg-gray-100', 'hover:bg-gray-200');
-                    btn.classList.add('bg-blue-500', 'text-white', 'active');
-                } else {
-                    btn.classList.add('bg-gray-100', 'hover:bg-gray-200');
-                    btn.classList.remove('bg-blue-500', 'text-white', 'active');
-                }
-            }
+        window.setMonthFilter = (month) => {
+            selectedMonthF = month;
+            const monthIds = ['month-all', ...Array.from({length: 12}, (_, i) => `month-${i + 1}`)];
+            monthIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                const isActive = (id === 'month-all' && month === '전체') || (id === `month-${month}`);
+                el.classList.toggle('active', isActive);
+                el.classList.toggle('inactive', !isActive);
+            });
+            renderLogs(); // 데이터 다시 그리기
         };
 
 
@@ -950,13 +977,23 @@
         const renderLogs = () => {
             const list = document.getElementById('log-list');
             const displayLogs = (isAdmin ? allLogs : allLogs.filter(l => l.userName === userNickname))
-                               .filter(l => l.date && new Date(l.date).getFullYear() === parseInt(selectedYear));
+                .filter(l => l.date && new Date(l.date).getFullYear() === parseInt(selectedYear))
+                .filter(l => {
+                    if (selectedMonthF === '전체') return true;
+                    // Date 객체의 getMonth()는 0~11을 반환하므로 +1 필요
+                    const logMonth = new Date(l.date).getMonth() + 1;
+                    return logMonth === parseInt(selectedMonthF);
+                })
+                .filter(l => selectedType === '전체' || (l.runType || '번개') === selectedType);
+
             const sorted = [...displayLogs].sort((a, b) => {
                 const dateA = new Date(a.date);
                 const dateB = new Date(b.date);
                 return dateB - dateA; // 내림차순
             })
             .slice(0, isAdmin ? undefined : 15);
+
+
 
 
             const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
