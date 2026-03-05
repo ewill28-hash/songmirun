@@ -323,9 +323,11 @@
                 </section>
 
                 <div class="space-y-3">
-                    <h2 class="font-bold text-sm text-gray-800 px-1">활동 타임라인(최근 10)</h2>
+                    <h2 class="font-bold text-sm text-gray-800 px-1">활동 타임라인(Last 10)</h2>
                     <div id="log-list" class="space-y-2"></div>
                 </div>
+
+                
             </div>
 
             <!-- Section: Ranking -->
@@ -749,6 +751,33 @@
             renderAllCharts();
         };
 
+        let selectedType_PX = 'all';  // 선택된 운동 종류 상태
+        let selectedMonth_PX = 'all'; // 선택된 월 상태
+        window.setFilter = (category, value) => {
+            if (category === 'type') {
+                selectedType_PX = value;
+                updateButtonUI('filter-btn-type', value);
+            } else if (category === 'month') {
+                selectedMonth_PX = value;
+                updateButtonUI('filter-btn-month', value);
+            }
+            resetPageAndRender();
+        };
+
+        const updateButtonUI = (className, value) => {
+            const buttons = document.getElementsByClassName(className);
+            for (let btn of buttons) {
+                if (btn.getAttribute('data-value') == value) {
+                    btn.classList.remove('bg-gray-100', 'hover:bg-gray-200');
+                    btn.classList.add('bg-blue-500', 'text-white', 'active');
+                } else {
+                    btn.classList.add('bg-gray-100', 'hover:bg-gray-200');
+                    btn.classList.remove('bg-blue-500', 'text-white', 'active');
+                }
+            }
+        };
+
+
         window.setRankingPeriod = (period) => {
             selectedRankingPeriod = period;
             ['rank-period-this', 'rank-period-last'].forEach(id => {
@@ -922,7 +951,15 @@
             const list = document.getElementById('log-list');
             const displayLogs = (isAdmin ? allLogs : allLogs.filter(l => l.userName === userNickname))
                                .filter(l => l.date && new Date(l.date).getFullYear() === parseInt(selectedYear));
-            const sorted = [...displayLogs].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 10);
+            const sorted = [...displayLogs].sort((a, b) => {
+                const dateA = new Date(a.date);
+                const dateB = new Date(b.date);
+                return dateB - dateA; // 내림차순
+            })
+            .slice(0, isAdmin ? undefined : 15);
+
+
+            const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
             list.innerHTML = sorted.map(l => {
                 const hms = minToHMS(l.duration);
                 const timeStr = `${hms.h > 0 ? hms.h + ':' : ''}${hms.m.toString().padStart(2, '0')}:${hms.s.toString().padStart(2, '0')}`;
@@ -936,17 +973,35 @@
                     const ss = Math.round((pace - mm) * 60);
                     paceStr = `${mm}'${ss.toString().padStart(2, '0')}"`;
                 }
+                const dateObj = new Date(l.date);                
+                const dayIndex = dateObj.getDay(); 
+                const dayName = dayNames[dateObj.getDay()]; // 요일 인덱스 추출
+                let dayColorClass = 'text-gray-400'; // 기본 회색
+                if (dayIndex === 1) {
+                    dayColorClass = 'text-green-500 font-medium'; // 월요일: 파란색
+                } else if (dayIndex === 0 || dayIndex === 6) {
+                    dayColorClass = 'text-red-500 font-medium'; // 일요일, 토요일: 빨간색
+                }
+
+                const runTypeMap = {
+                    '정규': { icon: '📅', label: '정규' },
+                    '번개': { icon: '⚡', label: '번개' },
+                    '대회': { icon: '🏅', label: '대회' }
+                };
+
+                const defaultType = { icon: '⚡', label: '번개' };
+                const typeInfo = runTypeMap[l.runType] || defaultType;
 
                 return `
                 <div class="bg-white p-3 rounded-2xl border border-brand-100 shadow-sm relative">
                     <div class="flex justify-between items-start mb-2">
-                        <span class="text-[9px] font-black text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full">${l.date} | ${l.runType || '번개'}</span>
+                        <span class="text-[9px] font-black font-bold ${dayColorClass} bg-gray-50 px-2 py-0.5 rounded-full">${l.date} (${dayName}) | ${typeInfo.icon} ${typeInfo.label}</span>
                         <div class="flex gap-2">
                             <button onclick="window.editLog('${l.id}')" class="text-gray-300 hover:text-brand-500 p-1"><i class="fa-solid fa-pen-to-square text-xs"></i></button>
                             <button onclick="window.deleteLog('${l.id}')" class="text-gray-300 hover:text-red-500 p-1"><i class="fa-solid fa-trash-can text-xs"></i></button>
                         </div>
                     </div>
-                    <div class="flex items-center gap-2 mb-3">
+                    <div class="flex items-center gap-1 mb-1">
                         <div class="w-5 h-5 bg-brand-100 rounded-full flex items-center justify-center text-[8px] font-bold text-brand-600">${l.userName?.charAt(0) || '?'}</div>
                         <span class="text-xs font-bold text-gray-700">${l.userName}</span>
                     </div>
