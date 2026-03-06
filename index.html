@@ -1317,7 +1317,7 @@
             setValueAndTrigger('in-cadence', l.cadence);
             setValueAndTrigger('in-date', l.date);
             setValueAndTrigger('run-type', l.runType);
-            setValueAndTrigger('in-memo', l.memo);
+            setValueAndTrigger('in-memo', l.memo || '');
 
             // 4. UI 상태 변경 (수정 모드 표시 및 탭 전환)
             const formTitle = document.getElementById('form-title');
@@ -1515,7 +1515,7 @@
                 if(bpm !== 0 && (bpm < 70 || bpm > 220)) return showModal("심박수는 0(미입력) 또는 70 ~ 220 사이로 입력해주세요.", "alert");
                 if(cadence !== 0 && (cadence < 100 || cadence > 250)) return showModal("케이던스는 0(미입력) 또는 100 ~ 250 사이로 입력해주세요.", "alert");
 
-                const data = { userName: isAdmin ? document.getElementById('log-username').value.trim() : userNickname, distance: Number(dist.toFixed(3)), duration: totalMin, bpm: bpm, cadence: cadence, memo: memo, date: date, runType: document.getElementById('run-type').value, updatedAt: serverTimestamp() };
+                const data = { userName: isAdmin ? document.getElementById('log-username').value.trim() : userNickname, distance: Number(dist.toFixed(3)), duration: totalMin, bpm: bpm, cadence: cadence, memo: document.getElementById('in-memo').value, date: date, runType: document.getElementById('run-type').value, updatedAt: serverTimestamp() };
                 const eid = document.getElementById('edit-id').value;
                 try {
                     const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_logs');
