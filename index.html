@@ -49,297 +49,168 @@
                 }
             }
     </script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
-        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; color: #0f172a; -webkit-tap-highlight-color: transparent; }
-        
-        .tab-btn { 
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
-            border-bottom: 3px solid transparent;
-            position: relative;
-        }
-        .active-tab {
-            background-color: #f0fdf4;
-            border-bottom-color: #22c55e;
-            color: #15803d !important;
-        }
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
+    
+    /* [기본 설정] */
+    body { 
+        font-family: 'Pretendard', sans-serif; 
+        background-color: #f8fafc; 
+        color: #0f172a; 
+        -webkit-tap-highlight-color: transparent; 
+        line-height: 1.5;
+    }
 
-        .hidden { display: none !important; }
-        .loading-spinner { animation: spin 1s linear infinite; }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        
-        .stat-grid-label { font-size: 8px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 2px; }
-        .stat-grid-val { font-size: 11px; font-weight: 900; color: #1e293b; font-style: italic; }
+    /* [스크롤바 커스텀] */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
 
-        .sortable-header { cursor: pointer; user-select: none; transition: background-color 0.2s; }
-        .sortable-header:hover { background-color: #f1f5f9; }
+    /* [공통 유틸리티] */
+    .hidden { display: none !important; }
+    .glass-card, .rank-card, .modal-comparison-card {
+        background: white;
+        border-radius: 1.5rem;
+        border: 1px solid #f1f5f9;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
+    .loading-spinner { animation: spin 1s linear infinite; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        .rank-card {
-            background: white;
-            border-radius: 1.5rem;
-            border: 1px solid #f1f5f9;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            overflow: hidden;
-        }
-        .rank-header {
-            padding: 1rem;
-            border-bottom: 1px solid #f0fdf4;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: #f0fdf4;
-        }
-        
-        .rank-item {
-            position: relative;
-            padding: 0.35rem 1rem;
-            transition: background 0.2s;
-        }
-        .rank-progress {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            height: 2px;
-            background: #dcfce7;
-            transition: width 1s ease-out;
-            z-index: 0;
-        }
+    /* [탭 & 필터 시스템] - 중복 제거 및 통합 */
+    .filter-group { 
+        display: flex; 
+        background-color: #f1f5f9; 
+        padding: 4px; 
+        border-radius: 12px; 
+        gap: 2px;
+    }
+    .filter-btn { 
+        flex: 1;
+        padding: 8px 12px; 
+        font-size: 11px; 
+        font-weight: 800; 
+        border-radius: 8px; 
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        text-align: center;
+        color: #94a3b8;
+        white-space: nowrap;
+        cursor: pointer;
+    }
+    .filter-btn.active { 
+        background-color: white; 
+        color: #16a34a; 
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+    }
 
-        .filter-group { display: flex; background-color: #f1f5f9; padding: 4px; border-radius: 12px; }
-        .filter-btn { padding: 6px 12px; font-size: 10px; font-weight: 800; border-radius: 8px; transition: all 0.2s; }
-        .filter-btn.active { background-color: white; color: #16a34a; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-        .filter-btn.inactive { color: #94a3b8; }
+    /* [버튼 스타일] */
+    .btn-gradient {
+        background: linear-gradient(135deg, #22c55e, #16a34a);
+        color: white;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .btn-gradient:hover { transform: translateY(-1px); filter: brightness(1.1); }
 
-        .modal-comparison-card {
-            background: white;
-            border-radius: 1.5rem;
-            border: 1px solid #f1f5f9;
-            overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-        .medal-1 { color: #fbbf24; }
-        .medal-2 { color: #94a3b8; }
-        .medal-3 { color: #b45309; }
+    .main-btn {
+        padding: 0.5rem 1rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        border: 1px solid #e2e8f0;
+        background: white;
+        color: #64748b;
+        transition: all 0.2s;
+    }
+    .main-btn.active {
+        background: #22c55e;
+        color: white;
+        border-color: #22c55e;
+        box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+    }
 
-        .runner-grade-badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 2px 8px;
-            border-radius: 9999px;
-            font-size: 10px;
-            font-weight: 900;
-            letter-spacing: -0.025em;
-            text-transform: uppercase;
-        }
+    /* [랭킹 및 리스트 아이템] */
+    .rank-header {
+        padding: 1rem;
+        border-bottom: 1px solid #f0fdf4;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: #f0fdf4;
+    }
+    .rank-item {
+        position: relative;
+        padding: 0.35rem 1rem;
+        transition: background 0.2s;
+        z-index: 1;
+    }
+    .rank-progress {
+        position: absolute;
+        bottom: 0; left: 0; height: 2px;
+        background: #dcfce7;
+        transition: width 1s ease-out;
+        z-index: 0;
+    }
 
+    /* [통계 및 뱃지] */
+    .stat-grid-label { font-size: 8px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 2px; }
+    .stat-grid-val { font-size: 11px; font-weight: 900; color: #1e293b; font-style: italic; }
+    
+    .badge-stat {
+        display: inline-block;
+        background: #f8fafc;
+        color: #94a3b8;
+        padding: 3px 10px;
+        border-radius: 8px;
+        font-size: 10px;
+        font-weight: 800;
+        border: 1px solid #f1f5f9;
+        transition: all 0.3s;
+    }
+    .badge-stat.highlight {
+        background: #dcfce7;
+        color: #16a34a;
+        border-color: #bbf7d0;
+        box-shadow: 0 2px 4px rgba(34, 197, 94, 0.1);
+    }
 
-        .expandable-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
-            opacity: 0;
-        }
-        
-        .expandable-content.active {
-            max-height: 200px;
-            opacity: 1;
-        }
+    /* [입력 폼] */
+    .form-input {
+        width: 100%;
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        padding: 0.85rem 1rem;
+        border-radius: 1rem;
+        font-size: 0.875rem;
+        outline: none;
+        transition: all 0.2s;
+    }
+    .form-input:focus {
+        border-color: #22c55e;
+        background-color: white;
+        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+    }
 
-        .rotate-icon {
-            transition: transform 0.3s ease;
-        }
+    /* [애니메이션 및 모달] */
+    .expandable-content {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+        opacity: 0;
+    }
+    .expandable-content.active { max-height: 200px; opacity: 1; }
+    .rotate-icon { transition: transform 0.3s ease; }
+    .rotate-icon.active { transform: rotate(180deg); }
+    .modal-overlay { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(8px); }
 
-        .rotate-icon.active {
-            transform: rotate(180deg);
-        }
-
-
-        .font-orbitron { font-family: 'Orbitron', sans-serif; }
-
-        .glass-card {
-            background: white;
-            border-radius: 1.5rem;
-            border: 1px solid #f1f5f9;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            overflow: hidden;
-        }
-
-        .modal-overlay {
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(8px);
-        }
-
-        .filter-group { 
-            display: flex; 
-            background-color: #f1f5f9; 
-            padding: 4px; 
-            border-radius: 12px; 
-        }
-        
-        .filter-btn { 
-            flex: 1;
-            padding: 8px 12px; 
-            font-size: 11px; 
-            font-weight: 800; 
-            border-radius: 8px; 
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            text-align: center;
-            color: #94a3b8;
-            white-space: nowrap;
-        }
-        
-        .filter-btn.active { 
-            background-color: white; 
-            color: #16a34a; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
-        }
-
-        .btn-gradient {
-            background: linear-gradient(135deg, #22c55e, #16a34a);
-            color: white;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-gradient:hover { transform: translateY(-1px); filter: brightness(1.1); }
-
-        .form-input {
-            width: 100%;
-            background-color: #f8fafc;
-            border: 1px solid #e2e8f0;
-            padding: 0.85rem 1rem;
-            border-radius: 1rem;
-            font-size: 0.875rem;
-            outline: none;
-            transition: all 0.2s;
-        }
-
-        .form-input:focus {
-            border-color: #22c55e;
-            background-color: white;
-            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
-        }
-
-        .badge-stat {
-            background: #f8fafc;
-            color: #94a3b8;
-            padding: 3px 10px;
-            border-radius: 8px;
-            font-size: 10px;
-            font-weight: 800;
-            border: 1px solid #f1f5f9;
-            transition: all 0.3s;
-        }
-
-        .badge-stat.highlight {
-            background: #dcfce7;
-            color: #16a34a;
-            border-color: #bbf7d0;
-            box-shadow: 0 2px 4px rgba(34, 197, 94, 0.1);
-        }
-
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
-                        
-    </style>
-
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&family=Orbitron:wght@700&display=swap');
-        
-        body { 
-            font-family: 'Pretendard', sans-serif; 
-            background-color: #f8fafc; 
-            color: #0f172a; 
-            -webkit-tap-highlight-color: transparent; 
-        }
-
-        .font-orbitron { font-family: 'Orbitron', sans-serif; }
-
-        .glass-card {
-            background: white;
-            border-radius: 1.5rem;
-            border: 1px solid #f1f5f9;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            overflow: hidden;
-        }
-
-        .modal-overlay {
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(8px);
-        }
-
-        .filter-group { 
-            display: flex; 
-            background-color: #f1f5f9; 
-            padding: 4px; 
-            border-radius: 12px; 
-        }
-        
-        .filter-btn { 
-            flex: 1;
-            padding: 8px 12px; 
-            font-size: 11px; 
-            font-weight: 800; 
-            border-radius: 8px; 
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            text-align: center;
-            color: #94a3b8;
-            white-space: nowrap;
-        }
-        
-        .filter-btn.active { 
-            background-color: white; 
-            color: #16a34a; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
-        }
-
-        .main-btn {
-            padding: 0.5rem 1rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            border: 1px solid #e2e8f0;
-            background: white;
-            color: #64748b;
-            transition: all 0.2s;
-        }
-
-        .main-btn.active {
-            background: #22c55e;
-            color: white;
-            border-color: #22c55e;
-            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
-        }
-
-        .btn-gradient {
-            background: linear-gradient(135deg, #22c55e, #16a34a);
-            color: white;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-gradient:hover { transform: translateY(-1px); filter: brightness(1.1); }
-
-        .form-input {
-            width: 100%;
-            background-color: #f8fafc;
-            border: 1px solid #e2e8f0;
-            padding: 0.85rem 1rem;
-            border-radius: 1rem;
-            font-size: 0.875rem;
-            outline: none;
-            transition: all 0.2s;
-        }
-
-        .form-input:focus {
-            border-color: #22c55e;
-            background-color: white;
-            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
-        }
-
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
-    </style>
+    /* [메달 색상] */
+    .medal-1 { color: #fbbf24; }
+    .medal-2 { color: #94a3b8; }
+    .medal-3 { color: #b45309; }
+</style>
 
 </head>
 <body class="pb-20">
@@ -564,9 +435,9 @@
                                     </select>
                             </div>
                             <div class="filter-group flex gap-1">
-                                <button onclick="window.setTypeFilter('전체')" id="type-all" class="target-filter-btn filter-btn flex-1 active">🏃 전체</button>
-                                <button onclick="window.setTypeFilter('정규')" id="type-j" class="target-filter-btn filter-btn flex-1 inactive">📅 정규</button>
-                                <button onclick="window.setTypeFilter('번개')" id="type-b" class="target-filter-btn filter-btn flex-1 inactive">⚡ 번개</button>
+                                <button onclick="window.setTypeFilter('전체')" id="type-all" class="target-filter-btn filter-btn  flex-1 active">🏃 전체</button>
+                                <button onclick="window.setTypeFilter('정규')" id="type-j" class="target-filter-btn filter-btn  flex-1 inactive">📅 정규</button>
+                                <button onclick="window.setTypeFilter('번개')" id="type-b" class="target-filter-btn filter-btn  flex-1 inactive">⚡ 번개</button>
                                 <button onclick="window.setTypeFilter('대회')" id="type-d"  class="target-filter-btn filter-btn flex-1 inactive">🏅 대회</button>
                             </div>
                         </div>
@@ -885,9 +756,9 @@
                     <div class="space-y-1">
                         <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest px-1">측정 기준</p>
                         <div class="flex gap-1">
-                            <button onclick="setMetric('dist')" id="main-btn-dist" class="main-btn active flex-1 px-0"><i class="fas fa-road"></i></button>
-                            <button onclick="setMetric('time')" id="main-btn-time" class="main-btn flex-1 px-0"><i class="fas fa-clock"></i></button>
-                            <button onclick="setMetric('count')" id="main-btn-count" class="main-btn flex-1 px-0"><i class="fas fa-running"></i></button>
+                                <button onclick="setMetric('dist')" id="main-btn-dist" class="main-btn flex-1 py-2 rounded-xl border border-slate-200 bg-white text-[10px] font-black text-slate-400 hover:bg-slate-50 transition shadow-sm">  <i class="fas fa-road"></i> 거리</button>
+                                <button onclick="setMetric('time')" id="main-btn-time" class="main-btn flex-1 py-2 rounded-xl border border-slate-200 bg-white text-[10px] font-black text-slate-400 hover:bg-slate-50 transition shadow-sm">  <i class="fas fa-clock"></i> 시간</button>
+                                <button onclick="setMetric('count')" id="main-btn-count" class="main-btn flex-1 py-2 rounded-xl border border-slate-200 bg-white text-[10px] font-black text-slate-400 hover:bg-slate-50 transition shadow-sm"><i class="fas fa-running"></i> 횟수</button>
                         </div>
                     </div>
                 </div>
