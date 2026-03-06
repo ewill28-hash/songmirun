@@ -151,7 +151,96 @@
 
         .rotate-icon.active {
             transform: rotate(180deg);
-        }        
+        }
+
+
+        .font-orbitron { font-family: 'Orbitron', sans-serif; }
+
+        .glass-card {
+            background: white;
+            border-radius: 1.5rem;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .modal-overlay {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(8px);
+        }
+
+        .filter-group { 
+            display: flex; 
+            background-color: #f1f5f9; 
+            padding: 4px; 
+            border-radius: 12px; 
+        }
+        
+        .filter-btn { 
+            flex: 1;
+            padding: 8px 12px; 
+            font-size: 11px; 
+            font-weight: 800; 
+            border-radius: 8px; 
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: center;
+            color: #94a3b8;
+            white-space: nowrap;
+        }
+        
+        .filter-btn.active { 
+            background-color: white; 
+            color: #16a34a; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+        }
+
+        .btn-gradient {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-gradient:hover { transform: translateY(-1px); filter: brightness(1.1); }
+
+        .form-input {
+            width: 100%;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 0.85rem 1rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus {
+            border-color: #22c55e;
+            background-color: white;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+        }
+
+        .badge-stat {
+            background: #f8fafc;
+            color: #94a3b8;
+            padding: 3px 10px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: 800;
+            border: 1px solid #f1f5f9;
+            transition: all 0.3s;
+        }
+
+        .badge-stat.highlight {
+            background: #dcfce7;
+            color: #16a34a;
+            border-color: #bbf7d0;
+            box-shadow: 0 2px 4px rgba(34, 197, 94, 0.1);
+        }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+                        
     </style>
 </head>
 <body class="pb-20">
@@ -326,6 +415,44 @@
                             </div>  기록 저장하기
                     </button>
                 </section>
+
+           <!-- Team Rankings Section -->
+            <section class="glass-card p-1 bg-slate-100">
+                <div class="flex justify-between items-center mb-1 bg-slate-100">
+                    <h3 class="text-lg font-black text-purple-800 uppercase tracking-tighter">Team Status</h3>
+                    <button onclick="openStatsModal()" class="text-[10px] font-black bg-rose-50 text-rose-600 px-4 py-2 rounded-full transition flex items-center gap-2 border border-rose-100">
+                        <i class="fas fa-chart-pie"></i> 분석 도구
+                    </button>
+                </div>
+               <div class="ounded-2xl p-1 pace-y-3 border border-slate-100 bg-slate-100">
+                    <div class="flex items-center gap-1 bg-slate-100">
+                        <div class="flex-1 bg-slate-100">
+                            <p class="text-[9px] font-black text-slate-400 uppercase mb-1.5 ml-1 bg-slate-100"> <i class="fas fa-calendar"></i> 기록 기간</p>
+                            <div class="relative bg-slate-100">
+                                <select id="main-filter-month" onchange="syncAndRefresh()" 
+                                class="text-[11px] font-bold border border-gray-200 rounded-lg px-2 py-2.5 bg-white outline-none text-gray-700 shadow-sm appearance-none min-h-[40px] flex items-center">
+                                    <option value="전체">🗓️ 모든 월 </option>
+                                    </select>
+                                <i class="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-slate-300 pointer-events-none"></i>
+                            </div>
+                        </div>
+                        <div class="flex-[1.5] bg-slate-100">
+                            <p class="text-[9px] font-black text-slate-400 uppercase mb-1.5 ml-1"><i class="fas fa-sort"> </i> 정렬 및 바 기준</p>
+                            <div class="flex gap-1">
+                                <button onclick="setMetric('dist')" id="main-btn-dist" class="flex-1 py-2 rounded-xl border border-slate-200 bg-white text-[10px] font-black text-slate-400 hover:bg-slate-50 transition shadow-sm">  <i class="fas fa-road"></i> 거리</button>
+                                <button onclick="setMetric('time')" id="main-btn-time" class="flex-1 py-2 rounded-xl border border-slate-200 bg-white text-[10px] font-black text-slate-400 hover:bg-slate-50 transition shadow-sm">  <i class="fas fa-clock"></i> 시간</button>
+                                <button onclick="setMetric('count')" id="main-btn-count" class="flex-1 py-2 rounded-xl border border-slate-200 bg-white text-[10px] font-black text-slate-400 hover:bg-slate-50 transition shadow-sm"><i class="fas fa-running"></i> 횟수</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="team-list" class="space-y-3"></div>
+            </section>
+
+
+
+
                 <div class="space-y-2">
                         <h3 class="font-black text-xs mb-4 flex items-center gap-2 text-gray-700 uppercase">
                             <i class="fa-solid fa-clock text-brand-600 animate-pulse"></i> 
@@ -419,24 +546,33 @@
             <!-- Section: Statistics -->
             <div id="section-stats" class="hidden space-y-5">
                 <section class="bg-white p-4 rounded-[2.5rem] border border-brand-100 shadow-sm sticky top-20 z-10">
-                    <div class="flex flex-col gap-4">
+                    <div class="flex flex-col gap-3">
                         <div class="flex justify-between items-center">
                             <h2 class="font-black text-sm flex items-center gap-2 text-gray-800 italic">
                                 <i class="fa-solid fa-filter text-brand-500"></i> Stats Filter
                             </h2>
                         </div>
-                        <div class="flex flex-wrap gap-4">
-                            <div class="flex-1 min-w-[140px]">
-                                <div class="filter-group">
-                                    <button onclick="window.setTargetFilter('전체')" id="target-all" class="target-filter-btn filter-btn flex-1 active">전체 통계</button>
+
+                        <div class="grid grid-cols-2 gap-1">
+                            <div class="col-span-1">
+                                <div class="filter-group flex">
+                                    <button onclick="window.setTargetFilter('전체')" id="target-all" class="target-filter-btn filter-btn flex-1 active">전체기록</button>
                                     <button onclick="window.setTargetFilter('나')" id="target-me" class="target-filter-btn filter-btn flex-1 inactive">내 기록</button>
                                 </div>
                             </div>
-                            <div class="flex-1 min-w-[140px]">
-                                <div class="filter-group">
+                            <div class="col-span-1">
+                                <div class="filter-group flex">
                                     <button onclick="window.setGenderFilter('전체')" id="filter-all" class="gender-filter-btn filter-btn flex-1 active">전체</button>
                                     <button onclick="window.setGenderFilter('남성')" id="filter-male" class="gender-filter-btn filter-btn flex-1 inactive">남성</button>
                                     <button onclick="window.setGenderFilter('여성')" id="filter-female" class="gender-filter-btn filter-btn flex-1 inactive">여성</button>
+                                </div>
+                            </div>
+                            <div class="col-span-2">
+                                <div class="filter-group flex">
+                                    <button onclick="window.setTeamFilter('전체')" id="filter-tall" class="team-filter-btn filter-btn flex-1 active">팀-전체</button>
+                                    <button onclick="window.setTeamFilter('손기정')" id="filter-ts" class="team-filter-btn filter-btn flex-1 inactive">팀-손기정</button>
+                                    <button onclick="window.setTeamFilter('황영조')" id="filter-th" class="team-filter-btn filter-btn flex-1 inactive">팀-황영조</button>
+                                    <button onclick="window.setTeamFilter('이봉주')" id="filter-tl" class="team-filter-btn filter-btn flex-1 inactive">팀-이봉주</button>
                                 </div>
                             </div>
                         </div>
@@ -495,45 +631,63 @@
 
             <!-- Section: Members (Only Admin) -->
             <div id="section-members" class="hidden space-y-6">
-                <section class="bg-brand-50 p-6 rounded-[2.5rem] border-2 border-brand-200 shadow-xl shadow-brand-100/50">
-                    <h2 id="mem-form-title" class="font-black text-sm mb-6 flex items-center gap-2 text-gray-800">
-                        <i class="fa-solid fa-fire-flame-curved text-brand-600 animate-pulse"></i> 개별 크루 등록
-                    </h2>
-                    <input type="hidden" id="mem-edit-id">
-                    <div class="grid grid-cols-2 gap-4 mb-6">
-                        <div class="col-span-1">
-                            <label class="text-[10px] text-gray-400 font-bold block mb-1">로그인 닉네임 (log_nickname)</label>
-                            <input type="text" id="mem-log-nickname" class="w-full bg-white border border-green-100 p-3 rounded-xl text-sm font-bold outline-none" placeholder="로그인 시 사용">
-                        </div>
-                        <div class="col-span-1">
-                            <label class="text-[10px] text-gray-400 font-bold block mb-1">실제 닉네임 (nickname)</label>
-                            <input type="text" id="mem-nickname" class="w-full bg-white border border-green-100 p-3 rounded-xl text-sm font-bold outline-none" placeholder="화면 표시용">
-                        </div>
-                        <div class="col-span-1">
-                            <label class="text-[10px] text-gray-400 font-bold block mb-1">가입일</label>
-                            <input type="date" id="mem-joindate" class="w-full bg-white border border-green-100 p-3 rounded-xl text-sm font-bold outline-none">
-                        </div>
-                        <div class="col-span-1">
-                            <label class="text-[10px] text-gray-400 font-bold block mb-1">성별</label>
-                            <select id="mem-gender" class="w-full bg-white border border-green-100 p-3 rounded-xl text-sm font-bold outline-none">
-                                <option value="남성">남성</option>
-                                <option value="여성">여성</option>
-                            </select>
-                        </div>
-                        <div class="col-span-2">
-                            <label class="text-[10px] text-gray-400 font-bold block mb-1">메모</label>
-                            <input type="text" id="mem-memo" class="w-full bg-white border border-green-100 p-3 rounded-xl text-sm font-bold outline-none">
-                        </div>
-                    </div>
-                    <button id="mem-submit-btn" class="w-full bg-brand-600 text-white font-black py-4 rounded-2xl shadow-lg shadow-brand-200 active:scale-[0.98] transition-all hover:bg-brand-700 text-lg flex items-center justify-center gap-2">저장하기</button>
-                </section>
+  
+<section class="bg-brand-50 p-6 rounded-[2.5rem] border-2 border-brand-200 shadow-xl shadow-brand-100/50">
+    <h2 id="mem-form-title" class="font-black text-sm mb-6 flex items-center gap-2 text-gray-800">
+        <i class="fa-solid fa-fire-flame-curved text-brand-600 animate-pulse"></i> 개별 크루 등록
+    </h2>
+    <input type="hidden" id="mem-edit-id">
+    
+    <div class="grid grid-cols-2 gap-4 mb-6">
+        <div class="col-span-1">
+            <label class="text-[10px] text-gray-400 font-bold block mb-1">로그인 닉네임 (log_nickname)</label>
+            <input type="text" id="mem-log-nickname" class="w-full bg-white border border-green-100 p-3 rounded-xl text-sm font-bold outline-none" placeholder="로그인 시 사용">
+        </div>
+        
+        <div class="col-span-1">
+            <label class="text-[10px] text-gray-400 font-bold block mb-1">실제 닉네임 (nickname)</label>
+            <input type="text" id="mem-nickname" class="w-full bg-white border border-green-100 p-3 rounded-xl text-sm font-bold outline-none" placeholder="화면 표시용">
+        </div>
+
+        <div class="col-span-2 grid grid-cols-3 gap-3">
+            <div>
+                <label class="text-[10px] text-gray-400 font-bold block mb-1">소속팀 (team)</label>
+                <select id="mem-team" class="w-full bg-white border border-green-100 p-3 rounded-xl text-sm font-bold outline-none">
+                    <option value="">선택</option>
+                    <option value="손기정">손기정</option>
+                    <option value="이봉주">이봉주</option>
+                    <option value="황영조">황영조</option>
+                </select>
+            </div>
+            <div>
+                <label class="text-[10px] text-gray-400 font-bold block mb-1">성별</label>
+                <select id="mem-gender" class="w-full bg-white border border-green-100 p-3 rounded-xl text-sm font-bold outline-none">
+                    <option value="남성">남성</option>
+                    <option value="여성">여성</option>
+                </select>
+            </div>
+            <div>
+                <label class="text-[10px] text-gray-400 font-bold block mb-1">가입일</label>
+                <input type="date" id="mem-joindate" class="w-full bg-white border border-green-100 p-3 rounded-xl text-sm font-bold outline-none">
+            </div>
+        </div>
+
+        <div class="col-span-2">
+            <label class="text-[10px] text-gray-400 font-bold block mb-1">메모</label>
+            <input type="text" id="mem-memo" class="w-full bg-white border border-green-100 p-3 rounded-xl text-sm font-bold outline-none">
+        </div>
+    </div>
+
+    <button id="mem-submit-btn" class="w-full bg-brand-600 text-white font-black py-4 rounded-2xl shadow-lg shadow-brand-200 active:scale-[0.98] transition-all hover:bg-brand-700 text-lg flex items-center justify-center gap-2">저장하기</button>
+</section>
+
                 <section class="bg-white p-6 rounded-[2.5rem] border border-brand-100 shadow-sm">
                     <div class="flex justify-between items-center mb-6">
                          <h2 class="font-black text-sm flex items-center gap-2 text-gray-800">
                             <i class="fa-solid fa-users-viewfinder text-brand-500"></i> 일괄 크루 입력
                         </h2>
                     </div>
-                    <textarea id="bulk-members-input" rows="4" placeholder="예: 2024-03-01, 홍길동, 남성..." class="w-full bg-gray-50 border border-gray-200 p-4 rounded-2xl text-[11px] font-bold outline-none focus:ring-2 ring-brand-200 mb-4 font-mono"></textarea>
+                    <textarea id="bulk-members-input" rows="4" placeholder="예: 2027-03-01, 팀명,이가을,이가을, 여성..." class="w-full bg-gray-50 border border-gray-200 p-4 rounded-2xl text-[11px] font-bold outline-none focus:ring-2 ring-brand-200 mb-4 font-mono"></textarea>
                     <button id="btn-bulk-import" class="w-full bg-brand-600 text-white font-black py-4 rounded-2xl shadow-lg shadow-brand-200 active:scale-[0.98] transition-all hover:bg-brand-700 text-lg flex items-center justify-center gap-2">일괄 등록 시작하기</button>
                 </section>
 
@@ -563,6 +717,10 @@
                                     <th class="p-1 sortable-header" onclick="window.toggleSort('nickname')">
                                         실제닉 <i id="sort-nickname" class="fa-solid fa-sort sort-icon"></i>
                                     </th>
+                                    <th class="p-1 sortable-header" onclick="window.toggleSort('team')">
+                                        팀 <i id="sort-team" class="fa-solid fa-sort sort-icon"></i>
+                                    </th>
+
                                     <th class="p-1 sortable-header" onclick="window.toggleSort('gender')">
                                         성별 <i id="sort-gender" class="fa-solid fa-sort sort-icon"></i>
                                     </th>
@@ -588,7 +746,7 @@
                         </h2>
                     </div>
                     <p class="text-[10px] text-gray-400 font-bold mb-3 ml-1">형식: 날짜, 이름, 유형, 거리, 시간, 심박, 케이던스</p>
-                    <textarea id="bulk-logs-input" rows="5" placeholder="2026-01-15, 홍길동, 번개, 10, 50, 160, 180&#10;2026-01-16, 김철수, 정규, 5, 25, 150, 175" class="w-full bg-gray-50 border border-gray-200 p-4 rounded-2xl text-[11px] font-bold outline-none focus:ring-2 ring-brand-200 mb-4 font-mono"></textarea>
+                    <textarea id="bulk-logs-input" rows="5" placeholder="2026-01-15, 홍여름, 번개, 10, 50, 160, 180&#10;2026-01-16, 김겨울, 정규, 5, 25, 150, 175" class="w-full bg-gray-50 border border-gray-200 p-4 rounded-2xl text-[11px] font-bold outline-none focus:ring-2 ring-brand-200 mb-4 font-mono"></textarea>
                     <button id="btn-bulk-logs-import" class="w-full bg-brand-600 text-white font-black py-4 rounded-2xl shadow-lg shadow-brand-200 active:scale-[0.98] transition-all hover:bg-brand-700 text-lg flex items-center justify-center gap-2">기록 일괄 등록하기</button>
                 </section>
             </div>
@@ -684,9 +842,12 @@
         let memberSearchTerm = '';
         let selectedYear = new Date().getFullYear();
         let selectedGender = '전체';
+        let selectedTeam = '전체';        
         let selectedTarget = '전체'; 
         let selectedType = '전체'; 
         let selectedMonthF = '전체'; 
+
+        let selectedMonthT = '전체'; 
 
         let selectedRankingPeriod = 'this'; 
         let sortConfig = { key: 'log_nickname', direction: 'asc' };
@@ -776,6 +937,17 @@
         };
 
 
+        window.setTeamFilter = (team) => {
+            selectedTeam = team;
+            ['filter-tall', 'filter-ts', 'filter-th', 'filter-tl'].forEach(id => {
+                const el = document.getElementById(id);
+                const isActive = (id === 'filter-tall' && team === '전체') || (id === 'filter-ts' && team === '손기정') || (id === 'filter-th' && team === '황영조')|| (id === 'filter-tl' && team === '이봉주');
+                el.classList.toggle('active', isActive);
+                el.classList.toggle('inactive', !isActive);
+            });
+            renderAllCharts();
+        };
+
 //z
         window.setTypeFilter = (type) => {
             selectedType = type;
@@ -789,6 +961,7 @@
         };
 
         const mo = document.getElementById('month-select');
+
         const smileys = ["😊", "✨", "🏃", "☀️", "🍀", "🌿", "🌊", "⛱️", "🍁", "🍂", "❄️", "🎄"]; // 월별 어울리는 아이콘 (선택사항)
         const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
         for(let i=1; i<=12; i++) {
@@ -810,6 +983,8 @@
 
         window.setMonthFilter = (month) => {
             selectedMonthF = month;
+  console.log("aa");
+  console.log(month);
             const monthIds = ['month-all', ...Array.from({length: 12}, (_, i) => `month-${i + 1}`)];
             monthIds.forEach(id => {
                 const el = document.getElementById(id);
@@ -821,6 +996,42 @@
             renderLogs(); // 데이터 다시 그리기
         };
 
+////////s/
+       const mot = document.getElementById('main-filter-month');
+       for(let i=1; i<=12; i++) {
+            const o = document.createElement('option');
+            o.value = i;
+            
+            const engName = monthNames[i-1];
+            const icon = smileys[i-1]; 
+            
+            o.innerText = ` ${icon} ${i}월 - ${engName}`;
+            mot.appendChild(o);
+        }
+
+        mot.onchange = (e) => {
+            const val = e.target.value;
+            // 기존에 버튼 클릭 시 호출하던 함수를 그대로 연결합니다.
+            window.setMonthFilterT(val === '전체' ? '전체' : Number(val));
+        };
+
+        window.setMonthFilterT = (month) => {
+
+  console.log("TT");
+    console.log(month);
+
+            selectedMonthT = month;
+            const monthIds = ['month-all', ...Array.from({length: 12}, (_, i) => `month-${i + 1}`)];
+            monthIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                const isActive = (id === 'month-all' && month === '전체') || (id === `month-${month}`);
+                el.classList.toggle('active', isActive);
+                el.classList.toggle('inactive', !isActive);
+            });
+            updateUI_Team(); // 데이터 다시 그리기
+        };
+////////
 
         window.setRankingPeriod = (period) => {
             selectedRankingPeriod = period;
@@ -833,6 +1044,180 @@
             renderRankingLists();
         };
 
+
+
+
+
+
+        window.updateUI_Team = () => {
+           // c//onst filterVal = document.getElementById('main-filter-month').value;
+            //const filtered = allLogs.filter(r => filterVal === 'all' || (r.date && r.date.startsWith(filterVal)));
+
+            const filtered = allLogs
+                    .filter(l => l.date && new Date(l.date).getFullYear() === parseInt(selectedYear))
+                    .filter(l => {
+                        if (selectedMonthT === '전체') return true;
+                        const logMonth = new Date(l.date).getMonth() + 1;
+                        return logMonth === parseInt(selectedMonthT);
+                    });
+
+
+            const teams = {
+                "손기정": { dist: 0, time: 0, count: 0, color: '#3b82f6', members: new Set() },
+                "황영조": { dist: 0, time: 0, count: 0, color: '#ec4899', members: new Set() },
+                "이봉주": { dist: 0, time: 0, count: 0, color: '#22c55e', members: new Set() }
+            };
+
+            let myStats = { dist: 0, time: 0, count: 0 };
+
+            filtered.forEach(r => {
+                const teamName = allMembers[r.userName];
+                if (teamName && teams[teamName]) {
+                    teams[teamName].dist += (r.distance || 0);
+                    teams[teamName].time += (r.duration || 0);
+                    teams[teamName].count++;
+                    teams[teamName].members.add(r.userName);
+                    
+                    if (r.userName === userData.name) {
+                        myStats.dist += (r.distance || 0);
+                        myStats.time += (r.duration || 0);
+                        myStats.count++;
+                    }
+                }
+            });
+
+            const myCurrentTeam = allMembers[userData.name] || userData.team;
+            const myTeamData = teams[myCurrentTeam] || { dist: 1 };
+   
+            const list = document.getElementById('team-list');
+            if (list) {
+                list.innerHTML = '';
+                const sorted = Object.entries(teams).sort((a,b) => {
+                    const key = currentMetric === 'dist' ? 'dist' : (currentMetric === 'time' ? 'time' : 'count');
+                    return b[1][key] - a[1][key];
+                });
+
+                const maxKey = currentMetric === 'dist' ? 'dist' : (currentMetric === 'time' ? 'time' : 'count');
+                const maxVal = Math.max(...Object.values(teams).map(t => t[maxKey]), 1);
+
+               sorted.forEach(([name, data]) => {
+
+                const hms= minToHMS(data.time);
+                const timeStr = `${hms.h > 0 ? hms.h + ':' : ''}${hms.m.toString().padStart(2, '0')}:${hms.s.toString().padStart(2, '0')}`;
+
+
+                    list.innerHTML += `
+                        <div class="space-y-1 bg-rose-50 p-2 rounded-xl"> 
+                            <div class="flex justify-between items-center bg-rose-50">
+                                <div class="flex items-center gap-1 bg-rose-50">
+                                    <div class="w-2 h-2 rounded-full" style="background-color: ${data.color}"></div>
+                                    <span class="text-[12px] font-black text-slate-800">팀-${name}</span>
+                                    <span class="text-[9px] font-bold text-slate-300">${data.members.size}인</span>
+                                </div>
+                                <div class="flex gap-1 bg-rose-50">
+                                    <span class="badge-stat ${currentMetric==='dist'?'highlight':''}">
+                                        ${data.dist.toFixed(1)}km
+                                    </span>
+                                    <span class="badge-stat ${currentMetric==='time'?'highlight':''}">
+                                        ${timeStr}
+                                    </span>
+                                    <span class="badge-stat ${currentMetric==='count'?'highlight':''}">
+                                        ${data.count}회
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="h-2.5 bg-rose/60 rounded-full overflow-hidden">
+                                <div class="h-full transition-all duration-1000 ease-out rounded-full bg-rose-50" 
+                                    style="width: ${(data[maxKey]/maxVal)*100}%; background-color: ${data.color}"></div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            renderChart(teams, myStats, myCurrentTeam);
+        };
+
+        function renderChart(teams, myStats, myCurrentTeam) {
+            const canvas = document.getElementById('teamChart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            let dataPoints = [];
+            let chartLabels = Object.keys(teams);
+
+            if (currentCalcMode === 'my') {
+                const myTeamTotal = teams[myCurrentTeam] || { dist: 0, time: 0, count: 0 };
+                const key = currentMetric === 'dist' ? 'dist' : (currentMetric === 'time' ? 'time' : 'count');
+                dataPoints = [myStats[key], Math.max(0, myTeamTotal[key] - myStats[key])];
+                chartLabels = ["내 기록", "다른 팀원"];
+            } else {
+                chartLabels.forEach(l => {
+                    const t = teams[l];
+                    const memberCount = t.members.size || 1;
+                    const key = currentMetric === 'dist' ? 'dist' : (currentMetric === 'time' ? 'time' : 'count');
+                    dataPoints.push(currentCalcMode === 'total' ? t[key] : t[key] / memberCount);
+                });
+            }
+
+            if (chartInstance) chartInstance.destroy();
+            chartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        data: dataPoints,
+                        backgroundColor: currentCalcMode === 'my' ? [(teams[myCurrentTeam]?.color || '#22c55e'), '#f1f5f9'] : Object.values(teams).map(t => t.color),
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, cutout: '78%',
+                    plugins: {
+                        legend: { position: 'bottom', labels: { padding: 15, font: { size: 10, weight: 'bold' }, usePointStyle: true } }
+                    }
+                }
+            });
+            const modeLabel = currentCalcMode === 'my' ? '내 비중' : (currentCalcMode === 'total' ? '팀 합계' : '팀원 평균');
+            const metricLabel = currentMetric === 'dist' ? '거리' : (currentMetric === 'time' ? '시간' : '횟수');
+            const title = document.getElementById('chart-title');
+            if(title) title.innerText = `${modeLabel} ${metricLabel} 분석`;
+        }
+
+
+        let currentUser = null;
+        let userData = { name: '', team: '' };
+        let allMembers = {}; // nickname: team 조인용 맵
+        let chartInstance = null;
+        let currentMetric = 'dist';
+        let currentCalcMode = 'total';
+
+        window.syncAndRefresh = () => updateUI_Team();
+
+        window.setMetric = (m) => {
+            currentMetric = m;
+            ['dist', 'time', 'count'].forEach(id => {
+                const mb = document.getElementById(`main-btn-${id}`);
+                if(mb) {
+                    const isActive = id === m;
+                    mb.classList.toggle('bg-green-500', isActive);
+                    mb.classList.toggle('text-white', isActive);
+                    mb.classList.toggle('border-green-500', isActive);
+                }
+            });
+            updateUI_Team();
+        };
+
+        window.setCalcMode = (mode) => {
+            currentCalcMode = mode;
+            ['total', 'avg', 'my'].forEach(id => {
+                const b = document.getElementById(`btn-mode-${id}`);
+                if(b) b.classList.toggle('active', id === mode);
+            });
+            updateUI_Team();
+        };
+
         const renderAllCharts = () => {
             if (document.getElementById('section-stats').classList.contains('hidden')) return;
             const distData = Array(12).fill(0);
@@ -840,14 +1225,23 @@
             const countData = Array(12).fill(0);
             const paceRaw = Array(12).fill(null).map(() => ({ dist: 0, time: 0 }));
             const genderMap = {};
-            crewMembers.forEach(m => { genderMap[m.nickname] = m.gender; });
+            const teamMap = {};
+
+            //crewMembers.forEach(m => { genderMap[m.nickname] = m.gender; });
+            crewMembers.forEach(m => {
+                genderMap[m.nickname] = m.gender;
+                teamMap[m.nickname] = m.team;
+            });
+
 
             const filteredLogs = allLogs.filter(l => {
                 const isCorrectYear = l.date && new Date(l.date).getFullYear() === parseInt(selectedYear);
                 const userGender = genderMap[l.userName] || '미지정';
+                const userTeam = teamMap[l.userName] || '미지정';
                 const isCorrectGender = selectedGender === '전체' || userGender === selectedGender;
+                const isCorrectTeam = selectedTeam === '전체' || userTeam === selectedTeam;
                 const isCorrectTarget = selectedTarget === '전체' || l.userName === userNickname;
-                return isCorrectYear && isCorrectGender && isCorrectTarget;
+                return isCorrectYear && isCorrectGender && isCorrectTarget && isCorrectTeam;
             });
 
             filteredLogs.forEach(l => {
@@ -991,6 +1385,11 @@
             renderAllCharts();
         };
 
+
+
+
+
+
         const renderLogs = () => {
             const list = document.getElementById('log-list');
             const displayLogs = (isAdmin ? allLogs : allLogs.filter(l => l.userName === userNickname))
@@ -1078,7 +1477,7 @@
         };
 
         const getFilteredMembers = () => {
-           let filtered = crewMembers.filter(m => (m.nickname + (m.log_nickname || '') + m.gender + m.joinDate).toLowerCase().includes(memberSearchTerm.toLowerCase()));
+           let filtered = crewMembers.filter(m => (m.nickname + (m.log_nickname || '') + m.gender+ m.team + m.joinDate).toLowerCase().includes(memberSearchTerm.toLowerCase()));
              filtered.sort((a, b) => {
                 let vA = a[sortConfig.key] || '', vB = b[sortConfig.key] || '';
                 if (vA < vB) return sortConfig.direction === 'asc' ? -1 : 1;
@@ -1102,6 +1501,7 @@
                             ${m.nickname}
                         </button>
                     </td>
+                    <td class="px-3 py-0 text-[10px] font-bold ${m.team === '남성' ? 'text-blue-500' : 'text-pink-500'} leading-tight">${m.team}</td>
                     <td class="px-3 py-0 text-[10px] font-bold ${m.gender === '남성' ? 'text-blue-500' : 'text-pink-500'} leading-tight">${m.gender}</td>
                     <td class="px-3 py-0 text-[10px] text-gray-400 font-medium leading-tight">${m.joinDate}</td>
                     <td class="px-3 py-0 text-[10px] text-brand-600 font-black italic leading-tight">${m.lastLogin || '-'}</td>
@@ -1361,6 +1761,7 @@
             document.getElementById('mem-log-nickname').value = m.log_nickname || '';
             document.getElementById('mem-nickname').value = m.nickname;
             document.getElementById('mem-gender').value = m.gender;
+            document.getElementById('mem-team').value = m.team|| '무소속';
             document.getElementById('mem-joindate').value = m.joinDate;
             document.getElementById('mem-memo').value = m.memo || '';
             document.getElementById('mem-form-title').innerText = "크루 정보 수정";
@@ -1370,7 +1771,7 @@
         const setupListeners = () => {
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_logs'), (snap) => {
                 allLogs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                renderStats();  renderLogs(); renderRankingLists();
+                renderStats();  renderLogs(); renderRankingLists();updateUI_Team();
             });
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_members'), (snap) => {
                 crewMembers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -1443,6 +1844,19 @@
     
                 document.getElementById('username-field-container').classList.toggle('hidden', !isAdmin);
                 document.getElementById('log-username').value = isAdmin ? (document.getElementById('log-username').value || "Jake") : userNickname;
+
+            // 멤버 리스너 (nickname=userName 조인용)
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_members'), (snap) => {
+                const members = {};
+                snap.docs.forEach(d => {
+                    const data = d.data();
+                    // nickname을 키로 사용하여 팀 정보 저장
+                    members[data.nickname] = data.team;
+                });
+                allMembers = members;
+                updateUI_Team();
+            });
+
 
             }
         };
@@ -1549,8 +1963,8 @@
             document.getElementById('btn-member-csv').onclick = () => {
                 const filtered = getFilteredMembers();
                 if(filtered.length === 0) return showModal("내보낼 크루가 없습니다.", "alert");
-                let csv = "\uFEFFNo,로그인닉,닉네임,성별,가입일,최근접속일,메모\n";
-                filtered.forEach((m, idx) => { csv += `${idx + 1},${m.log_nickname || ''},${m.nickname},${m.gender},${m.joinDate},${m.lastLogin || '-'},${(m.memo || '').replace(/,/g, ' ')}\n`; });
+                let csv = "\uFEFFNo,로그인닉,닉네임,팀,성별,가입일,최근접속일,메모\n";
+                filtered.forEach((m, idx) => { csv += `${idx + 1},${m.log_nickname || ''},${m.nickname},${m.team},${m.gender},${m.joinDate},${m.lastLogin || '-'},${(m.memo || '').replace(/,/g, ' ')}\n`; });
                 const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement("a");
                 link.setAttribute("href", URL.createObjectURL(blob));
@@ -1559,7 +1973,7 @@
                 showToast("크루 목록을 다운로드했습니다.");                
             };
             document.getElementById('mem-submit-btn').onclick = async () => {
-                const data = { log_nickname: document.getElementById('mem-log-nickname').value.trim(), nickname: document.getElementById('mem-nickname').value.trim(), gender: document.getElementById('mem-gender').value, joinDate: document.getElementById('mem-joindate').value, memo: document.getElementById('mem-memo').value.trim(), updatedAt: serverTimestamp() };
+                const data = { log_nickname: document.getElementById('mem-log-nickname').value.trim(), nickname: document.getElementById('mem-nickname').value.trim(), gender: document.getElementById('mem-gender').value,  joinDate: document.getElementById('mem-joindate').value, memo: document.getElementById('mem-memo').value.trim(),team: document.getElementById('mem-team').value|| '무소속', updatedAt: serverTimestamp() };
                 if(!data.nickname) return showModal("닉네임을 입력하세요.", "alert");
                 const editId = document.getElementById('mem-edit-id').value;
                 try {
@@ -1583,8 +1997,8 @@
                 const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_members');
                 for(let line of lines) {
                     const p = line.split(',').map(x => x.trim());
-                    if(p.length >= 4) {
-                        try { await addDoc(colRef, { joinDate: p[0], log_nickname: p[1], nickname: p[2], gender: p[3], memo: '일괄 등록됨', updatedAt: serverTimestamp() }); count++; } catch(e) {}
+                    if(p.length >= 5) {
+                        try { await addDoc(colRef, { joinDate: p[0], log_nickname: p[1], nickname: p[2], team: p[3],gender: p[4], memo: '일괄 등록됨', updatedAt: serverTimestamp() }); count++; } catch(e) {}
                     }
                 }
                 document.getElementById('bulk-members-input').value = '';
