@@ -242,6 +242,105 @@
         ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
                         
     </style>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&family=Orbitron:wght@700&display=swap');
+        
+        body { 
+            font-family: 'Pretendard', sans-serif; 
+            background-color: #f8fafc; 
+            color: #0f172a; 
+            -webkit-tap-highlight-color: transparent; 
+        }
+
+        .font-orbitron { font-family: 'Orbitron', sans-serif; }
+
+        .glass-card {
+            background: white;
+            border-radius: 1.5rem;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .modal-overlay {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(8px);
+        }
+
+        .filter-group { 
+            display: flex; 
+            background-color: #f1f5f9; 
+            padding: 4px; 
+            border-radius: 12px; 
+        }
+        
+        .filter-btn { 
+            flex: 1;
+            padding: 8px 12px; 
+            font-size: 11px; 
+            font-weight: 800; 
+            border-radius: 8px; 
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: center;
+            color: #94a3b8;
+            white-space: nowrap;
+        }
+        
+        .filter-btn.active { 
+            background-color: white; 
+            color: #16a34a; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+        }
+
+        .main-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border: 1px solid #e2e8f0;
+            background: white;
+            color: #64748b;
+            transition: all 0.2s;
+        }
+
+        .main-btn.active {
+            background: #22c55e;
+            color: white;
+            border-color: #22c55e;
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+        }
+
+        .btn-gradient {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-gradient:hover { transform: translateY(-1px); filter: brightness(1.1); }
+
+        .form-input {
+            width: 100%;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 0.85rem 1rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus {
+            border-color: #22c55e;
+            background-color: white;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+        }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+    </style>
+
 </head>
 <body class="pb-20">
 
@@ -430,18 +529,17 @@
                             <p class="text-[9px] font-black text-slate-400 uppercase mb-1.5 ml-1 bg-slate-100"> <i class="fas fa-calendar"></i> 기록 기간</p>
                             <div class="relative bg-slate-100">
                                 <select id="main-filter-month" onchange="syncAndRefresh()" 
-                                class="text-[11px] font-bold border border-gray-200 rounded-lg px-2 py-2.5 bg-white outline-none text-gray-700 shadow-sm appearance-none min-h-[40px] flex items-center">
+                                    class="text-[11px] font-bold border border-gray-200 rounded-lg px-2 py-2.5 bg-white outline-none text-gray-700 shadow-sm appearance-none min-h-[40px] flex items-center">
                                     <option value="전체">🗓️ 모든 월 </option>
                                     </select>
-                                <i class="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-slate-300 pointer-events-none"></i>
                             </div>
                         </div>
                         <div class="flex-[1.5] bg-slate-100">
                             <p class="text-[9px] font-black text-slate-400 uppercase mb-1.5 ml-1"><i class="fas fa-sort"> </i> 정렬 및 바 기준</p>
                             <div class="flex gap-1">
-                                <button onclick="setMetric('dist')" id="main-btn-dist" class="flex-1 py-2 rounded-xl border border-slate-200 bg-white text-[10px] font-black text-slate-400 hover:bg-slate-50 transition shadow-sm">  <i class="fas fa-road"></i> 거리</button>
-                                <button onclick="setMetric('time')" id="main-btn-time" class="flex-1 py-2 rounded-xl border border-slate-200 bg-white text-[10px] font-black text-slate-400 hover:bg-slate-50 transition shadow-sm">  <i class="fas fa-clock"></i> 시간</button>
-                                <button onclick="setMetric('count')" id="main-btn-count" class="flex-1 py-2 rounded-xl border border-slate-200 bg-white text-[10px] font-black text-slate-400 hover:bg-slate-50 transition shadow-sm"><i class="fas fa-running"></i> 횟수</button>
+                                <button onclick="setMetric('dist')" id="main-btn-dist" class="main-btn flex-1 py-2 rounded-xl border border-slate-200 bg-white text-[10px] font-black text-slate-400 hover:bg-slate-50 transition shadow-sm">  <i class="fas fa-road"></i> 거리</button>
+                                <button onclick="setMetric('time')" id="main-btn-time" class="main-btn flex-1 py-2 rounded-xl border border-slate-200 bg-white text-[10px] font-black text-slate-400 hover:bg-slate-50 transition shadow-sm">  <i class="fas fa-clock"></i> 시간</button>
+                                <button onclick="setMetric('count')" id="main-btn-count" class="main-btn flex-1 py-2 rounded-xl border border-slate-200 bg-white text-[10px] font-black text-slate-400 hover:bg-slate-50 transition shadow-sm"><i class="fas fa-running"></i> 횟수</button>
                             </div>
                         </div>
                     </div>
@@ -753,6 +851,98 @@
         </main>
     </div>
 
+   <!-- Statistics Modal -->
+    <div id="stats-modal" class="fixed inset-0 z-[100] hidden modal-overlay flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-lg rounded-[2.5rem] max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200">
+            <div class="sticky top-0 bg-white/90 backdrop-blur-md px-8 py-6 border-b border-slate-100 flex justify-between items-center z-10">
+                <div>
+                    <h2 class="text-xl font-black text-slate-900 tracking-tight">MISSION STATISTICS</h2>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">상세 활동 데이터 분석</p>
+                </div>
+                <button onclick="closeStatsModal()" class="w-10 h-10 bg-slate-50 hover:bg-slate-100 rounded-full flex items-center justify-center text-slate-400 transition">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="p-1 space-y-1">
+                <div class="space-y-1">
+                    <div class="filter-group">
+                        <button onclick="setCalcMode('total')" id="btn-mode-total" class="filter-btn active">팀 합계</button>
+                        <button onclick="setCalcMode('avg')" id="btn-mode-avg" class="filter-btn">팀원 평균</button>
+                        <button onclick="setCalcMode('my')" id="btn-mode-my" class="filter-btn">내 기록</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-1">
+                    <div class="space-y-1">
+                        <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest px-1">기간 선택</p>
+                                <select id="main-filter-month2" onchange="syncAndRefresh()" 
+                                    class="text-[11px] font-bold border border-gray-200 rounded-lg px-2 py-2.5 bg-white outline-none text-gray-700 shadow-sm appearance-none min-h-[40px] flex items-center">
+                                    <option value="전체">🗓️ 모든 월 </option>
+                                    </select>
+
+                    </div>
+                    <div class="space-y-1">
+                        <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest px-1">측정 기준</p>
+                        <div class="flex gap-1">
+                            <button onclick="setMetric('dist')" id="main-btn-dist" class="main-btn active flex-1 px-0"><i class="fas fa-road"></i></button>
+                            <button onclick="setMetric('time')" id="main-btn-time" class="main-btn flex-1 px-0"><i class="fas fa-clock"></i></button>
+                            <button onclick="setMetric('count')" id="main-btn-count" class="main-btn flex-1 px-0"><i class="fas fa-running"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 rounded-[2rem] p-1 border border-slate-100">
+                    <h3 id="chart-title" class="text-[11px] font-black text-slate-400 uppercase mb-6 text-center tracking-widest">데이터 분석 중...</h3>
+                    <div class="h-56 relative flex items-center justify-center">
+                        <canvas id="teamChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-1">
+                    <!-- Indicators stay same as provided in previous version -->
+                    <div class="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm flex items-center gap-4">
+                        <div class="w-10 h-10 bg-blue-50 text-blue-500 rounded-xl flex items-center justify-center text-sm">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div>
+                            <p class="text-[9px] text-slate-400 font-black uppercase">거리 비중</p>
+                            <p id="contrib-dist" class="text-sm font-black text-slate-800">0%</p>
+                        </div>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm flex items-center gap-4">
+                        <div class="w-10 h-10 bg-pink-50 text-pink-500 rounded-xl flex items-center justify-center text-sm">
+                            <i class="fas fa-history"></i>
+                        </div>
+                        <div>
+                            <p class="text-[9px] text-slate-400 font-black uppercase">시간 비중</p>
+                            <p id="contrib-time" class="text-sm font-black text-slate-800">0%</p>
+                        </div>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm flex items-center gap-4">
+                        <div class="w-10 h-10 bg-green-50 text-green-500 rounded-xl flex items-center justify-center text-sm">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <div>
+                            <p class="text-[9px] text-slate-400 font-black uppercase">평균 페이스</p>
+                            <p id="my-avg-pace" class="text-sm font-black text-slate-800">0'00"</p>
+                        </div>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm flex items-center gap-4">
+                        <div class="w-10 h-10 bg-yellow-50 text-yellow-500 rounded-xl flex items-center justify-center text-sm">
+                            <i class="fas fa-fire"></i>
+                        </div>
+                        <div>
+                            <p class="text-[9px] text-slate-400 font-black uppercase">활동 횟수</p>
+                            <p id="my-run-count" class="text-sm font-black text-slate-800">0회</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+         </div>
+    </div>
+
+
     <!-- Modals -->
     <!-- Profile Edit Modal -->
     <div id="profile-edit-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[250] hidden items-center justify-center p-4">
@@ -1015,10 +1205,25 @@
             window.setMonthFilterT(val === '전체' ? '전체' : Number(val));
         };
 
-        window.setMonthFilterT = (month) => {
 
-  console.log("TT");
-    console.log(month);
+       const mot2 = document.getElementById('main-filter-month2');
+       for(let i=1; i<=12; i++) {
+            const o = document.createElement('option');
+            o.value = i;
+            
+            const engName = monthNames[i-1];
+            const icon = smileys[i-1]; 
+            
+            o.innerText = ` ${icon} ${i}월 - ${engName}`;
+            mot2.appendChild(o);
+        }
+
+        mot2.onchange = (e) => {
+            const val = e.target.value;
+            // 기존에 버튼 클릭 시 호출하던 함수를 그대로 연결합니다.
+            window.setMonthFilterT(val === '전체' ? '전체' : Number(val));
+        };
+        window.setMonthFilterT = (month) => {
 
             selectedMonthT = month;
             const monthIds = ['month-all', ...Array.from({length: 12}, (_, i) => `month-${i + 1}`)];
@@ -1043,10 +1248,6 @@
             });
             renderRankingLists();
         };
-
-
-
-
 
 
         window.updateUI_Team = () => {
@@ -1139,6 +1340,14 @@
             renderChart(teams, myStats, myCurrentTeam);
         };
 
+
+        function formatTime(seconds) {
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = Math.floor(seconds % 60);
+            return `${h > 0 ? h + ':' : ''}${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        }
+
         function renderChart(teams, myStats, myCurrentTeam) {
             const canvas = document.getElementById('teamChart');
             if (!canvas) return;
@@ -1173,9 +1382,44 @@
                     }]
                 },
                 options: {
-                    responsive: true, maintainAspectRatio: false, cutout: '78%',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '78%',
                     plugins: {
-                        legend: { position: 'bottom', labels: { padding: 15, font: { size: 10, weight: 'bold' }, usePointStyle: true } }
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                font: { size: 10, weight: 'bold' },
+                                usePointStyle: true,
+                                generateLabels: (chart) => {
+                                    const data = chart.data;
+                                    return data.labels.map((label, i) => {
+                                        const rawValue = data.datasets[0].data[i];
+                                        const displayValue = currentMetric === 'time' 
+                                            ? formatTime(rawValue) 
+                                            : Math.round(rawValue).toLocaleString(); // 1,000단위 콤마 포함 정수
+                                        return {
+                                            text: `${label}: ${displayValue}`,
+                                            fillStyle: data.datasets[0].backgroundColor[i],
+                                            index: i
+                                        };
+                                    });
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed;
+                                    const displayValue = currentMetric === 'time' 
+                                        ? formatTime(value) 
+                                        : Math.round(value).toLocaleString();
+                                    return ` ${label}: ${displayValue}`;
+                                }
+                            }
+                        }
                     }
                 }
             });
@@ -1194,6 +1438,15 @@
         let currentCalcMode = 'total';
 
         window.syncAndRefresh = () => updateUI_Team();
+
+        window.openStatsModal = () => {
+            if (!localStorage.getItem('songmirun_nickname')) return;
+            document.getElementById('stats-modal').classList.remove('hidden');
+            setTimeout(updateUI_Team, 100);
+        };
+
+        window.closeStatsModal = () => document.getElementById('stats-modal').classList.add('hidden');
+
 
         window.setMetric = (m) => {
             currentMetric = m;
@@ -2024,7 +2277,7 @@
             const yr = document.getElementById('year-select');
             const nowY = new Date().getFullYear();
             for(let i=nowY; i>=nowY-2; i--) { const o = document.createElement('option'); o.value = i; o.innerText = i + '년'; yr.appendChild(o); }
-            yr.onchange = (e) => { selectedYear = e.target.value; renderStats(); renderLogs(); };
+            yr.onchange = (e) => { selectedYear = e.target.value; renderStats(); renderLogs();updateUI_Team(); };  //selectedyear
             const today = new Date().toLocaleDateString('en-CA'); 
             document.getElementById('in-date').value = today;
             document.getElementById('mem-joindate').value = today;        
