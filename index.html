@@ -275,7 +275,7 @@
                                 <label id="label-dist21" title="Click Half" class="text-[11px] text-brand-700 font-black block mb-1 ml cursor-pointer text-center">Half</label>
                                 <label id="label-dist42" title="Click Full" class="text-[11px] text-brand-700 font-black block mb-1 ml cursor-pointer text-center">Full</label>
                             </div>
-                            <input type="number" step="1.000" id="in-dist" placeholder="0.000" class="w-full bg-white border-2 border-brand-100 p-3.5 rounded-2xl text-sm font-bold outline-none shadow-sm">
+                            <input type="number" step="1.000" id="in-dist" placeholder="0.000" class="w-full bg-white border-2 border-brand-100 p-3 rounded-2xl text-sm font-bold outline-none shadow-sm">
                         </div>
 
                         <!-- Improved Time Input Section -->
@@ -306,15 +306,19 @@
                         <div id="more-options" class="expandable-content grid grid-cols-2 gap-4">
                             <div>
                                 <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1">심박수(bpm)</label>
-                                <input type="number" id="in-bpm" min="60" max="300" placeholder="0" class="w-full bg-white border-2 border-brand-100 p-3.5 rounded-2xl text-sm font-bold outline-none shadow-sm">
+                                <input type="number" id="in-bpm" min="60" max="300" placeholder="0" class="w-full bg-white border-2 border-brand-100 p-3 rounded-2xl text-sm font-bold outline-none shadow-sm">
                             </div>
-                            
+
                             <div>
                                 <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1">케이던스 (spm)</label>
-                                <input type="number" id="in-cadence" min="60" max="300" placeholder="0" class="w-full bg-white border-2 border-brand-100 p-3.5 rounded-2xl text-sm font-bold outline-none shadow-sm">
+                                <input type="number" id="in-cadence" min="60" max="300" placeholder="0" class="w-full bg-white border-2 border-brand-100 p-3 rounded-2xl text-sm font-bold outline-none shadow-sm">
                             </div>
-                        </div>
-                    </div>                    
+
+                            <div class="col-span-2">
+                                <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1">메모</label>
+                                <input type="text" id="in-memo" placeholder="메모를 입력하세요" class="w-full bg-white border-2 border-brand-100 p-3 rounded-2xl text-sm font-bold outline-none shadow-sm">
+                            </div>
+                        </div>                    </div>                    
                     <button id="btn-save-log" class="w-full bg-brand-600 text-white font-black py-4 rounded-2xl shadow-lg shadow-brand-200 active:scale-[0.98] transition-all hover:bg-brand-700 text-lg flex items-center justify-center gap-2">
                             <div id="pace-display" class="text-[15px] font-black text-white-800">
                                 [Pace : 0'00"]
@@ -1005,9 +1009,6 @@
             })
             .slice(0, isAdmin ? undefined : 15);
 
-
-
-
             const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
             list.innerHTML = sorted.map(l => {
                 const hms = minToHMS(l.duration);
@@ -1214,23 +1215,16 @@
                         </div>
                     </div>
                 `;
-
-
             };
 
             const lifetimeStats = calculate(userLogs);
             document.getElementById('lifetime-stats-container').innerHTML = `<div class="bg-white rounded-3xl p-5 border border-brand-100 shadow-sm"><h4 class="text-[11px] font-black text-brand-600 mb-4 flex items-center gap-2 uppercase tracking-tight"><i class="fa-solid fa-globe"></i> Lifetime Performance</h4><div class="grid grid-cols-4 gap-3"><div class="text-center bg-brand-50/50 py-3 rounded-2xl"><p class="stat-grid-label text-brand-600">Count</p><p class="stat-grid-val">${lifetimeStats.count}</p></div><div class="text-center bg-gray-50 py-3 rounded-2xl"><p class="stat-grid-label">Dist</p><p class="stat-grid-val">${Number(lifetimeStats.distance).toFixed(0)}km</p></div><div class="text-center bg-gray-50 py-3 rounded-2xl"><p class="stat-grid-label">Time</p><p class="stat-grid-val">${lifetimeStats.durationHMS}</p></div><div class="text-center bg-gray-50 py-3 rounded-2xl"><p class="stat-grid-label">Avg Pace</p><p class="stat-grid-val text-brand-400">${lifetimeStats.pace}</p></div></div></div>`;
 
-
-
-/////
-            // 데이터 필터링 (기존 로직 유지)
             const curMonthData = userLogs.filter(l => l.date && l.date.startsWith(currMonthStr));
             const lastMonthData = userLogs.filter(l => l.date && l.date.startsWith(lastMonthStr));
             const curYearData = userLogs.filter(l => l.date && l.date.startsWith(currYear.toString()));
             const lastYearData = userLogs.filter(l => l.date && l.date.startsWith(lastYear.toString()));
 
-            // 테이블 HTML 생성
             const totalComparisonContent = `
             <div class="bg-white rounded-3xl p-6 border border-brand-100 shadow-sm">
                 <h4 class="text-[11px] font-black text-brand-600 mb-5 flex items-center gap-2 uppercase tracking-tight">
@@ -1267,14 +1261,35 @@
             </div>
             `;
 
-
             document.getElementById('comparison-container').innerHTML = totalComparisonContent;
 
             modal.classList.remove('hidden'); modal.classList.add('flex');
         };
 
-        window.deleteLog = async (id) => { showModal("기록을 삭제하시겠습니까?", "confirm", async () => { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'songmirun_logs', id)); showToast("삭제되었습니다."); }); };
-        
+
+        window.deleteLog = async (id) => {
+            showModal("기록을 삭제하시겠습니까?", "confirm", async () => {
+                try {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'songmirun_logs', id));
+
+                    document.getElementById('edit-id').value = '';
+                    document.getElementById('form-title').innerHTML = '<i class="fa-solid fa-fire-flame-curved text-brand-600 animate-pulse"></i> 새 러닝 기록 입력';
+
+                    const fields = ['in-dist', 'in-time-h', 'in-time-m', 'in-time-s', 'in-bpm', 'in-cadence', 'in-memo'];
+                    fields.forEach(fieldId => {
+                        const el = document.getElementById(fieldId);
+                        if (el) el.value = '';
+                    });
+                    showToast("기록이 ✨삭제되었습니다.");
+
+                } catch (error) {
+                    console.error("삭제 중 오류 발생:", error);
+                    showToast("삭제에 실패했습니다.");
+                }
+            });
+        };
+
+
         window.editLog = (id) => {
             const l = allLogs.find(x => x.id === id);
             if (!l) return;
@@ -1302,6 +1317,7 @@
             setValueAndTrigger('in-cadence', l.cadence);
             setValueAndTrigger('in-date', l.date);
             setValueAndTrigger('run-type', l.runType);
+            setValueAndTrigger('in-memo', l.memo);
 
             // 4. UI 상태 변경 (수정 모드 표시 및 탭 전환)
             const formTitle = document.getElementById('form-title');
@@ -1309,17 +1325,31 @@
                 formTitle.innerHTML = '<i class="fa-solid fa-pen text-brand-500"></i> 기록 수정';
             }
 
-            // 로그 탭으로 이동 및 최상단 스크롤
             document.getElementById('tab-logs')?.click();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
 
         window.deleteMember = async (id) => {
-            if(!auth.currentUser) return;
-            showModal(`크루 정보를 삭제하시겠습니까?`, "confirm", async () => {
-                try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'songmirun_members', id)); showToast('해당 크루가 삭제되었습니다.'); } 
-                catch(e) { showToast("삭제 중 오류가 발생했습니다."); }
+            if (!auth.currentUser) return;
+            const m = crewMembers.find(x => x.id === id);
+            if(!m) return;
+
+            showModal(`${m.log_nickname} / ${m.nickname} \n\n크루 정보를 삭제하시겠습니까?`, "confirm", async () => {
+                try {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'songmirun_members', id));
+                    document.getElementById('mem-edit-id').value = '';
+                    ['mem-log-nickname', 'mem-nickname', 'mem-memo'].forEach(i => {
+                        const el = document.getElementById(i);
+                        if (el) el.value = '';
+                    });
+                    document.getElementById('mem-form-title').innerText = "개별 크루 등록";
+                    showToast(`${m.nickname} ✨해당 크루가 삭제되었습니다.`);
+                } 
+                catch (e) {
+                    console.error("삭제 오류:", e);
+                    showToast("삭제 중 오류가 발생했습니다.");
+                }
             });
         };
 
@@ -1386,7 +1416,7 @@
                         log_nickname: newLogNick 
                     });
                     userObj.log_nickname = newLogNick;
-                    showToast("로그인 닉네임이 변경되었습니다.");
+                    showToast(`${newLogNick} ✨ 로그인 닉네임이 변경되었습니다.`);                    
                     document.getElementById('btn-close-profile').click();
                 } catch(e) { 
                     showToast("변경 실패"); 
@@ -1437,7 +1467,7 @@
                 finally { document.getElementById('login-loader').classList.add('hidden'); }
             };
 
-            document.getElementById('btn-logout').onclick = () => { showModal("로그아웃 하시겠습니까?", "confirm", async () => { localStorage.removeItem('songmirun_nickname'); await signOut(auth); location.reload(); }); };
+            document.getElementById('btn-logout').onclick = () => { showModal(`${userNickname}님, 👟 러닝 가시려구요? 😊`, "confirm", async () => { localStorage.removeItem('songmirun_nickname'); await signOut(auth); location.reload(); }); };
 
             const tabs = { 'tab-logs': 'section-logs', 'tab-ranking': 'section-ranking', 'tab-stats': 'section-stats', 'tab-members': 'section-members' };
             Object.keys(tabs).forEach(id => {
@@ -1464,6 +1494,8 @@
                 const totalMin = hmsToMin(h, m, s);
                 const bpm = Number(document.getElementById('in-bpm').value);
                 const cadence = Number(document.getElementById('in-cadence').value);
+                const memo = Number(document.getElementById('in-memo').value);
+
                 const dist = Number(document.getElementById('in-dist').value);
                 const date = document.getElementById('in-date').value;
                 if(!date || dist <= 0 || totalMin <= 0) return showModal("필수 항목(날짜, 거리, 시간)을 모두 정확히 입력하세요.", "alert");
@@ -1483,16 +1515,16 @@
                 if(bpm !== 0 && (bpm < 70 || bpm > 220)) return showModal("심박수는 0(미입력) 또는 70 ~ 220 사이로 입력해주세요.", "alert");
                 if(cadence !== 0 && (cadence < 100 || cadence > 250)) return showModal("케이던스는 0(미입력) 또는 100 ~ 250 사이로 입력해주세요.", "alert");
 
-                const data = { userName: isAdmin ? document.getElementById('log-username').value.trim() : userNickname, distance: Number(dist.toFixed(3)), duration: totalMin, bpm: bpm, cadence: cadence, date: date, runType: document.getElementById('run-type').value, updatedAt: serverTimestamp() };
+                const data = { userName: isAdmin ? document.getElementById('log-username').value.trim() : userNickname, distance: Number(dist.toFixed(3)), duration: totalMin, bpm: bpm, cadence: cadence, memo: memo, date: date, runType: document.getElementById('run-type').value, updatedAt: serverTimestamp() };
                 const eid = document.getElementById('edit-id').value;
                 try {
                     const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_logs');
                     if(eid) await updateDoc(doc(colRef, eid), data);
                     else await addDoc(colRef, { ...data, createdAt: serverTimestamp() });
-                    ['in-dist','in-time-h','in-time-m','in-time-s','in-bpm','in-cadence'].forEach(i => document.getElementById(i).value='');
+                    ['in-dist','in-time-h','in-time-m','in-time-s','in-bpm','in-cadence','in-memo'].forEach(i => document.getElementById(i).value='');
                     document.getElementById('edit-id').value = '';
                     document.getElementById('form-title').innerHTML = '<i class="fa-solid fa-fire-flame-curved text-brand-600 animate-pulse"></i> 새 러닝 기록 입력';
-                    showToast("저장되었습니다.");
+                    showToast("✨저장되었습니다.");
                 } catch(e) { showToast("저장 실패"); }
             };
 
@@ -1502,8 +1534,8 @@
                 if(!start || !end) return showModal("기간을 선택하세요.", "alert");
                 const filtered = allLogs.filter(l => (l.date >= start && l.date <= end) && (isAdmin || l.userName === userNickname)).sort((a,b) => new Date(a.date) - new Date(b.date));
                 if(filtered.length === 0) return showModal("내보낼 데이터가 없습니다.", "alert");
-                let csv = "\uFEFF날짜,이름,유형,거리(km),시간(분),심박(bpm),케이던스(spm)\n";
-                filtered.forEach(l => { csv += `${l.date},${l.userName},${l.runType || '일반'},${l.distance},${l.duration.toFixed(2)},${l.bpm || 0},${l.cadence || 0}\n`; });
+                let csv = "\uFEFF날짜,이름,유형,거리(km),시간(분),심박(bpm),케이던스(spm),Memo\n";
+                filtered.forEach(l => { csv += `${l.date},${l.userName},${l.runType || '일반'},${l.distance},${l.duration.toFixed(2)},${l.bpm || 0},${l.cadence || 0},${l.memo ||'-'}\n`; });
                 const typeLabel = isAdmin ? "AllRecords" : "MyRecords";
                 const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement("a");
@@ -1536,7 +1568,9 @@
                     document.getElementById('mem-edit-id').value = '';
                     ['mem-log-nickname', 'mem-nickname', 'mem-memo'].forEach(i => document.getElementById(i).value='');
                     document.getElementById('mem-form-title').innerText = "개별 크루 등록";
-                    showToast("크루 정보 저장 완료");
+                    //showToast("크루 정보 저장 완료");
+                    showToast(`${data.nickname} ✨크루 정보 저장 완료`);
+
                 } catch(e) { showToast("저장 실패"); }
             };
 
@@ -1622,13 +1656,11 @@
                 }
             }
 
-            // 모든 입력 필드에 이벤트 리스너 추가
             [inDist, inTimeH, inTimeM, inTimeS].forEach(el => {
                 el.addEventListener('input', calculatePace);
             });
 
             document.getElementById('label-time0').addEventListener('click', function() {
-                // 각 input의 value를 '0'으로 설정
                 document.getElementById('in-time-h').value = 0;
                 document.getElementById('in-time-m').value = 0;
                 document.getElementById('in-time-s').value = 0;
@@ -1639,19 +1671,15 @@
                 const updateAndDispatch = (inputEl, newValue, decimal) => {
                     if (!inputEl) return;
 
-                    // 1. 값 업데이트
                     inputEl.value = newValue.toFixed(decimal);
 
-                    // 2. 수동으로 'input' 이벤트 발생 (스크립트 변경 시 자동 발생 안 함)
-                    // bubbles: true를 통해 부모 요소에서도 이벤트를 감지할 수 있게 함
                     inputEl.dispatchEvent(new Event('input', { bubbles: true }));
 
-                    // 3. 시각적 피드백 (테두리 강조)
+ 
                     inputEl.classList.add('border-emerald-500');
                     setTimeout(() => inputEl.classList.remove('border-emerald-500'), 200);
                 };
 
-                // --- 거리(Distance) 설정 ---
                 const distInput = document.getElementById('in-dist');
                 const distMap = {
                     'label-dist0':  { type: 'set', val: 0.000 },                    
@@ -1671,7 +1699,6 @@
                     });
                 });
 
-                // --- 시간(Time) 설정 ---
                 const timeConfigs = [
                     { id: 'label-timeH', targetId: 'in-time-h', increment: 1 },
                     { id: 'label-timeM', targetId: 'in-time-m', increment: 10 },
