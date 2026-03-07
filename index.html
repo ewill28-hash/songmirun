@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -310,7 +311,7 @@
                 </div>
                 <div class="bg-white p-3 rounded-2xl border border-brand-100 shadow-sm">
                     <p class="text-[9px] text-gray-400 font-bold uppercase tracking-tighter">Time</p>
-                    <p id="stat-time" class="text-[15px] font-black text-gray-500 italic leading-none mt-1">0 m</p>
+                    <p id="stat-time" class="text-[15px] font-black text-orange-500 italic leading-none mt-1">0 m</p>
                 </div>
                 <div class="bg-white p-3 rounded-2xl border border-brand-100 shadow-sm">
                     <p class="text-[9px] text-gray-400 font-bold uppercase tracking-tighter">Count</p>
@@ -603,10 +604,10 @@
                     </section>
                     <section class="bg-white p-6 rounded-[2.5rem] border border-brand-100 shadow-sm">
                         <h2 class="font-black text-xs mb-4 flex items-center gap-2 text-gray-700 uppercase">
-                            <i class="fa-solid fa-gauge-high text-emerald-500"></i> Average Pace (min/km)
+                            <i class="fa-solid fa-clock text-orange-500"></i> Monthly Time (min)
                         </h2>
                         <div class="relative w-full h-[200px]">
-                            <canvas id="monthlyPaceChart"></canvas>
+                            <canvas id="monthlyTimeChart"></canvas>
                         </div>
                     </section>
                     <section class="bg-white p-6 rounded-[2.5rem] border border-brand-100 shadow-sm">
@@ -619,12 +620,14 @@
                     </section>
                     <section class="bg-white p-6 rounded-[2.5rem] border border-brand-100 shadow-sm">
                         <h2 class="font-black text-xs mb-4 flex items-center gap-2 text-gray-700 uppercase">
-                            <i class="fa-solid fa-clock text-orange-500"></i> Monthly Time (min)
+                            <i class="fa-solid fa-gauge-high text-rose-500"></i> Average Pace (min/km)
                         </h2>
                         <div class="relative w-full h-[200px]">
-                            <canvas id="monthlyTimeChart"></canvas>
+                            <canvas id="monthlyPaceChart"></canvas>
                         </div>
                     </section>
+
+
                 </div>
                 <div class="bg-white p-4 rounded-2xl border border-brand-100">
                     <div class="flex justify-between items-center mb-3">
@@ -1475,9 +1478,25 @@
             distChart = createChart('monthlyDistChart', 'bar', 'Dist.(km)', distData, themeColor, { dataset: { borderRadius: 6 } });
             
             if (paceChart) paceChart.destroy();
-            paceChart = createChart('monthlyPaceChart', 'line', 'Pace (min/km)', paceData, '#10b981', { 
-                dataset: { fill: true, backgroundColor: '#10b98133', tension: 0.3, pointRadius: 4 },
-                chart: { scales: { y: { reverse: true } } }
+
+            // Rose 계통 색상 설정
+            const rosePrimary = '#f43f5e'; // rose-500
+            const roseLight = '#f43f5e33'; // rose-500 + 20% 투명도
+
+            paceChart = createChart('monthlyPaceChart', 'line', 'Pace (min/km)', paceData, rosePrimary, { 
+                dataset: { 
+                    fill: true, 
+                    backgroundColor: roseLight, 
+                    tension: 0.3, 
+                    pointRadius: 4 
+                },
+                chart: { 
+                    scales: { 
+                        y: { 
+                            reverse: true // 페이스 차트이므로 낮은 숫자(빠른 속도)가 상단에 위치
+                        } 
+                    } 
+                }
             });
 
             if (countChart) countChart.destroy();
@@ -1850,13 +1869,13 @@
                         </div>
                         <div class="space-y-2">
                             <div>
-                                <p class="stat-grid-val text-emerald-600">${s.count}회</p>
+                                <p class="stat-grid-val text-emerald-600">${Number(s.distance).toFixed(0)}km</p>
                             </div>
                             <div>
-                                <p class="stat-grid-val">${Number(s.distance).toFixed(0)}km</p>
+                                <p class="stat-grid-val text-orange-600 ">${s.durationHMS}</p>
                             </div>
                             <div>
-                                <p class="stat-grid-val">${s.durationHMS}</p>
+                                <p class="stat-grid-val text-purple-600">${s.count}회</p>
                             </div>
                             <div>
                                 <p class="stat-grid-val text-rose-600 font-bold">${s.pace}</p>
@@ -1867,8 +1886,35 @@
             };
 
             const lifetimeStats = calculate(userLogs);
-            document.getElementById('lifetime-stats-container').innerHTML = `<div class="bg-white rounded-3xl p-5 border border-brand-100 shadow-sm"><h4 class="text-[11px] font-black text-brand-600 mb-4 flex items-center gap-2 uppercase tracking-tight"><i class="fa-solid fa-globe"></i> Lifetime Performance</h4><div class="grid grid-cols-4 gap-3"><div class="text-center bg-brand-50/50 py-3 rounded-2xl"><p class="stat-grid-label text-brand-600">Count</p><p class="stat-grid-val">${lifetimeStats.count}</p></div><div class="text-center bg-gray-50 py-3 rounded-2xl"><p class="stat-grid-label">Dist</p><p class="stat-grid-val">${Number(lifetimeStats.distance).toFixed(0)}km</p></div><div class="text-center bg-gray-50 py-3 rounded-2xl"><p class="stat-grid-label">Time</p><p class="stat-grid-val">${lifetimeStats.durationHMS}</p></div><div class="text-center bg-gray-50 py-3 rounded-2xl"><p class="stat-grid-label">Avg Pace</p><p class="stat-grid-val text-brand-400">${lifetimeStats.pace}</p></div></div></div>`;
+            document.getElementById('lifetime-stats-container').innerHTML = `
+                <div class="bg-white rounded-3xl p-5 border border-brand-100 shadow-sm">
+                    <h4 class="text-[11px] font-black text-brand-600 mb-4 flex items-center gap-2 uppercase tracking-tight">
+                        <i class="fa-solid fa-globe"></i> Lifetime Performance
+                    </h4>
+                    
+                    <div class="grid grid-cols-4 gap-3">
 
+                        
+                        <div class="text-center bg-gray-50 py-3 rounded-2xl">
+                            <p class="stat-grid-label">Dist</p>
+                            <p class="stat-grid-val text-emerald-500">${Number(lifetimeStats.distance).toFixed(0)}km</p>
+                        </div>
+                        
+                        <div class="text-center bg-gray-50 py-3 rounded-2xl">
+                            <p class="stat-grid-label">Time</p>
+                            <p class="stat-grid-val text-orange-500">${lifetimeStats.durationHMS}</p>
+                        </div>
+                        <div class="text-center bg-purple-50/50 py-3 rounded-2xl">
+                            <p class="stat-grid-label text-purple-600">Count</p>
+                            <p class="stat-grid-val text-purple-500">${lifetimeStats.count}</p>
+                        </div>
+                        <div class="text-center bg-gray-50 py-3 rounded-2xl">
+                            <p class="stat-grid-label">Avg Pace</p>
+                            <p class="stat-grid-val text-rose-500">${lifetimeStats.pace}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
             const curMonthData = userLogs.filter(l => l.date && l.date.startsWith(currMonthStr));
             const lastMonthData = userLogs.filter(l => l.date && l.date.startsWith(lastMonthStr));
             const curYearData = userLogs.filter(l => l.date && l.date.startsWith(currYear.toString()));
@@ -1883,7 +1929,7 @@
                     <table class="w-full text-center border-collapse">
                         <thead>
                             <tr class="text-[10px] text-gray-400 uppercase tracking-widest border-b border-brand-50">
-                                <th class="pb-3 font-black text-emerald-600">This Month</th>
+                                <th class="pb-3 font-black text-rose-600">This Month</th>
                                 <th class="pb-3 font-black text-gray-400">Last Month</th>
                                 <th class="pb-3 border-l border-brand-50 font-black text-blue-600 pl-4">Year ${currYear}</th>
                                 <th class="pb-3 font-black text-gray-400">Year ${lastYear}</th>
@@ -1891,16 +1937,16 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td class="py-3">
-                                    ${genStatCol('', curMonthData, 'emerald')}
+                                <td class="py-3 text-emerald-500 ">
+                                    ${genStatCol('', curMonthData, 'blue')}
                                 </td>
-                                <td class="py-3 text-gray-400 opacity-80">
+                                <td class="py-3 text-orange-500 opacity-80">
                                     ${genStatCol('', lastMonthData, 'gray')}
                                 </td>
-                                <td class="py-3 border-l border-brand-50 pl-4">
+                                <td class="py-3 text-purple-500 border-l border-brand-50 pl-4">
                                     ${genStatCol('', curYearData, 'blue')}
                                 </td>
-                                <td class="py-3 text-gray-400 opacity-80">
+                                <td class="py-3 text-rose-500 opacity-80">
                                     ${genStatCol('', lastYearData, 'gray')}
                                 </td>
                             </tr>
@@ -2019,18 +2065,14 @@
         const setupListeners = () => {
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_logs'), (snap) => {
                 allLogs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-
-
                 renderStats();  renderLogs(); renderRankingLists();updateUI_Team();
             });
-//sss
+
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_members'), (snap) => {
                 crewMembers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 snap.docs.forEach(d => { crewMembers[d.data().nickname] = d.data().team; });
-
                 myTeam = crewMembers[userNickname] || '무소속';
- 
-                renderMembers(); renderAllCharts();updateUI_Team();
+                 renderMembers(); renderAllCharts();updateUI_Team();
             });
 
             document.getElementById('close-stat-modal').onclick = closeUserStatModal;
