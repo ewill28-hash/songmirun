@@ -1850,7 +1850,7 @@
                         </div>
                         <div class="space-y-2">
                             <div>
-                                <p class="stat-grid-val">${s.count}회</p>
+                                <p class="stat-grid-val text-emerald-600">${s.count}회</p>
                             </div>
                             <div>
                                 <p class="stat-grid-val">${Number(s.distance).toFixed(0)}km</p>
@@ -1859,7 +1859,7 @@
                                 <p class="stat-grid-val">${s.durationHMS}</p>
                             </div>
                             <div>
-                                <p class="stat-grid-val text-brand-400 font-medium">${s.pace}</p>
+                                <p class="stat-grid-val text-rose-600 font-bold">${s.pace}</p>
                             </div>
                         </div>
                     </div>
@@ -1883,10 +1883,10 @@
                     <table class="w-full text-center border-collapse">
                         <thead>
                             <tr class="text-[10px] text-gray-400 uppercase tracking-widest border-b border-brand-50">
-                                <th class="pb-3 font-black text-emerald-600">이번달</th>
-                                <th class="pb-3 font-black text-gray-400">지난달</th>
-                                <th class="pb-3 border-l border-brand-50 font-black text-blue-600 pl-4">올해(${currYear})</th>
-                                <th class="pb-3 font-black text-gray-400">작년(${lastYear})</th>
+                                <th class="pb-3 font-black text-emerald-600">This Month</th>
+                                <th class="pb-3 font-black text-gray-400">Last Month</th>
+                                <th class="pb-3 border-l border-brand-50 font-black text-blue-600 pl-4">Year ${currYear}</th>
+                                <th class="pb-3 font-black text-gray-400">Year ${lastYear}</th>
                             </tr>
                         </thead>
                         <tbody>
