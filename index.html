@@ -768,14 +768,14 @@
     <!-- Statistics Modal -->
     <div id="stats-modal" class="fixed inset-0 z-[100] hidden modal-overlay flex items-center justify-center p-2">
         <div class="bg-white w-full max-w-lg  max-h-[90vh] overflow-y-auto shadow-2xl relative">
-            <div class="sticky top-0 bg-white/95 backdrop-blur-md px-8 py-3 border-b border-slate-100 flex justify-between items-center z-15">
+            <div class="sticky top-0 bg-white/95 backdrop-blur-md px-8 py-2 border-b border-slate-100 flex justify-between items-center z-15">
                     <h2 class="text-xl font-black text-slate-900 tracking-tight">Team Challenges</h2>
                 <button onclick="closeStatsModal()" class="w-5 h-5 bg-slate-50 rounded-full flex items-center justify-center text-slate-400">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             
-            <div class="p-1 space-y-1">
+            <div class="p-2 space-y-1">
 
                 <!-- 필터 레이아웃 -->
                 <div class="grid grid-cols-2 gap-2">
@@ -808,7 +808,7 @@
                 </div>
 
                 <!-- 차트 영역 -->
-                <div class="bg-slate-50 rounded-[2rem] p-6 border border-slate-100">
+                <div class="bg-slate-50 rounded-[2rem] p-3 border border-slate-100">
                     <div class="h-64 relative">
                         <canvas id="teamChart"></canvas>
                     </div>
@@ -816,7 +816,7 @@
 
 
                 <!-- 팀 기반 요약 카드 (기여도 중심) -->
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-2 gap-1">
                     <div class="stat-mini-card">
                         <p class="text-[9px] font-black text-slate-400 uppercase mb-1">내 거리 비중</p>
                         <div class="flex items-end justify-between">
