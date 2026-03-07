@@ -85,34 +85,71 @@
         border-radius: 12px; 
         gap: 2px;
     }
-    .filter-btn { 
-        flex: 1;
-        padding: 8px 12px; 
-        font-size: 11px; 
-        font-weight: 800; 
-        border-radius: 8px; 
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        text-align: center;
-        color: #94a3b8;
-        white-space: nowrap;
-        cursor: pointer;
-    }
-    .filter-btn.active { 
-        background-color: #d1fae5; 
-        color: #16a34a; 
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
-    }
+ 
+        .filter-btn { 
+            flex: 1;
+            padding: 8px 4px; 
+            font-size: 10px; 
+            font-weight: 800; 
+            border-radius: 8px; 
+            transition: all 0.2s;
+            text-align: center;
+            color: #94a3b8;
+            background: #f1f5f9;
+        }
+        
+        .filter-btn.active { 
+            background-color: white; 
+            color: #16a34a; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+        }
 
-    /* [버튼 스타일] */
-    .btn-gradient {
-        background: linear-gradient(135deg, #22c55e, #16a34a);
-        color: white;
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-    }
-    .btn-gradient:hover { transform: translateY(-1px); filter: brightness(1.1); }
+        .metric-btn {
+            padding: 0.5rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            border: 1px solid #e2e8f0;
+            background: white;
+            color: #64748b;
+            transition: all 0.2s;
+        }
+
+        .metric-btn.active {
+            background: #22c55e;
+            color: white;
+            border-color: #22c55e;
+        }
+
+        .metric-btn2 {
+            padding: 0.5rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            border: 1px solid #e2e8f0;
+            background: white;
+            color: #64748b;
+            transition: all 0.2s;
+        }
+
+        .metric-btn2.active {
+            background: #22c55e;
+            color: white;
+            border-color: #22c55e;
+        }
+
+
+        .btn-gradient {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            transition: all 0.3s ease;
+        }
+         .stat-mini-card {
+            background: #f8fafc;
+            border-radius: 1rem;
+            padding: 1rem;
+            border: 1px solid #f1f5f9;
+        }       
 
 
     /* [랭킹 및 리스트 아이템] */
@@ -230,6 +267,7 @@
                             <span id="display-nickname2" class="text-[10px] font-bold text-brand-500 cursor-pointer hover:bg-brand-50 px-1 rounded transition-colors" title="내 정보 상세">-</span>
                             <span id="admin-badge" class="hidden text-[8px] bg-red-500 text-white px-1.5 rounded-sm font-black uppercase">Admin</span>
                         </div>
+                        <div class="text-[10px] font-black px-3 py-1.5 rounded-lg text-white uppercase" id="display-team-badge">TEAM</div>
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
@@ -372,7 +410,7 @@
                 <section class="glass-card p-4 bg-white rounded-3xl shadow-sm border border-emerald-50">
                     <div class="flex justify-between items-center mb-6">
                         <div class="flex items-center gap-2">
-                            <div class="w-2 h-6 bg-rose-500 rounded-full"></div>
+                            <div class="w-2 h-4 bg-rose-500 rounded-full"></div>
                             <h2 class="text-xl font-black text-rose uppercase ">Team Challenges</h2>
                         </div>
                         <button onclick="openStatsModal()" 
@@ -401,21 +439,10 @@
                                 <label class="text-[10px] font-black text-emerald-700 uppercase mb-1.5 ml-1 flex items-center gap-1">
                                     <i class="fas fa-layer-group text-emerald-500"></i> 데이터 기준
                                 </label>
-                                <div class="flex gap-1 p-1 bg-white/60 rounded-xl border border-emerald-100 shadow-inner h-[38px]">
-                                    <button onclick="setMetric('dist')" id="main-btn-dist" 
-                                        class="main-btn flex-1 rounded-lg text-[10px] font-black text-emerald-400 hover:bg-white transition-all duration-200 flex items-center justify-center gap-1.5 active-btn">
-                                        <i class="fas fa-road text-[9px]"></i> <span>거리</span>
-                                    </button>
-                                    
-                                    <button onclick="setMetric('time')" id="main-btn-time" 
-                                        class="main-btn flex-1 rounded-lg text-[10px] font-black text-emerald-400 hover:bg-white transition-all duration-200 flex items-center justify-center gap-1.5">
-                                        <i class="fas fa-clock text-[9px]"></i> <span>시간</span>
-                                    </button>
-                                    
-                                    <button onclick="setMetric('count')" id="main-btn-count" 
-                                        class="main-btn flex-1 rounded-lg text-[10px] font-black text-emerald-400 hover:bg-white transition-all duration-200 flex items-center justify-center gap-1.5">
-                                        <i class="fas fa-running text-[9px]"></i> <span>횟수</span>
-                                    </button>
+                                <div class="flex gap-2">
+                                    <button onclick="setMetric2('dist')" id="btn-metric2-dist" class="metric-btn2 active flex-1"><i class="fas fa-road mr-1 text-[10px]"></i>거리</button>
+                                    <button onclick="setMetric2('time')" id="btn-metric2-time" class="metric-btn2 flex-1"><i class="fas fa-clock mr-1 text-[10px]"></i>시간</button>
+                                    <button onclick="setMetric2('count')" id="btn-metric2-count" class="metric-btn2 flex-1"><i class="fas fa-running mr-1 text-[10px]"></i>횟수</button>
                                 </div>
                             </div>
                             
@@ -739,95 +766,89 @@
 
 
 
-<!-- Statistics Modal -->
-    <div id="stats-modal" class="fixed inset-0 z-[100] hidden modal-overlay flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-lg rounded-[2.5rem] max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200">
-            <div class="sticky top-0 bg-white/90 backdrop-blur-md px-8 py-6 border-b border-slate-100 flex justify-between items-center z-10">
-                <div>
-                    <h2 class="text-xl font-black text-slate-900 tracking-tight">MISSION STATISTICS</h2>
-                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">상세 활동 데이터 분석</p>
-                </div>
-                <button onclick="closeStatsModal()" class="w-10 h-10 bg-slate-50 hover:bg-slate-100 rounded-full flex items-center justify-center text-slate-400 transition">
+    <!-- Statistics Modal -->
+    <div id="stats-modal" class="fixed inset-0 z-[100] hidden modal-overlay flex items-center justify-center p-2">
+        <div class="bg-white w-full max-w-lg  max-h-[90vh] overflow-y-auto shadow-2xl relative">
+            <div class="sticky top-0 bg-white/95 backdrop-blur-md px-8 py-3 border-b border-slate-100 flex justify-between items-center z-15">
+                    <h2 class="text-xl font-black text-slate-900 tracking-tight">Team Challenges</h2>
+                <button onclick="closeStatsModal()" class="w-5 h-5 bg-slate-50 rounded-full flex items-center justify-center text-slate-400">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             
             <div class="p-1 space-y-1">
-                <div class="space-y-1">
-                    <div class="filter-group">
-                        <button onclick="setCalcMode('total')" id="btn-mode-total" class="filter-btn active">팀 합계</button>
-                        <button onclick="setCalcMode('avg')" id="btn-mode-avg" class="filter-btn">팀원 평균</button>
-                        <button onclick="setCalcMode('my')" id="btn-mode-my" class="filter-btn">내 기록</button>
-                    </div>
-                </div>
 
-                <div class="grid grid-cols-2 gap-1">
-                    <div class="space-y-1">
-                        <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest px-1">기간 선택</p>
-                                <select id="main-filter-month2" onchange="syncAndRefresh()" 
-                                    class="text-[11px] font-bold border border-gray-200 rounded-lg px-2 py-2.5 bg-white outline-none text-gray-700 shadow-sm appearance-none min-h-[40px] flex items-center">
-                                    <option value="전체">🗓️ 모든 월 </option>
-                                    </select>
+                <!-- 필터 레이아웃 -->
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="space-y-2">
+                         <!-- 
+                        <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest px-1">분석 범위</p>
+                        -->
+                        <div class="flex p-1 bg-slate-100 rounded-xl">
+                            <button onclick="setDataScope('avg')" id="scope-avg" class="filter-btn active">평균</button>
+                            <button onclick="setDataScope('me')" id="scope-me" class="filter-btn">내기록</button>
+                            <button onclick="setDataScope('total')" id="scope-total" class="filter-btn ">누적</button>
 
-                    </div>
-                    <div class="space-y-1">
-                        <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest px-1">측정 기준</p>
-                        <div class="flex gap-1">
-                                <button onclick="setMetric('dist')" id="main-btn-dist" class="main-btn flex-1 py-2 rounded-xl border border-slate-200 bg-white text-[10px] font-black text-slate-400 hover:bg-slate-50 transition shadow-sm">  <i class="fas fa-road"></i> 거리</button>
-                                <button onclick="setMetric('time')" id="main-btn-time" class="main-btn flex-1 py-2 rounded-xl border border-slate-200 bg-white text-[10px] font-black text-slate-400 hover:bg-slate-50 transition shadow-sm">  <i class="fas fa-clock"></i> 시간</button>
-                                <button onclick="setMetric('count')" id="main-btn-count" class="main-btn flex-1 py-2 rounded-xl border border-slate-200 bg-white text-[10px] font-black text-slate-400 hover:bg-slate-50 transition shadow-sm"><i class="fas fa-running"></i> 횟수</button>
                         </div>
                     </div>
+                    <div class="space-y-2">
+                        <!-- 
+                        <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest px-1">기간 설정</p>
+                        -->
+                        <select id="main-filter-month2" onchange="syncAndRefresh()"  class="w-full text-xs font-bold p-2.5 bg-slate-100 rounded-xl border-none outline-none">
+                                    <option value="전체">🗓️ 모든 월 </option>
+                        </select>
+                    </div>
                 </div>
 
-                <div class="bg-slate-50 rounded-[2rem] p-1 border border-slate-100">
-                    <h3 id="chart-title" class="text-[11px] font-black text-slate-400 uppercase mb-6 text-center tracking-widest">데이터 분석 중...</h3>
-                    <div class="h-56 relative flex items-center justify-center">
+                <!-- 측정 기준 -->
+                <div class="flex gap-2">
+                    <button onclick="setMetric('dist')" id="btn-metric-dist" class="metric-btn active flex-1"><i class="fas fa-road mr-1 text-[10px]"></i>거리</button>
+                    <button onclick="setMetric('time')" id="btn-metric-time" class="metric-btn flex-1"><i class="fas fa-clock mr-1 text-[10px]"></i>시간</button>
+                    <button onclick="setMetric('count')" id="btn-metric-count" class="metric-btn flex-1"><i class="fas fa-running mr-1 text-[10px]"></i>횟수</button>
+                </div>
+
+                <!-- 차트 영역 -->
+                <div class="bg-slate-50 rounded-[2rem] p-6 border border-slate-100">
+                    <div class="h-64 relative">
                         <canvas id="teamChart"></canvas>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-1">
-                    <!-- Indicators stay same as provided in previous version -->
-                    <div class="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm flex items-center gap-4">
-                        <div class="w-10 h-10 bg-blue-50 text-blue-500 rounded-xl flex items-center justify-center text-sm">
-                            <i class="fas fa-chart-line"></i>
-                        </div>
-                        <div>
-                            <p class="text-[9px] text-slate-400 font-black uppercase">거리 비중</p>
-                            <p id="contrib-dist" class="text-sm font-black text-slate-800">0%</p>
-                        </div>
-                    </div>
-                    <div class="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm flex items-center gap-4">
-                        <div class="w-10 h-10 bg-pink-50 text-pink-500 rounded-xl flex items-center justify-center text-sm">
-                            <i class="fas fa-history"></i>
-                        </div>
-                        <div>
-                            <p class="text-[9px] text-slate-400 font-black uppercase">시간 비중</p>
-                            <p id="contrib-time" class="text-sm font-black text-slate-800">0%</p>
+
+                <!-- 팀 기반 요약 카드 (기여도 중심) -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="stat-mini-card">
+                        <p class="text-[9px] font-black text-slate-400 uppercase mb-1">내 거리 비중</p>
+                        <div class="flex items-end justify-between">
+                            <span id="card-dist-ratio" class="text-xl font-orbitron text-slate-800">0%</span>
+                            <i class="fas fa-chart-area text-blue-500 text-xs"></i>
                         </div>
                     </div>
-                    <div class="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm flex items-center gap-4">
-                        <div class="w-10 h-10 bg-green-50 text-green-500 rounded-xl flex items-center justify-center text-sm">
-                            <i class="fas fa-bolt"></i>
-                        </div>
-                        <div>
-                            <p class="text-[9px] text-slate-400 font-black uppercase">평균 페이스</p>
-                            <p id="my-avg-pace" class="text-sm font-black text-slate-800">0'00"</p>
+                    <div class="stat-mini-card">
+                        <p class="text-[9px] font-black text-slate-400 uppercase mb-1">내 시간 비중</p>
+                        <div class="flex items-end justify-between">
+                            <span id="card-time-ratio" class="text-xl font-orbitron text-slate-800">0%</span>
+                            <i class="fas fa-hourglass-start text-indigo-500 text-xs"></i>
                         </div>
                     </div>
-                    <div class="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm flex items-center gap-4">
-                        <div class="w-10 h-10 bg-yellow-50 text-yellow-500 rounded-xl flex items-center justify-center text-sm">
-                            <i class="fas fa-fire"></i>
+                    <div class="stat-mini-card">
+                        <p class="text-[9px] font-black text-slate-400 uppercase mb-1">내 평균 페이스</p>
+                        <div class="flex items-end justify-between">
+                            <span id="card-avg-pace" class="text-xl font-orbitron text-slate-800">0'00"</span>
+                            <i class="fas fa-bolt text-yellow-500 text-xs"></i>
                         </div>
-                        <div>
-                            <p class="text-[9px] text-slate-400 font-black uppercase">활동 횟수</p>
-                            <p id="my-run-count" class="text-sm font-black text-slate-800">0회</p>
+                    </div>
+                    <div class="stat-mini-card">
+                        <p class="text-[9px] font-black text-slate-400 uppercase mb-1">내 활동 비중</p>
+                        <div class="flex items-end justify-between">
+                            <span id="card-count-ratio" class="text-xl font-orbitron text-slate-800">0%</span>
+                            <i class="fas fa-walking text-purple-500 text-xs"></i>
                         </div>
                     </div>
                 </div>
             </div>
-         </div>
+        </div>
     </div>
 
 
@@ -925,8 +946,8 @@
         let selectedTarget = '전체'; 
         let selectedType = '전체'; 
         let selectedMonthF = '전체'; 
-
         let selectedMonthT = '전체'; 
+        let myTeam;
 
         let selectedRankingPeriod = 'this'; 
         let sortConfig = { key: 'log_nickname', direction: 'asc' };
@@ -1155,33 +1176,40 @@
                     });
 
 
-            const teams = {
-                "손기정": { dist: 0, time: 0, count: 0, color: '#3b82f6', members: new Set() },
-                "황영조": { dist: 0, time: 0, count: 0, color: '#ec4899', members: new Set() },
-                "이봉주": { dist: 0, time: 0, count: 0, color: '#22c55e', members: new Set() }
-            };
-
+            const teams = {};
             let myStats = { dist: 0, time: 0, count: 0 };
 
+
             filtered.forEach(r => {
-                const teamName = allMembers[r.userName];
-                if (teamName && teams[teamName]) {
-                    teams[teamName].dist += (r.distance || 0);
-                    teams[teamName].time += (r.duration || 0);
-                    teams[teamName].count++;
-                    teams[teamName].members.add(r.userName);
-                    
-                    if (r.userName === userData.name) {
-                        myStats.dist += (r.distance || 0);
-                        myStats.time += (r.duration || 0);
-                        myStats.count++;
-                    }
+                const teamName = crewMembers[r.userName] || '무소속';
+                if (!teams[teamName]) {
+                    teams[teamName] = { 
+                        name: teamName,
+                        dist: 0, 
+                        time: 0, 
+                        count: 0, 
+                        color: TEAM_COLORS[teamName] || '#94a3b8', 
+                        members: new Set() 
+                    };
+                }
+                teams[teamName].dist += r.distance;
+                teams[teamName].time += r.duration;
+                teams[teamName].count++;
+                teams[teamName].members.add(r.userName);
+
+                if (r.userName === userNickname) {
+                    myStats.dist += r.distance;
+                    myStats.time += r.duration;
+                    myStats.count++;
                 }
             });
 
-            const myCurrentTeam = allMembers[userData.name] || userData.team;
-            const myTeamData = teams[myCurrentTeam] || { dist: 1 };
-   
+            const myTeamName = crewMembers[userNickname] || myTeam;
+            const myTeamData = teams[myTeamName] || { dist: 0, time: 0, count: 0, members: new Set(), color: TEAM_COLORS[myTeamName] || '#94a3b8' };
+            
+            //document.getElementById('my-total-dist').innerText = myStats.dist.toFixed(1) + 'km';
+            //document.getElementById('my-contribution').innerText = ((myStats.dist / (myTeamData.dist || 1)) * 100).toFixed(1) + '%';
+
             const list = document.getElementById('team-list');
             if (list) {
                 list.innerHTML = '';
@@ -1230,105 +1258,120 @@
                 });
             }
 
-            renderChart(teams, myStats, myCurrentTeam);
+            document.getElementById('card-dist-ratio').innerText = ((myStats.dist / (myTeamData.dist || 1)) * 100).toFixed(1) + '%';
+            document.getElementById('card-time-ratio').innerText = ((myStats.time / (myTeamData.time || 1)) * 100).toFixed(1) + '%';
+            document.getElementById('card-count-ratio').innerText = ((myStats.count / (myTeamData.count || 1)) * 100).toFixed(1) + '%';
+            
+            const myPaceSec = myStats.dist > 0 ? (myStats.time / myStats.dist) * 60 : 0;
+            document.getElementById('card-avg-pace').innerText = `${Math.floor(myPaceSec/60)}'${Math.floor(myPaceSec%60).toString().padStart(2,'0')}"`;
+
+            renderChart(teams, myStats);
         };
 
 
-        function formatTime(seconds) {
-            const h = Math.floor(seconds / 3600);
-            const m = Math.floor((seconds % 3600) / 60);
-            const s = Math.floor(seconds % 60);
-            return `${h > 0 ? h + ':' : ''}${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-        }
+        // 팀 컬러 정의
+        const TEAM_COLORS = { 
+            '황영조': '#f87171', 
+            '손기정': '#3b82f6', 
+            '이봉주': '#22c55e', 
+            '무소속': '#94a3b8'     
+        };
 
-        function renderChart(teams, myStats, myCurrentTeam) {
+        const formatTime2 = (minutes) => {
+            const totalSec = Math.round(minutes * 60);
+            const h = Math.floor(totalSec / 3600);
+            const m = Math.floor((totalSec % 3600) / 60);
+            const s = totalSec % 60;
+            if (h > 0) return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            return `${m}:${s.toString().padStart(2, '0')}`;
+        };
+
+        function renderChart(teams, myStats) {
             const canvas = document.getElementById('teamChart');
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
-            let dataPoints = [];
-            let chartLabels = Object.keys(teams);
 
-            if (currentCalcMode === 'my') {
-                const myTeamTotal = teams[myCurrentTeam] || { dist: 0, time: 0, count: 0 };
-                const key = currentMetric === 'dist' ? 'dist' : (currentMetric === 'time' ? 'time' : 'count');
-                dataPoints = [myStats[key], Math.max(0, myTeamTotal[key] - myStats[key])];
-                chartLabels = ["내 기록", "다른 팀원"];
+            let labels = [];
+            let dataPoints = [];
+            let colors = [];
+
+            if (dataScope === 'me') {
+                labels = ['내 기록', '팀 평균'];
+                //const myTeamName = allMembers[userData.name] || userData.team;
+                const myTeamName = crewMembers[userNickname] || myTeam;
+                const td = teams[myTeamName] || { dist: 0, time: 0, count: 1, members: new Set([1]), color: TEAM_COLORS[myTeamName] || '#3b82f6' };
+                const mCount = td.members.size || 1;
+
+                if (currentMetric === 'dist') {
+                    dataPoints = [myStats.dist, td.dist / mCount];
+                } else if (currentMetric === 'time') {
+                    dataPoints = [myStats.time, td.time / mCount];
+                } else {
+                    dataPoints = [myStats.count, td.count / mCount];
+                }
+                colors = [td.color, '#e2e8f0'];
             } else {
-                chartLabels.forEach(l => {
-                    const t = teams[l];
-                    const memberCount = t.members.size || 1;
-                    const key = currentMetric === 'dist' ? 'dist' : (currentMetric === 'time' ? 'time' : 'count');
-                    dataPoints.push(currentCalcMode === 'total' ? t[key] : t[key] / memberCount);
+                // 팀 객체의 키 순서대로 데이터를 추출하여 불일치 방지
+                const teamEntries = Object.values(teams);
+                labels = teamEntries.map(t => t.name);
+                dataPoints = teamEntries.map(t => {
+                    const mCount = t.members.size || 1;
+                    const val = currentMetric === 'dist' ? t.dist : (currentMetric === 'time' ? t.time : t.count);
+                    return dataScope === 'avg' ? val / mCount : val;
                 });
+                colors = teamEntries.map(t => t.color);
             }
 
+            // 차트 재생성
             if (chartInstance) chartInstance.destroy();
             chartInstance = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: chartLabels,
+                    labels: labels,
                     datasets: [{
                         data: dataPoints,
-                        backgroundColor: currentCalcMode === 'my' ? [(teams[myCurrentTeam]?.color || '#22c55e'), '#f1f5f9'] : Object.values(teams).map(t => t.color),
+                        backgroundColor: colors,
                         borderWidth: 0,
-                        hoverOffset: 4
+                        hoverOffset: 10
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    cutout: '78%',
+                    cutout: '70%',
                     plugins: {
                         legend: {
                             position: 'bottom',
                             labels: {
-                                padding: 15,
-                                font: { size: 10, weight: 'bold' },
                                 usePointStyle: true,
-                                generateLabels: (chart) => {
-                                    const data = chart.data;
-                                    return data.labels.map((label, i) => {
-                                        const rawValue = data.datasets[0].data[i];
-                                        const displayValue = currentMetric === 'time' 
-                                            ? formatTime(rawValue) 
-                                            : Math.round(rawValue).toLocaleString(); // 1,000단위 콤마 포함 정수
-                                        return {
-                                            text: `${label}: ${displayValue}`,
-                                            fillStyle: data.datasets[0].backgroundColor[i],
-                                            index: i
-                                        };
-                                    });
-                                }
+                                font: { size: 10, weight: 'bold' },
+                                padding: 15
                             }
                         },
                         tooltip: {
                             callbacks: {
-                                label: function(context) {
-                                    const label = context.label || '';
-                                    const value = context.parsed;
-                                    const displayValue = currentMetric === 'time' 
-                                        ? formatTime(value) 
-                                        : Math.round(value).toLocaleString();
-                                    return ` ${label}: ${displayValue}`;
+                                label: (context) => {
+                                    let label = context.label || '';
+                                    let value = context.parsed;
+                                    let displayVal = value.toFixed(1);
+                                    if (currentMetric === 'time') displayVal = formatTime2(value);
+                                    else if (currentMetric === 'dist') displayVal += 'km';
+                                    else displayVal += '회';
+                                    return `${label}: ${displayVal}`;
                                 }
                             }
                         }
                     }
                 }
             });
-            const modeLabel = currentCalcMode === 'my' ? '내 비중' : (currentCalcMode === 'total' ? '팀 합계' : '팀원 평균');
-            const metricLabel = currentMetric === 'dist' ? '거리' : (currentMetric === 'time' ? '시간' : '횟수');
-            const title = document.getElementById('chart-title');
-            if(title) title.innerText = `${modeLabel} ${metricLabel} 분석`;
         }
-
 
         let currentUser = null;
         let userData = { name: '', team: '' };
         let allMembers = {}; // nickname: team 조인용 맵
         let chartInstance = null;
         let currentMetric = 'dist';
-        let currentCalcMode = 'total';
+        let dataScope = 'avg'; 
 
         window.syncAndRefresh = () => updateUI_Team();
 
@@ -1343,25 +1386,31 @@
         window.setMetric = (m) => {
             currentMetric = m;
             ['dist', 'time', 'count'].forEach(id => {
-                const mb = document.getElementById(`main-btn-${id}`);
-                if(mb) {
-                    const isActive = id === m;
-                    mb.classList.toggle('bg-brand-400', isActive);
-                    mb.classList.toggle('text-black', isActive);
-                    mb.classList.toggle('border-brand-400', isActive);
-                }
+                const b = document.getElementById(`btn-metric-${id}`);
+                if(b) b.classList.toggle('active', id === m);
             });
             updateUI_Team();
         };
 
-        window.setCalcMode = (mode) => {
-            currentCalcMode = mode;
-            ['total', 'avg', 'my'].forEach(id => {
-                const b = document.getElementById(`btn-mode-${id}`);
-                if(b) b.classList.toggle('active', id === mode);
+       window.setMetric2 = (m) => {
+            currentMetric = m;
+            ['dist', 'time', 'count'].forEach(id => {
+                const b = document.getElementById(`btn-metric2-${id}`);
+                if(b) b.classList.toggle('active', id === m);
             });
             updateUI_Team();
         };
+
+
+        window.setDataScope = (s) => {
+            dataScope = s;
+            ['total', 'avg', 'me'].forEach(id => {
+                const b = document.getElementById(`scope-${id}`);
+                if(b) b.classList.toggle('active', id === s);
+            });
+            updateUI_Team();
+        };
+
 
         const renderAllCharts = () => {
             if (document.getElementById('section-stats').classList.contains('hidden')) return;
@@ -1372,7 +1421,6 @@
             const genderMap = {};
             const teamMap = {};
 
-            //crewMembers.forEach(m => { genderMap[m.nickname] = m.gender; });
             crewMembers.forEach(m => {
                 genderMap[m.nickname] = m.gender;
                 teamMap[m.nickname] = m.team;
@@ -1956,12 +2004,22 @@
         const setupListeners = () => {
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_logs'), (snap) => {
                 allLogs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+
                 renderStats();  renderLogs(); renderRankingLists();updateUI_Team();
             });
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_members'), (snap) => {
                 crewMembers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                renderMembers(); renderAllCharts();
+                snap.docs.forEach(d => { crewMembers[d.data().nickname] = d.data().team; });
+                myTeam = crewMembers[userNickname] || '무소속';
+                const badge = document.getElementById('display-team-badge');
+                if (badge) {
+                    badge.innerText = "팀:"+myTeam;
+                    badge.style.backgroundColor = TEAM_COLORS[myTeam] || '#94a3b8';
+                }         
+                renderMembers(); renderAllCharts();updateUI_Team();
             });
+
             document.getElementById('close-stat-modal').onclick = closeUserStatModal;
             document.getElementById('stat-detail-modal').onclick = (e) => { if (e.target === document.getElementById('stat-detail-modal')) closeUserStatModal(); };
             document.getElementById('member-search').addEventListener('input', (e) => { memberSearchTerm = e.target.value; renderMembers(); });
@@ -2026,14 +2084,13 @@
                         members[data.nickname] = data.team;
                     });
                     allMembers = members;
-                    const myTeam = allMembers[userNickname] || '소속 없음';
-
+                    //myTeam = allMembers[userNickname] || '무소속';
+                    //(팀:${myTeam})
                     document.getElementById('display-nickname2').innerHTML = `
                         <button onclick="window.openUserStatModal('${userNickname}')" 
                                 class="text-brand-600 hover:underline text-left font-black p-0 m-0 block">
-                            ${userNickname} 님(팀:${myTeam}), 입장!
+                            ${userNickname} 님, 입장!
                     `;
-
                     updateUI_Team();
                 });
 
@@ -2072,7 +2129,7 @@
                 finally { document.getElementById('login-loader').classList.add('hidden'); }
             };
 
-            document.getElementById('btn-logout').onclick = () => { showModal(`${userNickname}님, 👟 러닝 가시려구요? 😊`, "confirm", async () => { localStorage.removeItem('songmirun_nickname'); await signOut(auth); location.reload(); }); };
+            document.getElementById('btn-logout').onclick = () => { showModal(`👟${userNickname}님, 러닝 가시려구요?  😊`, "confirm", async () => { localStorage.removeItem('songmirun_nickname'); await signOut(auth); location.reload(); }); };
 
             const tabs = { 'tab-logs': 'section-logs', 'tab-ranking': 'section-ranking', 'tab-stats': 'section-stats', 'tab-members': 'section-members' };
             Object.keys(tabs).forEach(id => {
@@ -2103,7 +2160,7 @@
 
                 const dist = Number(document.getElementById('in-dist').value);
                 const date = document.getElementById('in-date').value;
-                if(!date || dist <= 0 || totalMin <= 0) return showModal("필수 항목(날짜, 거리, 시간)을 모두 정확히 입력하세요.", "alert");
+                if(!date || dist <= 0 || totalMin <= 0) return showModal("💡필수 항목(날짜, 거리, 시간) .", "alert");
 
                 const pace = totalMin / dist;
                 if (pace < 2.0) {
