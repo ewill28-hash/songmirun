@@ -2142,10 +2142,12 @@
                     const target = membersSnap.docs.find(d => { const data = d.data(); return (data.log_nickname === nick); });
                     if(!nick.toLowerCase().startsWith('admin') && !target) return showModal("🥕송미런 크루가 아닙니다.\n\n ✨Jake 에게 문의하세요", "alert");
                     const userFinalNickname = target ? target.data().nickname : nick;
+                    const userFinalNickname2 = target ? target.data().team : nick;
+                    
                     if (target) await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'songmirun_members', target.id), { lastLogin: new Date().toISOString().split('T')[0] });
                     localStorage.setItem('songmirun_nickname', userFinalNickname);
                     userNickname = userFinalNickname; updateUI(); setupListeners();
-                    showToast(`${userFinalNickname}님 환영합니다!`);
+                    showToast(`${userFinalNickname}님 환영합니다! (팀:${userFinalNickname2})`);
                 } catch(e) { showModal("로그인 오류", "alert"); }
                 finally { document.getElementById('login-loader').classList.add('hidden'); }
             };
