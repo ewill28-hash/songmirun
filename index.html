@@ -94,14 +94,17 @@
             border-radius: 8px; 
             transition: all 0.2s;
             text-align: center;
-            color: #94a3b8;
-            background: #f1f5f9;
+            background: white;
+            color: #64748b;
         }
         
         .filter-btn.active { 
-            background-color: white; 
-            color: #16a34a; 
+
             box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+
+            background: #22c55e;
+            color: white;
+
         }
 
         .metric-btn {
@@ -471,11 +474,11 @@
                                 <button onclick="window.setTypeFilter('전체')" id="type-all" 
                                         class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black transition-all active-btn">🏃 전체</button>
                                 <button onclick="window.setTypeFilter('정규')" id="type-j" 
-                                        class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400 hover:bg-white transition-all">📅 정규</button>
+                                        class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400  transition-all">📅 정규</button>
                                 <button onclick="window.setTypeFilter('번개')" id="type-b" 
-                                        class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400 hover:bg-white transition-all">⚡ 번개</button>
+                                        class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400  transition-all">⚡ 번개</button>
                                 <button onclick="window.setTypeFilter('대회')" id="type-d" 
-                                        class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400 hover:bg-white transition-all">🏅 대회</button>
+                                        class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400  transition-all">🏅 대회</button>
                             </div>
                             
                         </div>
@@ -778,7 +781,7 @@
             <div class="p-2 space-y-1">
 
                 <!-- 필터 레이아웃 -->
-                <div class="grid grid-cols-2 gap-2">
+                <div class="grid grid-cols-3 gap-2">
                     <div class="space-y-2">
                          <!-- 
                         <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest px-1">분석 범위</p>
@@ -790,6 +793,8 @@
 
                         </div>
                     </div>
+                    <div>
+                        </div>
                     <div class="space-y-2">
                         <!-- 
                         <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest px-1">기간 설정</p>
@@ -1640,7 +1645,7 @@
                 const dateB = new Date(b.date);
                 return dateB - dateA; // 내림차순
             })
-            .slice(0, isAdmin ? undefined : 15);
+            .slice(0, isAdmin ? undefined : 25);
 
             const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
             list.innerHTML = sorted.map(l => {
