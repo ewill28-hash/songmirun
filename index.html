@@ -421,14 +421,14 @@
                         </button>
                     </div>
                     <div class="rounded-2xl p-3.5 bg-emerald-50/40 border border-emerald-100 mb-4">
-                        <div class="flex flex-col md:flex-row items-end gap-4">
+                        <div class="flex flex-col md:flex-row items-end gap-2">
                            <div class="w-full md:flex-1">
                                 <label class="text-[10px] font-black text-emerald-700 uppercase mb-1.5 ml-1 flex items-center gap-1">
                                     <i class="fas fa-calendar-alt text-emerald-500"></i> 기록 기간
                                 </label>
                                 <div class="relative group">
                                     <select id="main-filter-month" onchange="syncAndRefresh()" 
-                                        class="w-full text-[11px] font-bold border border-emerald-200 rounded-xl px-3 py-2 bg-white outline-none text-emerald-800 shadow-sm appearance-none min-h-[38px] flex items-center cursor-pointer focus:ring-2 focus:ring-emerald-500/10 transition-all">
+                                        class="w-full text-[11px] font-bold border border-emerald-200 rounded-xl px-3 py-2 bg-white outline-none text-emerald-700 shadow-sm appearance-none min-h-[36px] cursor-pointer">
                                         <option value="전체">🗓️ 모든 월</option>
                                     </select>
                                     <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-emerald-400">
@@ -781,25 +781,25 @@
             <div class="p-2 space-y-1">
 
                 <!-- 필터 레이아웃 -->
-                <div class="grid grid-cols-3 gap-2">
-                    <div class="space-y-2">
+                <div class="grid grid-cols-2 gap-1">
+                    <div class="space-y-1">
                          <!-- 
                         <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest px-1">분석 범위</p>
                         -->
-                        <div class="flex p-1 bg-slate-100 rounded-xl">
-                            <button onclick="setDataScope('avg')" id="scope-avg" class="filter-btn active">평균</button>
-                            <button onclick="setDataScope('me')" id="scope-me" class="filter-btn">내기록</button>
-                            <button onclick="setDataScope('total')" id="scope-total" class="filter-btn ">누적</button>
-
+                        
+                        <div class="flex p-1 bg-slate-100 rounded-xl gap-1">    
+                            <button onclick="setDataScope('avg')" id="scope-avg" class="filter-btn flex-1 active">평균</button>
+                            <button onclick="setDataScope('me')" id="scope-me" class="filter-btn flex-1">내기록</button>
+                            <button onclick="setDataScope('total')" id="scope-total" class="filter-btn flex-1">누적</button>
                         </div>
                     </div>
-                    <div>
-                        </div>
-                    <div class="space-y-2">
+                    <div class="space-y-1">
                         <!-- 
                         <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest px-1">기간 설정</p>
                         -->
-                        <select id="main-filter-month2" onchange="syncAndRefresh()"  class="w-full text-xs font-bold p-2.5 bg-slate-100 rounded-xl border-none outline-none">
+                        <select id="main-filter-month2" onchange="syncAndRefresh()"  
+                            class="w-full text-[11px] font-bold border border-emerald-200 rounded-xl px-3 py-2 bg-white outline-none text-emerald-800 shadow-sm appearance-none min-h-[38px] flex items-center cursor-pointer focus:ring-2 focus:ring-emerald-500/10 transition-all">
+
                                     <option value="전체">🗓️ 모든 월 </option>
                         </select>
                     </div>
@@ -1318,7 +1318,9 @@
             } else {
                 // 팀 객체의 키 순서대로 데이터를 추출하여 불일치 방지
                 const teamEntries = Object.values(teams);
-                labels = teamEntries.map(t => t.name);
+                //labels = teamEntries.map(t => t.name);
+                labels = teamEntries.map(t => `팀: ${t.name}`);
+
                 dataPoints = teamEntries.map(t => {
                     const mCount = t.members.size || 1;
                     const val = currentMetric === 'dist' ? t.dist : (currentMetric === 'time' ? t.time : t.count);
