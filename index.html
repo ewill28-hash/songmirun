@@ -78,11 +78,10 @@
     .loading-spinner { animation: spin 1s linear infinite; }
     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-    /* [탭 & 필터 시스템] - 중복 제거 및 통합 */
     .filter-group { 
         display: flex; 
-        background-color: #f1f5f9; 
-        padding: 4px; 
+        background-color: #ecfdf5; 
+        padding: 2px; 
         border-radius: 12px; 
         gap: 2px;
     }
@@ -99,7 +98,7 @@
         cursor: pointer;
     }
     .filter-btn.active { 
-        background-color: white; 
+        background-color: #d1fae5; 
         color: #16a34a; 
         box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
     }
@@ -115,22 +114,6 @@
     }
     .btn-gradient:hover { transform: translateY(-1px); filter: brightness(1.1); }
 
-    .main-btn {
-        padding: 0.5rem 1rem;
-        border-radius: 9999px;
-        font-size: 0.75rem;
-        font-weight: 700;
-        border: 1px solid #e2e8f0;
-        background: white;
-        color: #64748b;
-        transition: all 0.2s;
-    }
-    .main-btn.active {
-        background: red;
-        color: white;
-        border-color: #22c55e;
-        box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
-    }
 
     /* [랭킹 및 리스트 아이템] */
     .rank-header {
@@ -215,7 +198,7 @@
 </head>
 <body class="pb-20">
 
-    <!-- Login Screen -->
+<!-- Login Screen -->
     <div id="login-screen" class="fixed inset-0 bg-brand-600 z-[100] flex items-center justify-center p-6 transition-all duration-500">
         <div class="bg-white w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl text-center">
             <div class="w-16 h-16 bg-brand-100 text-brand-500 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
@@ -233,7 +216,7 @@
         </div>
     </div>
 
-    <!-- Main Content -->
+<!-- Main Content -->
     <div id="main-content" class="hidden">
         <header class="bg-white/80 backdrop-blur-md border-b border-brand-100 px-0 pt-4 sticky top-0 z-40">
             <div class="flex justify-between items-center max-w-2xl mx-auto mb-3 px-4">
@@ -295,12 +278,11 @@
                 </div>
             </section>
 
-            <!-- Section: Logs -->
+<!-- Section: Logs -->
             <div id="section-logs" class="space-y-3">
                 <section id="entry-form" class="bg-brand-50 p-3 rounded-[2.5rem] border-2 border-brand-200 shadow-xl shadow-brand-100/50">
                     <h2 id="form-title" class="font-black text-base mb-6 flex items-center gap-2 text-brand-900 italic tracking-tight">
                         <i class="fa-solid fa-fire-flame-curved text-brand-600 animate-pulse"></i> 새 러닝 기록 입력
-
                     </h2>
                     <input type="hidden" id="edit-id">
                     
@@ -353,13 +335,13 @@
                         </div>
                     </div>
 
-                         <!-- 더보기 버튼 (More) -->
-                        <div class="col-span-1">
-                            <button type="button" onclick="toggleMoreOptions()" class="group flex items-center justify-center w-full py-2 rounded-xl border border-dashed border-slate-300 text-slate-400 text-[10px] font-bold hover:bg-slate-50 hover:border-emerald-300 hover:text-emerald-500 transition-all">
-                                <span>more (심박수, 케이던스, 메모)</span>
-                                <i id="more-icon" class="fa-solid fa-chevron-down ml-1 rotate-icon"></i>
-                            </button>
-                        </div>
+                    <!-- 더보기 버튼 (More) -->
+                    <div class="col-span-1">
+                        <button type="button" onclick="toggleMoreOptions()" class="group flex items-center justify-center w-full py-2 rounded-xl border border-dashed border-slate-300 text-slate-400 text-[10px] font-bold hover:bg-slate-50 hover:border-emerald-300 hover:text-emerald-500 transition-all">
+                            <span>more (심박수, 케이던스, 메모)</span>
+                            <i id="more-icon" class="fa-solid fa-chevron-down ml-1 rotate-icon"></i>
+                        </button>
+                    </div>
 
                     <div class="grid grid-cols-1 gap-4 mb-3">
                         <div id="more-options" class="expandable-content grid grid-cols-2 gap-4">
@@ -386,168 +368,166 @@
                     </button>
                 </section>
 
-           <!-- Team Rankings Section -->
-<section class="glass-card p-4 bg-white rounded-3xl shadow-sm border border-emerald-50">
-    <div class="flex justify-between items-center mb-6">
-        <div class="flex items-center gap-2">
-            <div class="w-2 h-6 bg-emerald-500 rounded-full"></div>
-            <h2 class="text-xl font-black text-rose-800 uppercase tracking-tight">Team Challenges</h2>
-        </div>
-        <button onclick="openStatsModal()" 
-                class="text-[11px] font-bold bg-rose-600 text-white px-4 py-2 rounded-xl transition-all hover:bg-emerald-700 hover:shadow-md active:scale-95 flex items-center gap-2">
-            <i class="fas fa-chart-line"></i> 분석 도구
-        </button>
-    </div>
-<div class="rounded-2xl p-3.5 bg-emerald-50/40 border border-emerald-100 mb-4">
-    <div class="flex flex-col md:flex-row items-end gap-4">
-        
-        <div class="w-full md:flex-1">
-            <label class="text-[10px] font-black text-emerald-700 uppercase mb-1.5 ml-1 flex items-center gap-1">
-                <i class="fas fa-calendar-alt text-emerald-500"></i> 기록 기간
-            </label>
-            <div class="relative group">
-                <select id="main-filter-month" onchange="syncAndRefresh()" 
-                    class="w-full text-[11px] font-bold border border-emerald-200 rounded-xl px-3 py-2 bg-white outline-none text-emerald-800 shadow-sm appearance-none min-h-[38px] flex items-center cursor-pointer focus:ring-2 focus:ring-emerald-500/10 transition-all">
-                    <option value="전체">🗓️ 모든 월</option>
-                </select>
-                <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-emerald-400">
-                    <i class="fas fa-chevron-down text-[9px]"></i>
-                </div>
-            </div>
-        </div>
-
-        <div class="w-full md:flex-[1.5]">
-            <label class="text-[10px] font-black text-emerald-700 uppercase mb-1.5 ml-1 flex items-center gap-1">
-                <i class="fas fa-layer-group text-emerald-500"></i> 데이터 기준
-            </label>
-            <div class="flex gap-1 p-1 bg-white/60 rounded-xl border border-emerald-100 shadow-inner h-[38px]">
-                <button onclick="setMetric('dist')" id="main-btn-dist" 
-                    class="main-btn flex-1 rounded-lg text-[10px] font-black text-emerald-400 hover:bg-white transition-all duration-200 flex items-center justify-center gap-1.5 active-btn">
-                    <i class="fas fa-road text-[9px]"></i> <span>거리</span>
-                </button>
-                
-                <button onclick="setMetric('time')" id="main-btn-time" 
-                    class="main-btn flex-1 rounded-lg text-[10px] font-black text-emerald-400 hover:bg-white transition-all duration-200 flex items-center justify-center gap-1.5">
-                    <i class="fas fa-clock text-[9px]"></i> <span>시간</span>
-                </button>
-                
-                <button onclick="setMetric('count')" id="main-btn-count" 
-                    class="main-btn flex-1 rounded-lg text-[10px] font-black text-emerald-400 hover:bg-white transition-all duration-200 flex items-center justify-center gap-1.5">
-                    <i class="fas fa-running text-[9px]"></i> <span>횟수</span>
-                </button>
-            </div>
-        </div>
-        
-    </div>
-</div>
-
-    <div id="team-list" class="space-y-4 px-1">        </div>
-</section>
-
-
-<section class="glass-card p-5 bg-white rounded-3xl shadow-sm border border-emerald-50">
-    <div class="flex items-center gap-2 mb-5">
-        <div class="w-1.5 h-5 bg-emerald-500 rounded-full"></div>
-        <h2 class="text-lg font-black text-emerald-900 uppercase tracking-tighter leading-none">
-            Running Activity
-        </h2>
-    </div>
-
-    <div class="rounded-2xl p-2 bg-emerald-50/50 border border-emerald-100 mb-5">
-        <div class="flex flex-col sm:flex-row items-center gap-2">
-            
-            <div class="w-full sm:w-auto">
-                <select id="month-select" 
-                        class="w-full text-[11px] font-bold border border-emerald-200 rounded-xl px-3 py-2 bg-white outline-none text-emerald-700 shadow-sm appearance-none min-h-[36px] cursor-pointer">
-                    <option value="전체">🗓️ 모든 월</option>
-                </select>
-            </div>
-
-            <div class="flex flex-1 items-center gap-1 bg-white/60 p-1 rounded-xl border border-emerald-100 shadow-inner w-full">
-                <button onclick="window.setTypeFilter('전체')" id="type-all" 
-                        class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black transition-all active-btn">🏃 전체</button>
-                <button onclick="window.setTypeFilter('정규')" id="type-j" 
-                        class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400 hover:bg-white transition-all">📅 정규</button>
-                <button onclick="window.setTypeFilter('번개')" id="type-b" 
-                        class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400 hover:bg-white transition-all">⚡ 번개</button>
-                <button onclick="window.setTypeFilter('대회')" id="type-d" 
-                        class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400 hover:bg-white transition-all">🏅 대회</button>
-            </div>
-            
-        </div>
-    </div>
-
-    <div id="log-list" class="space-y-2">
-        </div>
-</section>
-
-
-            <!-- Section: Ranking -->
-            <div id="section-ranking" class="hidden space-y-3">
-                <section class="bg-white p-3 rounded-[1.5rem] border border-brand-100 shadow-sm">
-                    <div class="flex items-center justify-between gap-4">
+<!-- Team Rankings Section -->
+                <section class="glass-card p-4 bg-white rounded-3xl shadow-sm border border-emerald-50">
+                    <div class="flex justify-between items-center mb-6">
                         <div class="flex items-center gap-2">
-                             <div class="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center text-yellow-600">
-                                <i class="fa-solid fa-medal"></i>
-                            </div>
-                            <h2 class="font-black text-sm text-gray-800 italic">명예의 전당</h2>
+                            <div class="w-2 h-6 bg-rose-500 rounded-full"></div>
+                            <h2 class="text-xl font-black text-rose uppercase ">Team Challenges</h2>
                         </div>
-                        <div class="filter-group">
-                            <button onclick="window.setRankingPeriod('this')" id="rank-period-this" class="rank-period-btn filter-btn active">이번 달</button>
-                            <button onclick="window.setRankingPeriod('last')" id="rank-period-last" class="rank-period-btn filter-btn inactive">지난 달</button>
+                        <button onclick="openStatsModal()" 
+                                class="text-[11px] font-bold bg-rose-400 text-white px-4 py-2 rounded-xl transition-all hover:bg-rose-600 hover:shadow-md active:scale-95 flex items-center gap-2">
+                            <i class="fas fa-chart-line"></i> 분석 도구
+                        </button>
+                    </div>
+                    <div class="rounded-2xl p-3.5 bg-emerald-50/40 border border-emerald-100 mb-4">
+                        <div class="flex flex-col md:flex-row items-end gap-4">
+                           <div class="w-full md:flex-1">
+                                <label class="text-[10px] font-black text-emerald-700 uppercase mb-1.5 ml-1 flex items-center gap-1">
+                                    <i class="fas fa-calendar-alt text-emerald-500"></i> 기록 기간
+                                </label>
+                                <div class="relative group">
+                                    <select id="main-filter-month" onchange="syncAndRefresh()" 
+                                        class="w-full text-[11px] font-bold border border-emerald-200 rounded-xl px-3 py-2 bg-white outline-none text-emerald-800 shadow-sm appearance-none min-h-[38px] flex items-center cursor-pointer focus:ring-2 focus:ring-emerald-500/10 transition-all">
+                                        <option value="전체">🗓️ 모든 월</option>
+                                    </select>
+                                    <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-emerald-400">
+                                        <i class="fas fa-chevron-down text-[9px]"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="w-full md:flex-[1.5]">
+                                <label class="text-[10px] font-black text-emerald-700 uppercase mb-1.5 ml-1 flex items-center gap-1">
+                                    <i class="fas fa-layer-group text-emerald-500"></i> 데이터 기준
+                                </label>
+                                <div class="flex gap-1 p-1 bg-white/60 rounded-xl border border-emerald-100 shadow-inner h-[38px]">
+                                    <button onclick="setMetric('dist')" id="main-btn-dist" 
+                                        class="main-btn flex-1 rounded-lg text-[10px] font-black text-emerald-400 hover:bg-white transition-all duration-200 flex items-center justify-center gap-1.5 active-btn">
+                                        <i class="fas fa-road text-[9px]"></i> <span>거리</span>
+                                    </button>
+                                    
+                                    <button onclick="setMetric('time')" id="main-btn-time" 
+                                        class="main-btn flex-1 rounded-lg text-[10px] font-black text-emerald-400 hover:bg-white transition-all duration-200 flex items-center justify-center gap-1.5">
+                                        <i class="fas fa-clock text-[9px]"></i> <span>시간</span>
+                                    </button>
+                                    
+                                    <button onclick="setMetric('count')" id="main-btn-count" 
+                                        class="main-btn flex-1 rounded-lg text-[10px] font-black text-emerald-400 hover:bg-white transition-all duration-200 flex items-center justify-center gap-1.5">
+                                        <i class="fas fa-running text-[9px]"></i> <span>횟수</span>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    <div id="team-list" class="space-y-4 px-1">        </div>
+                </section>
+
+                <section class="glass-card p-5 bg-white rounded-3xl shadow-sm border border-emerald-50">
+                    <div class="flex items-center gap-2 mb-5">
+                        <div class="w-1.5 h-5 bg-emerald-500 rounded-full"></div>
+                        <h2 class="text-lg font-black text-emerald-900 uppercase tracking-tighter leading-none">
+                            Running Activity
+                        </h2>
+                    </div>
+                    <div class="rounded-2xl p-2 bg-emerald-50/50 border border-emerald-100 mb-5">
+                        <div class="flex flex-col sm:flex-row items-center gap-2">
+                            
+                            <div class="w-full sm:w-auto">
+                                <select id="month-select" 
+                                        class="w-full text-[11px] font-bold border border-emerald-200 rounded-xl px-3 py-2 bg-white outline-none text-emerald-700 shadow-sm appearance-none min-h-[36px] cursor-pointer">
+                                    <option value="전체">🗓️ 모든 월</option>
+                                </select>
+                            </div>
+
+                            <div class="flex flex-1 items-center gap-1 bg-white/60 p-1 rounded-xl border border-emerald-100 shadow-inner w-full">
+                                <button onclick="window.setTypeFilter('전체')" id="type-all" 
+                                        class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black transition-all active-btn">🏃 전체</button>
+                                <button onclick="window.setTypeFilter('정규')" id="type-j" 
+                                        class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400 hover:bg-white transition-all">📅 정규</button>
+                                <button onclick="window.setTypeFilter('번개')" id="type-b" 
+                                        class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400 hover:bg-white transition-all">⚡ 번개</button>
+                                <button onclick="window.setTypeFilter('대회')" id="type-d" 
+                                        class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400 hover:bg-white transition-all">🏅 대회</button>
+                            </div>
+                            
+                        </div>
+                    </div>
+
+                    <div id="log-list" class="space-y-2">
+                        </div>
+                </section>
+
+            </div>
+
+<!-- Section: Ranking -->
+                <section class="glass-card p-5 bg-white rounded-3xl shadow-sm border border-emerald-50">
+                   <div id="section-ranking" class="hidden space-y-3">
+                        <section class="bg-white p-3 rounded-[1.5rem] border border-brand-100 shadow-sm">
+                            <div class="flex items-center justify-between gap-4">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center text-yellow-600">
+                                        <i class="fa-solid fa-medal"></i>
+                                    </div>
+                                    <h2 class="font-black text-sm text-gray-800 italic">명예의 전당</h2>
+                                </div>
+                                <div class="filter-group">
+                                    <button onclick="window.setRankingPeriod('this')" id="rank-period-this" class="rank-period-btn filter-btn active">이번 달</button>
+                                    <button onclick="window.setRankingPeriod('last')" id="rank-period-last" class="rank-period-btn filter-btn inactive">지난 달</button>
+                                </div>
+                            </div>
+                        </section>
+
+                        <div class="grid grid-cols-1 gap-3">
+                            <div class="rank-card">
+                                <div class="rank-header">
+                                    <i class="fa-solid fa-route text-brand-500"></i>
+                                    <span class="text-xs font-black text-gray-700">누적 거리 TOP 5</span>
+                                </div>
+                                <div id="rank-dist-list" class="divide-y divide-gray-50"></div>
+                            </div>
+                            <div class="rank-card">
+                                <div class="rank-header">
+                                    <i class="fa-solid fa-stopwatch text-orange-500"></i>
+                                    <span class="text-xs font-black text-gray-700">누적 시간 TOP 5</span>
+                                </div>
+                                <div id="rank-time-list" class="divide-y divide-gray-50"></div>
+                            </div>
+                            <div class="rank-card">
+                                <div class="rank-header">
+                                    <i class="fa-solid fa-calendar-check text-purple-500"></i>
+                                    <span class="text-xs font-black text-gray-700">러닝 횟수 TOP 5</span>
+                                </div>
+                                <div id="rank-count-list" class="divide-y divide-gray-50"></div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center px-1 pt-4">
+                            <h2 class="font-black text-base text-gray-800 italic">
+                                <i class="fa-solid fa-bolt text-blue-500"></i> 한 번에 제일 멀리, 오래
+                            </h2>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-5">
+                            <div class="rank-card">
+                                <div class="rank-header">
+                                    <i class="fa-solid fa-award text-emerald-500"></i>
+                                    <span class="text-xs font-black text-gray-700">단일 최장 거리 TOP 5</span>
+                                </div>
+                                <div id="rank-single-dist-list" class="divide-y divide-gray-50"></div>
+                            </div>
+                            <div class="rank-card">
+                                <div class="rank-header">
+                                    <i class="fa-solid fa-hourglass-half text-amber-500"></i>
+                                    <span class="text-xs font-black text-gray-700">단일 최장 시간 TOP 5</span>
+                                </div>
+                                <div id="rank-single-time-list" class="divide-y divide-gray-50"></div>
+                            </div>
                         </div>
                     </div>
                 </section>
-
-                <div class="grid grid-cols-1 gap-3">
-                    <div class="rank-card">
-                        <div class="rank-header">
-                            <i class="fa-solid fa-route text-brand-500"></i>
-                            <span class="text-xs font-black text-gray-700">누적 거리 TOP 5</span>
-                        </div>
-                        <div id="rank-dist-list" class="divide-y divide-gray-50"></div>
-                    </div>
-                    <div class="rank-card">
-                        <div class="rank-header">
-                            <i class="fa-solid fa-stopwatch text-orange-500"></i>
-                            <span class="text-xs font-black text-gray-700">누적 시간 TOP 5</span>
-                        </div>
-                        <div id="rank-time-list" class="divide-y divide-gray-50"></div>
-                    </div>
-                    <div class="rank-card">
-                        <div class="rank-header">
-                            <i class="fa-solid fa-calendar-check text-purple-500"></i>
-                            <span class="text-xs font-black text-gray-700">러닝 횟수 TOP 5</span>
-                        </div>
-                        <div id="rank-count-list" class="divide-y divide-gray-50"></div>
-                    </div>
-                </div>
-
-                <div class="flex items-center px-1 pt-4">
-                    <h2 class="font-black text-base text-gray-800 italic">
-                        <i class="fa-solid fa-bolt text-blue-500"></i> 한 번에 제일 멀리, 오래
-                    </h2>
-                </div>
-
-                <div class="grid grid-cols-1 gap-5">
-                    <div class="rank-card">
-                        <div class="rank-header">
-                            <i class="fa-solid fa-award text-emerald-500"></i>
-                            <span class="text-xs font-black text-gray-700">단일 최장 거리 TOP 5</span>
-                        </div>
-                        <div id="rank-single-dist-list" class="divide-y divide-gray-50"></div>
-                    </div>
-                    <div class="rank-card">
-                        <div class="rank-header">
-                            <i class="fa-solid fa-hourglass-half text-amber-500"></i>
-                            <span class="text-xs font-black text-gray-700">단일 최장 시간 TOP 5</span>
-                        </div>
-                        <div id="rank-single-time-list" class="divide-y divide-gray-50"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Section: Statistics -->
+<!-- Section: Statistics -->
             <div id="section-stats" class="hidden space-y-5">
                 <section class="bg-white p-4 rounded-[2.5rem] border border-brand-100 shadow-sm sticky top-20 z-10">
                     <div class="flex flex-col gap-3">
@@ -633,57 +613,56 @@
                 </div>
             </div>
 
-            <!-- Section: Members (Only Admin) -->
+<!-- Section: Members (Only Admin) -->
             <div id="section-members" class="hidden space-y-6">
-  
-<section class="bg-brand-50 p-6 rounded-[2.5rem] border-2 border-brand-200 shadow-xl shadow-brand-100/50">
-    <h2 id="mem-form-title" class="font-black text-sm mb-6 flex items-center gap-2 text-gray-800">
-        <i class="fa-solid fa-fire-flame-curved text-brand-600 animate-pulse"></i> 개별 크루 등록
-    </h2>
-    <input type="hidden" id="mem-edit-id">
-    
-    <div class="grid grid-cols-2 gap-4 mb-6">
-        <div class="col-span-1">
-            <label class="text-[10px] text-gray-400 font-bold block mb-1">로그인 닉네임 (log_nickname)</label>
-            <input type="text" id="mem-log-nickname" class="w-full bg-white border border-green-100 p-3 rounded-xl text-sm font-bold outline-none" placeholder="로그인 시 사용">
-        </div>
-        
-        <div class="col-span-1">
-            <label class="text-[10px] text-gray-400 font-bold block mb-1">실제 닉네임 (nickname)</label>
-            <input type="text" id="mem-nickname" class="w-full bg-white border border-green-100 p-3 rounded-xl text-sm font-bold outline-none" placeholder="화면 표시용">
-        </div>
+                <section class="bg-brand-50 p-6 rounded-[2.5rem] border-2 border-brand-200 shadow-xl shadow-brand-100/50">
+                    <h2 id="mem-form-title" class="font-black text-sm mb-6 flex items-center gap-2 text-gray-800">
+                        <i class="fa-solid fa-fire-flame-curved text-brand-600 animate-pulse"></i> 개별 크루 등록
+                    </h2>
+                    <input type="hidden" id="mem-edit-id">
+                    
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="col-span-1">
+                            <label class="text-[10px] text-gray-400 font-bold block mb-1">로그인 닉네임 (log_nickname)</label>
+                            <input type="text" id="mem-log-nickname" class="w-full bg-white border border-green-100 p-3 rounded-xl text-sm font-bold outline-none" placeholder="로그인 시 사용">
+                        </div>
+                        
+                        <div class="col-span-1">
+                            <label class="text-[10px] text-gray-400 font-bold block mb-1">실제 닉네임 (nickname)</label>
+                            <input type="text" id="mem-nickname" class="w-full bg-white border border-green-100 p-3 rounded-xl text-sm font-bold outline-none" placeholder="화면 표시용">
+                        </div>
 
-        <div class="col-span-2 grid grid-cols-3 gap-3">
-            <div>
-                <label class="text-[10px] text-gray-400 font-bold block mb-1">소속팀 (team)</label>
-                <select id="mem-team" class="w-full bg-white border border-green-100 p-3 rounded-xl text-sm font-bold outline-none">
-                    <option value="">선택</option>
-                    <option value="손기정">손기정</option>
-                    <option value="이봉주">이봉주</option>
-                    <option value="황영조">황영조</option>
-                </select>
-            </div>
-            <div>
-                <label class="text-[10px] text-gray-400 font-bold block mb-1">성별</label>
-                <select id="mem-gender" class="w-full bg-white border border-green-100 p-3 rounded-xl text-sm font-bold outline-none">
-                    <option value="남성">남성</option>
-                    <option value="여성">여성</option>
-                </select>
-            </div>
-            <div>
-                <label class="text-[10px] text-gray-400 font-bold block mb-1">가입일</label>
-                <input type="date" id="mem-joindate" class="w-full bg-white border border-green-100 p-3 rounded-xl text-sm font-bold outline-none">
-            </div>
-        </div>
+                        <div class="col-span-2 grid grid-cols-3 gap-3">
+                            <div>
+                                <label class="text-[10px] text-gray-400 font-bold block mb-1">소속팀 (team)</label>
+                                <select id="mem-team" class="w-full bg-white border border-green-100 p-3 rounded-xl text-sm font-bold outline-none">
+                                    <option value="">선택</option>
+                                    <option value="손기정">손기정</option>
+                                    <option value="이봉주">이봉주</option>
+                                    <option value="황영조">황영조</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-gray-400 font-bold block mb-1">성별</label>
+                                <select id="mem-gender" class="w-full bg-white border border-green-100 p-3 rounded-xl text-sm font-bold outline-none">
+                                    <option value="남성">남성</option>
+                                    <option value="여성">여성</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-gray-400 font-bold block mb-1">가입일</label>
+                                <input type="date" id="mem-joindate" class="w-full bg-white border border-green-100 p-3 rounded-xl text-sm font-bold outline-none">
+                            </div>
+                        </div>
 
-        <div class="col-span-2">
-            <label class="text-[10px] text-gray-400 font-bold block mb-1">메모</label>
-            <input type="text" id="mem-memo" class="w-full bg-white border border-green-100 p-3 rounded-xl text-sm font-bold outline-none">
-        </div>
-    </div>
+                        <div class="col-span-2">
+                            <label class="text-[10px] text-gray-400 font-bold block mb-1">메모</label>
+                            <input type="text" id="mem-memo" class="w-full bg-white border border-green-100 p-3 rounded-xl text-sm font-bold outline-none">
+                        </div>
+                    </div>
 
-    <button id="mem-submit-btn" class="w-full bg-brand-600 text-white font-black py-4 rounded-2xl shadow-lg shadow-brand-200 active:scale-[0.98] transition-all hover:bg-brand-700 text-lg flex items-center justify-center gap-2">저장하기</button>
-</section>
+                    <button id="mem-submit-btn" class="w-full bg-brand-600 text-white font-black py-4 rounded-2xl shadow-lg shadow-brand-200 active:scale-[0.98] transition-all hover:bg-brand-700 text-lg flex items-center justify-center gap-2">저장하기</button>
+                </section>
 
                 <section class="bg-white p-6 rounded-[2.5rem] border border-brand-100 shadow-sm">
                     <div class="flex justify-between items-center mb-6">
@@ -757,7 +736,10 @@
         </main>
     </div>
 
-   <!-- Statistics Modal -->
+
+
+
+<!-- Statistics Modal -->
     <div id="stats-modal" class="fixed inset-0 z-[100] hidden modal-overlay flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-lg rounded-[2.5rem] max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200">
             <div class="sticky top-0 bg-white/90 backdrop-blur-md px-8 py-6 border-b border-slate-100 flex justify-between items-center z-10">
@@ -849,7 +831,7 @@
     </div>
 
 
-    <!-- Modals -->
+<!-- Modals -->
     <!-- Profile Edit Modal -->
     <div id="profile-edit-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[250] hidden items-center justify-center p-4">
         <div class="bg-white rounded-[2.5rem] w-full max-w-sm shadow-2xl overflow-hidden p-8">
@@ -901,6 +883,7 @@
             </div>
         </div>
     </div>
+
 
     <div id="custom-modal" class="fixed inset-0 bg-black/50 z-[200] hidden items-center justify-center p-4">
         <div class="bg-white rounded-[2rem] p-6 max-w-sm w-full shadow-2xl">
@@ -1357,16 +1340,15 @@
 
         window.closeStatsModal = () => document.getElementById('stats-modal').classList.add('hidden');
 
-
         window.setMetric = (m) => {
             currentMetric = m;
             ['dist', 'time', 'count'].forEach(id => {
                 const mb = document.getElementById(`main-btn-${id}`);
                 if(mb) {
                     const isActive = id === m;
-                    mb.classList.toggle('bg-green-500', isActive);
-                    mb.classList.toggle('text-white', isActive);
-                    mb.classList.toggle('border-green-500', isActive);
+                    mb.classList.toggle('bg-brand-400', isActive);
+                    mb.classList.toggle('text-black', isActive);
+                    mb.classList.toggle('border-brand-400', isActive);
                 }
             });
             updateUI_Team();
@@ -1407,7 +1389,11 @@
                 return isCorrectYear && isCorrectGender && isCorrectTarget && isCorrectTeam;
             });
 
+
+
             filteredLogs.forEach(l => {
+                const hms= minToHMS(l.duration);
+                const timeStr = `${hms.h > 0 ? hms.h + ':' : ''}${hms.m.toString().padStart(2, '0')}:${hms.s.toString().padStart(2, '0')}`;
                 const m = new Date(l.date).getMonth();
                 distData[m] += Number(l.distance || 0);
                 timeData[m] += Number(l.duration || 0);
@@ -1431,19 +1417,55 @@
             };
 
             if (distChart) distChart.destroy();
-            distChart = createChart('monthlyDistChart', 'bar', '거리 (km)', distData, themeColor, { dataset: { borderRadius: 6 } });
+            distChart = createChart('monthlyDistChart', 'bar', 'Dist.(km)', distData, themeColor, { dataset: { borderRadius: 6 } });
             
             if (paceChart) paceChart.destroy();
-            paceChart = createChart('monthlyPaceChart', 'line', '평균 페이스 (min/km)', paceData, '#10b981', { 
+            paceChart = createChart('monthlyPaceChart', 'line', 'Pace (min/km)', paceData, '#10b981', { 
                 dataset: { fill: true, backgroundColor: '#10b98133', tension: 0.3, pointRadius: 4 },
                 chart: { scales: { y: { reverse: true } } }
             });
 
             if (countChart) countChart.destroy();
-            countChart = createChart('monthlyCountChart', 'bar', '러닝 횟수 (회)', countData, '#8b5cf6', { dataset: { borderRadius: 6 } });
+            countChart = createChart('monthlyCountChart', 'bar', 'Count', countData, '#8b5cf6', { dataset: { borderRadius: 6 } });
 
             if (timeChart) timeChart.destroy();
-            timeChart = createChart('monthlyTimeChart', 'bar', '시간 (min)', timeData, '#f97316', { dataset: { borderRadius: 6 } });
+
+            timeChart = createChart('monthlyTimeChart', 'bar', 'Time', timeData, '#f97316', { 
+                dataset: { borderRadius: 6 },
+                chart: {
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                // 툴팁에 나타나는 숫자를 시분초로 변환
+                                label: function(context) {
+                                    const totalMin = context.parsed.y;
+                                    if (totalMin <= 0) return ' 00:00';
+                                    
+                                    const hms = minToHMS(totalMin);
+                                    const hPart = hms.h > 0 ? hms.h + ':' : '';
+                                    const mPart = hms.m.toString().padStart(2, '0');
+                                    const sPart = hms.s.toString().padStart(2, '0');
+                                    
+                                    return ` Hr: ${hPart}${mPart}:${sPart}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            ticks: {
+                                // Y축 눈금도 시분 단위로 변환 (선택 사항)
+                                callback: function(value) {
+                                    if (value === 0) return 0;
+                                    const h = Math.floor(value / 60);
+                                    const m = value % 60;
+                                    return h > 0 ? `${h}:${m}`:`${m}min`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
         };
 
         const renderRankingLists = () => {
