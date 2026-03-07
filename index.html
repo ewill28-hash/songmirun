@@ -262,12 +262,11 @@
                         <i class="fa-solid fa-person-running icon-btn" id="display-nickname"></i>
                     </div>
                     <div>
-                        <h1 class="text-sm font-black text-gray-800 italic">Songmirun</h1>
+                        <h2 class="text-sm font-black text-gray-800 italic">Songmirun</h2>
                         <div class="flex items-center gap-1.5">
                             <span id="display-nickname2" class="text-[10px] font-bold text-brand-500 cursor-pointer hover:bg-brand-50 px-1 rounded transition-colors" title="내 정보 상세">-</span>
                             <span id="admin-badge" class="hidden text-[8px] bg-red-500 text-white px-1.5 rounded-sm font-black uppercase">Admin</span>
                         </div>
-                        <div class="text-[10px] font-black px-3 py-1.5 rounded-lg text-white uppercase" id="display-team-badge">TEAM</div>
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
@@ -891,7 +890,8 @@
                     <div>
                         <div class="flex items-center gap-2">
                             <h2 id="modal-user-name" class="text-2xl font-black italic">Runner Name</h2>
-                            <div id="modal-runner-grade" class="runner-grade-badge"></div>
+                            <div class="text-[9px] font-black px-3 py-1 rounded-lg text-white uppercase" id="display-team-badge">TEAM</div>          
+                            <div id="modal-runner-grade" class="text-[10px] font-black px-3 py-1.5 rounded-lg text-white uppercase"></div>
                         </div>
                     </div>
                 </div>
@@ -947,7 +947,7 @@
         let selectedType = '전체'; 
         let selectedMonthF = '전체'; 
         let selectedMonthT = '전체'; 
-        let myTeam;
+        let myTeam = '무소속'; // 초기값 설정
 
         let selectedRankingPeriod = 'this'; 
         let sortConfig = { key: 'log_nickname', direction: 'asc' };
@@ -1791,7 +1791,7 @@
             else if (activeWeeks === 2) scoreBonus = 10;
 
             const totalScore = scoreCount + scoreDist + scoreBonus;
-            let grade = { name: '🐣 Starter', color: 'bg-gray-100 text-gray-500' };
+            let grade = { name: '🐣 Starter', color: 'bg-gray-100 px-3 rounded-lg text-gray-500' };
             if (totalScore >= 90) grade = { name: '🏔 Iron Runner', color: 'bg-slate-800 text-white' };
             else if (totalScore >= 75) grade = { name: '🔥 Steady Flame', color: 'bg-orange-500 text-white' };
             else if (totalScore >= 60) grade = { name: '🌊 Rhythm Runner', color: 'bg-blue-500 text-white' };
@@ -1808,6 +1808,14 @@
             const gradeBadge = document.getElementById('modal-runner-grade');
             gradeBadge.innerText = grade.name;
             gradeBadge.className = `runner-grade-badge ${grade.color}`;
+
+            const userRecord = crewMembers.find(m => m.nickname === userNickname); // userName -> nickname
+            const myTeam2 = userRecord ? userRecord.team : '무소속';
+            const badge = document.getElementById('display-team-badge');
+            if (badge) {
+                badge.innerText = '팀:'+myTeam2;
+                badge.style.backgroundColor = TEAM_COLORS[myTeam2] || '#94a3b8';
+            }
 
             const calculate = (logs) => {
                 const count = logs.length;
@@ -2008,15 +2016,13 @@
 
                 renderStats();  renderLogs(); renderRankingLists();updateUI_Team();
             });
+//sss
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_members'), (snap) => {
                 crewMembers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 snap.docs.forEach(d => { crewMembers[d.data().nickname] = d.data().team; });
+
                 myTeam = crewMembers[userNickname] || '무소속';
-                const badge = document.getElementById('display-team-badge');
-                if (badge) {
-                    badge.innerText = "팀:"+myTeam;
-                    badge.style.backgroundColor = TEAM_COLORS[myTeam] || '#94a3b8';
-                }         
+ 
                 renderMembers(); renderAllCharts();updateUI_Team();
             });
 
@@ -2080,16 +2086,27 @@
                     const members = {};
                     snap.docs.forEach(d => {
                         const data = d.data();
-                        // nickname을 키로 사용하여 팀 정보 저장
+                        // nickname을 키로 사용하여 팀 정보 저장 입장
                         members[data.nickname] = data.team;
                     });
                     allMembers = members;
-                    //myTeam = allMembers[userNickname] || '무소속';
-                    //(팀:${myTeam})
+                    const myTeam2 = members[userNickname] || '무소속';
+                    const teamBgColor = TEAM_COLORS[myTeam2] || '#94a3b8';
+
                     document.getElementById('display-nickname2').innerHTML = `
-                        <button onclick="window.openUserStatModal('${userNickname}')" 
-                                class="text-brand-600 hover:underline text-left font-black p-0 m-0 block">
-                            ${userNickname} 님, 입장!
+                        <div class="flex items-center gap-2">
+                            <span class="text-white text-[8px] font-black px-1 py-1 rounded-md shadow-sm whitespace-nowrap flex items-center h-fit"
+                                style="background-color: ${teamBgColor};">
+                                팀:${myTeam2}
+                            </span>
+
+                            <button onclick="window.openUserStatModal('${userNickname}')" 
+                                    class="text-emerald-600 hover:text-emerald-700 hover:underline text-left font-black p-0 m-0 whitespace-nowrap leading-none transition-colors">
+                                ${userNickname}님, 입장!
+                            </button>
+
+
+                        </div>
                     `;
                     updateUI_Team();
                 });
@@ -2101,9 +2118,6 @@
     
                 document.getElementById('username-field-container').classList.toggle('hidden', !isAdmin);
                 document.getElementById('log-username').value = isAdmin ? (document.getElementById('log-username').value || "Jake") : userNickname;
-
-
-
 
             }
         };
@@ -2272,6 +2286,8 @@
             const nowY = new Date().getFullYear();
             for(let i=nowY; i>=nowY-2; i--) { const o = document.createElement('option'); o.value = i; o.innerText = i + '년'; yr.appendChild(o); }
             yr.onchange = (e) => { selectedYear = e.target.value; renderStats(); renderLogs();updateUI_Team(); };  //selectedyear
+
+
             const today = new Date().toLocaleDateString('en-CA'); 
             document.getElementById('in-date').value = today;
             document.getElementById('mem-joindate').value = today;        
