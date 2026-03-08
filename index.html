@@ -1866,7 +1866,9 @@
                     </div>
                     <div class="flex items-center gap-1 mb-1">
                         <div class="w-5 h-5 bg-brand-100 rounded-full flex items-center justify-center text-[8px] font-bold text-brand-600">${l.userName?.charAt(0) || '?'}</div>
-                        <span class="text-xs font-bold text-gray-700">${l.userName}</span>
+                        <button onclick="window.openUserStatModal('${l.userName}')" class="text-xs font-bold text-gray-700">
+                                ${l.userName}
+                            </button>
                     </div>
                     <div class="grid grid-cols-5 gap-1 text-center bg-brand-50/50 p-2 rounded-xl">
                         <div><p class="text-[7px] text-gray-400 font-bold">Km</p><p class="text-[11px] font-black">${l.distance}</p></div>
@@ -1989,8 +1991,17 @@
             gradeBadge.innerText = grade.name;
             gradeBadge.className = `runner-grade-badge ${grade.color}`;
 
-            const userRecord = crewMembers.find(m => m.nickname === userNickname); // userName -> nickname
-            const myTeam2 = userRecord ? userRecord.team : '무소속';
+            const userRecord = crewMembers.find(m => m.nickname === nickname); // userName -> nickname
+
+
+            const myTeam2 = userRecord ? userRecord.team : '무소속2';
+    console.log(userNickname); // 예: "황영조"
+
+if (userRecord) {
+    console.log("내 팀:", userRecord.team); // 예: "황영조"
+    console.log("내 등급:", userRecord.grade); // 예: "에이스"
+}
+
             const badge = document.getElementById('display-team-badge');
             if (badge) {
                 badge.innerText = '팀:'+myTeam2;
