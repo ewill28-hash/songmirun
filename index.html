@@ -871,7 +871,6 @@
                         -->
                         <select id="main-filter-month2" onchange="syncAndRefresh()"  
                             class="w-full text-[11px] font-bold border border-emerald-200 rounded-xl px-3 py-2 bg-white outline-none text-emerald-800 shadow-sm appearance-none min-h-[38px] flex items-center cursor-pointer focus:ring-2 focus:ring-emerald-500/10 transition-all">
-
                                     <option value="전체">🗓️ 모든 월 </option>
                         </select>
                     </div>
@@ -1168,7 +1167,90 @@
             renderRankingLists();
         };
 
-//z
+
+
+        const renderLogs = () => {
+            const list = document.getElementById('log-list');
+            const displayLogs = (isAdmin ? allLogs : allLogs.filter(l => l.userName === userNickname))
+                .filter(l => l.date && new Date(l.date).getFullYear() === parseInt(selectedYear))
+                .filter(l => {
+                    if (selectedMonthF === '전체') return true;
+                    // Date 객체의 getMonth()는 0~11을 반환하므로 +1 필요
+                    const logMonth = new Date(l.date).getMonth() + 1;
+                    return logMonth === parseInt(selectedMonthF);
+                })
+                .filter(l => selectedType === '전체' || (l.runType || '번개') === selectedType);
+
+            const sorted = [...displayLogs].sort((a, b) => {
+                const dateA = new Date(a.date);
+                const dateB = new Date(b.date);
+                return dateB - dateA; // 내림차순
+            })
+            .slice(0, isAdmin ? undefined : 25);
+
+            const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+            list.innerHTML = sorted.map(l => {
+                const hms = minToHMS(l.duration);
+                const timeStr = `${hms.h > 0 ? hms.h + ':' : ''}${hms.m.toString().padStart(2, '0')}:${hms.s.toString().padStart(2, '0')}`;
+                
+                const dist = Number(l.distance || 0);
+                const duration = Number(l.duration || 0);
+                let paceStr = "0'00\"";
+                if (dist > 0) {
+                    const pace = duration / dist;
+                    const mm = Math.floor(pace);
+                    const ss = Math.round((pace - mm) * 60);
+                    paceStr = `${mm}'${ss.toString().padStart(2, '0')}"`;
+                }
+                const dateObj = new Date(l.date);                
+                const dayIndex = dateObj.getDay(); 
+                const dayName = dayNames[dateObj.getDay()]; // 요일 인덱스 추출
+                let dayColorClass = 'text-gray-400'; // 기본 회색
+                if (dayIndex === 1) {
+                    dayColorClass = 'text-green-500 font-medium'; // 월요일: 파란색
+                } else if (dayIndex === 0 || dayIndex === 6) {
+                    dayColorClass = 'text-red-500 font-medium'; // 일요일, 토요일: 빨간색
+                }
+
+                const runTypeMap = {
+                    '정규': { icon: '📅', label: '정규' },
+                    '번개': { icon: '⚡', label: '번개' },
+                    '대회': { icon: '🏅', label: '대회' },
+                    '오운완': { icon: '👟', label: '오운완' }
+
+                };
+
+                const defaultType = { icon: '⚡', label: '번개' };
+                const typeInfo = runTypeMap[l.runType] || defaultType;
+
+                return `
+                <div class="bg-white p-3 rounded-2xl border border-brand-100 shadow-sm relative">
+                    <div class="flex justify-between items-center mb-1"> <span class="text-[9px] font-black ${dayColorClass} bg-gray-50 px-2 py-0 rounded-full leading-none flex items-center h-4"> ${l.date} (${dayName}) | ${typeInfo.icon} ${typeInfo.label}
+                        </span>
+                        <div class="flex gap-1"> <button onclick="window.editLog('${l.id}')" class="text-gray-300 hover:text-brand-500 p-0.5"> <i class="fa-solid fa-pen-to-square text-[10px]"></i> </button>
+                            <button onclick="window.deleteLog('${l.id}')" class="text-gray-300 hover:text-red-500 p-0.5"> <i class="fa-solid fa-trash-can text-[10px]"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1 mb-1">
+                        <div class="w-5 h-5 bg-brand-100 rounded-full flex items-center justify-center text-[8px] font-bold text-brand-600">${l.userName?.charAt(0) || '?'}</div>
+                        <button onclick="window.openUserStatModal('${l.userName}')" class="text-xs font-bold text-gray-700">
+                                ${l.userName}
+                            </button>
+                    </div>
+                    <div class="grid grid-cols-5 gap-1 text-center bg-brand-50/50 p-2 rounded-xl">
+                        <div><p class="text-[7px] text-gray-400 font-bold">Km</p><p class="text-[11px] font-black">${l.distance}</p></div>
+                        <div><p class="text-[7px] text-gray-400 font-bold">Time</p><p class="text-[11px] font-black">${timeStr}</p></div>
+                        <div><p class="text-[7px] text-emerald-600 font-bold">Pace</p><p class="text-[11px] font-black text-emerald-600">${paceStr}</p></div>
+                        <div><p class="text-[7px] text-gray-400 font-bold text-red-400">Bpm</p><p class="text-[11px] font-black text-red-500">${l.bpm}</p></div>
+                        <div><p class="text-[7px] text-gray-400 font-bold">Cad</p><p class="text-[11px] font-black text-brand-600">${l.cadence}</p></div>
+                    </div>
+                </div>
+            `;}).join('') || '<div class="p-10 text-center text-gray-300 text-xs font-bold">활동 기록이 없습니다.</div>';
+        };
+
+
+
         window.setTypeFilter = (type) => {
             selectedType = type;
             ['type-all', 'type-j', 'type-b', 'type-d', 'type-o'].forEach(id => {
@@ -1180,34 +1262,7 @@
             renderLogs();
         };
 
-        const mo = document.getElementById('month-select');
-        const currentMonth = new Array().getMonth ? new Date().getMonth() + 1 : new Date().getMonth() + 1; // 현재 월 (1~12)
-
-        const smileys = ["😊", "✨", "🏃", "☀️", "🍀", "🌿", "🌊", "⛱️", "🍁", "🍂", "❄️", "🎄"]; // 월별 어울리는 아이콘 (선택사항)
-        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-        for(let i=1; i<=12; i++) {
-            const o = document.createElement('option');
-            o.value = i;
-
-            // 현재 월과 i가 일치하면 기본 선택값으로 설정
-            if (i === currentMonth) {
-                o.selected = true;
-            }
-                        
-            const engName = monthNames[i-1];
-            const icon = smileys[i-1]; 
-            
-            //o.innerText = ` ${icon} ${i}월 - ${engName}`;
-            o.innerText = ` ${i}월 `;
-            mo.appendChild(o);
-        }
-
-        mo.onchange = (e) => {
-            const val = e.target.value;
-            // 기존에 버튼 클릭 시 호출하던 함수를 그대로 연결합니다.
-            window.setMonthFilter(val === '전체' ? '전체' : Number(val));
-        };
-
+///////mo- start ==== 기록월
         window.setMonthFilter = (month) => {
             selectedMonthF = month;
             const monthIds = ['month-all', ...Array.from({length: 12}, (_, i) => `month-${i + 1}`)];
@@ -1221,86 +1276,42 @@
             renderLogs(); // 데이터 다시 그리기
         };
 
-////////s/
-       const mot = document.getElementById('main-filter-month');
-       const currentMontht = new Array().getMonth ? new Date().getMonth() + 1 : new Date().getMonth() + 1; // 현재 월 (1~12)
+        const mo = document.getElementById('month-select');
+        const currentMonth = new Array().getMonth ? new Date().getMonth() + 1 : new Date().getMonth() + 1; // 현재 월 (1~12)
 
-       for(let i=1; i<=12; i++) {
+        const smileys = ["😊", "✨", "🏃", "☀️", "🍀", "🌿", "🌊", "⛱️", "🍁", "🍂", "❄️", "🎄"]; // 월별 어울리는 아이콘 (선택사항)
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        for(let i=1; i<=12; i++) {
             const o = document.createElement('option');
             o.value = i;
-
-            if (i === currentMontht) {
+            // 현재 월과 i가 일치하면 기본 선택값으로 설정
+            if (i === currentMonth) {
                 o.selected = true;
             }
-
+                        
             const engName = monthNames[i-1];
             const icon = smileys[i-1]; 
             
             //o.innerText = ` ${icon} ${i}월 - ${engName}`;
             o.innerText = ` ${i}월 `;
-            mot.appendChild(o);
+            mo.appendChild(o);
         }
-
-        mot.onchange = (e) => {
-            const val = e.target.value;
-            window.setMonthFilterT(val === '전체' ? '전체' : Number(val));
-        };
-
-
-       const mot2 = document.getElementById('main-filter-month2');
-       const currentMontht2 = new Array().getMonth ? new Date().getMonth() + 1 : new Date().getMonth() + 1; // 현재 월 (1~12)
-
-       for(let i=1; i<=12; i++) {
-            const o = document.createElement('option');
-            o.value = i;
-            if (i === currentMontht2) {
-                o.selected = true;
-            }
-
-            const engName = monthNames[i-1];
-            const icon = smileys[i-1]; 
-            
-            //o.innerText = ` ${icon} ${i}월 - ${engName}`;
-            o.innerText = ` ${i}월 `;
-            mot2.appendChild(o);
-        }
-
-        mot2.onchange = (e) => {
+        window.setMonthFilter(currentMonth);
+        mo.onchange = (e) => {
             const val = e.target.value;
             // 기존에 버튼 클릭 시 호출하던 함수를 그대로 연결합니다.
-            window.setMonthFilterT(val === '전체' ? '전체' : Number(val));
+            window.setMonthFilter(val === '전체' ? '전체' : Number(val));
         };
-        window.setMonthFilterT = (month) => {
+///////mo- end ==== 기록월
 
-            selectedMonthT = month;
-            const monthIds = ['month-all', ...Array.from({length: 12}, (_, i) => `month-${i + 1}`)];
-            monthIds.forEach(id => {
-                const el = document.getElementById(id);
-                if (!el) return;
-                const isActive = (id === 'month-all' && month === '전체') || (id === `month-${month}`);
-                el.classList.toggle('active', isActive);
-                el.classList.toggle('inactive', !isActive);
-            });
-            updateUI_Team(); // 데이터 다시 그리기
-        };
-////////
-
-        window.setRankingPeriod = (period) => {
-            selectedRankingPeriod = period;
-            ['rank-period-this', 'rank-period-last'].forEach(id => {
-                const el = document.getElementById(id);
-                const isActive = (id === 'rank-period-this' && period === 'this') || (id === 'rank-period-last' && period === 'last');
-                el.classList.toggle('active', isActive);
-                el.classList.toggle('inactive', !isActive);
-            });
-            renderRankingLists();
-        };
-
-
+        let currentUser = null;
+        let userData = { name: '', team: '' };
+        let allMembers = {}; // nickname: team 조인용 맵
+        let chartInstance = null;
+        let currentMetric = 'dist';
+        let dataScope = 'avg'; 
+        
         window.updateUI_Team = () => {
-           // c//onst filterVal = document.getElementById('main-filter-month').value;
-            //const filtered = allLogs.filter(r => filterVal === 'all' || (r.date && r.date.startsWith(filterVal)));
-
             const filtered = allLogs
                     .filter(l => l.date && new Date(l.date).getFullYear() === parseInt(selectedYear))
                     .filter(l => {
@@ -1309,10 +1320,8 @@
                         return logMonth === parseInt(selectedMonthT);
                     });
 
-
             const teams = {};
             let myStats = { dist: 0, time: 0, count: 0 };
-
 
             filtered.forEach(r => {
                 const teamName = crewMembers[r.userName] || '무소속';
@@ -1341,9 +1350,6 @@
             const myTeamName = crewMembers[userNickname] || myTeam;
             const myTeamData = teams[myTeamName] || { dist: 0, time: 0, count: 0, members: new Set(), color: TEAM_COLORS[myTeamName] || '#94a3b8' };
             
-            //document.getElementById('my-total-dist').innerText = myStats.dist.toFixed(1) + 'km';
-            //document.getElementById('my-contribution').innerText = ((myStats.dist / (myTeamData.dist || 1)) * 100).toFixed(1) + '%';
-
             const list = document.getElementById('team-list');
             if (list) {
                 list.innerHTML = '';
@@ -1359,7 +1365,6 @@
 
                 const hms= minToHMS(data.time);
                 const timeStr = `${hms.h > 0 ? hms.h + ':' : ''}${hms.m.toString().padStart(2, '0')}:${hms.s.toString().padStart(2, '0')}`;
-
 
                     list.innerHTML += 
                     `
@@ -1402,14 +1407,87 @@
             renderChart(teams, myStats);
         };
 
-
-        // 팀 컬러 정의
         const TEAM_COLORS = { 
             '황영조': '#f87171', 
             '손기정': '#3b82f6', 
             '이봉주': '#22c55e', 
             '무소속': '#94a3b8'     
         };
+
+        window.setMonthFilterT = (month) => {
+            selectedMonthT = month;
+            const monthIds = ['month-all', ...Array.from({length: 12}, (_, i) => `month-${i + 1}`)];
+            monthIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                const isActive = (id === 'month-all' && month === '전체') || (id === `month-${month}`);
+                el.classList.toggle('active', isActive);
+                el.classList.toggle('inactive', !isActive);
+            });
+            updateUI_Team(); // 데이터 다시 그리기
+        };
+////////
+////////mot-start/ Team Challenges
+       const mot = document.getElementById('main-filter-month');
+       const currentMontht = new Array().getMonth ? new Date().getMonth() + 1 : new Date().getMonth() + 1; // 현재 월 (1~12)
+       for(let i=1; i<=12; i++) {
+            const o = document.createElement('option');
+            o.value = i;
+            if (i === currentMontht) {
+                o.selected = true;
+            }
+            const engName = monthNames[i-1];
+            const icon = smileys[i-1]; 
+            //o.innerText = ` ${icon} ${i}월 - ${engName}`;
+            o.innerText = ` ${i}월 `;
+            mot.appendChild(o);
+        }
+        window.setMonthFilterT(currentMonth);
+        mot.onchange = (e) => {
+            const val = e.target.value;
+            window.setMonthFilterT(val === '전체' ? '전체' : Number(val));
+        };
+////////mot-end/
+
+////////mot2-start/ 상세분석 모달창
+       const mot2 = document.getElementById('main-filter-month2');
+       const currentMontht2 = new Array().getMonth ? new Date().getMonth() + 1 : new Date().getMonth() + 1; // 현재 월 (1~12)
+
+       for(let i=1; i<=12; i++) {
+            const o = document.createElement('option');
+            o.value = i;
+            if (i === currentMontht2) {
+                o.selected = true;
+            }
+
+            const engName = monthNames[i-1];
+            const icon = smileys[i-1]; 
+            
+            //o.innerText = ` ${icon} ${i}월 - ${engName}`;
+            o.innerText = ` ${i}월 `;
+            mot2.appendChild(o);
+        }
+        window.setMonthFilterT(currentMonth);
+        mot2.onchange = (e) => {
+            const val = e.target.value;
+            // 기존에 버튼 클릭 시 호출하던 함수를 그대로 연결합니다.
+            window.setMonthFilterT(val === '전체' ? '전체' : Number(val));
+        };
+////////mot2-end/
+
+
+        window.setRankingPeriod = (period) => {
+            selectedRankingPeriod = period;
+            ['rank-period-this', 'rank-period-last'].forEach(id => {
+                const el = document.getElementById(id);
+                const isActive = (id === 'rank-period-this' && period === 'this') || (id === 'rank-period-last' && period === 'last');
+                el.classList.toggle('active', isActive);
+                el.classList.toggle('inactive', !isActive);
+            });
+            renderRankingLists();
+        };
+
+
 
         const formatTime2 = (minutes) => {
             const totalSec = Math.round(minutes * 60);
@@ -1503,12 +1581,7 @@
             });
         }
 
-        let currentUser = null;
-        let userData = { name: '', team: '' };
-        let allMembers = {}; // nickname: team 조인용 맵
-        let chartInstance = null;
-        let currentMetric = 'dist';
-        let dataScope = 'avg'; 
+
 
         window.syncAndRefresh = () => updateUI_Team();
 
@@ -1814,86 +1887,6 @@
 
 
 
-
-        const renderLogs = () => {
-            const list = document.getElementById('log-list');
-            const displayLogs = (isAdmin ? allLogs : allLogs.filter(l => l.userName === userNickname))
-                .filter(l => l.date && new Date(l.date).getFullYear() === parseInt(selectedYear))
-                .filter(l => {
-                    if (selectedMonthF === '전체') return true;
-                    // Date 객체의 getMonth()는 0~11을 반환하므로 +1 필요
-                    const logMonth = new Date(l.date).getMonth() + 1;
-                    return logMonth === parseInt(selectedMonthF);
-                })
-                .filter(l => selectedType === '전체' || (l.runType || '번개') === selectedType);
-
-            const sorted = [...displayLogs].sort((a, b) => {
-                const dateA = new Date(a.date);
-                const dateB = new Date(b.date);
-                return dateB - dateA; // 내림차순
-            })
-            .slice(0, isAdmin ? undefined : 25);
-
-            const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
-            list.innerHTML = sorted.map(l => {
-                const hms = minToHMS(l.duration);
-                const timeStr = `${hms.h > 0 ? hms.h + ':' : ''}${hms.m.toString().padStart(2, '0')}:${hms.s.toString().padStart(2, '0')}`;
-                
-                const dist = Number(l.distance || 0);
-                const duration = Number(l.duration || 0);
-                let paceStr = "0'00\"";
-                if (dist > 0) {
-                    const pace = duration / dist;
-                    const mm = Math.floor(pace);
-                    const ss = Math.round((pace - mm) * 60);
-                    paceStr = `${mm}'${ss.toString().padStart(2, '0')}"`;
-                }
-                const dateObj = new Date(l.date);                
-                const dayIndex = dateObj.getDay(); 
-                const dayName = dayNames[dateObj.getDay()]; // 요일 인덱스 추출
-                let dayColorClass = 'text-gray-400'; // 기본 회색
-                if (dayIndex === 1) {
-                    dayColorClass = 'text-green-500 font-medium'; // 월요일: 파란색
-                } else if (dayIndex === 0 || dayIndex === 6) {
-                    dayColorClass = 'text-red-500 font-medium'; // 일요일, 토요일: 빨간색
-                }
-
-                const runTypeMap = {
-                    '정규': { icon: '📅', label: '정규' },
-                    '번개': { icon: '⚡', label: '번개' },
-                    '대회': { icon: '🏅', label: '대회' },
-                    '오운완': { icon: '👟', label: '오운완' }
-
-                };
-
-                const defaultType = { icon: '⚡', label: '번개' };
-                const typeInfo = runTypeMap[l.runType] || defaultType;
-
-                return `
-                <div class="bg-white p-3 rounded-2xl border border-brand-100 shadow-sm relative">
-                    <div class="flex justify-between items-center mb-1"> <span class="text-[9px] font-black ${dayColorClass} bg-gray-50 px-2 py-0 rounded-full leading-none flex items-center h-4"> ${l.date} (${dayName}) | ${typeInfo.icon} ${typeInfo.label}
-                        </span>
-                        <div class="flex gap-1"> <button onclick="window.editLog('${l.id}')" class="text-gray-300 hover:text-brand-500 p-0.5"> <i class="fa-solid fa-pen-to-square text-[10px]"></i> </button>
-                            <button onclick="window.deleteLog('${l.id}')" class="text-gray-300 hover:text-red-500 p-0.5"> <i class="fa-solid fa-trash-can text-[10px]"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-1 mb-1">
-                        <div class="w-5 h-5 bg-brand-100 rounded-full flex items-center justify-center text-[8px] font-bold text-brand-600">${l.userName?.charAt(0) || '?'}</div>
-                        <button onclick="window.openUserStatModal('${l.userName}')" class="text-xs font-bold text-gray-700">
-                                ${l.userName}
-                            </button>
-                    </div>
-                    <div class="grid grid-cols-5 gap-1 text-center bg-brand-50/50 p-2 rounded-xl">
-                        <div><p class="text-[7px] text-gray-400 font-bold">Km</p><p class="text-[11px] font-black">${l.distance}</p></div>
-                        <div><p class="text-[7px] text-gray-400 font-bold">Time</p><p class="text-[11px] font-black">${timeStr}</p></div>
-                        <div><p class="text-[7px] text-emerald-600 font-bold">Pace</p><p class="text-[11px] font-black text-emerald-600">${paceStr}</p></div>
-                        <div><p class="text-[7px] text-gray-400 font-bold text-red-400">Bpm</p><p class="text-[11px] font-black text-red-500">${l.bpm}</p></div>
-                        <div><p class="text-[7px] text-gray-400 font-bold">Cad</p><p class="text-[11px] font-black text-brand-600">${l.cadence}</p></div>
-                    </div>
-                </div>
-            `;}).join('') || '<div class="p-10 text-center text-gray-300 text-xs font-bold">활동 기록이 없습니다.</div>';
-        };
 
         window.toggleSort = (key) => {
             if (sortConfig.key === key) { 
