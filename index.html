@@ -365,6 +365,7 @@
                                 <option value="정규">📅 정규</option>
                                 <option value="번개">⚡ 번개</option>
                                 <option value="대회">🏅 대회</option>
+                                <option value="오운완">👟 오운완</option>
                             </select>
                         </div>
 
@@ -501,6 +502,9 @@
                                         class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400  transition-all">⚡ 번개</button>
                                 <button onclick="window.setTypeFilter('대회')" id="type-d" 
                                         class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400  transition-all">🏅 대회</button>
+                                <button onclick="window.setTypeFilter('오운완')" id="type-o" 
+                                        class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400  transition-all">👟 오운완</button>
+
                             </div>
                             
                         </div>
@@ -1102,9 +1106,9 @@
 //z
         window.setTypeFilter = (type) => {
             selectedType = type;
-            ['type-all', 'type-j', 'type-b', 'type-d'].forEach(id => {
+            ['type-all', 'type-j', 'type-b', 'type-d', 'type-o'].forEach(id => {
                 const el = document.getElementById(id);
-                const isActive = (id === 'type-all' && type === '전체') || (id === 'type-j' && type === '정규') || (id === 'type-b' && type === '번개')|| (id === 'type-d' && type === '대회');
+                const isActive = (id === 'type-all' && type === '전체') || (id === 'type-j' && type === '정규') || (id === 'type-b' && type === '번개') || (id === 'type-d' && type === '대회')|| (id === 'type-o' && type === '오운완');
                 el.classList.toggle('active', isActive);
                 el.classList.toggle('inactive', !isActive);
             });
@@ -1762,7 +1766,9 @@
                 const runTypeMap = {
                     '정규': { icon: '📅', label: '정규' },
                     '번개': { icon: '⚡', label: '번개' },
-                    '대회': { icon: '🏅', label: '대회' }
+                    '대회': { icon: '🏅', label: '대회' },
+                    '오운완': { icon: '👟', label: '오운완' }
+
                 };
 
                 const defaultType = { icon: '⚡', label: '번개' };
