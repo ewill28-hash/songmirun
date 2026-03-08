@@ -1442,6 +1442,11 @@
                 o.innerText = ` ${i}월 `;
                 if (i === currentMontht) o.selected = true;
                 targetSelect.appendChild(o);
+
+                //만약 페이지 로드 시점에 currentMontht가 아니라 "전체"를 기본값으로 보여주고 싶다면, 옵션 생성 부분의 
+                //if (i === currentMontht) o.selected = true; 부분을 
+                //삭제하고 mot1.value = '전체';를 마지막에 추가하시면 됩니다.
+
             }
         }
 
