@@ -306,17 +306,38 @@
                     
             <!-- Stats Summary Cards -->
             <section class="grid grid-cols-3 sm:grid-cols-3 gap-1">
-                <div class="bg-brand-500 p-3 rounded-2xl text-white shadow-lg shadow-brand-200">
+                <div class="bg-brand-500 p-3 rounded-2xl text-white shadow-lg shadow-brand-200 border border-brand-400">
                     <p class="text-[9px] font-bold text-brand-100 uppercase tracking-tighter">Distance</p>
-                    <p id="stat-dist" class="text-xl font-black italic leading-none mt-1">0 km</p>
+                    
+                    <p id="stat-distm" class="text-xl font-black italic leading-none mt-1 text-center">
+                        <span class="text-[10px] opacity-80 not-italic mr-1">Me:</span>0 km
+                    </p>
+                    
+                    <p id="stat-dist" class="text-xl font-black italic leading-none mt-1 text-center text-brand-200">
+                        <span class="text-[10px] opacity-70 not-italic mr-1">All:</span>0 km
+                    </p>
                 </div>
-                <div class="bg-white p-3 rounded-2xl border border-brand-100 shadow-sm">
-                    <p class="text-[9px] text-gray-400 font-bold uppercase tracking-tighter">Time</p>
-                    <p id="stat-time" class="text-[15px] font-black text-orange-500 italic leading-none mt-1">0 m</p>
+                <div class="bg-orange-50 p-3 rounded-2xl border border-orange-100 shadow-sm">
+                    <p class="text-[9px] text-orange-400 font-bold uppercase tracking-tighter">Time</p>
+                    
+                    <p id="stat-timem" class="text-[15px] text-center font-black text-orange-600 italic leading-none mt-1">
+                        Me: 0 m
+                    </p>
+                    
+                    <p id="stat-time" class="text-[15px] text-center font-black text-orange-400 italic leading-none mt-1">
+                        All: 0 m
+                    </p>
                 </div>
-                <div class="bg-white p-3 rounded-2xl border border-brand-100 shadow-sm">
-                    <p class="text-[9px] text-gray-400 font-bold uppercase tracking-tighter">Count</p>
-                    <p id="stat-count" class="text-xl font-black text-purple-500 italic leading-none mt-1">0 회</p>
+                <div class="bg-purple-50 p-3 rounded-2xl border border-purple-100 shadow-sm">
+                    <p class="text-[9px] text-purple-600 font-bold uppercase tracking-tighter">Count</p>
+                    
+                    <p id="stat-countm" class="text-[18px] text-center font-black text-purple-600 italic leading-none mt-1">
+                        Me: 0회
+                    </p>
+                    
+                    <p id="stat-count" class="text-[18px] text-center font-black text-purple-400 italic leading-none mt-1">
+                        All: 0회
+                    </p>
                 </div>
             </section>
 
@@ -1627,7 +1648,16 @@
             const totalDist = currentYearLogs.reduce((sum, l) => sum + Number(l.distance || 0), 0);
             const totalTime = currentYearLogs.reduce((sum, l) => sum + Number(l.duration || 0), 0);
             const totalCount = currentYearLogs.length;
-            
+
+            const myYearLogs = allLogs.filter(l => l.date 
+                && new Date(l.date).getFullYear() === parseInt(selectedYear) 
+                &&    l.userName === userNickname);
+
+            const myDist = myYearLogs.reduce((sum, l) => sum + Number(l.distance || 0), 0);
+            const myTime = myYearLogs.reduce((sum, l) => sum + Number(l.duration || 0), 0);
+            const myCount = myYearLogs.length;
+
+
             document.getElementById('stat-dist').innerText = totalDist.toFixed(0).toLocaleString()+ ' km';
             
             const roundedTotalTime = Math.round(totalTime);
@@ -1640,8 +1670,22 @@
             if (hours > 0 || days > 0) timeHTML += `${hours}h `;
             timeHTML += `${mins}m`;
 
+            const roundedTotalTimem = Math.round(myTime);
+            const daysm = Math.floor(roundedTotalTimem / 1440);
+            const hoursm = Math.floor((roundedTotalTimem % 1440) / 60);
+            const minsm = roundedTotalTimem % 60;
+
+            let timeHTMLm = '';
+            if (daysm > 0) timeHTMLm += `<strong>${daysm.toLocaleString()}d</strong> `;
+            if (hoursm > 0 || daysm > 0) timeHTMLm += `${hoursm}h `;
+            timeHTMLm += `${minsm}m`;
+
             document.getElementById('stat-time').innerHTML = timeHTML;
             document.getElementById('stat-count').innerText = totalCount.toLocaleString() + ' 회';
+
+            document.getElementById('stat-distm').innerText = myDist.toFixed(0).toLocaleString()+ ' km';
+            document.getElementById('stat-timem').innerHTML = timeHTMLm;
+            document.getElementById('stat-countm').innerText = myCount.toLocaleString() + ' 회';
             
             renderAllCharts();
         };
