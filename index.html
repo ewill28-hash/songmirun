@@ -1366,7 +1366,8 @@
                                     let displayVal = value.toFixed(1);
                                     if (currentMetric === 'time') displayVal = formatTime2(value);
                                     else if (currentMetric === 'dist') displayVal += 'km';
-                                    else displayVal += '회';
+                                    else {
+                                        displayVal = Math.round(value) + '회';}
                                     return `${label}: ${displayVal}`;
                                 }
                             }
