@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>송미션</title>
+    <title>쏭-미션</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -247,7 +246,7 @@
             </div>
             <h2 class="text-3xl font-black text-gray-800 mb-3 tracking-tighter italic">Songmirun </h2>
             <p class="text-xs text-gray-400 mb-2 font-bold">Since 2024</p>
-            <p class="text-xs text-rose-500 mb-2 font-bold">송미션</p>
+            <p class="text-xs text-rose-500 mb-2 font-bold">쏭미션</p>
             <div class="space-y-4">
                 <input type="text" id="login-nick" placeholder="등록된 닉네임을 입력하세요" class="w-full bg-gray-50 border-gray-100 border p-4 rounded-2xl outline-none focus:ring-2 ring-brand-400 font-bold placeholder:text-gray-300 text-center text-lg">
                 <button id="btn-login" class="w-full bg-brand-500 text-white font-black py-4 rounded-2xl shadow-lg shadow-brand-200 active:scale-95 transition-transform text-lg flex items-center justify-center gap-2">
@@ -886,22 +885,44 @@
     <div id="profile-edit-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[250] hidden items-center justify-center p-4">
         <div class="bg-white rounded-[2.5rem] w-full max-w-sm shadow-2xl overflow-hidden p-8">
             <h2 class="text-2xl font-black italic text-gray-800 mb-6 flex items-center gap-2">
-                <i class="fa-solid fa-user-gear text-brand-500"></i> 로그인 닉네임 수정
+                <i class="fa-solid fa-user-gear text-brand-500"></i> 로그인 닉네임/소속팀 수정
             </h2>
-            <div class="space-y-5">
-                <div>
-                    <label class="text-[11px] text-gray-400 font-bold block mb-1.5 ml-1 uppercase">당근 닉네임 (고정)</label>
-                    <div id="prof-actual-nick" class="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl text-sm font-bold text-gray-400"></div>
-                </div>
-                <div>
-                    <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1 uppercase">현재 로그인 닉네임</label>
-                    <div id="prof-current-log-nick" class="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl text-sm font-bold text-gray-400"></div>
-                </div>
-                <div>
-                    <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1 uppercase">변경할 로그인 닉네임</label>
-                    <input type="text" id="prof-new-log-nick" class="w-full bg-white border-2 border-brand-100 p-4 rounded-2xl text-sm font-bold outline-none focus:ring-2 ring-brand-400 shadow-sm" placeholder="변경할 로그인 닉네임 입력">
-                </div>
-            </div>
+<div class="space-y-5">
+    <div>
+        <label class="text-[11px] text-gray-400 font-bold block mb-1.5 ml-1 uppercase tracking-tight">당근 닉네임 (고정)</label>
+        <div id="prof-actual-nick" class="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl text-sm font-bold text-gray-400"></div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3">
+        <div>
+            <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1 uppercase">현재 로그인 닉네임</label>
+            <div id="prof-current-log-nick" class="w-full bg-gray-50 border border-gray-100 p-3 rounded-2xl text-sm font-bold text-gray-400"></div>
+        </div>
+        <div>
+            <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1 uppercase">현재 소속팀</label>
+            <div id="prof-current-team"     class="w-full bg-gray-50 border border-gray-100 p-3 rounded-2xl text-sm font-bold text-gray-400"></div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3">
+        <div>
+            <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1 uppercase">변경할 닉네임</label>
+            <input type="text" id="prof-new-log-nick" 
+                   class="w-full bg-white border-2 border-brand-100 p-4 rounded-2xl text-sm font-bold outline-none focus:ring-2 ring-brand-400 shadow-sm transition-all" 
+                   placeholder="닉네임 입력">
+        </div>
+        <div>
+            <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1 uppercase">변경할 소속팀</label>
+            <select id="prof-new-team" 
+                            class="w-full bg-white border-2 border-brand-100 p-4 rounded-2xl text-sm font-bold outline-none focus:ring-2 ring-brand-400 shadow-sm transition-all appearance-none cursor-pointer">
+                        <option value="" disabled selected>팀 선택</option>
+                        <option value="손기정">팀:손기정</option>
+                        <option value="황영조">팀:황영조</option>
+                        <option value="이봉주">팀:이봉주</option>
+                    </select>
+        </div>
+    </div>
+</div>
             <div class="grid grid-cols-2 gap-3 mt-8">
                 <button id="btn-close-profile" class="bg-gray-100 text-gray-500 font-black py-4 rounded-2xl active:scale-95 transition-transform text-sm">취소</button>
                 <button id="btn-save-profile" class="bg-brand-500 text-white font-black py-4 rounded-2xl shadow-lg shadow-brand-200 active:scale-95 transition-transform text-sm">변경 내용 저장</button>
@@ -911,7 +932,7 @@
 
     <div id="stat-detail-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[250] hidden items-center justify-center p-4">
         <div class="bg-white rounded-[2.5rem] w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div class="bg-brand-500 p-4 text-white relative">
+            <div class="bg-gray-500 p-4 text-white relative">
                 <button id="close-stat-modal" class="absolute top-6 right-6 w-10 h-10 bg-black/10 rounded-full flex items-center justify-center hover:bg-black/20 transition-colors">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
@@ -936,7 +957,7 @@
     </div>
 
 
-    <div id="custom-modal" class="fixed inset-0 bg-black/50 z-[200] hidden items-center justify-center p-4">
+    <div id="custom-modal" class="fixed inset-0 bg-black/50 z-[900] hidden items-center justify-center p-4">
         <div class="bg-white rounded-[2rem] p-6 max-w-sm w-full shadow-2xl">
             <h3 id="modal-title" class="text-base font-black text-gray-800 mb-2">알림</h3>
             <p id="modal-message" class="text-sm text-gray-600 mb-6 font-bold">메시지 내용</p>
@@ -1933,7 +1954,7 @@
 
             const lifetimeStats = calculate(userLogs);
             document.getElementById('lifetime-stats-container').innerHTML = `
-                <div class="bg-white rounded-3xl p-5 border border-brand-100 shadow-sm">
+                <div class="bg-white rounded-3xl p-5 border border-rose-100 shadow-sm">
                     <h4 class="text-[11px] font-black text-brand-600 mb-4 flex items-center gap-2 uppercase tracking-tight">
                         <i class="fa-solid fa-globe"></i> Lifetime Performance
                     </h4>
@@ -2131,6 +2152,8 @@
                 if(!userObj) return;
                 document.getElementById('prof-actual-nick').innerText = userNickname;
                 document.getElementById('prof-current-log-nick').innerText = userObj.log_nickname || '-';
+                document.getElementById('prof-current-team').innerText = userObj.team || '-';
+
                 document.getElementById('prof-new-log-nick').value = userObj.log_nickname || '';
                 document.getElementById('profile-edit-modal').classList.remove('hidden');
                 document.getElementById('profile-edit-modal').classList.add('flex');
@@ -2142,7 +2165,9 @@
 
             document.getElementById('btn-save-profile').onclick = async () => {
                 const newLogNick = document.getElementById('prof-new-log-nick').value.trim();
-                
+                const newTeam = document.getElementById('prof-new-team').value; // 선택된 소속팀 값
+if (!newTeam) return showModal("소속팀을 선택하세요.", "alert");
+
                 if(!newLogNick) return showModal("변경할 로그인 닉네임을 입력하세요.", "alert");
                 const isDuplicate = crewMembers.some(m => 
                     m.nickname !== userNickname && m.log_nickname === newLogNick
@@ -2152,17 +2177,23 @@
                         document.getElementById('btn-close-profile').click(); 
                         return; // 함수 종료
                     }
+
+
                 const userObj = crewMembers.find(m => m.nickname === userNickname);
                 if(!userObj) return;
-                if(userObj.log_nickname === newLogNick) {
-                    return document.getElementById('btn-close-profile').click();
-                }
+                if (userObj.log_nickname === newLogNick && userObj.team === newTeam) {
+                        return document.getElementById('btn-close-profile').click();
+                    }               
+
+
                 try {
                     await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'songmirun_members', userObj.id), { 
-                        log_nickname: newLogNick 
+                        log_nickname: newLogNick,
+                        team: newTeam // DB의 team 필드 업데이트
                     });
                     userObj.log_nickname = newLogNick;
-                    showToast(`${newLogNick} ✨ 로그인 닉네임이 변경되었습니다.`);                    
+                    userObj.team = newTeam;
+                    showToast(`${newLogNick} ✨ 로그인닉네임/소속팀이 변경되었습니다.`);                    
                     document.getElementById('btn-close-profile').click();
                 } catch(e) { 
                     showToast("변경 실패"); 
@@ -2177,21 +2208,38 @@
 
             if (isLoggedIn) {
 
+                let myCurrentNickname = "";
+                let myCurrentTeam = "";
+
                 onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_members'), (snap) => {
                     const members = {};
                     snap.docs.forEach(d => {
-                        const data = d.data();
-                        // nickname을 키로 사용하여 팀 정보 저장 입장
-                        members[data.nickname] = data.team;
-                    });
-                    allMembers = members;
-                    const myTeam2 = members[userNickname] || '무소속';
-                    const teamBgColor = TEAM_COLORS[myTeam2] || '#94a3b8';
+                            const data = d.data();
+                            members[data.nickname] = {
+                                team: data.team || '무소속',
+                                log_nickname: data.log_nickname,
+                                nickname: data.nickname
+                            };
+                        });
+
+                    const myInfo = members[userNickname];
+
+                    if (myInfo) {
+                        myCurrentNickname = myInfo.log_nickname || userNickname; // 로그인용 닉네임 (없으면 기본 닉네임)
+                        myCurrentTeam = myInfo.team; // 소속팀
+                    } else {
+                        myCurrentNickname = userNickname;
+                        myCurrentTeam = '무소속';
+                    }
+
+                    const myTeam2= myCurrentTeam;
+
+                    const teamBgColor2 = TEAM_COLORS[myTeam2] || '#94a3b8';
 
                     document.getElementById('display-nickname2').innerHTML = `
-                        <div class="flex items-center gap-2">
-                            <span class="text-white text-[8px] font-black px-1 py-1 rounded-md shadow-sm whitespace-nowrap flex items-center h-fit"
-                                style="background-color: ${teamBgColor};">
+                        <div class="flex items-center gap-1">
+                            <span class="text-white text-[7px] font-black px-1 py-1 rounded-md shadow-sm whitespace-nowrap flex items-center h-fit"
+                                style="background-color: ${teamBgColor2};">
                                 팀:${myTeam2}
                             </span>
 
