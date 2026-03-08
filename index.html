@@ -1427,53 +1427,55 @@
             updateUI_Team(); // 데이터 다시 그리기
         };
 ////////
-////////mot-start/ Team Challenges
-       const mot = document.getElementById('main-filter-month');
-       const currentMontht = new Array().getMonth ? new Date().getMonth() + 1 : new Date().getMonth() + 1; // 현재 월 (1~12)
-       for(let i=1; i<=12; i++) {
-            const o = document.createElement('option');
-            o.value = i;
-            if (i === currentMontht) {
-                o.selected = true;
+        // 1. 현재 월 계산
+        const currentMontht = new Date().getMonth() + 1;
+
+        // 2. 셀렉트 박스 엘리먼트 가져오기
+        const mot1 = document.getElementById('main-filter-month');
+        const mot2 = document.getElementById('main-filter-month2');
+
+        // 3. 옵션 생성 함수 (중복 방지)
+        function populateOptions(targetSelect) {
+            for(let i=1; i<=12; i++) {
+                const o = document.createElement('option');
+                o.value = i;
+                o.innerText = ` ${i}월 `;
+                if (i === currentMontht) o.selected = true;
+                targetSelect.appendChild(o);
             }
-            const engName = monthNames[i-1];
-            const icon = smileys[i-1]; 
-            //o.innerText = ` ${icon} ${i}월 - ${engName}`;
-            o.innerText = ` ${i}월 `;
-            mot.appendChild(o);
         }
-        window.setMonthFilterT(currentMonth);
-        mot.onchange = (e) => {
-            const val = e.target.value;
-            window.setMonthFilterT(val === '전체' ? '전체' : Number(val));
-        };
-////////mot-end/
 
-////////mot2-start/ 상세분석 모달창
-       const mot2 = document.getElementById('main-filter-month2');
-       const currentMontht2 = new Array().getMonth ? new Date().getMonth() + 1 : new Date().getMonth() + 1; // 현재 월 (1~12)
+        // 옵션 채우기
+        populateOptions(mot1);
+        populateOptions(mot2);
 
-       for(let i=1; i<=12; i++) {
-            const o = document.createElement('option');
-            o.value = i;
-            if (i === currentMontht2) {
-                o.selected = true;
-            }
-
-            const engName = monthNames[i-1];
-            const icon = smileys[i-1]; 
+        // 4. 동기화 및 필터 실행 함수
+        function syncAndFilter(val) {
+            const numericVal = val === '전체' ? '전체' : Number(val);
             
-            //o.innerText = ` ${icon} ${i}월 - ${engName}`;
-            o.innerText = ` ${i}월 `;
-            mot2.appendChild(o);
+            // 두 박스의 값을 동일하게 맞춤
+            mot1.value = val;
+            mot2.value = val;
+            
+            // 실제 데이터 필터링 함수 호출
+            if (window.setMonthFilterT) {
+                window.setMonthFilterT(numericVal);
+            }
         }
-        window.setMonthFilterT(currentMonth);
-        mot2.onchange = (e) => {
-            const val = e.target.value;
-            // 기존에 버튼 클릭 시 호출하던 함수를 그대로 연결합니다.
-            window.setMonthFilterT(val === '전체' ? '전체' : Number(val));
+
+        // 5. 이벤트 바인딩
+        mot1.onchange = (e) => {
+            syncAndFilter(e.target.value);
+            if (typeof syncAndRefresh === 'function') syncAndRefresh(); // HTML에 작성하신 함수 호출
         };
-////////mot2-end/
+
+        mot2.onchange = (e) => {
+            syncAndFilter(e.target.value);
+            if (typeof syncAndRefresh === 'function') syncAndRefresh(); // HTML에 작성하신 함수 호출
+        };
+
+        // 초기화 시 현재 월로 필터 적용
+        window.setMonthFilterT(currentMontht);
 
 
         window.setRankingPeriod = (period) => {
