@@ -519,20 +519,51 @@
 <!-- Section: Ranking -->
                 <section class="glass-cardb p-51 bg-white rounded-3xl shadow-sm border border-emerald-50">
                    <div id="section-ranking" class="hidden space-y-3">
-                        <section class="bg-white p-3 rounded-[1.5rem] border border-brand-100 shadow-sm">
-                            <div class="flex items-center justify-between gap-4">
-                                <div class="flex items-center gap-2">
-                                    <div class="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center text-yellow-600">
-                                        <i class="fa-solid fa-medal"></i>
-                                    </div>
-                                    <h2 class="font-black text-sm text-gray-800 italic">명예의 전당</h2>
-                                </div>
-                                <div class="filter-group">
-                                    <button onclick="window.setRankingPeriod('this')" id="rank-period-this" class="rank-period-btn filter-btn active">이번 달</button>
-                                    <button onclick="window.setRankingPeriod('last')" id="rank-period-last" class="rank-period-btn filter-btn inactive">지난 달</button>
-                                </div>
-                            </div>
-                        </section>
+
+
+<section class="bg-white p-4 rounded-[2rem] border border-brand-100 shadow-sm space-y-4">
+    <div class="flex items-center gap-2 pb-1">
+        <div class="w-8 h-8 bg-yellow-100 rounded-xl flex items-center justify-center text-yellow-600 shadow-sm">
+            <i class="fa-solid fa-medal"></i>
+        </div>
+        <h2 class="font-black text-lg text-gray-800 italic tracking-tighter">명예의 전당</h2>
+    </div>
+
+    <div class="flex gap-2">
+        <div class="flex-1 flex bg-gray-100 p-1 rounded-xl items-center">
+            <button onclick="window.setRankingPeriod('this')" id="rank-period-this" 
+                    class="flex-1 py-1.5 text-[10px] font-black rounded-lg transition-all active rank-period-btn filter-btn">이번 달</button>
+            <button onclick="window.setRankingPeriod('last')" id="rank-period-last" 
+                    class="flex-1 py-1.5 text-[10px] font-black rounded-lg transition-all inactive rank-period-btn filter-btn">지난 달</button>
+        </div>
+
+        <div class="flex-[1.2] flex bg-gray-100 p-1 rounded-xl items-center">
+            <button onclick="window.setGenderFilter2('전체')" id="filter2-all" class="gender-filter-btn filter-btn flex-1 py-1.5 text-[10px] font-black rounded-lg active">전체</button>
+            <button onclick="window.setGenderFilter2('여성')" id="filter2-female" class="gender-filter-btn filter-btn flex-1 py-1.5 text-[10px] font-black rounded-lg inactive">여성</button>
+            <button onclick="window.setGenderFilter2('남성')" id="filter2-male" class="gender-filter-btn filter-btn flex-1 py-1.5 text-[10px] font-black rounded-lg inactive">남성</button>
+
+        </div>
+    </div>
+
+    <div class="grid grid-cols-4 gap-1.5 p-1 bg-gray-50 rounded-2xl border border-gray-100">
+        <button onclick="window.setTeamFilter2('전체')" id="filter2-tall" 
+                class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all active flex items-center justify-center gap-1">
+            전체
+        </button>
+        <button onclick="window.setTeamFilter2('손기정')" id="filter2-ts" 
+                class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all inactive flex items-center justify-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#3b82f6]"></span>팀:손기정
+        </button>
+        <button onclick="window.setTeamFilter2('황영조')" id="filter2-th" 
+                class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all inactive flex items-center justify-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#f87171]"></span>팀:황영조
+        </button>
+        <button onclick="window.setTeamFilter2('이봉주')" id="filter2-tl" 
+                class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all inactive flex items-center justify-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#22c55e]"></span>팀:이봉주
+        </button>
+    </div>
+</section>
 
                         <div class="grid grid-cols-1 gap-3">
                             <div class="rank-card">
@@ -602,17 +633,30 @@
                             <div class="col-span-1">
                                 <div class="filter-group flex">
                                     <button onclick="window.setGenderFilter('전체')" id="filter-all" class="gender-filter-btn filter-btn flex-1 active">전체</button>
-                                    <button onclick="window.setGenderFilter('남성')" id="filter-male" class="gender-filter-btn filter-btn flex-1 inactive">남성</button>
                                     <button onclick="window.setGenderFilter('여성')" id="filter-female" class="gender-filter-btn filter-btn flex-1 inactive">여성</button>
+                                    <button onclick="window.setGenderFilter('남성')" id="filter-male" class="gender-filter-btn filter-btn flex-1 inactive">남성</button>
+
                                 </div>
                             </div>
                             <div class="col-span-2">
-                                <div class="filter-group flex">
-                                    <button onclick="window.setTeamFilter('전체')" id="filter-tall" class="team-filter-btn filter-btn flex-1 active">팀:전체</button>
-                                    <button onclick="window.setTeamFilter('손기정')" id="filter-ts" class="team-filter-btn filter-btn flex-1 inactive">팀:손기정</button>
-                                    <button onclick="window.setTeamFilter('황영조')" id="filter-th" class="team-filter-btn filter-btn flex-1 inactive">팀:황영조</button>
-                                    <button onclick="window.setTeamFilter('이봉주')" id="filter-tl" class="team-filter-btn filter-btn flex-1 inactive">팀:이봉주</button>
-                                </div>
+    <div class="grid grid-cols-4 gap-1.5 p-1 bg-gray-50 rounded-2xl border border-gray-100">
+        <button onclick="window.setTeamFilter('전체')" id="filter-tall" 
+                class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all active flex items-center justify-center gap-1">
+            전체
+        </button>
+        <button onclick="window.setTeamFilter('손기정')" id="filter-ts" 
+                class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all inactive flex items-center justify-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#3b82f6]"></span>팀:손기정
+        </button>
+        <button onclick="window.setTeamFilter('황영조')" id="filter-th" 
+                class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all inactive flex items-center justify-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#f87171]"></span>팀:황영조
+        </button>
+        <button onclick="window.setTeamFilter('이봉주')" id="filter-tl" 
+                class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all inactive flex items-center justify-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#22c55e]"></span>팀:이봉주
+        </button>
+    </div>
                             </div>
                         </div>
                     </div>
@@ -1091,6 +1135,16 @@
             renderAllCharts();
         };
 
+        window.setGenderFilter2 = (gender) => {
+            selectedGender = gender;
+            ['filter2-all', 'filter2-male', 'filter2-female'].forEach(id => {
+                const el = document.getElementById(id);
+                const isActive = (id === 'filter2-all' && gender === '전체') || (id === 'filter2-male' && gender === '남성') || (id === 'filter2-female' && gender === '여성');
+                el.classList.toggle('active', isActive);
+                el.classList.toggle('inactive', !isActive);
+            });
+            renderRankingLists();
+        };
 
         window.setTeamFilter = (team) => {
             selectedTeam = team;
@@ -1101,6 +1155,17 @@
                 el.classList.toggle('inactive', !isActive);
             });
             renderAllCharts();
+        };
+
+        window.setTeamFilter2 = (team) => {
+            selectedTeam = team;
+            ['filter2-tall', 'filter2-ts', 'filter2-th', 'filter2-tl'].forEach(id => {
+                const el = document.getElementById(id);
+                const isActive = (id === 'filter2-tall' && team === '전체') || (id === 'filter2-ts' && team === '손기정') || (id === 'filter2-th' && team === '황영조')|| (id === 'filter2-tl' && team === '이봉주');
+                el.classList.toggle('active', isActive);
+                el.classList.toggle('inactive', !isActive);
+            });
+            renderRankingLists();
         };
 
 //z
@@ -1600,7 +1665,23 @@
             }
             const monthStr = month.toString().padStart(2, '0');
             const prefix = `${year}-${monthStr}`;
-            const monthLogs = allLogs.filter(l => l.date && l.date.startsWith(prefix));
+            const teamMap = {};
+            const genderMap = {};
+            
+            crewMembers.forEach(m => {
+                genderMap[m.nickname] = m.gender;
+                teamMap[m.nickname] = m.team;
+            });
+
+            const monthLogs = allLogs.filter(l => {
+                const isCorrectMonth = l.date && l.date.startsWith(prefix);
+                const userGender = genderMap[l.userName] || '미지정';
+                const userTeam = teamMap[l.userName] || '미지정';
+                const isCorrectTeam = selectedTeam === '전체' || userTeam === selectedTeam;
+                const isCorrectGender = selectedGender === '전체' || userGender === selectedGender;
+                return isCorrectMonth && isCorrectTeam && isCorrectGender;
+            });
+
 
             const userAgg = {};
             monthLogs.forEach(l => {
