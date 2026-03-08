@@ -1181,13 +1181,19 @@
         };
 
         const mo = document.getElementById('month-select');
+        const currentMonth = new Array().getMonth ? new Date().getMonth() + 1 : new Date().getMonth() + 1; // 현재 월 (1~12)
 
         const smileys = ["😊", "✨", "🏃", "☀️", "🍀", "🌿", "🌊", "⛱️", "🍁", "🍂", "❄️", "🎄"]; // 월별 어울리는 아이콘 (선택사항)
         const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
         for(let i=1; i<=12; i++) {
             const o = document.createElement('option');
             o.value = i;
-            
+
+            // 현재 월과 i가 일치하면 기본 선택값으로 설정
+            if (i === currentMonth) {
+                o.selected = true;
+            }
+                        
             const engName = monthNames[i-1];
             const icon = smileys[i-1]; 
             
@@ -1204,8 +1210,6 @@
 
         window.setMonthFilter = (month) => {
             selectedMonthF = month;
-  console.log("aa");
-  console.log(month);
             const monthIds = ['month-all', ...Array.from({length: 12}, (_, i) => `month-${i + 1}`)];
             monthIds.forEach(id => {
                 const el = document.getElementById(id);
@@ -1219,10 +1223,16 @@
 
 ////////s/
        const mot = document.getElementById('main-filter-month');
+       const currentMontht = new Array().getMonth ? new Date().getMonth() + 1 : new Date().getMonth() + 1; // 현재 월 (1~12)
+
        for(let i=1; i<=12; i++) {
             const o = document.createElement('option');
             o.value = i;
-            
+
+            if (i === currentMontht) {
+                o.selected = true;
+            }
+
             const engName = monthNames[i-1];
             const icon = smileys[i-1]; 
             
@@ -1233,16 +1243,20 @@
 
         mot.onchange = (e) => {
             const val = e.target.value;
-            // 기존에 버튼 클릭 시 호출하던 함수를 그대로 연결합니다.
             window.setMonthFilterT(val === '전체' ? '전체' : Number(val));
         };
 
 
        const mot2 = document.getElementById('main-filter-month2');
+       const currentMontht2 = new Array().getMonth ? new Date().getMonth() + 1 : new Date().getMonth() + 1; // 현재 월 (1~12)
+
        for(let i=1; i<=12; i++) {
             const o = document.createElement('option');
             o.value = i;
-            
+            if (i === currentMontht2) {
+                o.selected = true;
+            }
+
             const engName = monthNames[i-1];
             const icon = smileys[i-1]; 
             
