@@ -1957,19 +1957,24 @@
             const count = monthLogs.length;
             let scoreCount = 5;
             if (count >= 20) scoreCount = 40;
-            else if (count >= 16) scoreCount = 35;
-            else if (count >= 12) scoreCount = 30;
+            else if (count >= 18) scoreCount = 35;
+            else if (count >= 16) scoreCount = 30;
+            else if (count >= 12) scoreCount = 25;
             else if (count >= 8) scoreCount = 20;
-            else if (count >= 4) scoreCount = 10;
+            else if (count >= 4) scoreCount = 15;
+            else if (count >= 2) scoreCount = 10;                
             else if (count >= 1) scoreCount = 5;
 
             const dist = monthLogs.reduce((sum, l) => sum + Number(l.distance || 0), 0);
             let scoreDist = 5;
             if (dist >= 200) scoreDist = 40;
             else if (dist >= 150) scoreDist = 35;
-            else if (dist >= 120) scoreDist = 30;
-            else if (dist >= 80) scoreDist = 20;
-            else if (dist >= 50) scoreDist = 10;
+            else if (dist >= 100) scoreDist = 30;
+            else if (dist >= 50) scoreDist = 25;                
+            else if (dist >= 20) scoreDist = 20;
+            else if (dist >= 15) scoreDist = 15;
+            else if (dist >= 10) scoreDist = 10;
+            else if (dist >= 5) scoreDist = 5;
 
             const weekActive = [false, false, false, false];
             for(let i=0; i<4; i++) {
@@ -1989,9 +1994,9 @@
             const totalScore = scoreCount + scoreDist + scoreBonus;
             let grade = { name: '🐣 Starter', color: 'bg-gray-100 px-3 rounded-lg text-gray-500' };
             if (totalScore >= 90) grade = { name: '🏔 Iron Runner', color: 'bg-slate-800 text-white' };
-            else if (totalScore >= 75) grade = { name: '🔥 Steady Flame', color: 'bg-orange-500 text-white' };
-            else if (totalScore >= 60) grade = { name: '🌊 Rhythm Runner', color: 'bg-blue-500 text-white' };
-            else if (totalScore >= 45) grade = { name: '🌱 Growing Runner', color: 'bg-green-500 text-white' };
+            else if (totalScore >= 70) grade = { name: '🔥 Steady Flame', color: 'bg-orange-500 text-white' };
+            else if (totalScore >= 50) grade = { name: '🌊 Rhythm Runner', color: 'bg-blue-500 text-white' };
+            else if (totalScore >= 30) grade = { name: '🌱 Growing Runner', color: 'bg-green-500 text-white' };
             return grade;
         };
 
