@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -177,7 +178,14 @@
         transition: width 1s ease-out;
         z-index: 0;
     }
-
+    .runner-grade-badge {
+        display: inline-flex;
+        align-items: center;
+        font-size: 0.75rem !important; /* text-xs 크기 */
+        padding: 2px 8px !important;  /* 상하 2px, 좌우 8px */
+        font-weight: 500;
+        border-radius: 6px;
+    }
     /* [통계 및 뱃지] */
     .stat-grid-label { font-size: 8px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 2px; }
     .stat-grid-val { font-size: 11px; font-weight: 900; color: #1e293b; font-style: italic; }
@@ -1992,11 +2000,11 @@
             else if (activeWeeks === 2) scoreBonus = 10;
 
             const totalScore = scoreCount + scoreDist + scoreBonus;
-            let grade = { name: '🐣 Starter', color: 'bg-gray-100 px-3 rounded-lg text-gray-500' };
-            if (totalScore >= 90) grade = { name: '🏔 Iron Runner', color: 'bg-slate-800 text-white' };
-            else if (totalScore >= 70) grade = { name: '🔥 Steady Flame', color: 'bg-orange-500 text-white' };
-            else if (totalScore >= 50) grade = { name: '🌊 Rhythm Runner', color: 'bg-blue-500 text-white' };
-            else if (totalScore >= 30) grade = { name: '🌱 Growing Runner', color: 'bg-green-500 text-white' };
+            let grade = { name: '🐣 삐약', color: 'bg-gray-100 px-3 rounded-lg text-gray-500' };
+            if (totalScore >= 90) grade = { name: '🏔 철인', color: 'bg-slate-800 text-white' };
+            else if (totalScore >= 70) grade = { name: '🔥 불꽃', color: 'bg-orange-500 text-white' };
+            else if (totalScore >= 50) grade = { name: '🌊 리듬', color: 'bg-blue-500 text-white' };
+            else if (totalScore >= 30) grade = { name: '🌱 새싹', color: 'bg-green-500 text-white' };
             return grade;
         };
 
@@ -2008,19 +2016,11 @@
             const grade = calculateRunnerGrade(userLogs);
             const gradeBadge = document.getElementById('modal-runner-grade');
             gradeBadge.innerText = grade.name;
-            gradeBadge.className = `runner-grade-badge ${grade.color}`;
+            //gradeBadge.className = `runner-grade-badge ${grade.color}`;
+            gradeBadge.className = `runner-grade-badge ${grade.color} text-xs px-2 py-1`;
 
             const userRecord = crewMembers.find(m => m.nickname === nickname); // userName -> nickname
-
-
             const myTeam2 = userRecord ? userRecord.team : '무소속2';
-    console.log(userNickname); // 예: "황영조"
-
-if (userRecord) {
-    console.log("내 팀:", userRecord.team); // 예: "황영조"
-    console.log("내 등급:", userRecord.grade); // 예: "에이스"
-}
-
             const badge = document.getElementById('display-team-badge');
             if (badge) {
                 badge.innerText = '팀:'+myTeam2;
