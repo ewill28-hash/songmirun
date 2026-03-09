@@ -2000,34 +2000,28 @@
             else if (activeWeeks === 2) scoreBonus = 10;
 
             const totalScore = scoreCount + scoreDist + scoreBonus;
-            
-            // 등급 체계 정의 (계산 편의를 위해 배열로 관리)
             const thresholds = [
-                { threshold: 90, name: '🌸 만개', color: 'bg-slate-800 text-white' },
+                { threshold: 90, name: '🏵️ 만개', color: 'bg-slate-800 text-white' },
                 { threshold: 70, name: '🌺 열정', color: 'bg-orange-500 text-white' },
                 { threshold: 50, name: '🌼 활짝', color: 'bg-blue-500 text-white' },
                 { threshold: 30, name: '🌷 꽃봉', color: 'bg-green-500 text-white' },
                 { threshold: 0,  name: '🌱 새싹', color: 'bg-gray-100 px-3 rounded-lg text-gray-500' }
             ];
 
-            // 현재 등급 찾기
             const currentIdx = thresholds.findIndex(t => totalScore >= t.threshold);
             let grade = { 
                 ...thresholds[currentIdx], 
                 details: { scoreCount, scoreDist, scoreBonus, totalScore } 
             };
-
-            // 다음 등급까지 남은 점수 계산
-            if (currentIdx > 0) { // 최고 등급인 '철인'이 아닐 경우
+            if (currentIdx > 0) { //
                 const next = thresholds[currentIdx - 1];
                 grade.nextGrade = {
                     name: next.name,
                     remaining: next.threshold - totalScore
                 };
             } else {
-                grade.nextGrade = null; // 이미 최고 등급
+                grade.nextGrade = null;
             }
-            
             return grade;
         };
 
@@ -2044,10 +2038,9 @@
             gradeBadge.innerText = grade.name;
             gradeBadge.className = `runner-grade-badge ${grade.color} text-xs px-2 py-1 cursor-help`;
             let tooltipText = `[상세 점수]\n` +
-                                `• 횟수점수: ${grade.details.scoreCount} / 거리점수: ${grade.details.scoreDist} / 연속점수: ${grade.details.scoreBonus}\n` +
+                                `● 횟수점수: ${grade.details.scoreCount} / 거리점수: ${grade.details.scoreDist} / 연속점수: ${grade.details.scoreBonus}\n` +
                                 `● 총합점수: ${grade.details.totalScore}점\n` +
                                 `----------------\n`;
-
                         if (grade.nextGrade) {
                             tooltipText += `✨ 다음 등급 [${grade.nextGrade.name}]까지 ${grade.nextGrade.remaining}점 남았습니다!`;
                         } else {
