@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -250,18 +251,19 @@
     <div id="login-screen" class="fixed inset-0 bg-brand-600 z-[100] flex items-center justify-center p-6 transition-all duration-500">
         <div class="bg-white w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl text-center">
             <div class="w-16 h-16 bg-brand-100 text-brand-500 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
-                <i class="fa-solid fa-person-running"></i>
+                <i class="fa-solid fa-person-running animate-pulse"></i>
             </div>
             <h2 class="text-3xl font-black text-gray-800 mb-3 tracking-tighter italic">Songmirun </h2>
             <p class="text-xs text-gray-400 mb-2 font-bold">Since 2024</p>
             <p class="text-xs text-rose-500 mb-2 font-bold">쏭미션</p>
             <div class="space-y-4">
                 <input type="text" id="login-nick" placeholder="등록된 닉네임을 입력하세요" class="w-full bg-gray-50 border-gray-100 border p-4 rounded-2xl outline-none focus:ring-2 ring-brand-400 font-bold placeholder:text-gray-300 text-center text-lg">
-                <button id="btn-login" class="w-full bg-brand-500 text-white font-black py-4 rounded-2xl shadow-lg shadow-brand-200 active:scale-95 transition-transform text-lg flex items-center justify-center gap-2">
+                <button id="btn-login" class="w-full bg-brand-500 text-white font-black py-4 rounded-2xl shadow-lg shadow-brand-200 active:scale-95 transition-transform text-lg flex items-center justify-center gap-2 ">
                     <span id="login-text">입장하기</span>
                     <i id="login-loader" class="fa-solid fa-circle-notch loading-spinner hidden"></i>
                 </button>
             </div>
+            <p class="text-xs text-gray-400 mt-5 mb-2">Copyright 2026. Songmirun(Jake) All Rights Reserved.</p>            
         </div>
     </div>
 
@@ -399,9 +401,9 @@
                                 <label id="label-timeS" title="Click +10s" class="text-[11px] text-brand-500 font-black block mb-1 ml cursor-pointer text-center">+10s</label>
                             </div>
                             <div class="grid grid-cols-3 gap-1">
-                                <input type="number" id="in-time-h" placeholder="시" min="0" class="w-full bg-white border-2 border-brand-100 p-3 rounded-xl text-center text-xs font-bold outline-none shadow-sm">
-                                <input type="number" id="in-time-m" placeholder="분" min="0" max="59" class="w-full bg-white border-2 border-brand-100 p-3 rounded-xl text-center text-xs font-bold outline-none shadow-sm">
-                                <input type="number" id="in-time-s" placeholder="초" min="0" max="59" class="w-full bg-white border-2 border-brand-100 p-3 rounded-xl text-center text-xs font-bold outline-none shadow-sm">
+                                <input type="number" id="in-time-h" placeholder="몇 시간" min="0" class="w-full bg-white border-2 border-brand-100 p-3 rounded-xl text-center text-xs font-bold outline-none shadow-sm">
+                                <input type="number" id="in-time-m" placeholder="몇 분" min="0" max="59" class="w-full bg-white border-2 border-brand-100 p-3 rounded-xl text-center text-xs font-bold outline-none shadow-sm">
+                                <input type="number" id="in-time-s" placeholder="몇 초" min="0" max="59" class="w-full bg-white border-2 border-brand-100 p-3 rounded-xl text-center text-xs font-bold outline-none shadow-sm">
                             </div>
                         </div>
                     </div>
@@ -433,9 +435,10 @@
                         </div>                    
                     </div>                    
                     <button id="btn-save-log" class="w-full bg-brand-600 text-white font-black py-4 rounded-2xl shadow-lg shadow-brand-200 active:scale-[0.98] transition-all hover:bg-brand-700 text-lg flex items-center justify-center gap-2">
-                            <div id="pace-display" class="text-[15px] font-black text-white-800">
+                            ☑ 기록 저장하기
+                            <div id="pace-display" class="text-[15px] font-black font-mono text-white-800 font-semibold tracking-tighter">
                                 [Pace : 0'00"]
-                            </div>  기록 저장하기
+                            </div>  
                     </button>
                 </section>
 
@@ -444,10 +447,11 @@
                     <div class="flex justify-between items-center mb-6">
                         <div class="flex items-center gap-2">
                             <div class="w-2 h-4 bg-rose-500 rounded-full"></div>
-                            <h2 class="text-xl font-black text-rose uppercase ">Team Challenges</h2>
+                            <h2 class="text-lg font-black text-rose uppercase tracking-tighter leading-none">
+                                Team Challenges</h2>
                         </div>
                         <button onclick="openStatsModal()" 
-                                class="text-[11px] font-bold bg-rose-400 text-white px-4 py-2 rounded-xl transition-all hover:bg-rose-600 hover:shadow-md active:scale-95 flex items-center gap-2">
+                                class="text-[11px] font-bold bg-sky-400 text-white px-4 py-2 rounded-xl transition-all hover:bg-sky-600 hover:shadow-md active:scale-95 flex items-center gap-2">
                             <i class="fas fa-chart-line"></i> 상세 분석
                         </button>
                     </div>
@@ -478,10 +482,12 @@
                                     <button onclick="setMetric2('count')" id="btn-metric2-count" class="metric-btn2 flex-1"><i class="fas fa-running mr-1 text-[10px]"></i>횟수</button>
                                 </div>
                             </div>
-                            
                         </div>
                     </div>
                     <div id="team-list" class="space-y-4 px-1">        </div>
+
+
+
                 </section>
 
                 <section class="glass-carda p-5 bg-white rounded-3xl shadow-sm border border-emerald-50">
@@ -852,7 +858,7 @@
     <div id="stats-modal" class="fixed inset-0 z-[100] hidden modal-overlay flex items-center justify-center p-2">
         <div class="bg-white w-full max-w-lg  max-h-[90vh] overflow-y-auto shadow-2xl relative">
             <div class="sticky top-0 bg-white/95 backdrop-blur-md px-8 py-2 border-b border-slate-100 flex justify-between items-center z-15">
-                    <h2 class="text-xl font-black text-slate-900 tracking-tight">Team Challenges</h2>
+                    <h2 class="text-xl font-black text-slate-900 tracking-tight">✨Team Challenges</h2>
                 <button onclick="closeStatsModal()" class="w-5 h-5 bg-slate-50 rounded-full flex items-center justify-center text-slate-400">
                     <i class="fas fa-times"></i>
                 </button>
@@ -1586,7 +1592,7 @@
                                     if (currentMetric === 'time') displayVal = formatTime2(value);
                                     else if (currentMetric === 'dist') displayVal += 'km';
                                     else {
-                                        displayVal = Math.round(value) + '회';}
+                                        displayVal = value.toFixed(1) + '회';}
                                     return `${label}: ${displayVal}`;
                                 }
                             }
@@ -2466,7 +2472,7 @@ if (!newTeam) return showModal("소속팀을 선택하세요.", "alert");
 
                 const dist = Number(document.getElementById('in-dist').value);
                 const date = document.getElementById('in-date').value;
-                if(!date || dist <= 0 || totalMin <= 0) return showModal("💡필수 항목(날짜, 거리, 시간) .", "alert");
+                if(!date || dist <= 0 || totalMin <= 0) return showModal("💡필수 항목(날짜, 거리, 시간) ✅✅✅.", "alert");
 
                 const pace = totalMin / dist;
                 if (pace < 2.0) {
@@ -2477,7 +2483,7 @@ if (!newTeam) return showModal("소속팀을 선택하세요.", "alert");
                 }
 
                 if (pace > 20) {
-                    return showModal("🐢 혹시 달리기 중에 깊은 명상에 빠지셨나요? \n아니면 달팽이와 경주 중이신가요?\n걷는 것보다 뒤로 구르는 게 더 빠를지도 몰라요 😊", "alert");
+                    return showModal("러닝 시간을 잘 입력하셨나요? \n\n🐢 혹시 달리기 중에 깊은 명상에 빠지셨나요? \n아니면 달팽이와 경주 중이신가요?\n걷는 것보다 뒤로 구르는 게 더 빠를지도 몰라요 😊", "alert");
                 }
                 
                 if(bpm !== 0 && (bpm < 70 || bpm > 220)) return showModal("심박수는 0(미입력) 또는 70 ~ 220 사이로 입력해주세요.", "alert");
@@ -2619,9 +2625,17 @@ if (!newTeam) return showModal("소속팀을 선택하세요.", "alert");
                     }
 
                     paceDisplay.innerText = `[Pace : ${finalMin}'${finalSec.toString().padStart(2, '0')}"]`;
+                    paceDisplay.classList.add('text-rose-200', 'font-mono', 'font-semibold', 'tracking-tighter');
+                    paceDisplay.classList.add('animate-pulse');
+                    setTimeout(() => {
+                        paceDisplay.classList.remove('animate-pulse');
+                    }, 6000);
+
+
                     //showToast(`Pace : ${finalMin}'${finalSec.toString().padStart(2, '0')}"`);
                 } else {
                     paceDisplay.innerText = "[Pace : 0'00\"]";
+                    paceDisplay.classList.add('text-white-300', 'font-mono', 'font-semibold', 'tracking-tighter');
 
                 }
             }
