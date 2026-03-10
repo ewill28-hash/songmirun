@@ -513,7 +513,7 @@
                         </h2>
                     </div>
 
-                    <div class="sticky top-20 z-40 bg-white pt-2 pb-5">
+                    <div class="sticky top-20 z-40 bg-white pt-2 pb-1">
                         <div class="rounded-2xl p-2 bg-emerald-50/50 border border-emerald-100">
                             <div class="flex flex-col sm:flex-row items-center gap-2">
                                 
@@ -541,10 +541,14 @@
                         </div>
                     </div>
 
-                    <div id="log-list" class="space-y-2">
+                    <div class="flex items-center justify-end gap-1">
+                        <span id="log-count-badge" class="text-[9px] bg-sky-100 text-sky-600 px-2 py-0.5 rounded-full font-black">
+                            0건
+                        </span>
+                    </div>
+                    <div id="log-list" class="space-y-1">
                         </div>
-</section>
-
+                </section>
             </div>
 
 <!-- Section: Ranking -->
@@ -1219,7 +1223,13 @@
                 const dateB = new Date(b.date);
                 return dateB - dateA; // 내림차순
             })
-            .slice(0, isAdmin ? undefined : 25);
+            .slice(0, isAdmin ? undefined : 35);
+
+            const lcountBadge = document.getElementById('log-count-badge');
+            if(lcountBadge) lcountBadge.innerText = `${sorted.length}건`;
+
+
+//onsole.log(`📊 조회된 데이터 건수: ${sorted.length}건`); // 콘솔 출력 추가
 
             const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
             list.innerHTML = sorted.map(l => {
