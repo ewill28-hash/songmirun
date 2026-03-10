@@ -263,7 +263,7 @@
                     <i id="login-loader" class="fa-solid fa-circle-notch loading-spinner hidden"></i>
                 </button>
             </div>
-            <p class="text-xs text-gray-400 mt-5 mb-2">Copyright 2026. Songmirun(Jake) All Rights Reserved.</p>            
+            <p class="text-[10px] text-gray-400 mt-5 mb-2">Copyright 2026. Songmirun(Jake) All Rights Reserved.</p>            
         </div>
     </div>
 
@@ -448,7 +448,7 @@
                         <div class="flex items-center gap-2">
                             <div class="w-2 h-4 bg-rose-500 rounded-full"></div>
                             <h2 class="text-lg font-black text-rose uppercase tracking-tighter leading-none">
-                                Team Challenges</h2>
+                                Challenges</h2>
                         </div>
                         <button onclick="openStatsModal()" 
                                 class="text-[11px] font-bold bg-sky-400 text-white px-4 py-2 rounded-xl transition-all hover:bg-sky-600 hover:shadow-md active:scale-95 flex items-center gap-2">
@@ -484,7 +484,21 @@
                             </div>
                         </div>
                     </div>
-                    <div id="team-list" class="space-y-4 px-1">        </div>
+                    <div class="mt-4 mb-2 px-2 flex items-center justify-between">
+                        <h1 class="text-gray-600 font-black text-xs tracking-tighter flex items-center gap-1 uppercase">
+                            <i class="fa-solid fa-user-friends text-emerald-500 text-[10px]"></i>
+                            TEAM Challenges
+                        </h1>
+                    </div>
+                    <div id="team-list" class="space-y-2 px-1 mb-6"></div>
+
+                    <div class="mt-4 mb-2 px-2 flex items-center justify-between">
+                        <h1 class="text-gray-600 font-black text-xs tracking-tighter flex items-center gap-1 uppercase">
+                            <i class="fa-solid fa-venus-mars text-emerald-500 text-[10px]"></i>
+                            GENDER Challenges
+                        </h1>
+                    </div>
+                    <div id="team-list-gender" class="space-y-2 px-1"></div>
 
 
 
@@ -1334,6 +1348,13 @@
                         return logMonth === parseInt(selectedMonthT);
                     });
 
+            const genderMap = {};
+            const teamMap = {};
+            crewMembers.forEach(m => {
+                genderMap[m.nickname] = m.gender;
+                teamMap[m.nickname] = m.team;
+            });
+
             const teams = {};
             let myStats = { dist: 0, time: 0, count: 0 };
 
@@ -1361,6 +1382,7 @@
                 }
             });
 
+
             const myTeamName = crewMembers[userNickname] || myTeam;
             const myTeamData = teams[myTeamName] || { dist: 0, time: 0, count: 0, members: new Set(), color: TEAM_COLORS[myTeamName] || '#94a3b8' };
             
@@ -1382,7 +1404,7 @@
 
                     list.innerHTML += 
                     `
-                        <div class="space-y-1 bg-slate-50 p-2 rounded-xl"> 
+                        <div class="space-y-1 bg-slate-50 p-1 rounded-xl"> 
                             <div class="flex justify-between items-center bg-slate-50">
                                 <div class="flex items-center gap-1 bg-slate-50">
                                     <div class="w-2 h-2 rounded-full" style="background-color: ${data.color}"></div>
@@ -1410,6 +1432,85 @@
                     `;
                 });
             }
+
+
+            const genders = {};
+            filtered.forEach(r => {
+                const genderName = r.gender || genderMap[r.userName] || '기타';
+                if (!genders[genderName]) {
+                    genders[genderName] = { 
+                        name: genderName, 
+                        dist: 0, 
+                        time: 0, 
+                        count: 0,
+                        // 남성/여성에 따른 바 컬러 지정
+                        //color: genderName === '남성' ? '#3b82f6' : (genderName === '여성' ? '#ec4899' : '#94a3b8')
+                        color: genderName === '남성' ? '#6366f1' : (genderName === '여성' ? '#f43f5e' : '#fbbf24')                        
+                        , members: new Set()
+                    };
+                }
+                genders[genderName].dist += r.distance;
+                genders[genderName].time += r.duration;
+                genders[genderName].count++;
+                genders[genderName].members.add(r.userName);
+            });
+
+
+            const listGender = document.getElementById('team-list-gender');
+            if (listGender) {
+                listGender.innerHTML = '';
+                const sorted = Object.entries(genders).sort((a,b) => {
+                    const key = currentMetric === 'dist' ? 'dist' : (currentMetric === 'time' ? 'time' : 'count');
+                    return b[1][key] - a[1][key];
+                });
+
+                const maxKey = currentMetric === 'dist' ? 'dist' : (currentMetric === 'time' ? 'time' : 'count');
+                const maxVal = Math.max(...Object.values(genders).map(t => t[maxKey]), 1);
+
+               sorted.forEach(([name, data]) => {
+
+                const hms= minToHMS(data.time);
+                const timeStr = `${hms.h > 0 ? hms.h + ':' : ''}${hms.m.toString().padStart(2, '0')}:${hms.s.toString().padStart(2, '0')}`;
+
+                    listGender.innerHTML += 
+                    `
+                        <div class="space-y-1 bg-slate-50 p-1 rounded-xl"> 
+                            <div class="flex justify-between items-center bg-slate-50">
+                                <div class="flex items-center gap-1 bg-slate-50">
+                                    <div class="w-2 h-2 rounded-full" style="background-color: ${data.color}"></div>
+                                    <span class="text-[12px] font-black text-slate-800">팀:${name}</span>
+                                    <span class="text-[9px] font-bold text-slate-400">${data.members.size}인</span>
+                                </div>
+                                <div class="flex gap-1 bg-slate-50">
+                                    <span class="badge-stat ${currentMetric==='dist'?'highlight':''}">
+                                        ${data.dist.toFixed(1)}km
+                                    </span>
+                                    <span class="badge-stat ${currentMetric==='time'?'highlight':''}">
+                                        ${timeStr}
+                                    </span>
+                                    <span class="badge-stat ${currentMetric==='count'?'highlight':''}">
+                                        ${data.count}회
+                                    </span>
+                                </div>
+                            </div>
+
+                        </div>
+                    `;
+                    listGender.innerHTML += `
+                        <div class="space-y-1 bg-slate-50 p-1 rounded-xl"> 
+                            <div class="h-1.5 bg-slate-200/60 rounded-full overflow-hidden">
+                                <div class="h-full transition-all duration-1000 ease-out rounded-full" 
+                                    style="width: ${(data[maxKey] / maxVal) * 100}%; 
+                                            background: repeating-linear-gradient(45deg, rgba(255,255,255,0.2) 0px, rgba(255,255,255,0.2) 6px, transparent 6px, transparent 12px), 
+                                                        linear-gradient(90deg, ${data.color}, ${data.color});">
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                });
+            }
+
 
             document.getElementById('card-dist-ratio').innerText = ((myStats.dist / (myTeamData.dist || 1)) * 100).toFixed(1) + '%';
             document.getElementById('card-time-ratio').innerText = ((myStats.time / (myTeamData.time || 1)) * 100).toFixed(1) + '%';
@@ -2473,7 +2574,7 @@ if (!newTeam) return showModal("소속팀을 선택하세요.", "alert");
 
                 const dist = Number(document.getElementById('in-dist').value);
                 const date = document.getElementById('in-date').value;
-                if(!date || dist <= 0 || totalMin <= 0) return showModal("💡필수 항목(날짜, 거리, 시간) ✅✅✅.", "alert");
+                if(!date || dist <= 0 || totalMin <= 0) return showModal("💡필수 항목(날짜, 거리, 시간)을 입력해주세요✅", "alert");
 
                 const pace = totalMin / dist;
                 if (pace < 2.0) {
