@@ -1614,21 +1614,22 @@
 
         window.closeStatsModal = () => document.getElementById('stats-modal').classList.add('hidden');
 
-        window.setMetric = (m) => {
+        window.setMetric = window.setMetric2 = (m) => {
             currentMetric = m;
-            ['dist', 'time', 'count'].forEach(id => {
-                const b = document.getElementById(`btn-metric-${id}`);
-                if(b) b.classList.toggle('active', id === m);
-            });
-            updateUI_Team();
-        };
+            
+            const prefixes = ['btn-metric-', 'btn-metric2-'];
+            const types = ['dist', 'time', 'count'];
 
-       window.setMetric2 = (m) => {
-            currentMetric = m;
-            ['dist', 'time', 'count'].forEach(id => {
-                const b = document.getElementById(`btn-metric2-${id}`);
-                if(b) b.classList.toggle('active', id === m);
+            prefixes.forEach(prefix => {
+                types.forEach(type => {
+                    const btn = document.getElementById(`${prefix}${type}`);
+                    if (btn) {
+                        // 현재 선택된 타입(m)이면 active 추가, 아니면 제거
+                        btn.classList.toggle('active', type === m);
+                    }
+                });
             });
+
             updateUI_Team();
         };
 
