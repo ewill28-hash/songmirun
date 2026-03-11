@@ -373,10 +373,10 @@
                         <div class="col-span-1">
                             <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1">러닝 유형</label>
                             <select id="run-type" class="w-full bg-white border-2 border-brand-100 p-3.5 rounded-2xl text-sm font-bold outline-none shadow-sm">
+                                <option value="오운완">👟 오운완</option>
                                 <option value="정규">📅 정규</option>
                                 <option value="번개">⚡ 번개</option>
                                 <option value="대회">🏅 대회</option>
-                                <option value="오운완">👟 오운완</option>
                             </select>
                         </div>
 
@@ -527,14 +527,14 @@
                                 <div class="flex flex-1 items-center gap-1 bg-white/60 p-1 rounded-xl border border-emerald-100 shadow-inner w-full">
                                     <button onclick="window.setTypeFilter('전체')" id="type-all" 
                                             class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black transition-all active-btn">🏃 전체</button>
+                                    <button onclick="window.setTypeFilter('오운완')" id="type-o" 
+                                            class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400  transition-all">👟 오운완</button>
                                     <button onclick="window.setTypeFilter('정규')" id="type-j" 
                                             class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400  transition-all">📅 정규</button>
                                     <button onclick="window.setTypeFilter('번개')" id="type-b" 
                                             class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400  transition-all">⚡ 번개</button>
                                     <button onclick="window.setTypeFilter('대회')" id="type-d" 
                                             class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400  transition-all">🏅 대회</button>
-                                    <button onclick="window.setTypeFilter('오운완')" id="type-o" 
-                                            class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400  transition-all">👟 오운완</button>
                                 </div>
                                 
                             </div>
@@ -1256,11 +1256,10 @@
                 }
 
                 const runTypeMap = {
+                    '오운완': { icon: '👟', label: '오운완' },
                     '정규': { icon: '📅', label: '정규' },
                     '번개': { icon: '⚡', label: '번개' },
-                    '대회': { icon: '🏅', label: '대회' },
-                    '오운완': { icon: '👟', label: '오운완' }
-
+                    '대회': { icon: '🏅', label: '대회' }
                 };
 
                 const defaultType = { icon: '⚡', label: '번개' };
