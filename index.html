@@ -322,8 +322,8 @@
                     <p id="stat-distm" class="text-xl font-black italic leading-none mt-1 text-center">
                         <span class="text-[10px] opacity-80 not-italic mr-1">Me:</span>0 km
                     </p>
-                    
-                    <p id="stat-dist" class="text-xl font-black italic leading-none mt-1 text-center text-brand-200">
+                    <p id="stat-dist" onclick="renderChallengeModal('year','0')" 
+                    class="text-xl font-black italic leading-none mt-1 text-center text-brand-200 transition-all duration-200 hover:text-white hover:brightness-125 cursor-pointer">
                         <span class="text-[10px] opacity-70 not-italic mr-1">All:</span>0 km
                     </p>
                 </div>
@@ -959,6 +959,92 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+  <!-- 챌린지 모달 -->
+    <div id="challenge-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <h3 id="modal-title" class="text-xl font-black text-slate-800">챌린지 리포트</h3>
+                <button onclick="closeModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-200 text-slate-500 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                </button>
+            </div>
+            
+            <div class="p-8">
+                <!-- 여정 요약 텍스트 -->
+                <div class="text-center mb-10">
+                    <p id="route-text" class="text-blue-600 font-bold tracking-tight text-lg mb-2 italic">
+                        송도 → 싱가포르 → 시드니
+                    </p>
+                    <p id="modal-summary" class="text-slate-600 font-medium leading-relaxed italic">
+                        "현재 송도에서 싱가포르(4,700km)까지 달려왔습니다!"
+                    </p>
+                </div>
+
+                <!-- 인포그래픽 진행 바 -->
+                <div class="relative px-2">
+                    <!-- 도시 아이콘들 -->
+                    <div class="flex justify-between items-end mb-4">
+                        <div class="text-center group">
+                            <span class="block text-xl mb-1 group-hover:scale-110 transition-transform">👟</span>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase">송도</span>
+                        </div>
+                        <div class="text-center relative">
+                            <!-- 현재 거리 툴팁 느낌의 표시 -->
+                            <div class="absolute -top-[30px] left-1/2 -translate-x-1/2 bg-blue-500 text-white text-[9px] px-2 py-1 rounded-md font-bold whitespace-nowrap shadow-md">
+                                현재 <span id="cur-val-inner">0</span>km 도달!
+                                <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-blue-500 rotate-45"></div>
+                            </div>
+                            <span id="reached-emoji" class="block text-2xl mb-1 scale-125 drop-shadow-sm">📍</span>
+                            <span id="prev-city" class="text-[10px] font-black text-blue-600 uppercase">현재 도시</span>
+                        </div>
+                        <div class="text-center opacity-40">
+                            <span id="next-emoji" class="block text-xl mb-1">🏁</span>
+                            <span id="next-city" class="text-[10px] font-bold text-slate-400 uppercase">목표 도시</span>
+                        </div>
+                    </div>
+
+                    <!-- 실제 게이지 -->
+                    <div class="overflow-hidden h-4 mb-2 flex rounded-full bg-slate-100 border border-slate-200 p-0.5 shadow-inner">
+                        <div id="modal-progress" style="width:0%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-gradient-to-r from-blue-400 via-blue-600 to-indigo-700 rounded-full transition-all duration-1000 ease-out relative">
+                            <div class="absolute inset-0 bg-white/10 animate-pulse"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between text-[10px] text-slate-500 font-bold px-1">
+                        <span>0 KM</span>
+                        <span id="target-dist-label">GOAL</span>
+                    </div>
+                </div>
+
+                <!-- 다음 챌린지 상세 -->
+                <div class="mt-1 p-5 bg-gradient-to-br from-slate-50 to-white rounded-2xl border border-slate-100 shadow-sm">
+                    <div class="flex items-start gap-1">
+                        <div class="p-3 bg-blue-600 rounded-xl text-white shadow-lg shadow-blue-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Next Destination</p>
+                            <p id="next-challenge-text" class="text-[13px] text-slate-700 leading-relaxed font-bold">
+                                다음 도시까지 조금만 더 힘내세요!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-4 bg-slate-50 text-center">
+                <button onclick="closeModal()" class="w-full py-4 bg-slate-900 text-white font-black rounded-2xl hover:bg-slate-800 active:scale-[0.98] transition-all shadow-xl shadow-slate-200 flex items-center justify-center gap-2">
+                    확인하고 계속 달리기
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                </button>
             </div>
         </div>
     </div>
@@ -1720,6 +1806,81 @@
 
 
         window.syncAndRefresh = () => updateUI_Team();
+
+
+
+
+        // 도시 데이터 (마라톤 성지 포함)
+        const DESTINATIONS = [
+            { name: "송도 (미추홀)", dist: 0, emoji: "👟" },
+            { name: "서울 (남산타워)", dist: 35, emoji: "🗼" }, // 매우 가까운 거리
+            { name: "평창 (동계올림픽)", dist: 180, emoji: "❄️" }, // 강원권
+            { name: "대전 (성심당)", dist: 160, emoji: "🥖" }, // 중부권
+            { name: "대구 (팔공산)", dist: 260, emoji: "🍎" }, // 영남권
+            { name: "광주 (무등산)", dist: 270, emoji: "🍉" }, // 호남권
+            { name: "부산 (해운대)", dist: 330, emoji: "🌊" }, // 남단
+            { name: "제주도 (한라산)", dist: 450, emoji: "🗿" }, // 섬 지역
+            { name: "상하이", dist: 800, emoji: "🏮" },
+            { name: "도쿄 (마라톤 성지)", dist: 1200, emoji: "🗼" },
+            { name: "홍콩", dist: 2000, emoji: "🏙️" },
+            { name: "방콕", dist: 3700, emoji: "🛕" },
+            { name: "싱가포르", dist: 4700, emoji: "🦁" },
+            { name: "시드니", dist: 8300, emoji: "🦘" },
+            { name: "베를린 (마라톤 성지)", dist: 8500, emoji: "🏰" },
+            { name: "모스크바", dist: 9300, emoji: "🇷🇺" },
+            { name: "런던 (마라톤 성지)", dist: 11000, emoji: "🎡" },
+            { name: "보스턴 (마라톤 성지)", dist: 11500, emoji: "🏛️" },
+            { name: "뉴욕 (마라톤 성지)", dist: 13000, emoji: "🗽" },
+            { name: "시카고 (마라톤 성지)", dist: 13500, emoji: "🏙️" },
+            { name: "상파울루 (지구반바퀴)", dist: 18000, emoji: "⚽" }
+        ];
+
+        window.renderChallengeModal = (title, distance) => {
+            const currentYearLogs = allLogs.filter(l => l.date && new Date(l.date).getFullYear() === parseInt(selectedYear));
+            const totalDist = currentYearLogs.reduce((sum, l) => sum + Number(l.distance || 0), 0);
+            const currentDist = parseFloat(totalDist);
+            if (isNaN(currentDist) || currentDist < 0) return;
+
+            const reached = [...DESTINATIONS].filter(d => d.dist <= currentDist).pop() || DESTINATIONS[0];
+            const next = DESTINATIONS.find(d => d.dist > currentDist) || DESTINATIONS[DESTINATIONS.length - 1];
+
+            document.getElementById('modal-title').innerText = selectedYear+'년 송미런 여정 경로';
+            document.getElementById('cur-val-inner').innerText = currentDist.toLocaleString();
+            
+            const routeText = `송도 → ${reached.name === '송도' ? '' : reached.name + ' → '}${next.name}`;
+            document.getElementById('route-text').innerText = reached.name === next.name ? `송도 → ... → ${reached.name} (완주!)` : routeText;
+            
+            document.getElementById('modal-summary').innerHTML = `현재 송도에서 <span class="text-slate-800 font-black">${reached.name}</span>까지 달렸습니다.`;
+            document.getElementById('reached-emoji').innerText = reached.emoji;
+            document.getElementById('next-emoji').innerText = next.emoji;
+            document.getElementById('prev-city').innerText = reached.name;
+            document.getElementById('next-city').innerText = next === reached ? "Final Destination" : next.name;
+
+            const progress = (next === reached) ? 100 : Math.min(100, (currentDist / next.dist) * 100);
+            document.getElementById('modal-progress').style.width = '0%';
+            setTimeout(() => {
+                document.getElementById('modal-progress').style.width = `${progress}%`;
+            }, 100);
+
+            document.getElementById('target-dist-label').innerText = `${next.dist.toLocaleString()} KM`;
+            
+            if (next === reached) {
+                document.getElementById('next-challenge-text').innerText = `대단합니다! 더 이상 갈 곳이 없을 정도로 멀리 오셨네요. 이제 당신은 세계적인 마라토너입니다.`;
+            } else {
+                const remain = (next.dist - currentDist).toFixed(1);
+                document.getElementById('next-challenge-text').innerHTML = `다음 목표 <span class="text-blue-600 font-black">${next.name}</span>까지 <span class="text-blue-600 font-black">${remain}km</span> 남았습니다.`;
+            }
+
+            document.getElementById('challenge-modal').classList.remove('hidden');
+            document.body.classList.add('modal-active');
+        };
+
+        
+        let globalYearlyStats = {};
+        window.closeModal = () => {
+            document.getElementById('challenge-modal').classList.add('hidden');
+            document.body.classList.remove('modal-active');
+        };
 
         window.openStatsModal = () => {
             if (!localStorage.getItem('songmirun_nickname')) return;
