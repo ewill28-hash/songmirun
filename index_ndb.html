@@ -1,0 +1,2988 @@
+
+
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>쏭-미션</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="importmap">
+    {
+      "imports": {
+        "firebase/app": "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js",
+        "firebase/auth": "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js",
+        "firebase/firestore": "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js"
+      }
+    }
+    </script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4', 100: '#dcfce7', 200: '#bbf7d0', 300: '#86efac',
+                            400: '#4ade80', 500: '#22c55e', 600: '#16a34a', 700: '#15803d',
+                            800: '#166534', 900: '#14532d'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+     <script>
+            function toggleMoreOptions() {
+                const options = document.getElementById('more-options');
+                const icon = document.getElementById('more-icon');
+                
+                const isActive = options.classList.toggle('active');
+                icon.classList.toggle('active');
+                
+                // 시각적 피드백을 위해 약간의 여백 조절
+                if (isActive) {
+                    options.style.marginTop = "0.1rem";
+                    options.style.marginBottom = "0.1rem";
+                } else {
+                    options.style.marginTop = "0";
+                    options.style.marginBottom = "0";
+                }
+            }
+    </script>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
+    
+    /* [기본 설정] */
+    body { 
+        font-family: 'Pretendard', sans-serif; 
+        background-color: #f8fafc; 
+        color: #0f172a; 
+        -webkit-tap-highlight-color: transparent; 
+        line-height: 1.5;
+    }
+
+    /* [스크롤바 커스텀] */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+
+    /* [공통 유틸리티] */
+    .hidden { display: none !important; }
+    .glass-card, .rank-card, .modal-comparison-card {
+        background: white;
+        border-radius: 1.5rem;
+        border: 1px solid #f1f5f9;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
+    .loading-spinner { animation: spin 1s linear infinite; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+    .filter-group { 
+        display: flex; 
+        background-color: #ecfdf5; 
+        padding: 2px; 
+        border-radius: 12px; 
+        gap: 2px;
+    }
+ 
+        .filter-btn { 
+            flex: 1;
+            padding: 8px 4px; 
+            font-size: 10px; 
+            font-weight: 800; 
+            border-radius: 8px; 
+            transition: all 0.2s;
+            text-align: center;
+            background: white;
+            color: #64748b;
+        }
+        
+        .filter-btn.active { 
+
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+
+            background: #22c55e;
+            color: white;
+
+        }
+
+        .metric-btn {
+            padding: 0.5rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            border: 1px solid #e2e8f0;
+            background: white;
+            color: #64748b;
+            transition: all 0.2s;
+        }
+
+        .metric-btn.active {
+            background: #22c55e;
+            color: white;
+            border-color: #22c55e;
+        }
+
+        .metric-btn2 {
+            padding: 0.5rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            border: 1px solid #e2e8f0;
+            background: white;
+            color: #64748b;
+            transition: all 0.2s;
+        }
+
+        .metric-btn2.active {
+            background: #22c55e;
+            color: white;
+            border-color: #22c55e;
+        }
+
+
+        .btn-gradient {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            transition: all 0.3s ease;
+        }
+         .stat-mini-card {
+            background: #f8fafc;
+            border-radius: 1rem;
+            padding: 1rem;
+            border: 1px solid #f1f5f9;
+        }       
+
+
+    /* [랭킹 및 리스트 아이템] */
+    .rank-header {
+        padding: 1rem;
+        border-bottom: 1px solid #f0fdf4;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: #f0fdf4;
+    }
+    .rank-item {
+        position: relative;
+        padding: 0.35rem 1rem;
+        transition: background 0.2s;
+        z-index: 1;
+    }
+    .rank-progress {
+        position: absolute;
+        bottom: 0; left: 0; height: 2px;
+        background: #dcfce7;
+        transition: width 1s ease-out;
+        z-index: 0;
+    }
+    .runner-grade-badge {
+        display: inline-flex;
+        align-items: center;
+        font-size: 0.75rem !important; /* text-xs 크기 */
+        padding: 2px 8px !important;  /* 상하 2px, 좌우 8px */
+        font-weight: 500;
+        border-radius: 6px;
+    }
+    /* [통계 및 뱃지] */
+    .stat-grid-label { font-size: 8px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 2px; }
+    .stat-grid-val { font-size: 11px; font-weight: 900; color: #1e293b; font-style: italic; }
+    
+    .badge-stat {
+        display: inline-block;
+        background: #f8fafc;
+        color: #94a3b8;
+        padding: 3px 10px;
+        border-radius: 8px;
+        font-size: 10px;
+        font-weight: 800;
+        border: 1px solid #f1f5f9;
+        transition: all 0.3s;
+    }
+    .badge-stat.highlight {
+        background: #dcfce7;
+        color: #16a34a;
+        border-color: #bbf7d0;
+        box-shadow: 0 2px 4px rgba(34, 197, 94, 0.1);
+    }
+
+    /* [입력 폼] */
+    .form-input {
+        width: 100%;
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        padding: 0.85rem 1rem;
+        border-radius: 1rem;
+        font-size: 0.875rem;
+        outline: none;
+        transition: all 0.2s;
+    }
+    .form-input:focus {
+        border-color: #22c55e;
+        background-color: white;
+        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+    }
+
+    /* [애니메이션 및 모달] */
+    .expandable-content {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+        opacity: 0;
+    }
+    .expandable-content.active { max-height: 200px; opacity: 1; }
+    .rotate-icon { transition: transform 0.3s ease; }
+    .rotate-icon.active { transform: rotate(180deg); }
+    .modal-overlay { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(8px); }
+
+    /* [메달 색상] */
+    .medal-1 { color: #fbbf24; }
+    .medal-2 { color: #94a3b8; }
+    .medal-3 { color: #b45309; }
+</style>
+
+</head>
+<body class="pb-20">
+
+<!-- Login Screen -->
+    <div id="login-screen" class="fixed inset-0 bg-brand-600 z-[100] flex items-center justify-center p-6 transition-all duration-500">
+        <div class="bg-white w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl text-center">
+            <div class="w-16 h-16 bg-brand-100 text-brand-500 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
+                <i class="fa-solid fa-person-running animate-pulse"></i>
+            </div>
+            <h2 class="text-3xl font-black text-gray-800 mb-3 tracking-tighter italic">Songmirun </h2>
+            <p class="text-xs text-gray-400 mb-2 font-bold">Since 2024</p>
+            <p class="text-xs text-rose-500 mb-2 font-bold">쏭미션</p>
+            <div class="space-y-4">
+                <input type="text" id="login-nick" placeholder="등록된 닉네임을 입력하세요" class="w-full bg-gray-50 border-gray-100 border p-4 rounded-2xl outline-none focus:ring-2 ring-brand-400 font-bold placeholder:text-gray-300 text-center text-lg">
+                <button id="btn-login" class="w-full bg-brand-500 text-white font-black py-4 rounded-2xl shadow-lg shadow-brand-200 active:scale-95 transition-transform text-lg flex items-center justify-center gap-2 ">
+                    <span id="login-text">입장하기</span>
+                    <i id="login-loader" class="fa-solid fa-circle-notch loading-spinner hidden"></i>
+                </button>
+            </div>
+            <p class="text-[10px] text-gray-400 mt-5 mb-2">Copyright 2026. Songmirun(Jake) All Rights Reserved.</p>            
+        </div>
+    </div>
+
+<!-- Main Content -->
+    <div id="main-content" class="hidden">
+        <header class="bg-white/80 backdrop-blur-md border-b border-brand-100 px-0 pt-4 sticky top-0 z-40">
+            <div class="flex justify-between items-center max-w-2xl mx-auto mb-3 px-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-brand-500 rounded-full flex items-center justify-center text-white text-lg shadow-md shadow-brand-200">
+                        <i class="fa-solid fa-person-running icon-btn" id="display-nickname"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-sm font-black text-gray-800 italic">Songmirun</h2>
+                        <div class="flex items-center gap-1.5">
+                            <span id="display-nickname2" class="text-[10px] font-bold text-brand-500 cursor-pointer hover:bg-brand-50 px-1 rounded transition-colors" title="내 정보 상세">-</span>
+                            <span id="admin-badge" class="hidden text-[8px] bg-red-500 text-white px-1.5 rounded-sm font-black uppercase">Admin</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <select id="year-select" class="text-[10px] font-bold border border-gray-200 rounded-lg px-2 py-1.5 bg-white outline-none text-gray-600"></select>
+                    <button id="btn-logout" class="p-2 text-gray-400 hover:text-red-500 transition-colors bg-gray-50 rounded-lg">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <nav id="main-nav" class="flex max-w-2xl mx-auto border-t border-brand-50 bg-white">
+                <button id="tab-logs" class="flex-1 flex flex-col items-center py-2 text-[10px] font-bold tab-btn active-tab border-brand-500 text-brand-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-1"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                    <span>러닝 기록</span>
+                </button>
+                <button id="tab-ranking" class="flex-1 flex flex-col items-center py-2 text-[10px] font-bold tab-btn border-transparent text-gray-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-1"><path d="M6 9H4v11h2Z"/><path d="M11 3h2v17h-2Z"/><path d="M18 13h2v7h-2Z"/></svg>
+                    <span>랭킹</span>
+                </button>
+                <button id="tab-stats" class="flex-1 flex flex-col items-center py-2 text-[10px] font-bold tab-btn border-transparent text-gray-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-1"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+                    <span>통계</span>
+                </button>
+                <button id="tab-members" class="hidden flex-1 flex flex-col items-center py-2 text-[10px] font-bold tab-btn border-transparent text-gray-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-1"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    <span>크루</span>
+                </button>
+            </nav>
+        </header>
+
+        <main class="p-3 max-w-2xl mx-auto space-y-3">
+                    
+            <!-- Stats Summary Cards -->
+            <section class="grid grid-cols-3 sm:grid-cols-3 gap-1">
+                <div class="bg-brand-500 p-3 rounded-2xl text-white shadow-lg shadow-brand-200 border border-brand-400">
+                    <p class="text-[9px] font-bold text-brand-100 uppercase tracking-tighter">Distance</p>
+                    
+                    <p id="stat-distm" class="text-xl font-black italic leading-none mt-1 text-center">
+                        <span class="text-[10px] opacity-80 not-italic mr-1">Me:</span>0 km
+                    </p>
+                    <p id="stat-dist" onclick="renderChallengeModal('year','0')" 
+                    class="text-xl font-black italic leading-none mt-1 text-center text-brand-200 transition-all duration-200 hover:text-white hover:brightness-125 cursor-pointer">
+                        <span class="text-[10px] opacity-70 not-italic mr-1">All:</span>0 km
+                    </p>
+                </div>
+                <div class="bg-orange-50 p-3 rounded-2xl border border-orange-100 shadow-sm">
+                    <p class="text-[9px] text-orange-400 font-bold uppercase tracking-tighter">Time (me/all)</p>
+                    
+                    <p id="stat-timem" class="text-[15px] text-center font-black text-orange-600 italic leading-none mt-1">
+                        Me: 0 m
+                    </p>
+                    
+                    <p id="stat-time" class="text-[15px] text-center font-black text-orange-400 italic leading-none mt-1">
+                        All: 0 m
+                    </p>
+                </div>
+                <div class="bg-purple-50 p-3 rounded-2xl border border-purple-100 shadow-sm">
+                    <p class="text-[9px] text-purple-600 font-bold uppercase tracking-tighter">Count</p>
+                    
+                    <p id="stat-countm" class="text-[18px] text-center font-black text-purple-600 italic leading-none mt-1">
+                        Me: 0회
+                    </p>
+                    
+                    <p id="stat-count" class="text-[18px] text-center font-black text-purple-400 italic leading-none mt-1">
+                        All: 0회
+                    </p>
+                </div>
+            </section>
+
+<!-- Section: Logs -->
+            <div id="section-logs" class="space-y-3">
+                <section id="entry-form" class="bg-brand-50 p-3 rounded-[2.5rem] border-2 border-brand-200 shadow-xl shadow-brand-100/50">
+                    <h2 id="form-title" class="font-black text-base mb-6 flex items-center gap-2 text-brand-900 italic tracking-tight">
+                        <i class="fa-solid fa-fire-flame-curved text-brand-600 animate-pulse"></i> 새 러닝 기록 입력
+                    </h2>
+                    <input type="hidden" id="edit-id">
+                    
+                    <div class="grid grid-cols-2 gap-4 mb-3">
+                        <div id="username-field-container" class="col-span-2 hidden">
+                            <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1">작성자 (관리자)</label>
+                            <input type="text" id="log-username" class="w-full bg-white border-2 border-brand-100 p-3.5 rounded-2xl text-sm font-bold outline-none shadow-sm">
+                        </div>
+                        
+                        <div class="col-span-1">
+                            <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1">러닝 날짜</label>
+                            <input type="date" id="in-date" class="w-full bg-white border-2 border-brand-100 p-3.5 rounded-2xl text-sm outline-none font-bold shadow-sm">
+                        </div>
+                        
+                        <div class="col-span-1">
+                            <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1">러닝 유형</label>
+                            <select id="run-type" class="w-full bg-white border-2 border-brand-100 p-3.5 rounded-2xl text-sm font-bold outline-none shadow-sm">
+                                <option value="오운완">👟 오운완</option>
+                                <option value="정규">📅 정규</option>
+                                <option value="번개">⚡ 번개</option>
+                                <option value="대회">🏅 대회</option>
+                            </select>
+                        </div>
+
+                        <div class="col-span-1">
+                            <label id="label-dist0" title="Click Zero" class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1 cursor-pointer">거리 (km)</label>
+                            <div class="grid grid-cols-6 gap-1">
+                                <label id="label-dist1" title="Click +1" class="text-[11px] text-blue-500 font-black block mb-1 ml cursor-pointer text-center">+1K</label>
+                                <label id="label-dist2" title="Click +2" class="text-[11px] text-blue-500 font-black block mb-1 ml cursor-pointer text-center">+2K</label>
+                                <label id="label-dist5" title="Click 5K" class="text-[11px] text-brand-700 font-black block mb-1 ml cursor-pointer text-center">5K</label>
+                                <label id="label-dist10" title="Click 10K" class="text-[11px] text-brand-700 font-black block mb-1 ml cursor-pointer text-center">10K</label>
+                                <label id="label-dist21" title="Click Half" class="text-[11px] text-brand-700 font-black block mb-1 ml cursor-pointer text-center">Half</label>
+                                <label id="label-dist42" title="Click Full" class="text-[11px] text-brand-700 font-black block mb-1 ml cursor-pointer text-center">Full</label>
+                            </div>
+                            <input type="number" step="1.000" id="in-dist" placeholder="0.000" class="w-full bg-white border-2 border-brand-100 p-3 rounded-2xl text-sm font-bold outline-none shadow-sm">
+                        </div>
+
+                        <!-- Improved Time Input Section -->
+                        <div class="col-span-1">
+                            <label id="label-time0" title="Click Zero" class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1">러닝 시간</label>
+                            <div class="grid grid-cols-3 gap-1">
+                                <label id="label-timeH" title="Click +1h" class="text-[11px] text-blue-500 font-black block mb-1 ml cursor-pointer text-center">+1h</label>
+                                <label id="label-timeM" title="Click +10m" class="text-[11px] text-rose-500 font-black block mb-1 ml cursor-pointer text-center">+10m</label>
+                                <label id="label-timeS" title="Click +10s" class="text-[11px] text-brand-500 font-black block mb-1 ml cursor-pointer text-center">+10s</label>
+                            </div>
+                            <div class="grid grid-cols-3 gap-1">
+                                <input type="number" id="in-time-h" placeholder="몇시간?" min="0" class="w-full bg-white border-2 border-brand-100 p-3 rounded-xl text-center text-xs font-bold outline-none shadow-sm">
+                                <input type="number" id="in-time-m" placeholder="몇분?" min="0" max="59" class="w-full bg-white border-2 border-brand-100 p-3 rounded-xl text-center text-xs font-bold outline-none shadow-sm">
+                                <input type="number" id="in-time-s" placeholder="몇초?" min="0" max="59" class="w-full bg-white border-2 border-brand-100 p-3 rounded-xl text-center text-xs font-bold outline-none shadow-sm">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 더보기 버튼 (More) -->
+                    <div class="col-span-1">
+                        <button type="button" onclick="toggleMoreOptions()" class="group flex items-center justify-center w-full py-2 rounded-xl border border-dashed border-slate-300 text-slate-400 text-[10px] font-bold hover:bg-slate-50 hover:border-emerald-300 hover:text-emerald-500 transition-all">
+                            <span>more (심박수, 케이던스, 메모)</span>
+                            <i id="more-icon" class="fa-solid fa-chevron-down ml-1 rotate-icon"></i>
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-4 mb-3">
+                        <div id="more-options" class="expandable-content grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1">심박수(bpm)</label>
+                                <input type="number" id="in-bpm" min="60" max="300" placeholder="0" class="w-full bg-white border-2 border-brand-100 p-3 rounded-2xl text-sm font-bold outline-none shadow-sm">
+                            </div>
+
+                            <div>
+                                <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1">케이던스 (spm)</label>
+                                <input type="number" id="in-cadence" min="60" max="300" placeholder="0" class="w-full bg-white border-2 border-brand-100 p-3 rounded-2xl text-sm font-bold outline-none shadow-sm">
+                            </div>
+
+                            <div class="col-span-2">
+                                <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1">메모</label>
+                                <input type="text" id="in-memo" placeholder="러닝 메모를 입력하세요" class="w-full bg-white border-2 border-brand-100 p-3 rounded-2xl text-sm font-bold outline-none shadow-sm">
+                            </div>
+                        </div>                    
+                    </div>                    
+                    <button id="btn-save-log" class="w-full bg-brand-600 text-white font-black py-4 rounded-2xl shadow-lg shadow-brand-200 active:scale-[0.98] transition-all hover:bg-brand-700 text-lg flex items-center justify-center gap-2">
+                            ☑ 기록 저장하기
+                            <div id="pace-display" class="text-[15px] font-black font-mono text-white-800 font-semibold tracking-tighter">
+                                [Pace : 0'00"]
+                            </div>  
+                    </button>
+                </section>
+
+<!-- Team Rankings Section -->
+                <section class="glass-card p-4 bg-white rounded-3xl shadow-sm border border-emerald-50">
+                    <div class="flex justify-between items-center mb-6">
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-4 bg-rose-500 rounded-full"></div>
+                            <h2 class="text-lg font-black text-rose uppercase tracking-tighter leading-none">
+                                Challenges</h2>
+                        </div>
+                        <button onclick="openStatsModal()" 
+                                class="text-[11px] font-bold bg-sky-400 text-white px-4 py-2 rounded-xl transition-all hover:bg-sky-600 hover:shadow-md active:scale-95 flex items-center gap-2">
+                            <i class="fas fa-chart-line"></i> 상세 분석
+                        </button>
+                    </div>
+                    <div class="rounded-2xl p-3.5 bg-emerald-50/40 border border-emerald-100 mb-4">
+                        <div class="flex flex-col md:flex-row items-end gap-2">
+                           <div class="w-full md:flex-1">
+                                <label class="text-[10px] font-black text-emerald-700 uppercase mb-1.5 ml-1 flex items-center gap-1">
+                                    <i class="fas fa-calendar-alt text-emerald-500"></i> 기록 기간
+                                </label>
+                                <div class="relative group">
+                                    <select id="main-filter-month" onchange="syncAndRefresh()" 
+                                        class="w-full text-[11px] font-bold border border-emerald-200 rounded-xl px-3 py-2 bg-white outline-none text-emerald-700 shadow-sm appearance-none min-h-[36px] cursor-pointer">
+                                        <option value="전체">🗓️ 모든 월</option>
+                                    </select>
+                                    <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-emerald-400">
+                                        <i class="fas fa-chevron-down text-[9px]"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="w-full md:flex-[1.5]">
+                                <label class="text-[10px] font-black text-emerald-700 uppercase mb-1.5 ml-1 flex items-center gap-1">
+                                    <i class="fas fa-layer-group text-emerald-500"></i> 데이터 기준
+                                </label>
+                                <div class="flex gap-2">
+                                    <button onclick="setMetric2('dist')" id="btn-metric2-dist" class="metric-btn2 active flex-1"><i class="fas fa-road mr-1 text-[10px]"></i>거리</button>
+                                    <button onclick="setMetric2('time')" id="btn-metric2-time" class="metric-btn2 flex-1"><i class="fas fa-clock mr-1 text-[10px]"></i>시간</button>
+                                    <button onclick="setMetric2('count')" id="btn-metric2-count" class="metric-btn2 flex-1"><i class="fas fa-running mr-1 text-[10px]"></i>횟수</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 mb-2 px-2 flex items-center justify-between">
+                        <h1 class="text-gray-600 font-black text-xs tracking-tighter flex items-center gap-1 uppercase">
+                            <i class="fa-solid fa-user-friends text-emerald-500 text-[10px]"></i>
+                            TEAM Challenges
+                        </h1>
+                    </div>
+                    <div id="team-list" class="space-y-2 px-1 mb-6"></div>
+
+                    <div class="mt-4 mb-2 px-2 flex items-center justify-between">
+                        <h1 class="text-gray-600 font-black text-xs tracking-tighter flex items-center gap-1 uppercase">
+                            <i class="fa-solid fa-venus-mars text-emerald-500 text-[10px]"></i>
+                            GENDER Challenges
+                        </h1>
+                    </div>
+                    <div id="team-list-gender" class="space-y-2 px-1"></div>
+
+
+
+                </section>
+
+                <section class="glass-carda p-5 bg-white rounded-3xl shadow-sm border border-emerald-50">
+                    <div class="flex items-center gap-2 mb-5">
+                        <div class="w-1.5 h-5 bg-emerald-500 rounded-full"></div>
+                        <h2 class="text-lg font-black text-emerald-900 uppercase tracking-tighter leading-none">
+                            Running Activity
+                        </h2>
+                    </div>
+
+                    <div class="sticky top-20 z-40 bg-white pt-2 pb-1">
+                        <div class="rounded-2xl p-2 bg-emerald-50/50 border border-emerald-100">
+                            <div class="flex flex-col sm:flex-row items-center gap-2">
+                                
+                                <div class="w-full sm:w-auto">
+                                    <select id="month-select" 
+                                            class="w-full text-[11px] font-bold border border-emerald-200 rounded-xl px-3 py-2 bg-white outline-none text-emerald-700 shadow-sm appearance-none min-h-[36px] cursor-pointer">
+                                        <option value="전체">🗓️ 모든 월</option>
+                                    </select>
+                                </div>
+
+                                <div class="flex flex-1 items-center gap-1 bg-white/60 p-1 rounded-xl border border-emerald-100 shadow-inner w-full">
+                                    <button onclick="window.setTypeFilter('전체')" id="type-all" 
+                                            class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black transition-all active-btn">🏃 전체</button>
+                                    <button onclick="window.setTypeFilter('오운완')" id="type-o" 
+                                            class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400  transition-all">👟 오운완</button>
+                                    <button onclick="window.setTypeFilter('정규')" id="type-j" 
+                                            class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400  transition-all">📅 정규</button>
+                                    <button onclick="window.setTypeFilter('번개')" id="type-b" 
+                                            class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400  transition-all">⚡ 번개</button>
+                                    <button onclick="window.setTypeFilter('대회')" id="type-d" 
+                                            class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400  transition-all">🏅 대회</button>
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-1">
+                        <span id="log-count-badge" class="text-[9px] bg-sky-100 text-sky-600 px-2 py-0.5 rounded-full font-black">
+                            0건
+                        </span>
+                    </div>
+                    <div id="log-list" class="space-y-1">
+                        </div>
+                </section>
+            </div>
+
+<!-- Section: Ranking -->
+                <section class="glass-cardb p-51 bg-white rounded-3xl shadow-sm border border-emerald-50">
+                   <div id="section-ranking" class="hidden space-y-3">
+                            <section class="sticky top-20 z-10 bg-white/95 backdrop-blur-sm p-2 rounded-[2rem] border border-brand-100 shadow-md space-y-2">
+                                <div class="flex items-center gap-2 pb-1">
+                                    <div class="w-8 h-8 bg-yellow-100 rounded-xl flex items-center justify-center text-yellow-600 shadow-sm">
+                                        <i class="fa-solid fa-medal"></i>
+                                    </div>
+                                    <h2 class="font-black text-lg text-gray-800 italic tracking-tighter">명예의 전당</h2>
+                                </div>
+
+                                <div class="flex gap-2">
+                                    <div class="flex-1 flex bg-gray-100 p-1 rounded-xl items-center">
+                                        <button onclick="window.setRankingPeriod('this')" id="rank-period-this" 
+                                                class="flex-1 py-1.5 text-[10px] font-black rounded-lg transition-all active rank-period-btn filter-btn">이번 달</button>
+                                        <button onclick="window.setRankingPeriod('last')" id="rank-period-last" 
+                                                class="flex-1 py-1.5 text-[10px] font-black rounded-lg transition-all inactive rank-period-btn filter-btn">지난 달</button>
+                                    </div>
+
+                                    <div class="flex-[1.2] flex bg-gray-100 p-1 rounded-xl items-center">
+                                        <button onclick="window.setGenderFilter2('전체')" id="filter2-all" class="gender-filter-btn filter-btn flex-1 py-1.5 text-[10px] font-black rounded-lg active">전체</button>
+                                        <button onclick="window.setGenderFilter2('여성')" id="filter2-female" class="gender-filter-btn filter-btn flex-1 py-1.5 text-[10px] font-black rounded-lg inactive">여성</button>
+                                        <button onclick="window.setGenderFilter2('남성')" id="filter2-male" class="gender-filter-btn filter-btn flex-1 py-1.5 text-[10px] font-black rounded-lg inactive">남성</button>
+
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-4 gap-1.5 p-1 bg-gray-50 rounded-2xl border border-gray-100">
+                                    <button onclick="window.setTeamFilter2('전체')" id="filter2-tall" 
+                                            class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all active flex items-center justify-center gap-1">
+                                        전체
+                                    </button>
+                                    <button onclick="window.setTeamFilter2('손기정')" id="filter2-ts" 
+                                            class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all inactive flex items-center justify-center gap-1">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-[#3b82f6]"></span>팀:손기정
+                                    </button>
+                                    <button onclick="window.setTeamFilter2('황영조')" id="filter2-th" 
+                                            class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all inactive flex items-center justify-center gap-1">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-[#f87171]"></span>팀:황영조
+                                    </button>
+                                    <button onclick="window.setTeamFilter2('이봉주')" id="filter2-tl" 
+                                            class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all inactive flex items-center justify-center gap-1">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-[#22c55e]"></span>팀:이봉주
+                                    </button>
+                                </div>
+                            </section>
+
+                        <div class="grid grid-cols-1 gap-3">
+                            <div class="rank-card">
+                                <div class="rank-header">
+                                    <i class="fa-solid fa-route text-brand-500"></i>
+                                    <span class="text-xs font-black text-gray-700">누적 거리 TOP 5</span>
+                                </div>
+                                <div id="rank-dist-list" class="divide-y divide-gray-50"></div>
+                            </div>
+                            <div class="rank-card">
+                                <div class="rank-header">
+                                    <i class="fa-solid fa-stopwatch text-orange-500"></i>
+                                    <span class="text-xs font-black text-gray-700">누적 시간 TOP 5</span>
+                                </div>
+                                <div id="rank-time-list" class="divide-y divide-gray-50"></div>
+                            </div>
+                            <div class="rank-card">
+                                <div class="rank-header">
+                                    <i class="fa-solid fa-calendar-check text-purple-500"></i>
+                                    <span class="text-xs font-black text-gray-700">러닝 횟수 TOP 5</span>
+                                </div>
+                                <div id="rank-count-list" class="divide-y divide-gray-50"></div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center px-1 pt-4">
+                            <h2 class="font-black text-base text-gray-800 italic">
+                                <i class="fa-solid fa-bolt text-blue-500"></i> 한 번에 제일 멀리, 오래
+                            </h2>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-5">
+                            <div class="rank-card">
+                                <div class="rank-header">
+                                    <i class="fa-solid fa-award text-emerald-500"></i>
+                                    <span class="text-xs font-black text-gray-700">단일 최장 거리 TOP 5</span>
+                                </div>
+                                <div id="rank-single-dist-list" class="divide-y divide-gray-50"></div>
+                            </div>
+                            <div class="rank-card">
+                                <div class="rank-header">
+                                    <i class="fa-solid fa-hourglass-half text-amber-500"></i>
+                                    <span class="text-xs font-black text-gray-700">단일 최장 시간 TOP 5</span>
+                                </div>
+                                <div id="rank-single-time-list" class="divide-y divide-gray-50"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+
+
+                
+<!-- Section: Statistics -->
+            <div id="section-stats" class="hidden space-y-5">
+                <section class="glass-card bg-white p-4 rounded-[2.5rem] border border-brand-100 shadow-sm sticky top-20 z-10">
+                    <div class="flex flex-col gap-3">
+                        <div class="flex justify-between items-center">
+                            <h2 class="font-black text-sm flex items-center gap-2 text-gray-800 italic">
+                                <i class="fa-solid fa-filter text-brand-500"></i> Stats Filter
+                            </h2>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-1">
+                            <div class="col-span-1">
+                                <div class="filter-group flex">
+                                    <button onclick="window.setTargetFilter('전체')" id="target-all" class="target-filter-btn filter-btn flex-1 active">전체기록</button>
+                                    <button onclick="window.setTargetFilter('나')" id="target-me" class="target-filter-btn filter-btn flex-1 inactive">내 기록</button>
+                                </div>
+                            </div>
+                            <div class="col-span-1">
+                                <div class="filter-group flex">
+                                    <button onclick="window.setGenderFilter('전체')" id="filter-all" class="gender-filter-btn filter-btn flex-1 active">전체</button>
+                                    <button onclick="window.setGenderFilter('여성')" id="filter-female" class="gender-filter-btn filter-btn flex-1 inactive">여성</button>
+                                    <button onclick="window.setGenderFilter('남성')" id="filter-male" class="gender-filter-btn filter-btn flex-1 inactive">남성</button>
+
+                                </div>
+                            </div>
+                            <div class="col-span-2">
+    <div class="grid grid-cols-4 gap-1.5 p-1 bg-gray-50 rounded-2xl border border-gray-100">
+        <button onclick="window.setTeamFilter('전체')" id="filter-tall" 
+                class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all active flex items-center justify-center gap-1">
+            전체
+        </button>
+        <button onclick="window.setTeamFilter('손기정')" id="filter-ts" 
+                class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all inactive flex items-center justify-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#3b82f6]"></span>팀:손기정
+        </button>
+        <button onclick="window.setTeamFilter('황영조')" id="filter-th" 
+                class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all inactive flex items-center justify-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#f87171]"></span>팀:황영조
+        </button>
+        <button onclick="window.setTeamFilter('이봉주')" id="filter-tl" 
+                class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all inactive flex items-center justify-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#22c55e]"></span>팀:이봉주
+        </button>
+    </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <section class="bg-white p-6 rounded-[2.5rem] border border-brand-100 shadow-sm">
+                        <h2 class="font-black text-xs mb-4 flex items-center gap-2 text-gray-700 uppercase">
+                            <i class="fa-solid fa-chart-simple text-blue-500"></i> Monthly Distance (km)
+                        </h2>
+                        <div class="relative w-full h-[200px]">
+                            <canvas id="monthlyDistChart"></canvas>
+                        </div>
+                    </section>
+                    <section class="bg-white p-6 rounded-[2.5rem] border border-brand-100 shadow-sm">
+                        <h2 class="font-black text-xs mb-4 flex items-center gap-2 text-gray-700 uppercase">
+                            <i class="fa-solid fa-clock text-orange-500"></i> Monthly Time (min)
+                        </h2>
+                        <div class="relative w-full h-[200px]">
+                            <canvas id="monthlyTimeChart"></canvas>
+                        </div>
+                    </section>
+                    <section class="bg-white p-6 rounded-[2.5rem] border border-brand-100 shadow-sm">
+                        <h2 class="font-black text-xs mb-4 flex items-center gap-2 text-gray-700 uppercase">
+                            <i class="fa-solid fa-calendar-check text-purple-500"></i> Activity Count
+                        </h2>
+                        <div class="relative w-full h-[200px]">
+                            <canvas id="monthlyCountChart"></canvas>
+                        </div>
+                    </section>
+                    <section class="bg-white p-6 rounded-[2.5rem] border border-brand-100 shadow-sm">
+                        <h2 class="font-black text-xs mb-4 flex items-center gap-2 text-gray-700 uppercase">
+                            <i class="fa-solid fa-gauge-high text-rose-500"></i> Average Pace (min/km)
+                        </h2>
+                        <div class="relative w-full h-[200px]">
+                            <canvas id="monthlyPaceChart"></canvas>
+                        </div>
+                    </section>
+
+
+                </div>
+                <div class="bg-white p-4 rounded-2xl border border-brand-100">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-xs font-bold text-gray-400 uppercase">기록 데이터 내보내기</h3>
+                        <span id="export-scope-badge" class="text-[8px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-black">Excel</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input type="date" id="export-start" class="flex-1 text-[10px] p-2 bg-gray-50 border border-gray-100 rounded-lg outline-none font-bold">
+                        <span class="text-gray-300">~</span>
+                        <input type="date" id="export-end" class="flex-1 text-[10px] p-2 bg-gray-50 border border-gray-100 rounded-lg outline-none font-bold">
+                        <button id="btn-csv" class="bg-brand-500 hover:bg-brand-600 text-white px-3 py-2 rounded-lg text-[10px] font-bold shadow-sm flex items-center gap-1.5">
+                            <i class="fa-solid fa-download"></i> CSV 다운로드
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+<!-- Section: Members (Only Admin) -->
+            <div id="section-members" class="hidden space-y-6">
+                <section class="bg-brand-50 p-6 rounded-[2.5rem] border-2 border-brand-200 shadow-xl shadow-brand-100/50">
+                    <h2 id="mem-form-title" class="font-black text-sm mb-6 flex items-center gap-2 text-gray-800">
+                        <i class="fa-solid fa-fire-flame-curved text-brand-600 animate-pulse"></i> 개별 크루 등록
+                    </h2>
+                    <input type="hidden" id="mem-edit-id">
+                    
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="col-span-1">
+                            <label class="text-[10px] text-gray-400 font-bold block mb-1">로그인 닉네임 (log_nickname)</label>
+                            <input type="text" id="mem-log-nickname" class="w-full bg-white border border-green-100 p-3 rounded-xl text-sm font-bold outline-none" placeholder="로그인 시 사용">
+                        </div>
+                        
+                        <div class="col-span-1">
+                            <label class="text-[10px] text-gray-400 font-bold block mb-1">실제 닉네임 (nickname)</label>
+                            <input type="text" id="mem-nickname" class="w-full bg-white border border-green-100 p-3 rounded-xl text-sm font-bold outline-none" placeholder="화면 표시용">
+                        </div>
+
+                        <div class="col-span-2 grid grid-cols-3 gap-3">
+                            <div>
+                                <label class="text-[10px] text-gray-400 font-bold block mb-1">소속팀 (team)</label>
+                                <select id="mem-team" class="w-full bg-white border border-green-100 p-3 rounded-xl text-sm font-bold outline-none">
+                                    <option value="">선택</option>
+                                    <option value="손기정">손기정</option>
+                                    <option value="이봉주">이봉주</option>
+                                    <option value="황영조">황영조</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-gray-400 font-bold block mb-1">성별</label>
+                                <select id="mem-gender" class="w-full bg-white border border-green-100 p-3 rounded-xl text-sm font-bold outline-none">
+                                    <option value="남성">남성</option>
+                                    <option value="여성">여성</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-gray-400 font-bold block mb-1">가입일</label>
+                                <input type="date" id="mem-joindate" class="w-full bg-white border border-green-100 p-3 rounded-xl text-sm font-bold outline-none">
+                            </div>
+                        </div>
+
+                        <div class="col-span-2">
+                            <label class="text-[10px] text-gray-400 font-bold block mb-1">메모</label>
+                            <input type="text" id="mem-memo" class="w-full bg-white border border-green-100 p-3 rounded-xl text-sm font-bold outline-none">
+                        </div>
+                    </div>
+
+                    <button id="mem-submit-btn" class="w-full bg-brand-600 text-white font-black py-4 rounded-2xl shadow-lg shadow-brand-200 active:scale-[0.98] transition-all hover:bg-brand-700 text-lg flex items-center justify-center gap-2">저장하기</button>
+                </section>
+
+                <section class="bg-white p-6 rounded-[2.5rem] border border-brand-100 shadow-sm">
+                    <div class="flex justify-between items-center mb-6">
+                         <h2 class="font-black text-sm flex items-center gap-2 text-gray-800">
+                            <i class="fa-solid fa-users-viewfinder text-brand-500"></i> 일괄 크루 입력
+                        </h2>
+                    </div>
+                    <textarea id="bulk-members-input" rows="4" placeholder="예: 2027-03-01, 팀명,이가을,이가을, 여성..." class="w-full bg-gray-50 border border-gray-200 p-4 rounded-2xl text-[11px] font-bold outline-none focus:ring-2 ring-brand-200 mb-4 font-mono"></textarea>
+                    <button id="btn-bulk-import" class="w-full bg-brand-600 text-white font-black py-4 rounded-2xl shadow-lg shadow-brand-200 active:scale-[0.98] transition-all hover:bg-brand-700 text-lg flex items-center justify-center gap-2">일괄 등록 시작하기</button>
+                </section>
+
+                <div class="space-y-4">
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <div class="flex-1">
+                            <div class="relative px-1">
+                                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                                <input type="text" id="member-search" placeholder="닉네임, 성별, 가입일(YYYY-MM) 검색..." class="w-full bg-white border border-brand-100 p-4 pl-12 rounded-2xl text-[11px] font-bold outline-none focus:ring-2 ring-brand-200 shadow-sm transition-all focus:border-brand-500">
+                                <div class="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                                     <span id="member-count-badge" class="text-[9px] bg-brand-100 text-brand-600 px-2 py-0.5 rounded-full font-black">0명</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button id="btn-member-csv" class="bg-brand-500 hover:bg-brand-600 text-white px-6 py-4 rounded-2xl text-[11px] font-black shadow-lg transition-all flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-file-export"></i> CSV 다운로드
+                        </button>
+                    </div>
+                    <div class="bg-white rounded-[2rem] border border-brand-100 shadow-sm overflow-hidden overflow-x-auto">
+                        <table class="w-full text-left min-w-[550px]">
+                            <thead class="bg-gray-50 text-[10px] text-gray-400 font-bold uppercase">
+                                <tr>
+                                    <th class="p-1 w-12 text-center">No.</th>
+                                    <th class="p-1 sortable-header" onclick="window.toggleSort('log_nickname')">
+                                        로긴닉 <i id="sort-log_nickname" class="fa-solid fa-sort sort-icon"></i>
+                                    </th>
+                                    <th class="p-1 sortable-header" onclick="window.toggleSort('nickname')">
+                                        실제닉 <i id="sort-nickname" class="fa-solid fa-sort sort-icon"></i>
+                                    </th>
+                                    <th class="p-1 sortable-header" onclick="window.toggleSort('team')">
+                                        팀 <i id="sort-team" class="fa-solid fa-sort sort-icon"></i>
+                                    </th>
+
+                                    <th class="p-1 sortable-header" onclick="window.toggleSort('gender')">
+                                        성별 <i id="sort-gender" class="fa-solid fa-sort sort-icon"></i>
+                                    </th>
+                                    <th class="p-1 sortable-header" onclick="window.toggleSort('joinDate')">
+                                        가입일 <i id="sort-joinDate" class="fa-solid fa-sort sort-icon"></i>
+                                    </th>
+                                    <th class="p-1 sortable-header" onclick="window.toggleSort('lastLogin')">
+                                        최근 접속 <i id="sort-lastLogin" class="fa-solid fa-sort sort-icon"></i>
+                                    </th>
+                                    <th class="p-1 text-right">관리</th>
+                                </tr>
+                            </thead>
+                            <tbody id="member-list" class="divide-y divide-green-50"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Section: Bulk Log Upload -->
+                <section class="bg-white p-6 rounded-[2.5rem] border border-brand-100 shadow-sm">
+                    <div class="flex justify-between items-center mb-6">
+                         <h2 class="font-black text-sm flex items-center gap-2 text-gray-800">
+                            <i class="fa-solid fa-upload text-brand-500"></i> 러닝 기록 일괄 업로드
+                        </h2>
+                    </div>
+                    <p class="text-[10px] text-gray-400 font-bold mb-3 ml-1">형식: 날짜, 이름, 유형, 거리, 시간, 심박, 케이던스</p>
+                    <textarea id="bulk-logs-input" rows="5" placeholder="2026-01-15, 홍여름, 번개, 10, 50, 160, 180&#10;2026-01-16, 김겨울, 정규, 5, 25, 150, 175" class="w-full bg-gray-50 border border-gray-200 p-4 rounded-2xl text-[11px] font-bold outline-none focus:ring-2 ring-brand-200 mb-4 font-mono"></textarea>
+                    <button id="btn-bulk-logs-import" class="w-full bg-brand-600 text-white font-black py-4 rounded-2xl shadow-lg shadow-brand-200 active:scale-[0.98] transition-all hover:bg-brand-700 text-lg flex items-center justify-center gap-2">기록 일괄 등록하기</button>
+                </section>
+            </div>
+        </main>
+    </div>
+
+
+
+
+    <!-- Statistics Modal -->
+    <div id="stats-modal" class="fixed inset-0 z-[100] hidden modal-overlay flex items-center justify-center p-2">
+        <div class="bg-white w-full max-w-lg  max-h-[90vh] overflow-y-auto shadow-2xl relative">
+            <div class="sticky top-0 bg-white/95 backdrop-blur-md px-8 py-2 border-b border-slate-100 flex justify-between items-center z-15">
+                    <h2 class="text-xl font-black text-slate-900 tracking-tight">✨Team Challenges</h2>
+                <button onclick="closeStatsModal()" class="w-5 h-5 bg-slate-50 rounded-full flex items-center justify-center text-slate-400">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="p-2 space-y-1">
+
+                <!-- 필터 레이아웃 -->
+                <div class="grid grid-cols-2 gap-1">
+                    <div class="space-y-1">
+                         <!-- 
+                        <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest px-1">분석 범위</p>
+                        -->
+                        
+                        <div class="flex p-1 bg-slate-100 rounded-xl gap-1">    
+                            <button onclick="setDataScope('avg')" id="scope-avg" class="filter-btn flex-1 active">평균</button>
+                            <button onclick="setDataScope('me')" id="scope-me" class="filter-btn flex-1">내기록</button>
+                            <button onclick="setDataScope('total')" id="scope-total" class="filter-btn flex-1">누적</button>
+                        </div>
+                    </div>
+                    <div class="space-y-1">
+                        <!-- 
+                        <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest px-1">기간 설정</p>
+                        -->
+                        <select id="main-filter-month2" onchange="syncAndRefresh()"  
+                            class="w-full text-[11px] font-bold border border-emerald-200 rounded-xl px-3 py-2 bg-white outline-none text-emerald-800 shadow-sm appearance-none min-h-[38px] flex items-center cursor-pointer focus:ring-2 focus:ring-emerald-500/10 transition-all">
+                                    <option value="전체">🗓️ 모든 월 </option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 측정 기준 -->
+                <div class="flex gap-2">
+                    <button onclick="setMetric('dist')" id="btn-metric-dist" class="metric-btn active flex-1"><i class="fas fa-road mr-1 text-[10px]"></i>거리</button>
+                    <button onclick="setMetric('time')" id="btn-metric-time" class="metric-btn flex-1"><i class="fas fa-clock mr-1 text-[10px]"></i>시간</button>
+                    <button onclick="setMetric('count')" id="btn-metric-count" class="metric-btn flex-1"><i class="fas fa-running mr-1 text-[10px]"></i>횟수</button>
+                </div>
+
+                <!-- 차트 영역 -->
+                <div class="bg-slate-50 rounded-[2rem] p-3 border border-slate-100">
+                    <div class="h-64 relative">
+                        <canvas id="teamChart"></canvas>
+                    </div>
+                </div>
+
+
+                <!-- 팀 기반 요약 카드 (기여도 중심) -->
+                <div class="grid grid-cols-2 gap-1">
+                    <div class="stat-mini-card">
+                        <p class="text-[9px] font-black text-slate-400 uppercase mb-1">내 거리 비중</p>
+                        <div class="flex items-end justify-between">
+                            <span id="card-dist-ratio" class="text-xl font-orbitron text-slate-800">0%</span>
+                            <i class="fas fa-chart-area text-blue-500 text-xs"></i>
+                        </div>
+                    </div>
+                    <div class="stat-mini-card">
+                        <p class="text-[9px] font-black text-slate-400 uppercase mb-1">내 시간 비중</p>
+                        <div class="flex items-end justify-between">
+                            <span id="card-time-ratio" class="text-xl font-orbitron text-slate-800">0%</span>
+                            <i class="fas fa-hourglass-start text-indigo-500 text-xs"></i>
+                        </div>
+                    </div>
+                    <div class="stat-mini-card">
+                        <p class="text-[9px] font-black text-slate-400 uppercase mb-1">내 평균 페이스</p>
+                        <div class="flex items-end justify-between">
+                            <span id="card-avg-pace" class="text-xl font-orbitron text-slate-800">0'00"</span>
+                            <i class="fas fa-bolt text-yellow-500 text-xs"></i>
+                        </div>
+                    </div>
+                    <div class="stat-mini-card">
+                        <p class="text-[9px] font-black text-slate-400 uppercase mb-1">내 활동 비중</p>
+                        <div class="flex items-end justify-between">
+                            <span id="card-count-ratio" class="text-xl font-orbitron text-slate-800">0%</span>
+                            <i class="fas fa-walking text-purple-500 text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+  <!-- 챌린지 모달 -->
+    <div id="challenge-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <h3 id="modal-title" class="text-xl font-black text-slate-800">챌린지 리포트</h3>
+                <button onclick="closeModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-200 text-slate-500 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                </button>
+            </div>
+            
+            <div class="p-8">
+                <!-- 여정 요약 텍스트 -->
+                <div class="text-center mb-10">
+                    <p id="route-text" class="text-blue-600 font-bold tracking-tight text-lg mb-2 italic">
+                        송도 → 싱가포르 → 시드니
+                    </p>
+                    <p id="modal-summary" class="text-slate-600 font-medium leading-relaxed italic">
+                        "현재 송도에서 싱가포르(4,700km)까지 달려왔습니다!"
+                    </p>
+                </div>
+
+                <!-- 인포그래픽 진행 바 -->
+                <div class="relative px-2">
+                    <!-- 도시 아이콘들 -->
+                    <div class="flex justify-between items-end mb-4">
+                        <div class="text-center group">
+                            <span class="block text-xl mb-1 group-hover:scale-110 transition-transform">👟</span>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase">송도</span>
+                        </div>
+                        <div class="text-center relative">
+                            <!-- 현재 거리 툴팁 느낌의 표시 -->
+                            <div class="absolute -top-[30px] left-1/2 -translate-x-1/2 bg-blue-500 text-white text-[9px] px-2 py-1 rounded-md font-bold whitespace-nowrap shadow-md">
+                                현재 <span id="cur-val-inner">0</span>km 도달!
+                                <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-blue-500 rotate-45"></div>
+                            </div>
+                            <span id="reached-emoji" class="block text-2xl mb-1 scale-125 drop-shadow-sm">📍</span>
+                            <span id="prev-city" class="text-[10px] font-black text-blue-600 uppercase">현재 도시</span>
+                        </div>
+                        <div class="text-center opacity-40">
+                            <span id="next-emoji" class="block text-xl mb-1">🏁</span>
+                            <span id="next-city" class="text-[10px] font-bold text-slate-400 uppercase">목표 도시</span>
+                        </div>
+                    </div>
+
+                    <!-- 실제 게이지 -->
+                    <div class="overflow-hidden h-4 mb-2 flex rounded-full bg-slate-100 border border-slate-200 p-0.5 shadow-inner">
+                        <div id="modal-progress" style="width:0%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-gradient-to-r from-blue-400 via-blue-600 to-indigo-700 rounded-full transition-all duration-1000 ease-out relative">
+                            <div class="absolute inset-0 bg-white/10 animate-pulse"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between text-[10px] text-slate-500 font-bold px-1">
+                        <span>0 KM</span>
+                        <span id="target-dist-label">GOAL</span>
+                    </div>
+                </div>
+
+                <!-- 다음 챌린지 상세 -->
+                <div class="mt-1 p-5 bg-gradient-to-br from-slate-50 to-white rounded-2xl border border-slate-100 shadow-sm">
+                    <div class="flex items-start gap-1">
+                        <div class="p-3 bg-blue-600 rounded-xl text-white shadow-lg shadow-blue-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Next Destination</p>
+                            <p id="next-challenge-text" class="text-[13px] text-slate-700 leading-relaxed font-bold">
+                                다음 도시까지 조금만 더 힘내세요!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-4 bg-slate-50 text-center">
+                <button onclick="closeModal()" class="w-full py-4 bg-slate-900 text-white font-black rounded-2xl hover:bg-slate-800 active:scale-[0.98] transition-all shadow-xl shadow-slate-200 flex items-center justify-center gap-2">
+                    확인하고 계속 달리기
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+<!-- Modals -->
+    <!-- Profile Edit Modal -->
+    <div id="profile-edit-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[250] hidden items-center justify-center p-4">
+        <div class="bg-white rounded-[2.5rem] w-full max-w-sm shadow-2xl overflow-hidden p-8">
+            <h2 class="text-2xl font-black italic text-gray-800 mb-6 flex items-center gap-2">
+                <i class="fa-solid fa-user-gear text-brand-500"></i> 로그인 닉네임/소속팀 수정
+            </h2>
+<div class="space-y-5">
+    <div>
+        <label class="text-[11px] text-gray-400 font-bold block mb-1.5 ml-1 uppercase tracking-tight">당근 닉네임 (고정)</label>
+        <div id="prof-actual-nick" class="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl text-sm font-bold text-gray-400"></div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3">
+        <div>
+            <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1 uppercase">현재 로그인 닉네임</label>
+            <div id="prof-current-log-nick" class="w-full bg-gray-50 border border-gray-100 p-3 rounded-2xl text-sm font-bold text-gray-400"></div>
+        </div>
+        <div>
+            <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1 uppercase">현재 소속팀</label>
+            <div id="prof-current-team"     class="w-full bg-gray-50 border border-gray-100 p-3 rounded-2xl text-sm font-bold text-gray-400"></div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3">
+        <div>
+            <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1 uppercase">변경할 로그인 닉네임</label>
+            <input type="text" id="prof-new-log-nick" 
+                   class="w-full bg-white border-2 border-brand-100 p-4 rounded-2xl text-sm font-bold outline-none focus:ring-2 ring-brand-400 shadow-sm transition-all" 
+                   placeholder="닉네임+숫자4자리 추천">
+        </div>
+        <div>
+            <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1 uppercase">변경할 소속팀</label>
+            <select id="prof-new-team" 
+                            class="w-full bg-white border-2 border-brand-100 p-4 rounded-2xl text-sm font-bold outline-none focus:ring-2 ring-brand-400 shadow-sm transition-all appearance-none cursor-pointer">
+                        <option value="" disabled selected>팀 선택</option>
+                        <option value="손기정">팀:손기정</option>
+                        <option value="황영조">팀:황영조</option>
+                        <option value="이봉주">팀:이봉주</option>
+                    </select>
+        </div>
+    </div>
+</div>
+            <div class="grid grid-cols-2 gap-3 mt-8">
+                <button id="btn-close-profile" class="bg-gray-100 text-gray-500 font-black py-4 rounded-2xl active:scale-95 transition-transform text-sm">취소</button>
+                <button id="btn-save-profile" class="bg-brand-500 text-white font-black py-4 rounded-2xl shadow-lg shadow-brand-200 active:scale-95 transition-transform text-sm">변경 내용 저장</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="stat-detail-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[250] hidden items-center justify-center p-4">
+        <div class="bg-white rounded-[2.5rem] w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="bg-gray-500 p-4 text-white relative">
+                <button id="close-stat-modal" class="absolute top-6 right-6 w-10 h-10 bg-black/10 rounded-full flex items-center justify-center hover:bg-black/20 transition-colors">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+                <div class="flex items-center gap-4 mb-2">
+                    <div id="modal-user-avatar" class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-3xl font-black italic">S</div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h2 id="modal-user-name" class="text-2xl font-black italic">Runner Name</h2>
+                            <div class="text-[9px] font-black px-3 py-1 rounded-lg text-white uppercase" id="display-team-badge">TEAM</div>          
+                            <div id="modal-runner-grade" class="text-[10px] font-black px-3 py-1.5 rounded-lg text-white uppercase"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="modal-stats-content" class="p-3 overflow-y-auto space-y-3 bg-gray-50">
+                <div id="lifetime-stats-container"></div>
+               <div class="modal-comparison-card">
+                    <div id="comparison-container" ></div>
+                </div>                
+            </div>
+        </div>
+    </div>
+
+
+    <div id="custom-modal" class="fixed inset-0 bg-black/50 z-[900] hidden items-center justify-center p-4">
+        <div class="bg-white rounded-[2rem] p-6 max-w-sm w-full shadow-2xl">
+            <h3 id="modal-title" class="text-base font-black text-gray-800 mb-2">알림</h3>
+            <p id="modal-message" class="text-sm text-gray-600 mb-6 font-bold">메시지 내용</p>
+            <div class="flex justify-end gap-2" id="modal-buttons"></div>
+        </div>
+    </div>
+
+    <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-full text-[11px] font-bold transition-opacity opacity-0 pointer-events-none z-[60] shadow-xl"></div>
+
+    <script type="module">
+        import { initializeApp } from "firebase/app";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signOut } from "firebase/auth";
+        import { getFirestore, collection, doc, onSnapshot, getDocs, addDoc, updateDoc, deleteDoc, serverTimestamp, query, where } from "firebase/firestore";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDIHVIGy54UX1wMQ0cTbYcBc3uOip-Nyl4",
+            authDomain: "project-accd2db4-b2ef-4370-b2c.firebaseapp.com",
+            databaseURL: "https://project-accd2db4-b2ef-4370-b2c-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "project-accd2db4-b2ef-4370-b2c",
+            storageBucket: "project-accd2db4-b2ef-4370-b2c.firebasestorage.app",
+            messagingSenderId: "914735491159",
+            appId: "1:914735491159:web:08fbc8ed6561d2c5899b12"
+        };
+        const appId = "CcMbXU1Vvpigo2jlnmJX";
+
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let userNickname = localStorage.getItem('songmirun_nickname') || '';
+        let isAdmin = false;
+        let allLogs = [];
+        let crewMembers = [];
+        let memberSearchTerm = '';
+        let selectedYear = new Date().getFullYear();
+        let selectedGender = '전체';
+        let selectedTeam = '전체';        
+        let selectedTarget = '전체'; 
+        let selectedType = '전체'; 
+        let selectedMonthF = '전체'; 
+        let selectedMonthT = '전체'; 
+        let myTeam = '무소속'; // 초기값 설정
+
+        let selectedRankingPeriod = 'this'; 
+        let sortConfig = { key: 'log_nickname', direction: 'asc' };
+
+        let distChart, paceChart, countChart, timeChart;
+
+        const showToast = (msg) => {
+            const t = document.getElementById('toast');
+            if(!t) return;
+            t.innerText = msg;
+            t.classList.remove('opacity-0');
+            setTimeout(() => t.classList.add('opacity-0'), 3000);
+        };
+
+        const showModal = (msg, type = 'alert', onConfirm = null) => {
+            const modal = document.getElementById('custom-modal');
+            document.getElementById('modal-message').innerText = msg;
+            const btnContainer = document.getElementById('modal-buttons');
+            btnContainer.innerHTML = '';
+            if (type === 'confirm') {
+                const cancelBtn = document.createElement('button');
+                cancelBtn.className = "px-4 py-2 text-xs font-bold text-gray-500 bg-gray-100 rounded-xl";
+                cancelBtn.innerText = "취소";
+                cancelBtn.onclick = () => { modal.classList.add('hidden'); modal.classList.remove('flex'); };
+                const confirmBtn = document.createElement('button');
+                confirmBtn.className = "px-4 py-2 text-xs font-bold text-white bg-red-500 rounded-xl";
+                confirmBtn.innerText = "확인";
+                confirmBtn.onclick = () => { modal.classList.add('hidden'); modal.classList.remove('flex'); if (onConfirm) onConfirm(); };
+                btnContainer.appendChild(cancelBtn);
+                btnContainer.appendChild(confirmBtn);
+            } else {
+                const okBtn = document.createElement('button');
+                okBtn.className = "px-4 py-2 text-xs font-bold text-white bg-brand-500 rounded-xl";
+                okBtn.innerText = "확인";
+                okBtn.onclick = () => { modal.classList.add('hidden'); modal.classList.remove('flex'); };
+                btnContainer.appendChild(okBtn);
+            }
+            modal.classList.remove('hidden'); modal.classList.add('flex');
+        };
+
+        const formatTimeHMS = (totalMinutes) => {
+            if (!totalMinutes || totalMinutes <= 0) return "0s";
+            const totalSeconds = Math.round(totalMinutes * 60);
+            const h = Math.floor(totalSeconds / 3600);
+            const m = Math.floor((totalSeconds % 3600) / 60);
+            const s = totalSeconds % 60;
+            
+            let parts = [];
+            if (h > 0) parts.push(`${h}h`);
+            if (m > 0 || h > 0) parts.push(`${m}m`);
+            parts.push(`${s}s`);
+            return parts.join(' ');
+        };
+
+        const minToHMS = (totalMinutes) => {
+            const totalSeconds = Math.round(totalMinutes * 60);
+            const h = Math.floor(totalSeconds / 3600);
+            const m = Math.floor((totalSeconds % 3600) / 60);
+            const s = totalSeconds % 60;
+            return { h, m, s };
+        };
+
+        const hmsToMin = (h, m, s) => {
+            return (Number(h || 0) * 60) + Number(m || 0) + (Number(s || 0) / 60);
+        };
+
+        window.setTargetFilter = (target) => {
+            selectedTarget = target;
+            ['target-all', 'target-me'].forEach(id => {
+                const el = document.getElementById(id);
+                const isActive = (id === 'target-all' && target === '전체') || (id === 'target-me' && target === '나');
+                el.classList.toggle('active', isActive);
+                el.classList.toggle('inactive', !isActive);
+            });
+            renderAllCharts();
+        };
+
+        window.setGenderFilter = (gender) => {
+            selectedGender = gender;
+            ['filter-all', 'filter-male', 'filter-female'].forEach(id => {
+                const el = document.getElementById(id);
+                const isActive = (id === 'filter-all' && gender === '전체') || (id === 'filter-male' && gender === '남성') || (id === 'filter-female' && gender === '여성');
+                el.classList.toggle('active', isActive);
+                el.classList.toggle('inactive', !isActive);
+            });
+            renderAllCharts();
+        };
+
+        window.setGenderFilter2 = (gender) => {
+            selectedGender = gender;
+            ['filter2-all', 'filter2-male', 'filter2-female'].forEach(id => {
+                const el = document.getElementById(id);
+                const isActive = (id === 'filter2-all' && gender === '전체') || (id === 'filter2-male' && gender === '남성') || (id === 'filter2-female' && gender === '여성');
+                el.classList.toggle('active', isActive);
+                el.classList.toggle('inactive', !isActive);
+            });
+            renderRankingLists();
+        };
+
+        window.setTeamFilter = (team) => {
+            selectedTeam = team;
+            ['filter-tall', 'filter-ts', 'filter-th', 'filter-tl'].forEach(id => {
+                const el = document.getElementById(id);
+                const isActive = (id === 'filter-tall' && team === '전체') || (id === 'filter-ts' && team === '손기정') || (id === 'filter-th' && team === '황영조')|| (id === 'filter-tl' && team === '이봉주');
+                el.classList.toggle('active', isActive);
+                el.classList.toggle('inactive', !isActive);
+            });
+            renderAllCharts();
+        };
+
+        window.setTeamFilter2 = (team) => {
+            selectedTeam = team;
+            ['filter2-tall', 'filter2-ts', 'filter2-th', 'filter2-tl'].forEach(id => {
+                const el = document.getElementById(id);
+                const isActive = (id === 'filter2-tall' && team === '전체') || (id === 'filter2-ts' && team === '손기정') || (id === 'filter2-th' && team === '황영조')|| (id === 'filter2-tl' && team === '이봉주');
+                el.classList.toggle('active', isActive);
+                el.classList.toggle('inactive', !isActive);
+            });
+            renderRankingLists();
+        };
+
+
+
+        const renderLogs = () => {
+            const list = document.getElementById('log-list');
+            const displayLogs = (isAdmin ? allLogs : allLogs.filter(l => l.userName === userNickname))
+                .filter(l => l.date && new Date(l.date).getFullYear() === parseInt(selectedYear))
+                .filter(l => {
+                    if (selectedMonthF === '전체') return true;
+                    // Date 객체의 getMonth()는 0~11을 반환하므로 +1 필요
+                    const logMonth = new Date(l.date).getMonth() + 1;
+                    return logMonth === parseInt(selectedMonthF);
+                })
+                .filter(l => selectedType === '전체' || (l.runType || '번개') === selectedType);
+
+            const sorted = [...displayLogs].sort((a, b) => {
+                const dateA = new Date(a.date);
+                const dateB = new Date(b.date);
+                return dateB - dateA; // 내림차순
+            })
+            .slice(0, isAdmin ? undefined : 35);
+
+            const lcountBadge = document.getElementById('log-count-badge');
+            if(lcountBadge) lcountBadge.innerText = `${sorted.length}건`;
+
+
+//onsole.log(`📊 조회된 데이터 건수: ${sorted.length}건`); // 콘솔 출력 추가
+
+            const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+            list.innerHTML = sorted.map(l => {
+                const hms = minToHMS(l.duration);
+                const timeStr = `${hms.h > 0 ? hms.h + ':' : ''}${hms.m.toString().padStart(2, '0')}:${hms.s.toString().padStart(2, '0')}`;
+                
+                const dist = Number(l.distance || 0);
+                const duration = Number(l.duration || 0);
+                let paceStr = "0'00\"";
+                if (dist > 0) {
+                    const pace = duration / dist;
+                    const mm = Math.floor(pace);
+                    const ss = Math.round((pace - mm) * 60);
+                    paceStr = `${mm}'${ss.toString().padStart(2, '0')}"`;
+                }
+                const dateObj = new Date(l.date);                
+                const dayIndex = dateObj.getDay(); 
+                const dayName = dayNames[dateObj.getDay()]; // 요일 인덱스 추출
+                let dayColorClass = 'text-gray-400'; // 기본 회색
+                if (dayIndex === 1) {
+                    dayColorClass = 'text-green-500 font-medium'; // 월요일: 파란색
+                } else if (dayIndex === 0 || dayIndex === 6) {
+                    dayColorClass = 'text-red-500 font-medium'; // 일요일, 토요일: 빨간색
+                }
+
+                const runTypeMap = {
+                    '오운완': { icon: '👟', label: '오운완' },
+                    '정규': { icon: '📅', label: '정규' },
+                    '번개': { icon: '⚡', label: '번개' },
+                    '대회': { icon: '🏅', label: '대회' }
+                };
+
+                const defaultType = { icon: '⚡', label: '번개' };
+                const typeInfo = runTypeMap[l.runType] || defaultType;
+
+                return `
+                <div class="bg-white p-3 rounded-2xl border border-brand-100 shadow-sm relative">
+                    <div class="flex justify-between items-center mb-1"> <span class="text-[9px] font-black ${dayColorClass} bg-gray-50 px-2 py-0 rounded-full leading-none flex items-center h-4"> ${l.date} (${dayName}) | ${typeInfo.icon} ${typeInfo.label}
+                        </span>
+                        <div class="flex gap-1"> <button onclick="window.editLog('${l.id}')" class="text-gray-300 hover:text-brand-500 p-0.5"> <i class="fa-solid fa-pen-to-square text-[10px]"></i> </button>
+                            <button onclick="window.deleteLog('${l.id}')" class="text-gray-300 hover:text-red-500 p-0.5"> <i class="fa-solid fa-trash-can text-[10px]"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1 mb-1">
+                        <div class="w-5 h-5 bg-brand-100 rounded-full flex items-center justify-center text-[8px] font-bold text-brand-600">${l.userName?.charAt(0) || '?'}</div>
+                        <button onclick="window.openUserStatModal('${l.userName}')" class="text-xs font-bold text-gray-700">
+                                ${l.userName}
+                            </button>
+                    </div>
+                    <div class="grid grid-cols-5 gap-1 text-center bg-brand-50/50 p-2 rounded-xl">
+                        <div><p class="text-[7px] text-gray-400 font-bold">Km</p><p class="text-[11px] font-black">${l.distance}</p></div>
+                        <div><p class="text-[7px] text-gray-400 font-bold">Time</p><p class="text-[11px] font-black">${timeStr}</p></div>
+                        <div><p class="text-[7px] text-emerald-600 font-bold">Pace</p><p class="text-[11px] font-black text-emerald-600">${paceStr}</p></div>
+                        <div><p class="text-[7px] text-gray-400 font-bold text-red-400">Bpm</p><p class="text-[11px] font-black text-red-500">${l.bpm}</p></div>
+                        <div><p class="text-[7px] text-gray-400 font-bold">Cad</p><p class="text-[11px] font-black text-brand-600">${l.cadence}</p></div>
+                    </div>
+                </div>
+            `;}).join('') || '<div class="p-10 text-center text-gray-300 text-xs font-bold">활동 기록이 없습니다.</div>';
+        };
+
+
+
+        window.setTypeFilter = (type) => {
+            selectedType = type;
+            ['type-all', 'type-j', 'type-b', 'type-d', 'type-o'].forEach(id => {
+                const el = document.getElementById(id);
+                const isActive = (id === 'type-all' && type === '전체') || (id === 'type-j' && type === '정규') || (id === 'type-b' && type === '번개') || (id === 'type-d' && type === '대회')|| (id === 'type-o' && type === '오운완');
+                el.classList.toggle('active', isActive);
+                el.classList.toggle('inactive', !isActive);
+            });
+            renderLogs();
+        };
+
+///////mo- start ==== 기록월
+        window.setMonthFilter = (month) => {
+            selectedMonthF = month;
+            const monthIds = ['month-all', ...Array.from({length: 12}, (_, i) => `month-${i + 1}`)];
+            monthIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                const isActive = (id === 'month-all' && month === '전체') || (id === `month-${month}`);
+                el.classList.toggle('active', isActive);
+                el.classList.toggle('inactive', !isActive);
+            });
+            renderLogs(); // 데이터 다시 그리기
+        };
+
+        const mo = document.getElementById('month-select');
+        const currentMonth = new Array().getMonth ? new Date().getMonth() + 1 : new Date().getMonth() + 1; // 현재 월 (1~12)
+
+        const smileys = ["😊", "✨", "🏃", "☀️", "🍀", "🌿", "🌊", "⛱️", "🍁", "🍂", "❄️", "🎄"]; // 월별 어울리는 아이콘 (선택사항)
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        for(let i=1; i<=12; i++) {
+            const o = document.createElement('option');
+            o.value = i;
+            // 현재 월과 i가 일치하면 기본 선택값으로 설정
+            if (i === currentMonth) {
+                o.selected = true;
+            }
+                        
+            const engName = monthNames[i-1];
+            const icon = smileys[i-1]; 
+            
+            //o.innerText = ` ${icon} ${i}월 - ${engName}`;
+            o.innerText = ` ${i}월 `;
+            mo.appendChild(o);
+        }
+        window.setMonthFilter(currentMonth);
+        mo.onchange = (e) => {
+            const val = e.target.value;
+            // 기존에 버튼 클릭 시 호출하던 함수를 그대로 연결합니다.
+            window.setMonthFilter(val === '전체' ? '전체' : Number(val));
+        };
+///////mo- end ==== 기록월
+
+        let currentUser = null;
+        let userData = { name: '', team: '' };
+        let allMembers = {}; // nickname: team 조인용 맵
+        let chartInstance = null;
+        let currentMetric = 'dist';
+        let dataScope = 'avg'; 
+        
+        window.updateUI_Team = () => {
+            const filtered = allLogs
+                    .filter(l => l.date && new Date(l.date).getFullYear() === parseInt(selectedYear))
+                    .filter(l => {
+                        if (selectedMonthT === '전체') return true;
+                        const logMonth = new Date(l.date).getMonth() + 1;
+                        return logMonth === parseInt(selectedMonthT);
+                    });
+
+            const genderMap = {};
+            const teamMap = {};
+            crewMembers.forEach(m => {
+                genderMap[m.nickname] = m.gender;
+                teamMap[m.nickname] = m.team;
+            });
+
+            const teams = {};
+            let myStats = { dist: 0, time: 0, count: 0 };
+
+            filtered.forEach(r => {
+                const teamName = crewMembers[r.userName] || '무소속';
+                if (!teams[teamName]) {
+                    teams[teamName] = { 
+                        name: teamName,
+                        dist: 0, 
+                        time: 0, 
+                        count: 0, 
+                        color: TEAM_COLORS[teamName] || '#94a3b8', 
+                        members: new Set() 
+                    };
+                }
+                teams[teamName].dist += r.distance;
+                teams[teamName].time += r.duration;
+                teams[teamName].count++;
+                teams[teamName].members.add(r.userName);
+
+                if (r.userName === userNickname) {
+                    myStats.dist += r.distance;
+                    myStats.time += r.duration;
+                    myStats.count++;
+                }
+            });
+
+
+            const myTeamName = crewMembers[userNickname] || myTeam;
+            const myTeamData = teams[myTeamName] || { dist: 0, time: 0, count: 0, members: new Set(), color: TEAM_COLORS[myTeamName] || '#94a3b8' };
+            
+            const list = document.getElementById('team-list');
+            if (list) {
+                list.innerHTML = '';
+                const sorted = Object.entries(teams).sort((a,b) => {
+                    const key = currentMetric === 'dist' ? 'dist' : (currentMetric === 'time' ? 'time' : 'count');
+                    return b[1][key] - a[1][key];
+                });
+
+                const maxKey = currentMetric === 'dist' ? 'dist' : (currentMetric === 'time' ? 'time' : 'count');
+                const maxVal = Math.max(...Object.values(teams).map(t => t[maxKey]), 1);
+
+               sorted.forEach(([name, data]) => {
+
+                const hms= minToHMS(data.time);
+                const timeStr = `${hms.h > 0 ? hms.h + ':' : ''}${hms.m.toString().padStart(2, '0')}:${hms.s.toString().padStart(2, '0')}`;
+
+                    list.innerHTML += 
+                    `
+                        <div class="space-y-1 bg-slate-50 p-1 rounded-xl"> 
+                            <div class="flex justify-between items-center bg-slate-50">
+                                <div class="flex items-center gap-1 bg-slate-50">
+                                    <div class="w-2 h-2 rounded-full" style="background-color: ${data.color}"></div>
+                                    <span class="text-[12px] font-black text-slate-800">팀:${name}</span>
+                                    <span class="text-[9px] font-bold text-slate-400">${data.members.size}인</span>
+                                </div>
+                                <div class="flex gap-1 bg-slate-50">
+                                    <span class="badge-stat ${currentMetric==='dist'?'highlight':''}">
+                                        ${data.dist.toFixed(1)}km
+                                    </span>
+                                    <span class="badge-stat ${currentMetric==='time'?'highlight':''}">
+                                        ${timeStr}
+                                    </span>
+                                    <span class="badge-stat ${currentMetric==='count'?'highlight':''}">
+                                        ${data.count}회
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="h-2.5 bg-slate/60 rounded-full overflow-hidden">
+                                <div class="h-full transition-all duration-1000 ease-out rounded-full bg-rose-50" 
+                                    style="width: ${(data[maxKey]/maxVal)*100}%; background-color: ${data.color}"></div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+
+            const genders = {};
+            filtered.forEach(r => {
+                const genderName = r.gender || genderMap[r.userName] || '기타';
+                if (!genders[genderName]) {
+                    genders[genderName] = { 
+                        name: genderName, 
+                        dist: 0, 
+                        time: 0, 
+                        count: 0,
+                        // 남성/여성에 따른 바 컬러 지정
+                        //color: genderName === '남성' ? '#3b82f6' : (genderName === '여성' ? '#ec4899' : '#94a3b8')
+                        color: genderName === '남성' ? '#6366f1' : (genderName === '여성' ? '#f43f5e' : '#fbbf24')                        
+                        , members: new Set()
+                    };
+                }
+                genders[genderName].dist += r.distance;
+                genders[genderName].time += r.duration;
+                genders[genderName].count++;
+                genders[genderName].members.add(r.userName);
+            });
+
+
+            const listGender = document.getElementById('team-list-gender');
+            if (listGender) {
+                listGender.innerHTML = '';
+                const sorted = Object.entries(genders).sort((a,b) => {
+                    const key = currentMetric === 'dist' ? 'dist' : (currentMetric === 'time' ? 'time' : 'count');
+                    return b[1][key] - a[1][key];
+                });
+
+                const maxKey = currentMetric === 'dist' ? 'dist' : (currentMetric === 'time' ? 'time' : 'count');
+                const maxVal = Math.max(...Object.values(genders).map(t => t[maxKey]), 1);
+
+               sorted.forEach(([name, data]) => {
+
+                const hms= minToHMS(data.time);
+                const timeStr = `${hms.h > 0 ? hms.h + ':' : ''}${hms.m.toString().padStart(2, '0')}:${hms.s.toString().padStart(2, '0')}`;
+
+                    listGender.innerHTML += 
+                    `
+                        <div class="space-y-1 bg-slate-50 p-1 rounded-xl"> 
+                            <div class="flex justify-between items-center bg-slate-50">
+                                <div class="flex items-center gap-1 bg-slate-50">
+                                    <div class="w-2 h-2 rounded-full" style="background-color: ${data.color}"></div>
+                                    <span class="text-[12px] font-black text-slate-800">팀:${name}</span>
+                                    <span class="text-[9px] font-bold text-slate-400">${data.members.size}인</span>
+                                </div>
+                                <div class="flex gap-1 bg-slate-50">
+                                    <span class="badge-stat ${currentMetric==='dist'?'highlight':''}">
+                                        ${data.dist.toFixed(1)}km
+                                    </span>
+                                    <span class="badge-stat ${currentMetric==='time'?'highlight':''}">
+                                        ${timeStr}
+                                    </span>
+                                    <span class="badge-stat ${currentMetric==='count'?'highlight':''}">
+                                        ${data.count}회
+                                    </span>
+                                </div>
+                            </div>
+
+                        </div>
+                    `;
+                    listGender.innerHTML += `
+                        <div class="space-y-1 bg-slate-50 p-1 rounded-xl"> 
+                            <div class="h-1.5 bg-slate-200/60 rounded-full overflow-hidden">
+                                <div class="h-full transition-all duration-1000 ease-out rounded-full" 
+                                    style="width: ${(data[maxKey] / maxVal) * 100}%; 
+                                            background: repeating-linear-gradient(45deg, rgba(255,255,255,0.2) 0px, rgba(255,255,255,0.2) 6px, transparent 6px, transparent 12px), 
+                                                        linear-gradient(90deg, ${data.color}, ${data.color});">
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                });
+            }
+
+
+            document.getElementById('card-dist-ratio').innerText = ((myStats.dist / (myTeamData.dist || 1)) * 100).toFixed(1) + '%';
+            document.getElementById('card-time-ratio').innerText = ((myStats.time / (myTeamData.time || 1)) * 100).toFixed(1) + '%';
+            document.getElementById('card-count-ratio').innerText = ((myStats.count / (myTeamData.count || 1)) * 100).toFixed(1) + '%';
+            
+            const myPaceSec = myStats.dist > 0 ? (myStats.time / myStats.dist) * 60 : 0;
+            document.getElementById('card-avg-pace').innerText = `${Math.floor(myPaceSec/60)}'${Math.floor(myPaceSec%60).toString().padStart(2,'0')}"`;
+
+            renderChart(teams, myStats);
+        };
+
+        const TEAM_COLORS = { 
+            '황영조': '#f87171', 
+            '손기정': '#3b82f6', 
+            '이봉주': '#22c55e', 
+            '무소속': '#94a3b8'     
+        };
+
+        window.setMonthFilterT = (month) => {
+            selectedMonthT = month;
+            const monthIds = ['month-all', ...Array.from({length: 12}, (_, i) => `month-${i + 1}`)];
+            monthIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                const isActive = (id === 'month-all' && month === '전체') || (id === `month-${month}`);
+                el.classList.toggle('active', isActive);
+                el.classList.toggle('inactive', !isActive);
+            });
+            updateUI_Team(); // 데이터 다시 그리기
+        };
+////////
+        // 1. 현재 월 계산
+        const currentMontht = new Date().getMonth() + 1;
+
+        // 2. 셀렉트 박스 엘리먼트 가져오기
+        const mot1 = document.getElementById('main-filter-month');
+        const mot2 = document.getElementById('main-filter-month2');
+
+        // 3. 옵션 생성 함수 (중복 방지)
+        function populateOptions(targetSelect) {
+            for(let i=1; i<=12; i++) {
+                const o = document.createElement('option');
+                o.value = i;
+                o.innerText = ` ${i}월 `;
+                if (i === currentMontht) o.selected = true;
+                targetSelect.appendChild(o);
+
+                //만약 페이지 로드 시점에 currentMontht가 아니라 "전체"를 기본값으로 보여주고 싶다면, 옵션 생성 부분의 
+                //if (i === currentMontht) o.selected = true; 부분을 
+                //삭제하고 mot1.value = '전체';를 마지막에 추가하시면 됩니다.
+
+            }
+        }
+
+        // 옵션 채우기
+        populateOptions(mot1);
+        populateOptions(mot2);
+
+        // 4. 동기화 및 필터 실행 함수
+        function syncAndFilter(val) {
+            const numericVal = val === '전체' ? '전체' : Number(val);
+            
+            // 두 박스의 값을 동일하게 맞춤
+            mot1.value = val;
+            mot2.value = val;
+            
+            // 실제 데이터 필터링 함수 호출
+            if (window.setMonthFilterT) {
+                window.setMonthFilterT(numericVal);
+            }
+        }
+
+        // 5. 이벤트 바인딩
+        mot1.onchange = (e) => {
+            syncAndFilter(e.target.value);
+            if (typeof syncAndRefresh === 'function') syncAndRefresh(); // HTML에 작성하신 함수 호출
+        };
+
+        mot2.onchange = (e) => {
+            syncAndFilter(e.target.value);
+            if (typeof syncAndRefresh === 'function') syncAndRefresh(); // HTML에 작성하신 함수 호출
+        };
+
+        // 초기화 시 현재 월로 필터 적용
+        window.setMonthFilterT(currentMontht);
+
+
+        window.setRankingPeriod = (period) => {
+            selectedRankingPeriod = period;
+            ['rank-period-this', 'rank-period-last'].forEach(id => {
+                const el = document.getElementById(id);
+                const isActive = (id === 'rank-period-this' && period === 'this') || (id === 'rank-period-last' && period === 'last');
+                el.classList.toggle('active', isActive);
+                el.classList.toggle('inactive', !isActive);
+            });
+            renderRankingLists();
+        };
+
+
+
+        const formatTime2 = (minutes) => {
+            const totalSec = Math.round(minutes * 60);
+            const h = Math.floor(totalSec / 3600);
+            const m = Math.floor((totalSec % 3600) / 60);
+            const s = totalSec % 60;
+            if (h > 0) return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            return `${m}:${s.toString().padStart(2, '0')}`;
+        };
+
+        function renderChart(teams, myStats) {
+            const canvas = document.getElementById('teamChart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            let labels = [];
+            let dataPoints = [];
+            let colors = [];
+
+            if (dataScope === 'me') {
+                labels = ['내 기록', '팀 평균'];
+                //const myTeamName = allMembers[userData.name] || userData.team;
+                const myTeamName = crewMembers[userNickname] || myTeam;
+                const td = teams[myTeamName] || { dist: 0, time: 0, count: 1, members: new Set([1]), color: TEAM_COLORS[myTeamName] || '#3b82f6' };
+                const mCount = td.members.size || 1;
+
+                if (currentMetric === 'dist') {
+                    dataPoints = [myStats.dist, td.dist / mCount];
+                } else if (currentMetric === 'time') {
+                    dataPoints = [myStats.time, td.time / mCount];
+                } else {
+                    dataPoints = [myStats.count, td.count / mCount];
+                }
+                colors = [td.color, '#e2e8f0'];
+            } else {
+                // 팀 객체의 키 순서대로 데이터를 추출하여 불일치 방지
+                const teamEntries = Object.values(teams);
+                //labels = teamEntries.map(t => t.name);
+                labels = teamEntries.map(t => `팀: ${t.name}`);
+
+                dataPoints = teamEntries.map(t => {
+                    const mCount = t.members.size || 1;
+                    const val = currentMetric === 'dist' ? t.dist : (currentMetric === 'time' ? t.time : t.count);
+                    return dataScope === 'avg' ? val / mCount : val;
+                });
+                colors = teamEntries.map(t => t.color);
+            }
+
+            // 차트 재생성
+            if (chartInstance) chartInstance.destroy();
+            chartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: dataPoints,
+                        backgroundColor: colors,
+                        borderWidth: 0,
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true,
+                                font: { size: 10, weight: 'bold' },
+                                padding: 15
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => {
+                                    let label = context.label || '';
+                                    let value = context.parsed;
+                                    let displayVal = value.toFixed(1);
+                                    if (currentMetric === 'time') displayVal = formatTime2(value);
+                                    else if (currentMetric === 'dist') displayVal += 'km';
+                                    else {
+                                        displayVal = value.toFixed(1) + '회';}
+                                    return `${label}: ${displayVal}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+
+
+        window.syncAndRefresh = () => updateUI_Team();
+
+
+
+
+        // 도시 데이터 (마라톤 성지 포함)
+        const DESTINATIONS = [
+            { name: "송도 (미추홀)", dist: 0, emoji: "👟" },
+            { name: "서울 (남산타워)", dist: 35, emoji: "🗼" }, // 매우 가까운 거리
+            { name: "평창 (동계올림픽)", dist: 180, emoji: "❄️" }, // 강원권
+            { name: "대전 (성심당)", dist: 160, emoji: "🥖" }, // 중부권
+            { name: "대구 (팔공산)", dist: 260, emoji: "🍎" }, // 영남권
+            { name: "광주 (무등산)", dist: 270, emoji: "🍉" }, // 호남권
+            { name: "부산 (해운대)", dist: 330, emoji: "🌊" }, // 남단
+            { name: "제주도 (한라산)", dist: 450, emoji: "🗿" }, // 섬 지역
+            { name: "상하이", dist: 800, emoji: "🏮" },
+            { name: "도쿄 (마라톤 성지)", dist: 1200, emoji: "🗼" },
+            { name: "홍콩", dist: 2000, emoji: "🏙️" },
+            { name: "방콕", dist: 3700, emoji: "🛕" },
+            { name: "싱가포르", dist: 4700, emoji: "🦁" },
+            { name: "시드니", dist: 8300, emoji: "🦘" },
+            { name: "베를린 (마라톤 성지)", dist: 8500, emoji: "🏰" },
+            { name: "모스크바", dist: 9300, emoji: "🇷🇺" },
+            { name: "런던 (마라톤 성지)", dist: 11000, emoji: "🎡" },
+            { name: "보스턴 (마라톤 성지)", dist: 11500, emoji: "🏛️" },
+            { name: "뉴욕 (마라톤 성지)", dist: 13000, emoji: "🗽" },
+            { name: "시카고 (마라톤 성지)", dist: 13500, emoji: "🏙️" },
+            { name: "상파울루 (지구반바퀴)", dist: 18000, emoji: "⚽" }
+        ];
+
+        window.renderChallengeModal = (title, distance) => {
+            const currentYearLogs = allLogs.filter(l => l.date && new Date(l.date).getFullYear() === parseInt(selectedYear));
+            const totalDist = currentYearLogs.reduce((sum, l) => sum + Number(l.distance || 0), 0);
+            const currentDist = parseFloat(totalDist);
+            if (isNaN(currentDist) || currentDist < 0) return;
+
+            const reached = [...DESTINATIONS].filter(d => d.dist <= currentDist).pop() || DESTINATIONS[0];
+            const next = DESTINATIONS.find(d => d.dist > currentDist) || DESTINATIONS[DESTINATIONS.length - 1];
+
+            document.getElementById('modal-title').innerText = selectedYear+'년 송미런 여정 경로';
+            document.getElementById('cur-val-inner').innerText = currentDist.toLocaleString();
+            
+            const routeText = `송도 → ${reached.name === '송도' ? '' : reached.name + ' → '}${next.name}`;
+            document.getElementById('route-text').innerText = reached.name === next.name ? `송도 → ... → ${reached.name} (완주!)` : routeText;
+            
+            document.getElementById('modal-summary').innerHTML = `현재 송도에서 <span class="text-slate-800 font-black">${reached.name}</span>까지 달렸습니다.`;
+            document.getElementById('reached-emoji').innerText = reached.emoji;
+            document.getElementById('next-emoji').innerText = next.emoji;
+            document.getElementById('prev-city').innerText = reached.name;
+            document.getElementById('next-city').innerText = next === reached ? "Final Destination" : next.name;
+
+            const progress = (next === reached) ? 100 : Math.min(100, (currentDist / next.dist) * 100);
+            document.getElementById('modal-progress').style.width = '0%';
+            setTimeout(() => {
+                document.getElementById('modal-progress').style.width = `${progress}%`;
+            }, 100);
+
+            document.getElementById('target-dist-label').innerText = `${next.dist.toLocaleString()} KM`;
+            
+            if (next === reached) {
+                document.getElementById('next-challenge-text').innerText = `대단합니다! 더 이상 갈 곳이 없을 정도로 멀리 오셨네요. 이제 당신은 세계적인 마라토너입니다.`;
+            } else {
+                const remain = (next.dist - currentDist).toFixed(1);
+                document.getElementById('next-challenge-text').innerHTML = `다음 목표 <span class="text-blue-600 font-black">${next.name}</span>까지 <span class="text-blue-600 font-black">${remain}km</span> 남았습니다.`;
+            }
+
+            document.getElementById('challenge-modal').classList.remove('hidden');
+            document.body.classList.add('modal-active');
+        };
+
+        
+        let globalYearlyStats = {};
+        window.closeModal = () => {
+            document.getElementById('challenge-modal').classList.add('hidden');
+            document.body.classList.remove('modal-active');
+        };
+
+        window.openStatsModal = () => {
+            if (!localStorage.getItem('songmirun_nickname')) return;
+            document.getElementById('stats-modal').classList.remove('hidden');
+            setTimeout(updateUI_Team, 100);
+        };
+
+        window.closeStatsModal = () => document.getElementById('stats-modal').classList.add('hidden');
+
+        window.setMetric = window.setMetric2 = (m) => {
+            currentMetric = m;
+            
+            const prefixes = ['btn-metric-', 'btn-metric2-'];
+            const types = ['dist', 'time', 'count'];
+
+            prefixes.forEach(prefix => {
+                types.forEach(type => {
+                    const btn = document.getElementById(`${prefix}${type}`);
+                    if (btn) {
+                        // 현재 선택된 타입(m)이면 active 추가, 아니면 제거
+                        btn.classList.toggle('active', type === m);
+                    }
+                });
+            });
+
+            updateUI_Team();
+        };
+
+
+        window.setDataScope = (s) => {
+            dataScope = s;
+            ['total', 'avg', 'me'].forEach(id => {
+                const b = document.getElementById(`scope-${id}`);
+                if(b) b.classList.toggle('active', id === s);
+            });
+            updateUI_Team();
+        };
+
+
+        const renderAllCharts = () => {
+            if (document.getElementById('section-stats').classList.contains('hidden')) return;
+            const distData = Array(12).fill(0);
+            const timeData = Array(12).fill(0);
+            const countData = Array(12).fill(0);
+            const paceRaw = Array(12).fill(null).map(() => ({ dist: 0, time: 0 }));
+            const genderMap = {};
+            const teamMap = {};
+
+            crewMembers.forEach(m => {
+                genderMap[m.nickname] = m.gender;
+                teamMap[m.nickname] = m.team;
+            });
+
+
+            const filteredLogs = allLogs.filter(l => {
+                const isCorrectYear = l.date && new Date(l.date).getFullYear() === parseInt(selectedYear);
+                const userGender = genderMap[l.userName] || '미지정';
+                const userTeam = teamMap[l.userName] || '미지정';
+                const isCorrectGender = selectedGender === '전체' || userGender === selectedGender;
+                const isCorrectTeam = selectedTeam === '전체' || userTeam === selectedTeam;
+                const isCorrectTarget = selectedTarget === '전체' || l.userName === userNickname;
+                return isCorrectYear && isCorrectGender && isCorrectTarget && isCorrectTeam;
+            });
+
+
+
+            filteredLogs.forEach(l => {
+                const hms= minToHMS(l.duration);
+                const timeStr = `${hms.h > 0 ? hms.h + ':' : ''}${hms.m.toString().padStart(2, '0')}:${hms.s.toString().padStart(2, '0')}`;
+                const m = new Date(l.date).getMonth();
+                distData[m] += Number(l.distance || 0);
+                timeData[m] += Number(l.duration || 0);
+                countData[m] += 1;
+                paceRaw[m].dist += Number(l.distance || 0);
+                paceRaw[m].time += Number(l.duration || 0);
+            });
+
+            const paceData = paceRaw.map(p => p.dist > 0 ? (p.time / p.dist).toFixed(2) : 0);
+            const labels = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+            const themeColor = selectedGender === '여성' ? '#f472b6' : (selectedGender === '남성' ? '#3b82f6' : '#22c55e');
+
+            const createChart = (id, type, label, data, color, options = {}) => {
+                const ctx = document.getElementById(id);
+                if (!ctx) return null;
+                return new Chart(ctx, {
+                    type,
+                    data: { labels, datasets: [{ label, data, backgroundColor: color, borderColor: color, ...options.dataset }] },
+                    options: { responsive: true, maintainAspectRatio: false, ...options.chart }
+                });
+            };
+
+            if (distChart) distChart.destroy();
+            distChart = createChart('monthlyDistChart', 'bar', 'Dist.(km)', distData, themeColor, { dataset: { borderRadius: 6 } });
+            
+            if (paceChart) paceChart.destroy();
+
+            // Rose 계통 색상 설정
+            const rosePrimary = '#f43f5e'; // rose-500
+            const roseLight = '#f43f5e33'; // rose-500 + 20% 투명도
+
+            paceChart = createChart('monthlyPaceChart', 'line', 'Pace (min/km)', paceData, rosePrimary, { 
+                dataset: { 
+                    fill: true, 
+                    backgroundColor: roseLight, 
+                    tension: 0.3, 
+                    pointRadius: 4 
+                },
+                chart: { 
+                    scales: { 
+                        y: { 
+                            reverse: true // 페이스 차트이므로 낮은 숫자(빠른 속도)가 상단에 위치
+                        } 
+                    } 
+                }
+            });
+
+            if (countChart) countChart.destroy();
+            countChart = createChart('monthlyCountChart', 'bar', 'Count', countData, '#8b5cf6', { dataset: { borderRadius: 6 } });
+
+            if (timeChart) timeChart.destroy();
+
+            timeChart = createChart('monthlyTimeChart', 'bar', 'Time', timeData, '#f97316', { 
+                dataset: { borderRadius: 6 },
+                chart: {
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                // 툴팁에 나타나는 숫자를 시분초로 변환
+                                label: function(context) {
+                                    const totalMin = context.parsed.y;
+                                    if (totalMin <= 0) return ' 00:00';
+                                    
+                                    const hms = minToHMS(totalMin);
+                                    const hPart = hms.h > 0 ? hms.h + ':' : '';
+                                    const mPart = hms.m.toString().padStart(2, '0');
+                                    const sPart = hms.s.toString().padStart(2, '0');
+                                    
+                                    return ` Hr: ${hPart}${mPart}:${sPart}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            ticks: {
+                                // Y축 눈금도 시분 단위로 변환 (선택 사항)
+                                callback: function(value) {
+                                    if (value === 0) return 0;
+                                    const h = Math.floor(value / 60);
+                                    const m = value % 60;
+                                    return h > 0 ? `${h}:${m}`:`${m}min`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        };
+
+        const renderRankingLists = () => {
+            const now = new Date();
+            let year = now.getFullYear();
+            let month = now.getMonth() + 1;
+            if (selectedRankingPeriod === 'last') {
+                month -= 1;
+                if (month === 0) { month = 12; year -= 1; }
+            }
+            const monthStr = month.toString().padStart(2, '0');
+            const prefix = `${year}-${monthStr}`;
+            const teamMap = {};
+            const genderMap = {};
+            
+            crewMembers.forEach(m => {
+                genderMap[m.nickname] = m.gender;
+                teamMap[m.nickname] = m.team;
+            });
+
+            const monthLogs = allLogs.filter(l => {
+                const isCorrectMonth = l.date && l.date.startsWith(prefix);
+                const userGender = genderMap[l.userName] || '미지정';
+                const userTeam = teamMap[l.userName] || '미지정';
+                const isCorrectTeam = selectedTeam === '전체' || userTeam === selectedTeam;
+                const isCorrectGender = selectedGender === '전체' || userGender === selectedGender;
+                return isCorrectMonth && isCorrectTeam && isCorrectGender;
+            });
+
+
+            const userAgg = {};
+            monthLogs.forEach(l => {
+                const name = l.userName;
+                if (!userAgg[name]) userAgg[name] = { distance: 0, duration: 0, count: 0 };
+                userAgg[name].distance += Number(l.distance || 0);
+                userAgg[name].duration += Number(l.duration || 0);
+                userAgg[name].count += 1;
+            });
+
+            const drawRankList = (elementId, data, unit, isTimeFormat = false) => {
+                const container = document.getElementById(elementId);
+                const sorted = data.slice(0, 5);
+                const maxVal = sorted.length > 0 ? Number(sorted[0].valRaw || sorted[0].val) : 1;
+
+                container.innerHTML = sorted.map((item, i) => {
+                    const isTop3 = i < 3;
+                    const medalClass = i === 0 ? 'medal-1' : i === 1 ? 'medal-2' : i === 2 ? 'medal-3' : 'text-gray-300';
+                    const progressWidth = (Number(item.valRaw || item.val) / maxVal) * 100;
+                    
+                    let displayValue = item.val;
+                    let displayUnit = unit;
+                    if (isTimeFormat) {
+                        displayValue = formatTimeHMS(item.valRaw || item.val);
+                        displayUnit = ""; 
+                    }
+
+                    return `
+                    <div class="rank-item ${item.name === userNickname ? 'bg-rose-50/50' : ''}">
+                        <div class="flex items-center justify-between relative z-10">
+                            <div class="flex items-center gap-1">
+                                <div class="w-7 h-7 flex items-center justify-center">
+                                    ${isTop3 ? `<i class="fa-solid fa-medal text-lg ${medalClass}"></i>` : `<span class="text-[11px] font-black text-gray-300">${i + 1}</span>`}
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-[8px] font-black text-gray-400">
+                                        ${item.name.charAt(0)}
+                                    </div>
+                                    <span class="text-xs font-bold ${item.name === userNickname ? 'text-brand-700' : 'text-gray-700'}">${item.name}</span>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs font-black italic ${isTop3 ? 'text-brand-600' : 'text-gray-500'}">${displayValue}<span class="text-[9px] font-bold ml-0.5 ml-1 not-italic">${displayUnit}</span></span>
+                            </div>
+                        </div>
+                        <div class="rank-progress" style="width: ${progressWidth}%"></div>
+                    </div>
+                    `;
+                }).join('') || '<div class="p-8 text-center text-gray-300 text-[10px] font-bold italic">기록이 없습니다.</div>';
+            };
+
+            const distRank = Object.entries(userAgg).map(([name, obj]) => ({ name, val: obj.distance.toFixed(3) })).sort((a,b) => b.val - a.val);
+            drawRankList('rank-dist-list', distRank, 'km');
+            
+            const timeRank = Object.entries(userAgg).map(([name, obj]) => ({ name, valRaw: obj.duration, val: obj.duration.toFixed(0) })).sort((a,b) => b.valRaw - a.valRaw);
+            drawRankList('rank-time-list', timeRank, '', true);
+            
+            const countRank = Object.entries(userAgg).map(([name, obj]) => ({ name, val: obj.count })).sort((a,b) => b.val - a.val);
+            drawRankList('rank-count-list', countRank, '회');
+            
+            const singleDistRank = monthLogs.map(l => ({ name: l.userName, val: Number(l.distance || 0).toFixed(3) })).sort((a,b) => b.val - a.val);
+            drawRankList('rank-single-dist-list', singleDistRank, 'km');
+            
+            const singleTimeRank = monthLogs.map(l => ({ name: l.userName, valRaw: Number(l.duration || 0), val: Number(l.duration || 0).toFixed(0) })).sort((a,b) => b.valRaw - a.valRaw);
+            drawRankList('rank-single-time-list', singleTimeRank, '', true);
+        };
+
+        const renderStats = () => {
+            const currentYearLogs = allLogs.filter(l => l.date && new Date(l.date).getFullYear() === parseInt(selectedYear));
+            const totalDist = currentYearLogs.reduce((sum, l) => sum + Number(l.distance || 0), 0);
+            const totalTime = currentYearLogs.reduce((sum, l) => sum + Number(l.duration || 0), 0);
+            const totalCount = currentYearLogs.length;
+
+            const myYearLogs = allLogs.filter(l => l.date 
+                && new Date(l.date).getFullYear() === parseInt(selectedYear) 
+                &&    l.userName === userNickname);
+
+            const myDist = myYearLogs.reduce((sum, l) => sum + Number(l.distance || 0), 0);
+            const myTime = myYearLogs.reduce((sum, l) => sum + Number(l.duration || 0), 0);
+            const myCount = myYearLogs.length;
+
+
+            document.getElementById('stat-dist').innerText = totalDist.toFixed(0).toLocaleString()+ ' km';
+            
+            const roundedTotalTime = Math.round(totalTime);
+            const days = Math.floor(roundedTotalTime / 1440);
+            const hours = Math.floor((roundedTotalTime % 1440) / 60);
+            const mins = roundedTotalTime % 60;
+
+            let timeHTML = '';
+            if (days > 0) timeHTML += `<strong>${days.toLocaleString()}d</strong> `;
+            if (hours > 0 || days > 0) timeHTML += `${hours}h `;
+            timeHTML += `${mins}m`;
+
+            const roundedTotalTimem = Math.round(myTime);
+            const daysm = Math.floor(roundedTotalTimem / 1440);
+            const hoursm = Math.floor((roundedTotalTimem % 1440) / 60);
+            const minsm = roundedTotalTimem % 60;
+
+            let timeHTMLm = '';
+            if (daysm > 0) timeHTMLm += `<strong>${daysm.toLocaleString()}d</strong> `;
+            if (hoursm > 0 || daysm > 0) timeHTMLm += `${hoursm}h `;
+            timeHTMLm += `${minsm}m`;
+
+            document.getElementById('stat-time').innerHTML = timeHTML;
+            document.getElementById('stat-count').innerText = totalCount.toLocaleString() + ' 회';
+
+            document.getElementById('stat-distm').innerText = myDist.toFixed(0).toLocaleString()+ ' km';
+            document.getElementById('stat-timem').innerHTML = timeHTMLm;
+            document.getElementById('stat-countm').innerText = myCount.toLocaleString() + ' 회';
+            
+            renderAllCharts();
+        };
+
+
+
+
+
+
+        window.toggleSort = (key) => {
+            if (sortConfig.key === key) { 
+                sortConfig.direction = sortConfig.direction === 'asc' ? 'desc' : 'asc'; 
+            } else { 
+                sortConfig.key = key; 
+                sortConfig.direction = 'asc'; 
+            }
+            renderMembers();
+        };
+
+        const getFilteredMembers = () => {
+           let filtered = crewMembers.filter(m => (m.nickname + (m.log_nickname || '') + m.gender+ m.team + m.joinDate).toLowerCase().includes(memberSearchTerm.toLowerCase()));
+             filtered.sort((a, b) => {
+                let vA = a[sortConfig.key] || '', vB = b[sortConfig.key] || '';
+                if (vA < vB) return sortConfig.direction === 'asc' ? -1 : 1;
+                if (vA > vB) return sortConfig.direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+            return filtered;
+        };
+
+        const renderMembers = () => {
+            const list = document.getElementById('member-list');
+            const filtered = getFilteredMembers();
+            const countBadge = document.getElementById('member-count-badge');
+            if(countBadge) countBadge.innerText = `${filtered.length}명`;
+            list.innerHTML = filtered.map((m, idx) => `
+                <tr class="hover:bg-brand-50/30 transition-colors border-b border-gray-50/50">
+                    <td class="px-3 py-0 text-[10px] font-bold text-gray-400 text-center leading-tight">${idx + 1}</td>
+                    <td class="px-3 py-0 text-[11px] font-bold text-blue-700 leading-tight">${m.log_nickname || '-'}</td>
+                    <td class="px-3 py-0 text-xs font-bold leading-tight">
+                        <button onclick="window.openUserStatModal('${m.nickname}')" class="text-brand-600 hover:underline text-left font-black p-0 m-0 block">
+                            ${m.nickname}
+                        </button>
+                    </td>
+                    <td class="px-3 py-0 text-[10px] font-bold ${m.team === '남성' ? 'text-blue-500' : 'text-pink-500'} leading-tight">${m.team}</td>
+                    <td class="px-3 py-0 text-[10px] font-bold ${m.gender === '남성' ? 'text-blue-500' : 'text-pink-500'} leading-tight">${m.gender}</td>
+                    <td class="px-3 py-0 text-[10px] text-gray-400 font-medium leading-tight">${m.joinDate}</td>
+                    <td class="px-3 py-0 text-[10px] text-brand-600 font-black italic leading-tight">${m.lastLogin || '-'}</td>
+                    <td class="px-3 py-0">
+                        <div class="flex gap-1 justify-end items-center h-full">
+                            <button onclick="window.editMember('${m.id}')" class="text-brand-400 p-0.5 hover:bg-brand-50 rounded"><i class="fa-solid fa-user-pen text-[10px]"></i></button>
+                            <button onclick="window.deleteMember('${m.id}')" class="text-red-300 p-0.5 hover:bg-red-50 rounded"><i class="fa-solid fa-user-minus text-[10px]"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('') || `<tr><td colspan="6" class="p-8 text-center text-gray-300 font-bold">검색 결과가 없습니다.</td></tr>`;
+        };
+
+        const closeUserStatModal = () => {
+            const modal = document.getElementById('stat-detail-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        };
+
+        const calculateRunnerGrade = (logs) => {
+            const now = new Date();
+            const currMonthStr = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
+            const monthLogs = logs.filter(l => l.date && l.date.startsWith(currMonthStr));
+            const count = monthLogs.length;
+            let scoreCount = 5;
+            if (count >= 20) scoreCount = 40;
+            else if (count >= 18) scoreCount = 35;
+            else if (count >= 16) scoreCount = 30;
+            else if (count >= 12) scoreCount = 25;
+            else if (count >= 8) scoreCount = 20;
+            else if (count >= 4) scoreCount = 15;
+            else if (count >= 2) scoreCount = 10;                
+            else if (count >= 1) scoreCount = 5;
+
+            const dist = monthLogs.reduce((sum, l) => sum + Number(l.distance || 0), 0);
+            let scoreDist = 5;
+            if (dist >= 200) scoreDist = 40;
+            else if (dist >= 150) scoreDist = 35;
+            else if (dist >= 100) scoreDist = 30;
+            else if (dist >= 50) scoreDist = 25;                
+            else if (dist >= 20) scoreDist = 20;
+            else if (dist >= 15) scoreDist = 15;
+            else if (dist >= 10) scoreDist = 10;
+            else if (dist >= 5) scoreDist = 5;
+
+            const weekActive = [false, false, false, false];
+            for(let i=0; i<4; i++) {
+                const start = new Date(now);
+                start.setDate(now.getDate() - (i + 1) * 7);
+                const end = new Date(now);
+                end.setDate(now.getDate() - i * 7);
+                const weeklyCount = logs.filter(l => { const d = new Date(l.date); return d >= start && d < end; }).length;
+                if(weeklyCount >= 2) weekActive[i] = true;
+            }
+            const activeWeeks = weekActive.filter(x => x).length;
+            let scoreBonus = 5;
+            if (activeWeeks === 4) scoreBonus = 20;
+            else if (activeWeeks === 3) scoreBonus = 15;
+            else if (activeWeeks === 2) scoreBonus = 10;
+
+            const totalScore = scoreCount + scoreDist + scoreBonus;
+            const thresholds = [
+                { threshold: 90, name: '🏵️ 만개', color: 'bg-slate-800 text-white' },
+                { threshold: 70, name: '🌺 열정', color: 'bg-orange-500 text-white' },
+                { threshold: 50, name: '🌼 활짝', color: 'bg-blue-500 text-white' },
+                { threshold: 30, name: '🌷 꽃봉', color: 'bg-green-500 text-white' },
+                { threshold: 0,  name: '🌱 새싹', color: 'bg-gray-100 px-3 rounded-lg text-gray-500' }
+            ];
+
+            const currentIdx = thresholds.findIndex(t => totalScore >= t.threshold);
+            let grade = { 
+                ...thresholds[currentIdx], 
+                details: { scoreCount, scoreDist, scoreBonus, totalScore } 
+            };
+            if (currentIdx > 0) { //
+                const next = thresholds[currentIdx - 1];
+                grade.nextGrade = {
+                    name: next.name,
+                    remaining: next.threshold - totalScore
+                };
+            } else {
+                grade.nextGrade = null;
+            }
+            return grade;
+        };
+
+        window.openUserStatModal = (nickname) => {
+            const modal = document.getElementById('stat-detail-modal');
+            const userLogs = allLogs.filter(l => l.userName === nickname);
+            
+            document.getElementById('modal-user-name').innerText = nickname;
+            document.getElementById('modal-user-avatar').innerText = nickname.charAt(0);
+            
+            const grade = calculateRunnerGrade(userLogs);
+            const gradeBadge = document.getElementById('modal-runner-grade');
+            
+            gradeBadge.innerText = grade.name;
+            gradeBadge.className = `runner-grade-badge ${grade.color} text-xs px-2 py-1 cursor-help`;
+            let tooltipText = `[상세 점수]\n` +
+                                `● 횟수점수: ${grade.details.scoreCount} / 거리점수: ${grade.details.scoreDist} / 연속점수: ${grade.details.scoreBonus}\n` +
+                                `● 총합점수: ${grade.details.totalScore}점\n` +
+                                `----------------\n`;
+                        if (grade.nextGrade) {
+                            tooltipText += `✨ 다음 등급 [${grade.nextGrade.name}]까지 ${grade.nextGrade.remaining}점 남았습니다!`;
+                        } else {
+                            tooltipText += `👑 축하합니다! 최고 등급인 ${grade.name}입니다.`;
+                        }
+            
+            gradeBadge.title = tooltipText;
+
+            const userRecord = crewMembers.find(m => m.nickname === nickname); // userName -> nickname
+            const myTeam2 = userRecord ? userRecord.team : '무소속2';
+            const badge = document.getElementById('display-team-badge');
+            if (badge) {
+                badge.innerText = '팀:'+myTeam2;
+                badge.style.backgroundColor = TEAM_COLORS[myTeam2] || '#94a3b8';
+            }
+
+            const calculate = (logs) => {
+                const count = logs.length;
+                const distance = logs.reduce((sum, l) => sum + Number(l.distance || 0), 0);
+                const duration = logs.reduce((sum, l) => sum + Number(l.duration || 0), 0);
+                const pace = distance > 0 ? (duration / distance) : 0;
+                const mm = Math.floor(pace), ss = Math.round((pace - mm) * 60);
+                return { count, distance: distance.toFixed(3), durationRaw: duration, durationHMS: formatTimeHMS(duration), pace: pace > 0 ? `${mm}'${ss.toString().padStart(2, '0')}"` : '0\'00"' };
+            };
+
+            const now = new Date();
+            const currYear = now.getFullYear();
+            const lastYear = currYear - 1;
+            const currMonthStr = `${currYear}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
+            let lastMonthDate = new Date();
+            lastMonthDate.setMonth(now.getMonth() - 1);
+            const lastMonthStr = `${lastMonthDate.getFullYear()}-${(lastMonthDate.getMonth() + 1).toString().padStart(2, '0')}`;
+
+            const genStatCol = (title, logs, theme) => {
+                const s = calculate(logs);
+                return `
+                    <div class="p-1 bg-white">
+                        <div class="flex items-center gap-1 mb-1">
+                            <span class="text-[20px] font-black text-gray-600">${title}</span>
+                        </div>
+                        <div class="space-y-2">
+                            <div>
+                                <p class="stat-grid-val text-emerald-600">${Number(s.distance).toFixed(0)}km</p>
+                            </div>
+                            <div>
+                                <p class="stat-grid-val text-orange-600 ">${s.durationHMS}</p>
+                            </div>
+                            <div>
+                                <p class="stat-grid-val text-purple-600">${s.count}회</p>
+                            </div>
+                            <div>
+                                <p class="stat-grid-val text-rose-600 font-bold">${s.pace}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            };
+
+            const lifetimeStats = calculate(userLogs);
+            document.getElementById('lifetime-stats-container').innerHTML = `
+                <div class="bg-white rounded-3xl p-5 border border-rose-100 shadow-sm">
+                    <h4 class="text-[11px] font-black text-brand-600 mb-4 flex items-center gap-2 uppercase tracking-tight">
+                        <i class="fa-solid fa-globe"></i> Lifetime Performance
+                    </h4>
+                    
+                    <div class="grid grid-cols-4 gap-3">
+
+                        
+                        <div class="text-center bg-gray-50 py-3 rounded-2xl">
+                            <p class="stat-grid-label">Dist</p>
+                            <p class="stat-grid-val text-emerald-500">${Number(lifetimeStats.distance).toFixed(0)}km</p>
+                        </div>
+                        
+                        <div class="text-center bg-gray-50 py-3 rounded-2xl">
+                            <p class="stat-grid-label">Time</p>
+                            <p class="stat-grid-val text-orange-500">${lifetimeStats.durationHMS}</p>
+                        </div>
+                        <div class="text-center bg-purple-50/50 py-3 rounded-2xl">
+                            <p class="stat-grid-label text-purple-600">Count</p>
+                            <p class="stat-grid-val text-purple-500">${lifetimeStats.count}</p>
+                        </div>
+                        <div class="text-center bg-gray-50 py-3 rounded-2xl">
+                            <p class="stat-grid-label">Avg Pace</p>
+                            <p class="stat-grid-val text-rose-500">${lifetimeStats.pace}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            const curMonthData = userLogs.filter(l => l.date && l.date.startsWith(currMonthStr));
+            const lastMonthData = userLogs.filter(l => l.date && l.date.startsWith(lastMonthStr));
+            const curYearData = userLogs.filter(l => l.date && l.date.startsWith(currYear.toString()));
+            const lastYearData = userLogs.filter(l => l.date && l.date.startsWith(lastYear.toString()));
+
+            const totalComparisonContent = `
+            <div class="bg-white rounded-3xl p-6 border border-brand-100 shadow-sm">
+                <h4 class="text-[11px] font-black text-brand-600 mb-5 flex items-center gap-2 uppercase tracking-tight">
+                    <i class="fa-solid fa-chart-line"></i> Activity Comparison
+                </h4>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-center border-collapse">
+                        <thead>
+                            <tr class="text-[10px] text-gray-400 uppercase tracking-widest border-b border-brand-50">
+                                <th class="pb-3 font-black text-rose-600">This Month</th>
+                                <th class="pb-3 font-black text-gray-400">Last Month</th>
+                                <th class="pb-3 border-l border-brand-50 font-black text-blue-600 pl-4">Year ${currYear}</th>
+                                <th class="pb-3 font-black text-gray-400">Year ${lastYear}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="py-3 text-emerald-500 ">
+                                    ${genStatCol('', curMonthData, 'blue')}
+                                </td>
+                                <td class="py-3 text-orange-500 opacity-80">
+                                    ${genStatCol('', lastMonthData, 'gray')}
+                                </td>
+                                <td class="py-3 text-purple-500 border-l border-brand-50 pl-4">
+                                    ${genStatCol('', curYearData, 'blue')}
+                                </td>
+                                <td class="py-3 text-rose-500 opacity-80">
+                                    ${genStatCol('', lastYearData, 'gray')}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            `;
+
+            document.getElementById('comparison-container').innerHTML = totalComparisonContent;
+
+            modal.classList.remove('hidden'); modal.classList.add('flex');
+        };
+
+
+        window.deleteLog = async (id) => {
+            showModal("기록을 삭제하시겠습니까?", "confirm", async () => {
+                try {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'songmirun_logs', id));
+
+                    document.getElementById('edit-id').value = '';
+                    document.getElementById('form-title').innerHTML = '<i class="fa-solid fa-fire-flame-curved text-brand-600 animate-pulse"></i> 새 러닝 기록 입력';
+
+                    const fields = ['in-dist', 'in-time-h', 'in-time-m', 'in-time-s', 'in-bpm', 'in-cadence', 'in-memo'];
+                    fields.forEach(fieldId => {
+                        const el = document.getElementById(fieldId);
+                        if (el) el.value = '';
+                    });
+                    showToast("기록이 ✨삭제되었습니다.");
+
+                } catch (error) {
+                    console.error("삭제 중 오류 발생:", error);
+                    showToast("삭제에 실패했습니다.");
+                }
+            });
+        };
+
+
+        window.editLog = (id) => {
+            const l = allLogs.find(x => x.id === id);
+            if (!l) return;
+
+            const setValueAndTrigger = (elementId, value) => {
+                const el = document.getElementById(elementId);
+                if (!el) return;
+                el.value = value ?? ''; // 값이 null/undefined일 경우 빈 문자열 처리
+                el.dispatchEvent(new Event('input', { bubbles: true }));
+            };
+
+            // 1. 기본 정보 설정
+            setValueAndTrigger('edit-id', id);
+            setValueAndTrigger('log-username', l.userName);
+            setValueAndTrigger('in-dist', l.distance);
+
+            // 2. 시간 정보 처리 (분 단위를 시/분/초로 변환)
+            const hms = minToHMS(l.duration);
+            setValueAndTrigger('in-time-h', hms.h || '');
+            setValueAndTrigger('in-time-m', hms.m);
+            setValueAndTrigger('in-time-s', hms.s);
+
+            // 3. 추가 운동 정보 설정
+            setValueAndTrigger('in-bpm', l.bpm);
+            setValueAndTrigger('in-cadence', l.cadence);
+            setValueAndTrigger('in-date', l.date);
+            setValueAndTrigger('run-type', l.runType);
+            setValueAndTrigger('in-memo', l.memo || '');
+
+            // 4. UI 상태 변경 (수정 모드 표시 및 탭 전환)
+            const formTitle = document.getElementById('form-title');
+            if (formTitle) {
+                formTitle.innerHTML = '<i class="fa-solid fa-pen text-brand-500"></i> 기록 수정';
+            }
+
+            document.getElementById('tab-logs')?.click();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+
+        window.deleteMember = async (id) => {
+            if (!auth.currentUser) return;
+            const m = crewMembers.find(x => x.id === id);
+            if(!m) return;
+
+            showModal(`${m.log_nickname} / ${m.nickname} \n\n크루 정보를 삭제하시겠습니까?`, "confirm", async () => {
+                try {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'songmirun_members', id));
+                    document.getElementById('mem-edit-id').value = '';
+                    ['mem-log-nickname', 'mem-nickname', 'mem-memo'].forEach(i => {
+                        const el = document.getElementById(i);
+                        if (el) el.value = '';
+                    });
+                    document.getElementById('mem-form-title').innerText = "개별 크루 등록";
+                    showToast(`${m.nickname} ✨해당 크루가 삭제되었습니다.`);
+                } 
+                catch (e) {
+                    console.error("삭제 오류:", e);
+                    showToast("삭제 중 오류가 발생했습니다.");
+                }
+            });
+        };
+
+        window.editMember = (id) => {
+            const m = crewMembers.find(x => x.id === id);
+            if(!m) return;
+            document.getElementById('mem-edit-id').value = id;
+            document.getElementById('mem-log-nickname').value = m.log_nickname || '';
+            document.getElementById('mem-nickname').value = m.nickname;
+            document.getElementById('mem-gender').value = m.gender;
+            document.getElementById('mem-team').value = m.team|| '무소속';
+            document.getElementById('mem-joindate').value = m.joinDate;
+            document.getElementById('mem-memo').value = m.memo || '';
+            document.getElementById('mem-form-title').innerText = "크루 정보 수정";
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        const setupListeners = () => {
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_logs'), (snap) => {
+                allLogs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderStats();  renderLogs(); renderRankingLists();updateUI_Team();
+            });
+
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_members'), (snap) => {
+                crewMembers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                snap.docs.forEach(d => { crewMembers[d.data().nickname] = d.data().team; });
+                myTeam = crewMembers[userNickname] || '무소속';
+                 renderMembers(); renderAllCharts();updateUI_Team();
+            });
+
+            document.getElementById('close-stat-modal').onclick = closeUserStatModal;
+            document.getElementById('stat-detail-modal').onclick = (e) => { if (e.target === document.getElementById('stat-detail-modal')) closeUserStatModal(); };
+            document.getElementById('member-search').addEventListener('input', (e) => { memberSearchTerm = e.target.value; renderMembers(); });
+            
+            // 프로필 수정 모달 관련
+            document.getElementById('display-nickname').onclick = () => {
+                const userObj = crewMembers.find(m => m.nickname === userNickname);
+                if(!userObj) return;
+                document.getElementById('prof-actual-nick').innerText = userNickname;
+                document.getElementById('prof-current-log-nick').innerText = userObj.log_nickname || '-';
+                document.getElementById('prof-current-team').innerText = userObj.team || '-';
+
+                document.getElementById('prof-new-log-nick').value = userObj.log_nickname || '';
+                document.getElementById('profile-edit-modal').classList.remove('hidden');
+                document.getElementById('profile-edit-modal').classList.add('flex');
+            };
+            document.getElementById('btn-close-profile').onclick = () => {
+                document.getElementById('profile-edit-modal').classList.add('hidden');
+                document.getElementById('profile-edit-modal').classList.remove('flex');
+            };
+
+            document.getElementById('btn-save-profile').onclick = async () => {
+                const newLogNick = document.getElementById('prof-new-log-nick').value.trim();
+                const newTeam = document.getElementById('prof-new-team').value; // 선택된 소속팀 값
+if (!newTeam) return showModal("소속팀을 선택하세요.", "alert");
+
+                if(!newLogNick) return showModal("변경할 로그인 닉네임을 입력하세요.", "alert");
+                const isDuplicate = crewMembers.some(m => 
+                    m.nickname !== userNickname && m.log_nickname === newLogNick
+                );
+                if (isDuplicate) {
+                        showModal(` [${newLogNick}] : 다른 로그인 닉네임을 추천합니다.\n\n (예-전화번호 뒷자리를 추가)`, "alert");
+                        document.getElementById('btn-close-profile').click(); 
+                        return; // 함수 종료
+                    }
+
+
+                const userObj = crewMembers.find(m => m.nickname === userNickname);
+                if(!userObj) return;
+                if (userObj.log_nickname === newLogNick && userObj.team === newTeam) {
+                        return document.getElementById('btn-close-profile').click();
+                    }               
+
+
+                try {
+                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'songmirun_members', userObj.id), { 
+                        log_nickname: newLogNick,
+                        team: newTeam // DB의 team 필드 업데이트
+                    });
+                    userObj.log_nickname = newLogNick;
+                    userObj.team = newTeam;
+                    showToast(`${newLogNick} ✨ 로그인닉네임/소속팀이 변경되었습니다.`);                    
+                    document.getElementById('btn-close-profile').click();
+                } catch(e) { 
+                    showToast("변경 실패"); 
+                }
+            };
+        };
+
+        const updateUI = () => {
+            const isLoggedIn = auth.currentUser && userNickname;
+            document.getElementById('login-screen').classList.toggle('hidden', isLoggedIn);
+            document.getElementById('main-content').classList.toggle('hidden', !isLoggedIn);
+
+            if (isLoggedIn) {
+
+                let myCurrentNickname = "";
+                let myCurrentTeam = "";
+
+                onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_members'), (snap) => {
+                    const members = {};
+                    snap.docs.forEach(d => {
+                            const data = d.data();
+                            members[data.nickname] = {
+                                team: data.team || '무소속',
+                                log_nickname: data.log_nickname,
+                                nickname: data.nickname
+                            };
+                        });
+
+                    const myInfo = members[userNickname];
+
+                    if (myInfo) {
+                        myCurrentNickname = myInfo.log_nickname || userNickname; // 로그인용 닉네임 (없으면 기본 닉네임)
+                        myCurrentTeam = myInfo.team; // 소속팀
+                    } else {
+                        myCurrentNickname = userNickname;
+                        myCurrentTeam = '무소속';
+                    }
+
+                    const myTeam2= myCurrentTeam;
+
+                    const teamBgColor2 = TEAM_COLORS[myTeam2] || '#94a3b8';
+
+                    document.getElementById('display-nickname2').innerHTML = `
+                        <div class="flex items-center gap-1">
+                            <span class="text-white text-[7px] font-black px-1 py-1 rounded-md shadow-sm whitespace-nowrap flex items-center h-fit"
+                                style="background-color: ${teamBgColor2};">
+                                팀:${myTeam2}
+                            </span>
+
+                            <button onclick="window.openUserStatModal('${userNickname}')" 
+                                    class="text-emerald-600 hover:text-emerald-700 hover:underline text-left font-black p-0 m-0 whitespace-nowrap leading-none transition-colors">
+                                ${userNickname}님, 입장!
+                            </button>
+
+
+                        </div>
+                    `;
+                    updateUI_Team();
+                });
+
+
+                isAdmin = userNickname.toLowerCase().startsWith('admin');
+                document.getElementById('tab-members').classList.toggle('hidden', !isAdmin);
+                document.getElementById('admin-badge').classList.toggle('hidden', !isAdmin);
+    
+                document.getElementById('username-field-container').classList.toggle('hidden', !isAdmin);
+                document.getElementById('log-username').value = isAdmin ? (document.getElementById('log-username').value || "Jake") : userNickname;
+
+            }
+        };
+
+        const init = async () => {
+            onAuthStateChanged(auth, (user) => { if (user) { const saved = localStorage.getItem('songmirun_nickname'); if (saved) { userNickname = saved; updateUI(); setupListeners(); } } else { updateUI(); } });
+            
+            document.getElementById('btn-login').onclick = async () => {
+                const nick = document.getElementById('login-nick').value.trim();
+                if(!nick) return;
+                document.getElementById('login-loader').classList.remove('hidden');
+                try {
+                    if(!auth.currentUser) await signInAnonymously(auth);
+                    const membersSnap = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_members'));
+                    const target = membersSnap.docs.find(d => { const data = d.data(); return (data.log_nickname === nick); });
+                    if(!nick.toLowerCase().startsWith('admin') && !target) return showModal("🥕송미런 크루가 아닙니다.\n\n ✨Jake 에게 문의하세요", "alert");
+                    const userFinalNickname = target ? target.data().nickname : nick;
+                    const userFinalNickname2 = target ? target.data().team : nick;
+                    
+                    if (target) await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'songmirun_members', target.id), { lastLogin: new Date().toISOString().split('T')[0] });
+                    localStorage.setItem('songmirun_nickname', userFinalNickname);
+                    userNickname = userFinalNickname; updateUI(); setupListeners();
+                    showToast(`${userFinalNickname}님 환영합니다! (팀:${userFinalNickname2})`);
+                } catch(e) { showModal("로그인 오류", "alert"); }
+                finally { document.getElementById('login-loader').classList.add('hidden'); }
+            };
+
+            document.getElementById('btn-logout').onclick = () => { showModal(`👟${userNickname}님, 러닝 가시려구요?  😊`, "confirm", async () => { localStorage.removeItem('songmirun_nickname'); await signOut(auth); location.reload(); }); };
+
+            const tabs = { 'tab-logs': 'section-logs', 'tab-ranking': 'section-ranking', 'tab-stats': 'section-stats', 'tab-members': 'section-members' };
+            Object.keys(tabs).forEach(id => {
+                document.getElementById(id).onclick = () => {
+                    Object.values(tabs).forEach(s => document.getElementById(s).classList.add('hidden'));
+                    document.getElementById(tabs[id]).classList.remove('hidden');
+                    Object.keys(tabs).forEach(t => {
+                        const el = document.getElementById(t);
+                        el.classList.toggle('active-tab', t === id);
+                        el.classList.toggle('border-brand-500', t === id);
+                        el.classList.toggle('text-brand-600', t === id);
+                        el.classList.toggle('text-gray-400', t !== id);
+                    });
+                    if(id === 'tab-stats') setTimeout(renderAllCharts, 150);
+                    if(id === 'tab-ranking') setTimeout(renderRankingLists, 50);
+                    if(id === 'tab-members') setTimeout(renderMembers, 50);
+                };
+            });
+
+            document.getElementById('btn-save-log').onclick = async () => {
+                const h = document.getElementById('in-time-h').value || 0;
+                const m = document.getElementById('in-time-m').value || 0;
+                const s = document.getElementById('in-time-s').value || 0;
+                const totalMin = hmsToMin(h, m, s);
+                const bpm = Number(document.getElementById('in-bpm').value);
+                const cadence = Number(document.getElementById('in-cadence').value);
+                const memo = Number(document.getElementById('in-memo').value);
+
+                const dist = Number(document.getElementById('in-dist').value);
+                const date = document.getElementById('in-date').value;
+                if(!date || dist <= 0 || totalMin <= 0) return showModal("💡필수 항목(날짜, 거리, 시간)을 입력해주세요✅", "alert");
+
+                const pace = totalMin / dist;
+                if (pace < 2.0) {
+                    return showModal("잠시만요! ⚡ 현재 페이스가 km당 2분 미만입니다. \n혹시 방금 오토바이를 타고 뛰셨나요? \n아니면 성함이 '어벤져스'인가요? \n\n기록을 다시 확인해 주세요 😊", "alert");
+                } 
+                if (pace < 3.0) {
+                    return showModal("세상에, 올림픽 금메달리스트급 기록이네요! \n🏅 이 속도로 뛰셨다면 당장 협회에 등록하셔야 합니다. \n\n다시 한번 확인해 보시겠어요? ✅", "alert");
+                }
+
+                if (pace > 20) {
+                    return showModal("러닝 시간을 잘 입력하셨나요? \n\n🐢 혹시 달리기 중에 깊은 명상에 빠지셨나요? \n아니면 달팽이와 경주 중이신가요?\n걷는 것보다 뒤로 구르는 게 더 빠를지도 몰라요 😊", "alert");
+                }
+                
+                if(bpm !== 0 && (bpm < 70 || bpm > 220)) return showModal("심박수는 0(미입력) 또는 70 ~ 220 사이로 입력해주세요.", "alert");
+                if(cadence !== 0 && (cadence < 100 || cadence > 250)) return showModal("케이던스는 0(미입력) 또는 100 ~ 250 사이로 입력해주세요.", "alert");
+
+                const data = { userName: isAdmin ? document.getElementById('log-username').value.trim() : userNickname, distance: Number(dist.toFixed(3)), duration: totalMin, bpm: bpm, cadence: cadence, memo: document.getElementById('in-memo').value, date: date, runType: document.getElementById('run-type').value, updatedAt: serverTimestamp() };
+                const eid = document.getElementById('edit-id').value;
+                try {
+                    const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_logs');
+                    if(eid) await updateDoc(doc(colRef, eid), data);
+                    else await addDoc(colRef, { ...data, createdAt: serverTimestamp() });
+                    ['in-dist','in-time-h','in-time-m','in-time-s','in-bpm','in-cadence','in-memo'].forEach(i => document.getElementById(i).value='');
+                    document.getElementById('edit-id').value = '';
+                    document.getElementById('form-title').innerHTML = '<i class="fa-solid fa-fire-flame-curved text-brand-600 animate-pulse"></i> 새 러닝 기록 입력';
+                    showToast("✨저장되었습니다.");
+                } catch(e) { showToast("저장 실패"); }
+            };
+
+            document.getElementById('btn-csv').onclick = () => {
+                const start = document.getElementById('export-start').value;
+                const end = document.getElementById('export-end').value;
+                if(!start || !end) return showModal("기간을 선택하세요.", "alert");
+                const filtered = allLogs.filter(l => (l.date >= start && l.date <= end) && (isAdmin || l.userName === userNickname)).sort((a,b) => new Date(a.date) - new Date(b.date));
+                if(filtered.length === 0) return showModal("내보낼 데이터가 없습니다.", "alert");
+                let csv = "\uFEFF날짜,이름,유형,거리(km),시간(분),심박(bpm),케이던스(spm),Memo\n";
+                filtered.forEach(l => { csv += `${l.date},${l.userName},${l.runType || '일반'},${l.distance},${l.duration.toFixed(2)},${l.bpm || 0},${l.cadence || 0},${l.memo ||'-'}\n`; });
+                const typeLabel = isAdmin ? "AllRecords" : "MyRecords";
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement("a");
+                link.setAttribute("href", URL.createObjectURL(blob));
+                link.setAttribute("download", `songmirun_${typeLabel}_${start}_${end}.csv`);
+                link.click();
+                showToast("러닝 기록을 다운로드했습니다.");                  
+            };
+
+            document.getElementById('btn-member-csv').onclick = () => {
+                const filtered = getFilteredMembers();
+                if(filtered.length === 0) return showModal("내보낼 크루가 없습니다.", "alert");
+                let csv = "\uFEFFNo,로그인닉,닉네임,팀,성별,가입일,최근접속일,메모\n";
+                filtered.forEach((m, idx) => { csv += `${idx + 1},${m.log_nickname || ''},${m.nickname},${m.team},${m.gender},${m.joinDate},${m.lastLogin || '-'},${(m.memo || '').replace(/,/g, ' ')}\n`; });
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement("a");
+                link.setAttribute("href", URL.createObjectURL(blob));
+                link.setAttribute("download", `songmirun_members_${new Date().toISOString().split('T')[0]}.csv`);
+                link.click();
+                showToast("크루 목록을 다운로드했습니다.");                
+            };
+            document.getElementById('mem-submit-btn').onclick = async () => {
+                const data = { log_nickname: document.getElementById('mem-log-nickname').value.trim(), nickname: document.getElementById('mem-nickname').value.trim(), gender: document.getElementById('mem-gender').value,  joinDate: document.getElementById('mem-joindate').value, memo: document.getElementById('mem-memo').value.trim(),team: document.getElementById('mem-team').value|| '무소속', updatedAt: serverTimestamp() };
+                if(!data.nickname) return showModal("닉네임을 입력하세요.", "alert");
+                const editId = document.getElementById('mem-edit-id').value;
+                try {
+                    const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_members');
+                    if(editId) await updateDoc(doc(colRef, editId), data);
+                    else await addDoc(colRef, data);
+                    document.getElementById('mem-edit-id').value = '';
+                    ['mem-log-nickname', 'mem-nickname', 'mem-memo'].forEach(i => document.getElementById(i).value='');
+                    document.getElementById('mem-form-title').innerText = "개별 크루 등록";
+                    //showToast("크루 정보 저장 완료");
+                    showToast(`${data.nickname} ✨크루 정보 저장 완료`);
+
+                } catch(e) { showToast("저장 실패"); }
+            };
+
+            document.getElementById('btn-bulk-import').onclick = async () => {
+                const raw = document.getElementById('bulk-members-input').value.trim();
+                if(!raw) return showModal("데이터를 입력하세요.", "alert");
+                const lines = raw.split('\n');
+                let count = 0;
+                const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_members');
+                for(let line of lines) {
+                    const p = line.split(',').map(x => x.trim());
+                    if(p.length >= 5) {
+                        try { await addDoc(colRef, { joinDate: p[0], log_nickname: p[1], nickname: p[2], team: p[3],gender: p[4], memo: '일괄 등록됨', updatedAt: serverTimestamp() }); count++; } catch(e) {}
+                    }
+                }
+                document.getElementById('bulk-members-input').value = '';
+                showModal(`${count}명 등록 완료`, "alert");
+            };
+
+            document.getElementById('btn-bulk-logs-import').onclick = async () => {
+                const raw = document.getElementById('bulk-logs-input').value.trim();
+                if(!raw) return showModal("데이터를 입력하세요.", "alert");
+                const lines = raw.split('\n');
+                let count = 0;
+                const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_logs');
+                for(let line of lines) {
+                    const p = line.split(',').map(x => x.trim());
+                    if(p.length >= 5) {
+                        try { await addDoc(colRef, { date: p[0], userName: p[1], runType: p[2] || '번개', distance: Number(p[3]), duration: Number(p[4]), bpm: Number(p[5] || 0), cadence: Number(p[6] || 0), createdAt: serverTimestamp(), updatedAt: serverTimestamp() }); count++; } catch(e) {}
+                    }
+                }
+                document.getElementById('bulk-logs-input').value = '';
+                showModal(`${count}건 등록 완료`, "alert");
+            };
+
+            const yr = document.getElementById('year-select');
+            const nowY = new Date().getFullYear();
+            for(let i=nowY; i>=nowY-2; i--) { const o = document.createElement('option'); o.value = i; o.innerText = i + '년'; yr.appendChild(o); }
+            yr.onchange = (e) => { selectedYear = e.target.value; renderStats(); renderLogs();updateUI_Team(); };  //selectedyear
+
+
+            const today = new Date().toLocaleDateString('en-CA'); 
+            document.getElementById('in-date').value = today;
+            document.getElementById('mem-joindate').value = today;        
+            document.getElementById('export-start').value = `${nowY}-01-01`;
+            document.getElementById('export-end').value = today;
+
+            const inDist = document.getElementById('in-dist');
+            const inTimeH = document.getElementById('in-time-h');
+            const inTimeM = document.getElementById('in-time-m');
+            const inTimeS = document.getElementById('in-time-s');
+            const paceDisplay = document.getElementById('pace-display');
+
+            function calculatePace() {
+                const dist = parseFloat(inDist.value) || 0;
+                const h = parseInt(inTimeH.value) || 0;
+                const m = parseInt(inTimeM.value) || 0;
+                const s = parseInt(inTimeS.value) || 0;
+
+                // 총 시간을 초 단위로 변환
+                const totalSeconds = (h * 3600) + (m * 60) + s;
+
+                // 유효성 검사: 거리와 시간이 모두 0보다 커야 함
+                if (dist > 0 && totalSeconds > 0) {
+                    // 1km당 소요되는 초(seconds) 계산
+                    const secondsPerKm = totalSeconds / dist;
+                    
+                    const paceMin = Math.floor(secondsPerKm / 60);
+                    const paceSec = Math.round(secondsPerKm % 60);
+
+                    // 시각적 출력 업데이트 (분'초" 형식)
+                    // 초가 60이 될 경우 처리 (round 때문)
+                    let finalMin = paceMin;
+                    let finalSec = paceSec;
+                    if (finalSec === 60) {
+                        finalMin += 1;
+                        finalSec = 0;
+                    }
+
+                    paceDisplay.innerText = `[Pace : ${finalMin}'${finalSec.toString().padStart(2, '0')}"]`;
+                    paceDisplay.classList.add('text-rose-200', 'font-mono', 'font-semibold', 'tracking-tighter');
+                    paceDisplay.classList.add('animate-pulse');
+                    setTimeout(() => {
+                        paceDisplay.classList.remove('animate-pulse');
+                    }, 6000);
+
+
+                    //showToast(`Pace : ${finalMin}'${finalSec.toString().padStart(2, '0')}"`);
+                } else {
+                    paceDisplay.innerText = "[Pace : 0'00\"]";
+                    paceDisplay.classList.add('text-white-300', 'font-mono', 'font-semibold', 'tracking-tighter');
+
+                }
+            }
+
+            [inDist, inTimeH, inTimeM, inTimeS].forEach(el => {
+                el.addEventListener('input', calculatePace);
+            });
+
+            document.getElementById('label-time0').addEventListener('click', function() {
+                document.getElementById('in-time-h').value = 0;
+                document.getElementById('in-time-m').value = 0;
+                document.getElementById('in-time-s').value = 0;
+            });
+
+            document.addEventListener('DOMContentLoaded', () => {
+
+                const updateAndDispatch = (inputEl, newValue, decimal) => {
+                    if (!inputEl) return;
+
+                    inputEl.value = newValue.toFixed(decimal);
+
+                    inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+
+ 
+                    inputEl.classList.add('border-emerald-500');
+                    setTimeout(() => inputEl.classList.remove('border-emerald-500'), 200);
+                };
+
+                const distInput = document.getElementById('in-dist');
+                const distMap = {
+                    'label-dist0':  { type: 'set', val: 0.000 },                    
+                    'label-dist1':  { type: 'add', val: 1 },
+                    'label-dist2':  { type: 'add', val: 2 },
+                    'label-dist5':  { type: 'set', val: 5.000 },
+                    'label-dist10': { type: 'set', val: 10.000 },
+                    'label-dist21': { type: 'set', val: 21.097 },
+                    'label-dist42': { type: 'set', val: 42.195 }
+                };
+
+                Object.entries(distMap).forEach(([id, config]) => {
+                    document.getElementById(id)?.addEventListener('click', () => {
+                        const current = parseFloat(distInput.value) || 0;
+                        const targetVal = config.type === 'add' ? current + config.val : config.val;
+                        updateAndDispatch(distInput, targetVal, 3);
+                    });
+                });
+
+                const timeConfigs = [
+                    { id: 'label-timeH', targetId: 'in-time-h', increment: 1 },
+                    { id: 'label-timeM', targetId: 'in-time-m', increment: 10 },
+                    { id: 'label-timeS', targetId: 'in-time-s', increment: 10 }
+                ];
+
+                timeConfigs.forEach(({ id, targetId, increment }) => {
+                    const btn = document.getElementById(id);
+                    const input = document.getElementById(targetId);
+
+                    btn?.addEventListener('click', () => {
+                        const current = parseFloat(input.value) || 0;
+                        updateAndDispatch(input, current + increment, 0);
+                    });
+                });
+            });
+
+
+
+        };
+        init();
+    </script>
+</body>
+</html>
