@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -3074,37 +3075,30 @@
                 };
             });
 
-            document.getElementById('btn-save-log').onclick = async () => {
-                const h = document.getElementById('in-time-h').value || 0;
-                const m = document.getElementById('in-time-m').value || 0;
-                const s = document.getElementById('in-time-s').value || 0;
-                const totalMin = hmsToMin(h, m, s);
-                const bpm = Number(document.getElementById('in-bpm').value);
-                const cadence = Number(document.getElementById('in-cadence').value);
-                const memo = Number(document.getElementById('in-memo').value);
+        document.getElementById('btn-save-log').onclick = async () => {
+            const h = document.getElementById('in-time-h').value || 0;
+            const m = document.getElementById('in-time-m').value || 0;
+            const s = document.getElementById('in-time-s').value || 0;
+            const totalMin = hmsToMin(h, m, s);
+            const bpm = Number(document.getElementById('in-bpm').value);
+            const cadence = Number(document.getElementById('in-cadence').value);
+            const dist = Number(document.getElementById('in-dist').value);
+            const date = document.getElementById('in-date').value;
+            const eid = document.getElementById('edit-id').value; // 수정 모드 여부
 
-                const dist = Number(document.getElementById('in-dist').value);
-                const date = document.getElementById('in-date').value;
-                if(!date || dist <= 0 || totalMin <= 0) return showModal("💡필수 항목(날짜, 거리, 시간)을 입력해주세요✅", "alert");
+            // 유효성 검사
+            if(!date || dist <= 0 || totalMin <= 0) return showModal("💡필수 항목(날짜, 거리, 시간)을 입력해주세요✅", "alert");
 
-                const pace = totalMin / dist;
-                if (pace < 2.0) {
-                    return showModal("잠시만요! ⚡ 현재 페이스가 km당 2분 미만입니다. \n혹시 방금 오토바이를 타고 뛰셨나요? \n아니면 성함이 '어벤져스'인가요? \n\n기록을 다시 확인해 주세요 😊", "alert");
-                } 
-                if (pace < 3.0) {
-                    return showModal("세상에, 올림픽 금메달리스트급 기록이네요! \n🏅 이 속도로 뛰셨다면 당장 협회에 등록하셔야 합니다. \n\n다시 한번 확인해 보시겠어요? ✅", "alert");
-                }
+            const pace = totalMin / dist;
+            if (pace < 2.0) return showModal("잠시만요! ⚡ 페이스가 너무 빠릅니다. 기록을 확인해주세요.", "alert");
+            if (pace > 20) return showModal("러닝 시간을 잘 입력하셨나요? 🐢", "alert");
+            
+            if(bpm !== 0 && (bpm < 70 || bpm > 220)) return showModal("심박수 범위를 확인해주세요.", "alert");
+            if(cadence !== 0 && (cadence < 100 || cadence > 250)) return showModal("케이던스 범위를 확인해주세요.", "alert");
 
-                if (pace > 20) {
-                    return showModal("러닝 시간을 잘 입력하셨나요? \n\n🐢 혹시 달리기 중에 깊은 명상에 빠지셨나요? \n아니면 달팽이와 경주 중이신가요?\n걷는 것보다 뒤로 구르는 게 더 빠를지도 몰라요 😊", "alert");
-                }
-                
-                if(bpm !== 0 && (bpm < 70 || bpm > 220)) return showModal("심박수는 0(미입력) 또는 70 ~ 220 사이로 입력해주세요.", "alert");
-                if(cadence !== 0 && (cadence < 100 || cadence > 250)) return showModal("케이던스는 0(미입력) 또는 100 ~ 250 사이로 입력해주세요.", "alert");
-                const eid = document.getElementById('edit-id').value;
-
+            try {
                 // 1. 데이터 객체 구성
-                const data = {
+                const saveData = {
                     user_name: isAdmin 
                         ? document.getElementById('log-username').value.trim() 
                         : userNickname,
@@ -3115,55 +3109,44 @@
                     memo: document.getElementById('in-memo').value,
                     run_date: date,
                     run_type: document.getElementById('run-type').value,
-                    // Firestore의 serverTimestamp() 대신 ISO 8601 형식을 사용합니다.
-                    updated_at: new Date().toISOString() 
+                    updated_at: new Date().toISOString()
                 };
 
-                // 2. Supabase 저장 실행 (이전 단계의 upsert 로직과 결합)
-                const { error } = await _supabase
-                    .from('songmirun_logs')
-                    .upsert(eid ? { log_id: eid, ...data } : data);
-                try {
-                    const TABLE_NAME = 'songmirun_logs';
-                    
-                    // 1. 저장할 데이터 준비
-                    const saveData = {
-                        ...data,
-                        // 수정 시에는 기존 생성일 유지, 새 등록 시에는 현재 시간 기록
-                        created_at: eid ? data.created_at : new Date().toISOString()
-                    };
-
-                    // 2. 만약 수정(eid 존재)이라면 id를 데이터에 포함
-                    if (eid) saveData.log_id = eid;
-
-                    // 3. Supabase upsert 실행 (id가 있으면 update, 없으면 insert)
-                    const { error } = await _supabase
-                        .from(TABLE_NAME)
-                        .upsert(saveData);
-
-                    if (error) throw error;
-
-                    // 4. 입력 폼 초기화 (배열 활용)
-                    ['in-dist', 'in-time-h', 'in-time-m', 'in-time-s', 'in-bpm', 'in-cadence', 'in-memo'].forEach(i => {
-                        const el = document.getElementById(i);
-                        if (el) el.value = '';
-                    });
-
-                    // 5. 편집 상태 초기화 및 UI 복구
-                    document.getElementById('edit-id').value = '';
-                    document.getElementById('form-title').innerHTML = `
-                        <i class="fa-solid fa-fire-flame-curved text-brand-600 animate-pulse"></i> 새 러닝 기록 입력
-                    `;
-                    if (typeof syncLogs === 'function') await syncLogs();
-                    showToast("✨ 저장되었습니다.");
-
-                } catch (e) {
-                    console.error("Save Error:", e.message);
-                    showToast("저장 실패: " + (e.message || "권한이 없습니다."));
+                // 2. 수정 모드일 경우 처리
+                if (eid) {
+                    saveData.log_id = eid;
+                    // 만약 기존 생성일(created_at)을 유지해야 한다면 여기에 추가 로직 필요
+                } else {
+                    saveData.created_at = new Date().toISOString();
                 }
 
+                // 3. Supabase 저장 실행 (단 한 번만 실행!)
+                const { error } = await _supabase
+                    .from('songmirun_logs')
+                    .upsert(saveData);
 
-            };
+                if (error) throw error;
+
+                // 4. 입력 폼 초기화
+                ['in-dist', 'in-time-h', 'in-time-m', 'in-time-s', 'in-bpm', 'in-cadence', 'in-memo'].forEach(i => {
+                    const el = document.getElementById(i);
+                    if (el) el.value = '';
+                });
+
+                // 5. UI 복구
+                document.getElementById('edit-id').value = '';
+                document.getElementById('form-title').innerHTML = `
+                    <i class="fa-solid fa-fire-flame-curved text-brand-600 animate-pulse"></i> 새 러닝 기록 입력
+                `;
+                
+                if (typeof syncLogs === 'function') await syncLogs();
+                showToast("✨ 저장되었습니다.");
+
+            } catch (e) {
+                console.error("Save Error:", e.message);
+                showToast("저장 실패: " + (e.message || "권한이 없습니다."));
+            }
+        };
 
             document.getElementById('btn-logs-csv').onclick = () => {
                 const start = document.getElementById('export-start').value;
