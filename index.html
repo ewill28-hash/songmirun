@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -443,7 +444,7 @@
                                 Challenges</h2>
                         </div>
                         <button onclick="openStatsModal()" 
-                                class="text-[11px] font-bold bg-sky-400 text-white px-4 py-2 rounded-xl transition-all hover:bg-sky-600 hover:shadow-md active:scale-95 flex items-center gap-2">
+                                class="text-[11px] font-bold bg-rose-400 text-white px-4 py-2 rounded-xl transition-all hover:bg-rose-600 hover:shadow-md active:scale-95 flex items-center gap-2">
                             <i class="fas fa-chart-line"></i> 상세 분석
                         </button>
                     </div>
@@ -486,7 +487,7 @@
 
                     <div class="mt-4 mb-2 px-2 flex items-center justify-between">
                         <h1 class="text-gray-600 font-black text-xs tracking-tighter flex items-center gap-1 uppercase">
-                            <i class="fa-solid fa-venus-mars text-emerald-500 text-[10px]"></i>
+                            <i class="fa-solid fa-venus-mars text-rose-500 text-[10px]"></i>
                             GENDER Challenges
                         </h1>
                     </div>
@@ -1534,7 +1535,7 @@
 
             // 4. 리스트 실행
             renderList('team-list', teams, "팀");
-            renderList('team-list-gender', genders, "성별");
+            renderList('team-list-gender', genders, "-");
 
             // 5. 상단 카드 및 요약 정보 업데이트
             const myTeamName = crewMembers[userNickname]?.team || myTeam;
@@ -2933,11 +2934,40 @@
             });
 
             const autoLoginNick = localStorage.getItem('songmirun_nickname');
-                if (autoLoginNick) {
-                    userNickname = autoLoginNick;
-                    updateUI();
-                    setupListeners(); // 여기서 즉시 데이터를 불러오기 시작함
+
+            if (autoLoginNick) {
+                try {
+                    // 1. 닉네임으로 사용자 정보(id) 조회
+                    const { data: member, error: selectError } = await _supabase
+                        .from('songmirun_members')
+                        .select('id')
+                        .eq('nickname', autoLoginNick)
+                        .single(); // 한 명의 데이터만 가져옴
+
+                    if (selectError) throw selectError;
+
+                    if (member) {
+                        // 2. 해당 사용자의 updated_at 갱신
+                        const { error: updateError } = await _supabase
+                            .from('songmirun_members')
+                            .update({ 
+                                updated_at: new Date().toISOString() // 날짜+시간 전체를 저장하는 것을 추천
+                            })
+                            .eq('id', member.id);
+
+                        if (updateError) throw updateError;
+
+                        // 3. UI 업데이트 및 데이터 리스너 설정
+                        userNickname = autoLoginNick;
+                        updateUI();
+                        setupListeners();
+                        console.log(`${userNickname}님, 자동 로그인 및 접속 시간이 갱신되었습니다.`);
+                    }
+                } catch (error) {
+                    console.error("자동 로그인 처리 중 오류 발생:", error.message);
+                    // 오류 발생 시 로컬스토리지 정화 등 후속 처리 가능
                 }
+            }
                 
             document.getElementById('btn-login').onclick = async () => {
                 const nick = document.getElementById('login-nick').value.trim();
