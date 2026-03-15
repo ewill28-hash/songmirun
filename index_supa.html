@@ -1292,87 +1292,92 @@
 
         const renderLogs = () => {
             const list = document.getElementById('log-list');
+            if (!list) return;
 
-            const displayLogs = (isAdmin ? allLogs : allLogs.filter(l => l.user_name === userNickname))
-                .filter(l => l.run_date && new Date(l.run_date).getFullYear() === parseInt(selectedYear))
-                .filter(l => {
-                    if (selectedMonthF === '전체') return true;
-                    // Date 객체의 getMonth()는 0~11을 반환하므로 +1 필요
-                    const logMonth = new Date(l.run_date).getMonth() + 1;
-                    return logMonth === parseInt(selectedMonthF);
-                })
-                .filter(l => selectedType === '전체' || (l.run_type || '번개') === selectedType);
+            // 1. 데이터 필터링 로직 (조건별 가독성 향상)
+            const filteredLogs = allLogs.filter(log => {
+                const isUserMatch = isAdmin || log.user_name === userNickname;
+                if (!isUserMatch || !log.run_date) return false;
 
-            const sorted = [...displayLogs].sort((a, b) => {
-                const dateA = new Date(a.create_at);
-                const dateB = new Date(b.create_at);
-                return dateB - dateA; // 내림차순
-            })
-            .slice(0, isAdmin ? undefined : 35);
+                const dateObj = new Date(log.run_date);
+                const isYearMatch = dateObj.getFullYear() === parseInt(selectedYear);
+                const isMonthMatch = selectedMonthF === '전체' || (dateObj.getMonth() + 1) === parseInt(selectedMonthF);
+                const isTypeMatch = selectedType === '전체' || (log.run_type || '번개') === selectedType;
 
+                return isYearMatch && isMonthMatch && isTypeMatch;
+            });
+
+            // 2. 정렬 및 개수 제한
+            const sortedLogs = filteredLogs
+                .sort((a, b) => new Date(b.created_at || b.run_date) - new Date(a.created_at || a.run_date))
+                .slice(0, isAdmin ? undefined : 35);
+
+            // 3. 배지 업데이트
             const lcountBadge = document.getElementById('log-count-badge');
-            if(lcountBadge) lcountBadge.innerText = `${sorted.length}건`;
+            if (lcountBadge) lcountBadge.innerText = `${sortedLogs.length}건`;
 
+            // 4. 상수 정의 (루프 밖으로 이동)
             const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
-            list.innerHTML = sorted.map(l => {
+            const runTypeMap = {
+                '오운완': { icon: '👟', label: '오운완' },
+                '정규': { icon: '📅', label: '정규' },
+                '번개': { icon: '⚡', label: '번개' },
+                '대회': { icon: '🏅', label: '대회' }
+            };
+
+            // 5. HTML 렌더링
+            list.innerHTML = sortedLogs.map(l => {
+                // 시간 및 페이스 계산 (도우미 함수 활용 권장)
                 const hms = minToHMS(l.duration);
-                const timeStr = `${hms.h > 0 ? hms.h + ':' : ''}${hms.m.toString().padStart(2, '0')}:${hms.s.toString().padStart(2, '0')}`;
+                const timeStr = `${hms.h > 0 ? hms.h + ':' : ''}${String(hms.m).padStart(2, '0')}:${String(hms.s).padStart(2, '0')}`;
                 
-                const dist = Number(l.distance || 0);
-                const duration = Number(l.duration || 0);
                 let paceStr = "0'00\"";
-                if (dist > 0) {
-                    const pace = duration / dist;
-                    const mm = Math.floor(pace);
-                    const ss = Math.round((pace - mm) * 60);
-                    paceStr = `${mm}'${ss.toString().padStart(2, '0')}"`;
-                }
-                const dateObj = new Date(l.run_date);                
-                const dayIndex = dateObj.getDay(); 
-                const dayName = dayNames[dateObj.getDay()]; // 요일 인덱스 추출
-                let dayColorClass = 'text-gray-400'; // 기본 회색
-                if (dayIndex === 1) {
-                    dayColorClass = 'text-green-500 font-medium'; // 월요일: 파란색
-                } else if (dayIndex === 0 || dayIndex === 6) {
-                    dayColorClass = 'text-red-500 font-medium'; // 일요일, 토요일: 빨간색
+                if (l.distance > 0) {
+                    const pace = l.duration / l.distance;
+                    paceStr = `${Math.floor(pace)}'${String(Math.round((pace % 1) * 60)).padStart(2, '0')}"`;
                 }
 
-                const runTypeMap = {
-                    '오운완': { icon: '👟', label: '오운완' },
-                    '정규': { icon: '📅', label: '정규' },
-                    '번개': { icon: '⚡', label: '번개' },
-                    '대회': { icon: '🏅', label: '대회' }
-                };
+                const dateObj = new Date(l.run_date);
+                const dayIndex = dateObj.getDay();
+                const typeInfo = runTypeMap[l.run_type] || runTypeMap['번개'];
 
-                const defaultType = { icon: '⚡', label: '번개' };
-                const typeInfo = runTypeMap[l.run_type] || defaultType;
+                // 요일 색상 결정
+                const dayColorClass = (dayIndex === 0 || dayIndex === 6) ? 'text-red-500 font-medium' : 
+                                    (dayIndex === 1) ? 'text-green-500 font-medium' : 'text-gray-400';
 
                 return `
-                <div class="bg-white p-3 rounded-2xl border border-brand-100 shadow-sm relative">
-                    <div class="flex justify-between items-center mb-1"> <span class="text-[9px] font-black ${dayColorClass} bg-gray-50 px-2 py-0 rounded-full leading-none flex items-center h-4"> ${l.run_date} (${dayName}) | ${typeInfo.icon} ${typeInfo.label}
-                        </span>
-                        <div class="flex gap-1"> <button onclick="window.editLog('${l.log_id}')" class="text-gray-300 hover:text-brand-500 p-0.5"> <i class="fa-solid fa-pen-to-square text-[10px]"></i> </button>
-                            <button onclick="window.deleteLog('${l.log_id}')" class="text-gray-300 hover:text-red-500 p-0.5"> <i class="fa-solid fa-trash-can text-[10px]"></i>
-                            </button>
+                    <div class="bg-white p-3 rounded-2xl border border-brand-100 shadow-sm relative">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-[9px] font-black ${dayColorClass} bg-gray-50 px-2 py-0 rounded-full leading-none flex items-center h-4">
+                                ${l.run_date} (${dayNames[dayIndex]}) | ${typeInfo.icon} ${typeInfo.label}
+                            </span>
+                            <div class="flex gap-1">
+                                <button onclick="window.editLog('${l.log_id}')" class="text-gray-300 hover:text-brand-500 p-0.5"><i class="fa-solid fa-pen-to-square text-[10px]"></i></button>
+                                <button onclick="window.deleteLog('${l.log_id}')" class="text-gray-300 hover:text-red-500 p-0.5"><i class="fa-solid fa-trash-can text-[10px]"></i></button>
+                            </div>
                         </div>
-                    </div>
-                    <div class="flex items-center gap-1 mb-1">
-                        <div class="w-5 h-5 bg-brand-100 rounded-full flex items-center justify-center text-[8px] font-bold text-brand-600">${l.user_name?.charAt(0) || '?'}</div>
-                        <button onclick="window.openUserStatModal('${l.user_name}')" class="text-xs font-bold text-gray-700">
-                                ${l.user_name}
-                            </button>
-                    </div>
-                    <div class="grid grid-cols-5 gap-1 text-center bg-brand-50/50 p-2 rounded-xl">
-                        <div><p class="text-[7px] text-gray-400 font-bold">Km</p><p class="text-[11px] font-black">${l.distance}</p></div>
-                        <div><p class="text-[7px] text-gray-400 font-bold">Time</p><p class="text-[11px] font-black">${timeStr}</p></div>
-                        <div><p class="text-[7px] text-emerald-600 font-bold">Pace</p><p class="text-[11px] font-black text-emerald-600">${paceStr}</p></div>
-                        <div><p class="text-[7px] text-gray-400 font-bold text-red-400">Bpm</p><p class="text-[11px] font-black text-red-500">${l.bpm}</p></div>
-                        <div><p class="text-[7px] text-gray-400 font-bold">Cad</p><p class="text-[11px] font-black text-brand-600">${l.cadence}</p></div>
-                    </div>
-                </div>
-            `;}).join('') || '<div class="p-10 text-center text-gray-300 text-xs font-bold">활동 기록이 없습니다.</div>';
+                        <div class="flex items-center gap-1 mb-1">
+                            <div class="w-5 h-5 bg-brand-100 rounded-full flex items-center justify-center text-[8px] font-bold text-brand-600">${(l.user_name || '?').charAt(0)}</div>
+                            <button onclick="window.openUserStatModal('${l.user_name}')" class="text-xs font-bold text-gray-700">${l.user_name}</button>
+                        </div>
+                        <div class="grid grid-cols-5 gap-1 text-center bg-brand-50/50 p-2 rounded-xl">
+                            ${renderStatItem("Km", l.distance, "text-gray-400")}
+                            ${renderStatItem("Time", timeStr, "text-gray-400")}
+                            ${renderStatItem("Pace", paceStr, "text-emerald-600")}
+                            ${renderStatItem("Bpm", l.bpm || 0, "text-red-400", "text-red-500")}
+                            ${renderStatItem("Cad", l.cadence || 0, "text-gray-400", "text-brand-600")}
+                        </div>
+                    </div>`;
+            }).join('') || '<div class="p-10 text-center text-gray-300 text-xs font-bold">활동 기록이 없습니다.</div>';
         };
 
+        // 컴포넌트화를 위한 작은 헬퍼 함수
+        const renderStatItem = (label, value, labelCol, valCol = "") => `
+            <div>
+                <p class="text-[7px] ${labelCol} font-bold">${label}</p>
+                <p class="text-[11px] font-black ${valCol}">${value}</p>
+            </div>
+        `;
 
 
         window.setTypeFilter = (type) => {
@@ -1436,69 +1441,52 @@
         let dataScope = 'avg'; 
         
         window.updateUI_Team = () => {
-            const filtered = allLogs
-                    .filter(l => l.run_date && new Date(l.run_date).getFullYear() === parseInt(selectedYear))
-                    .filter(l => {
-                        if (selectedMonthT === '전체') return true;
-                        const logMonth = new Date(l.run_date).getMonth() + 1;
-                        return logMonth === parseInt(selectedMonthT);
-                    });
-
-            const genderMap = {};
-            const teamMap = {};
-
-            if (crewMembers && typeof crewMembers === 'object' && !Array.isArray(crewMembers)) {
-                Object.entries(crewMembers).forEach(([nickname, info]) => {
-                    // nickname은 "이봉주", "Ben2" 등이고 info는 {team: "...", gender: "..."} 입니다.
-                    genderMap[nickname] = info.gender || '미설정7';
-                    teamMap[nickname] = info.team || '무소속7';
-                });
-            }
-
-
-
-//console.log("🧐 updateUI_Team 검사 시작: crewMembers 상태 =", crewMembers);
-//console.log("🧐 updateUI_Team 검사 시작: crewMembersList의 상태 =", crewMembersList);
-
-
-            // 사용 예시
-            //console.log(teamMap['제이크']); 
+            // 1. 데이터 필터링 (통합 순회)
+            const filtered = allLogs.filter(l => {
+                if (!l.run_date) return false;
+                const dateObj = new Date(l.run_date);
+                const isYearMatch = dateObj.getFullYear() === parseInt(selectedYear);
+                const isMonthMatch = selectedMonthT === '전체' || (dateObj.getMonth() + 1) === parseInt(selectedMonthT);
+                return isYearMatch && isMonthMatch;
+            });
 
             const teams = {};
+            const genders = {};
             let myStats = { dist: 0, time: 0, count: 0 };
 
-            // 1. 집계용 변수 초기화
-
-            // 2. 필터링된 로그 순회 (Supabase에서 가져온 allLogs를 필터링한 데이터)
+            // 2. 집계 로직 통합 (한 번의 순회로 모든 데이터 처리)
             filtered.forEach(r => {
-                // 앞서 저장한 crewMembers 매핑 객체에서 팀명을 가져옴
-                const memberInfo = crewMembers[r.user_name]; 
+                const memberInfo = crewMembers[r.user_name] || {};
+                const teamName = memberInfo.team || '무소속';
+                const genderName = memberInfo.gender || '미설정';
 
-                // 2. 객체가 있다면 그 안의 .team 문자열을 사용하고, 없으면 '무소속' 처리
-                const teamName = (memberInfo && typeof memberInfo === 'object') 
-                                ? memberInfo.team 
-                                : (memberInfo || '무소속'); // 기존에 문자열이었다면 그대로 사용
-
-
-                // 팀 객체가 없으면 초기 생성
+                // 팀 데이터 집계
                 if (!teams[teamName]) {
                     teams[teamName] = { 
-                        name: teamName,
-                        dist: 0, 
-                        time: 0, 
-                        count: 0, 
+                        name: teamName, dist: 0, time: 0, count: 0, 
                         color: TEAM_COLORS[teamName] || '#94a3b8', 
                         members: new Set() 
                     };
                 }
-
-                // 팀 기록 합산
                 teams[teamName].dist += Number(r.distance || 0);
                 teams[teamName].time += Number(r.duration || 0);
                 teams[teamName].count++;
                 teams[teamName].members.add(r.user_name);
 
-                // 내 기록 합산 (로그의 userName과 현재 로그인 유저 닉네임 비교)
+                // 성별 데이터 집계
+                if (!genders[genderName]) {
+                    genders[genderName] = { 
+                        name: genderName, dist: 0, time: 0, count: 0, 
+                        color: genderName === '남성' ? '#6366f1' : (genderName === '여성' ? '#f43f5e' : '#fbbf24'),
+                        members: new Set() 
+                    };
+                }
+                genders[genderName].dist += Number(r.distance || 0);
+                genders[genderName].time += Number(r.duration || 0);
+                genders[genderName].count++;
+                genders[genderName].members.add(r.user_name);
+
+                // 내 기록 합산
                 if (r.user_name === userNickname) {
                     myStats.dist += Number(r.distance || 0);
                     myStats.time += Number(r.duration || 0);
@@ -1506,153 +1494,68 @@
                 }
             });
 
+            // 3. 렌더링 헬퍼 함수 (중복되는 리스트 UI 생성 로직 통합)
+            const renderList = (targetId, dataObj, titlePrefix = "팀") => {
+                const targetList = document.getElementById(targetId);
+                if (!targetList) return;
 
+                const dataArray = Object.values(dataObj).sort((a, b) => b[currentMetric] - a[currentMetric]);
+                const maxVal = Math.max(...dataArray.map(d => d[currentMetric]), 1);
 
-            const myTeamName = crewMembers[userNickname] || myTeam;
-            const myTeamData = teams[myTeamName] || { dist: 0, time: 0, count: 0, members: new Set(), color: TEAM_COLORS[myTeamName] || '#94a3b8' };
-            
-            const list = document.getElementById('team-list');
-            if (list) {
-                list.innerHTML = '';
-                const sorted = Object.entries(teams).sort((a,b) => {
-                    const key = currentMetric === 'dist' ? 'dist' : (currentMetric === 'time' ? 'time' : 'count');
-                    return b[1][key] - a[1][key];
-                });
+                targetList.innerHTML = dataArray.map(data => {
+                    const hms = minToHMS(data.time);
+                    const timeStr = `${hms.h > 0 ? hms.h + ':' : ''}${String(hms.m).padStart(2, '0')}:${String(hms.s).padStart(2, '0')}`;
+                    const percent = (data[currentMetric] / maxVal) * 100;
 
-                const maxKey = currentMetric === 'dist' ? 'dist' : (currentMetric === 'time' ? 'time' : 'count');
-                const maxVal = Math.max(...Object.values(teams).map(t => t[maxKey]), 1);
-
-               sorted.forEach(([name, data]) => {
-
-                const hms= minToHMS(data.time);
-                const timeStr = `${hms.h > 0 ? hms.h + ':' : ''}${hms.m.toString().padStart(2, '0')}:${hms.s.toString().padStart(2, '0')}`;
-
-                    list.innerHTML += 
-                    `
-                        <div class="space-y-1 bg-slate-50 p-1 rounded-xl"> 
-                            <div class="flex justify-between items-center bg-slate-50">
-                                <div class="flex items-center gap-1 bg-slate-50">
+                    return `
+                        <div class="space-y-1 bg-slate-50 p-1 rounded-xl mb-2"> 
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center gap-1">
                                     <div class="w-2 h-2 rounded-full" style="background-color: ${data.color}"></div>
-                                    <span class="text-[12px] font-black text-slate-800">팀:${name}</span>
+                                    <span class="text-[12px] font-black text-slate-800">${titlePrefix}:${data.name}</span>
                                     <span class="text-[9px] font-bold text-slate-400">${data.members.size}인</span>
                                 </div>
-                                <div class="flex gap-1 bg-slate-50">
-                                    <span class="badge-stat ${currentMetric==='dist'?'highlight':''}">
-                                        ${data.dist.toFixed(1)}km
-                                    </span>
-                                    <span class="badge-stat ${currentMetric==='time'?'highlight':''}">
-                                        ${timeStr}
-                                    </span>
-                                    <span class="badge-stat ${currentMetric==='count'?'highlight':''}">
-                                        ${data.count}회
-                                    </span>
+                                <div class="flex gap-1">
+                                    <span class="badge-stat ${currentMetric==='dist'?'highlight':''}">${data.dist.toFixed(1)}km</span>
+                                    <span class="badge-stat ${currentMetric==='time'?'highlight':''}">${timeStr}</span>
+                                    <span class="badge-stat ${currentMetric==='count'?'highlight':''}">${data.count}회</span>
                                 </div>
                             </div>
-
-                            <div class="h-2.5 bg-slate/60 rounded-full overflow-hidden">
-                                <div class="h-full transition-all duration-1000 ease-out rounded-full bg-rose-50" 
-                                    style="width: ${(data[maxKey]/maxVal)*100}%; background-color: ${data.color}"></div>
-                            </div>
-                        </div>
-                    `;
-                });
-            }
-/////////////요기
-            const genders = {};
-            filtered.forEach(r => {
-              
-                const genderName = r.gender || genderMap[r.user_name] || '중성9';
-                if (!genders[genderName]) {
-                    genders[genderName] = { 
-                        name: genderName, 
-                        dist: 0, 
-                        time: 0, 
-                        count: 0,
-                        // 남성/여성에 따른 바 컬러 지정
-                        //color: genderName === '남성' ? '#3b82f6' : (genderName === '여성' ? '#ec4899' : '#94a3b8')
-                        color: genderName === '남성' ? '#6366f1' : (genderName === '여성' ? '#f43f5e' : '#fbbf24')                        
-                        , members: new Set()
-                    };
-                }
-                genders[genderName].dist += r.distance;
-                genders[genderName].time += r.duration;
-                genders[genderName].count++;
-                genders[genderName].members.add(r.user_name);
-            });
-
-
-//console.log("🧐 검사 시작: updateUI_Team teams 상태 =", teams);
-//console.log("🧐 검사 시작: updateUI_Team genders 상태 =", genders);
-
-            const listGender = document.getElementById('team-list-gender');
-            if (listGender) {
-                listGender.innerHTML = '';
-                const sorted = Object.entries(genders).sort((a,b) => {
-                    const key = currentMetric === 'dist' ? 'dist' : (currentMetric === 'time' ? 'time' : 'count');
-                    return b[1][key] - a[1][key];
-                });
-
-// 🔍 1. 정렬된 전체 데이터 확인
-//console.log("📊 [정렬된 데이터]:", sorted);
-
-                const maxKey = currentMetric === 'dist' ? 'dist' : (currentMetric === 'time' ? 'time' : 'count');
-                const maxVal = Math.max(...Object.values(genders).map(t => t[maxKey]), 1);
-// 🔍 2. 현재 기준(Metric) 및 최대값 확인
-//console.log(`🎯 현재 기준: ${currentMetric} | 최대값(maxVal): ${maxVal}`);
-               sorted.forEach(([name, data]) => {
-//console.log(`👤 성별: ${name} | 데이터:`, data);
-                const hms= minToHMS(data.time);
-                const timeStr = `${hms.h > 0 ? hms.h + ':' : ''}${hms.m.toString().padStart(2, '0')}:${hms.s.toString().padStart(2, '0')}`;
-
-                    listGender.innerHTML += 
-                    `
-                        <div class="space-y-1 bg-slate-50 p-1 rounded-xl"> 
-                            <div class="flex justify-between items-center bg-slate-50">
-                                <div class="flex items-center gap-1 bg-slate-50">
-                                    <div class="w-2 h-2 rounded-full" style="background-color: ${data.color}"></div>
-                                    <span class="text-[12px] font-black text-slate-800">팀:${name}</span>
-                                    <span class="text-[9px] font-bold text-slate-400">${data.members.size}인</span>
-                                </div>
-                                <div class="flex gap-1 bg-slate-50">
-                                    <span class="badge-stat ${currentMetric==='dist'?'highlight':''}">
-                                        ${data.dist.toFixed(1)}km
-                                    </span>
-                                    <span class="badge-stat ${currentMetric==='time'?'highlight':''}">
-                                        ${timeStr}
-                                    </span>
-                                    <span class="badge-stat ${currentMetric==='count'?'highlight':''}">
-                                        ${data.count}회
-                                    </span>
+                            <div class="h-2 bg-slate-200/60 rounded-full overflow-hidden">
+                                <div class="h-full transition-all duration-1000 ease-out" 
+                                    style="width: ${percent}%; background-color: ${data.color}; 
+                                    ${targetId.includes('gender') ? 'background: repeating-linear-gradient(45deg, rgba(255,255,255,0.1) 0px, rgba(255,255,255,0.1) 6px, transparent 6px, transparent 12px), ' + data.color : ''}">
                                 </div>
                             </div>
+                        </div>`;
+                }).join('');
+            };
 
-                        </div>
-                    `;
-                    listGender.innerHTML += `
-                        <div class="space-y-1 bg-slate-50 p-1 rounded-xl"> 
-                            <div class="h-1.5 bg-slate-200/60 rounded-full overflow-hidden">
-                                <div class="h-full transition-all duration-1000 ease-out rounded-full" 
-                                    style="width: ${(data[maxKey] / maxVal) * 100}%; 
-                                            background: repeating-linear-gradient(45deg, rgba(255,255,255,0.2) 0px, rgba(255,255,255,0.2) 6px, transparent 6px, transparent 12px), 
-                                                        linear-gradient(90deg, ${data.color}, ${data.color});">
-                                </div>
-                            </div>
-                        </div>
-                    `;
+            // 4. 리스트 실행
+            renderList('team-list', teams, "팀");
+            renderList('team-list-gender', genders, "성별");
 
-                });
-            }
+            // 5. 상단 카드 및 요약 정보 업데이트
+            const myTeamName = crewMembers[userNickname]?.team || myTeam;
+            const myTeamData = teams[myTeamName] || { dist: 1, time: 1, count: 1 };
 
-            document.getElementById('card-dist-ratio').innerText = ((myStats.dist / (myTeamData.dist || 1)) * 100).toFixed(1) + '%';
-            document.getElementById('card-time-ratio').innerText = ((myStats.time / (myTeamData.time || 1)) * 100).toFixed(1) + '%';
-            document.getElementById('card-count-ratio').innerText = ((myStats.count / (myTeamData.count || 1)) * 100).toFixed(1) + '%';
+            const updateRatio = (id, val, total) => {
+                const el = document.getElementById(id);
+                if (el) el.innerText = ((val / (total || 1)) * 100).toFixed(1) + '%';
+            };
+
+            updateRatio('card-dist-ratio', myStats.dist, myTeamData.dist);
+            updateRatio('card-time-ratio', myStats.time, myTeamData.time);
+            updateRatio('card-count-ratio', myStats.count, myTeamData.count);
             
-            const myPaceSec = myStats.dist > 0 ? (myStats.time / myStats.dist) * 60 : 0;
-            document.getElementById('card-avg-pace').innerText = `${Math.floor(myPaceSec/60)}'${Math.floor(myPaceSec%60).toString().padStart(2,'0')}"`;
+            const avgPaceEl = document.getElementById('card-avg-pace');
+            if (avgPaceEl) {
+                const myPaceSec = myStats.dist > 0 ? (myStats.time / myStats.dist) * 60 : 0;
+                avgPaceEl.innerText = `${Math.floor(myPaceSec/60)}'${Math.floor(myPaceSec%60).toString().padStart(2,'0')}"`;
+            }
 
             renderChart(teams, myStats);
         };
-
         const TEAM_COLORS = { 
             '황영조': '#f87171', 
             '손기정': '#3b82f6', 
@@ -1688,11 +1591,9 @@
                 o.innerText = ` ${i}월 `;
                 if (i === currentMontht) o.selected = true;
                 targetSelect.appendChild(o);
-
                 //만약 페이지 로드 시점에 currentMontht가 아니라 "전체"를 기본값으로 보여주고 싶다면, 옵션 생성 부분의 
                 //if (i === currentMontht) o.selected = true; 부분을 
                 //삭제하고 mot1.value = '전체';를 마지막에 추가하시면 됩니다.
-
             }
         }
 
@@ -1970,13 +1871,6 @@
                     teamMap[nickname] = info.team || '무소속7';
                 });
             }
-//console.log("🧐 0  검사 시작-: updateMemberMaps 상태 =",updateMemberMaps);
-
-            // 사용 예시:
-            // const { data } = await _supabase.from('members').select('*');
-            // updateMemberMaps(data);
-            // console.log(teamMap['제이크']); // 결과: 'A팀'
-
 
             const filteredLogs = allLogs.filter(l => {
            
@@ -1986,8 +1880,6 @@
                 const isCorrectGender = selectedGender === '전체' || userGender === selectedGender;
                 const isCorrectTeam = selectedTeam === '전체' || userTeam === selectedTeam;
                 const isCorrectTarget = selectedTarget === '전체' || l.user_name === userNickname;
-
-//console.log(selectedGender, selectedTeam, userNickname, selectedYear);
 
                 return isCorrectYear && isCorrectGender && isCorrectTarget && isCorrectTeam;
             });
@@ -2446,21 +2338,34 @@
             const grade = calculateRunnerGrade(userLogs);
             const gradeBadge = document.getElementById('modal-runner-grade');
             
-            gradeBadge.innerText = grade.name;
-            gradeBadge.className = `runner-grade-badge ${grade.color} text-xs px-2 py-1 cursor-help`;
-            let tooltipText = `[상세 점수]\n` +
-                                `● 횟수점수: ${grade.details.scoreCount} / 거리점수: ${grade.details.scoreDist} / 연속점수: ${grade.details.scoreBonus}\n` +
-                                `● 총합점수: ${grade.details.totalScore}점\n` +
-                                `----------------\n`;
-                        if (grade.nextGrade) {
-                            tooltipText += `✨ 다음 등급 [${grade.nextGrade.name}]까지 ${grade.nextGrade.remaining}점 남았습니다!`;
-                        } else {
-                            tooltipText += `👑 축하합니다! 최고 등급인 ${grade.name}입니다.`;
-                        }
-            
-            gradeBadge.title = tooltipText;
+            gradeBadge.innerHTML = `${grade.name} <i class="fa-solid fa-circle-info text-[9px] opacity-60"></i>`;
+            gradeBadge.className = `runner-grade-badge ${grade.color} text-xs px-2 py-1 cursor-pointer flex items-center gap-1`;
 
-            // ✅ 원본 배열 데이터인 crewMembersList에서 찾기
+            const detailText = `📊 상세 점수
+            ------------------------
+            🏃 횟수 점수: ${grade.details.scoreCount}점
+            📏 거리 점수: ${grade.details.scoreDist}점
+            🔥 연속 점수: ${grade.details.scoreBonus}점
+
+            💰 총합 점수: ${grade.details.totalScore}점
+            ------------------------
+            ${grade.nextGrade 
+                ? `✨ 다음 등급 [${grade.nextGrade.name}]까지 ${grade.nextGrade.remaining}점 남았습니다!`
+                : `👑 최고 등급 달성!`}`;
+
+
+           gradeBadge.onclick = (e) => {
+                e.stopPropagation();
+                
+                // 만약 기존에 만든 showModal 함수가 있다면 사용
+                if (typeof showModal === 'function') {
+                    showModal(detailText, "info");
+                } else {
+                    // 커스텀 모달이 없을 경우 최소한의 깔끔한 표시를 위한 alert 대체
+                    alert(tooltipText.replace(/<br>/g, '\n')); 
+                }
+            };
+
             const userRecord = crewMembersList.find(m => m.nickname === nickname);
 
             if (userRecord) {
@@ -2596,7 +2501,6 @@
                     .from('songmirun_logs') // 테이블명
                     .delete()               // 삭제 명령
                     .eq('log_id', id);          // 조건: id 컬럼의 값이 매개변수 id와 일치하는 행
-
                 if (error) throw error;
 
                 // 2. 편집 상태 및 폼 초기화 (수정 중 삭제했을 경우 대비)
@@ -2718,160 +2622,182 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
-
         const LOGS_TABLE = 'songmirun_logs';
-        const MEMBERS_TABLE = 'songmirun_members'; // 로그인 시 사용하는 테이블
+        const MEMBERS_TABLE = 'songmirun_members';
 
+        /**
+         * 멤버 데이터 동기화 및 매핑
+         */
         const syncMembers = async () => {
-//console.log(" const syncMembers = async () => {")
             try {
                 const { data, error } = await _supabase.from(MEMBERS_TABLE).select('*');
-                    if (error) throw error;
+                if (error) throw error;
+                if (!data) return;
 
-                    if (data) {
-                        crewMembersList = data;
-                        
-                        // 중요: crewMembers에 직접 데이터를 쌓습니다.
-                        // 기존의 crewMembers = mapping; 줄은 삭제하거나 mapping을 먼저 정의해야 합니다.
-                        const mapping = {}; 
-                        
-                        data.forEach(d => { 
-                            mapping[d.nickname] = { 
-                                team: d.team, 
-                                gender: d.gender || '중성1' 
-                            }; 
-                        });
+                crewMembersList = data;
+                
+                // reduce를 사용하여 한 번에 객체 매핑 (더 깔끔한 방식)
+                crewMembers = data.reduce((acc, member) => {
+                    acc[member.nickname] = { 
+                        team: member.team || '무소속', 
+                        gender: member.gender || '미설정' 
+                    };
+                    return acc;
+                }, {});
 
-                        crewMembers = mapping; // 이제 mapping(데이터가 찬 객체)을 할당합니다.
-                        // 🔍 2. 내 정보가 잘 매칭되었는지 확인
-                        myTeam = (crewMembers[userNickname] ? crewMembers[userNickname].team : '무소속1');
-                    renderMembers(); 
-                    renderAllCharts();
-                    updateUI_Team();
-                    renderRankingLists();                    
-                }
+                // 내 팀 정보 갱신
+                myTeam = crewMembers[userNickname]?.team || '무소속';
+
+                // UI 갱신 (관련된 부분만 호출)
+                renderMembers(); 
+                updateUI_Team(); // 팀 통계는 멤버 정보에 의존함
+                renderRankingLists();
+                renderAllCharts();
+                
             } catch (err) {
                 console.error("Members sync failed:", err.message);
             }
-
         };
 
+        /**
+         * 로그 데이터 동기화 및 통계 갱신
+         */
         const syncLogs = async () => {
-            //console.log(" const syncLogs = async () => {")
-                try {
-                    const { data: logs, error: logError } = await _supabase.from(LOGS_TABLE).select('*')
-                        .order('run_date', { ascending: false })    // 1순위: 활동일 최신순
-                        .order('created_at', { ascending: false }); // 2순위: 등록일 최신순
-                    if (logError) throw logError;
-                    if (!logs) return;
+            try {
+                const { data: logs, error: logError } = await _supabase.from(LOGS_TABLE)
+                    .select('*')
+                    .order('run_date', { ascending: false })
+                    .order('created_at', { ascending: false });
 
-                    allLogs = logs;
-                    const currMonthStr = new Date().toISOString().slice(0, 7);
-                    const monthLogs = logs.filter(l => l.run_date && l.run_date.startsWith(currMonthStr));
+                if (logError) throw logError;
+                if (!logs) return;
 
-                    renderLogs(); 
-                    updateUI_Team();
-                    renderStats(); 
-                    renderRankingLists();
-                    //
-                } catch (err) {
-                    console.error("run_logs sync failed:", err.message);
-                }                    
+                allLogs = logs;
+
+                // UI 갱신 로직 통합 호출
+                refreshAllLogUI();
+                
+            } catch (err) {
+                console.error("run_logs sync failed:", err.message);
+            }
         };
 
+        /**
+         * 로그 관련 모든 UI를 한 번에 갱신하는 헬퍼 함수
+         */
+        const refreshAllLogUI = () => {
+            renderLogs(); 
+            updateUI_Team();
+            renderStats(); 
+            renderRankingLists();
+            // 필요 시 renderAllCharts() 추가
+        };
 
+        /**
+         * 실시간 구독 설정
+         */
         function setupRealtime() {
             _supabase.channel('db-changes')
-                .on('postgres_changes', { event: '*', schema: 'public', table: LOGS_TABLE }, syncLogs)
-                .on('postgres_changes', { event: '*', schema: 'public', table: MEMBERS_TABLE }, syncMembers)
+                .on('postgres_changes', { event: '*', schema: 'public', table: LOGS_TABLE }, () => {
+                    console.log('🔄 로그 변경 감지');
+                    syncLogs();
+                })
+                .on('postgres_changes', { event: '*', schema: 'public', table: MEMBERS_TABLE }, () => {
+                    console.log('👤 멤버 변경 감지');
+                    syncMembers();
+                })
                 .subscribe();
         }
 
         const setupListeners = async () => {
-            syncLogs();
-            syncMembers();
-            setupRealtime();
+            // 1. 초기 데이터 로드 (중복 제거 및 병렬 처리)
+            // 기존에 syncLogs()를 두 번 호출하던 부분을 하나로 합치고 로딩 순서를 정리합니다.
             try {
                 await Promise.all([syncLogs(), syncMembers()]);
-             } catch (e) {
+                setupRealtime(); // 데이터 로드 후 실시간 구독 시작
+            } catch (e) {
                 console.error("초기 로드 중 오류:", e);
             }
 
-            // --- 3. 로그인 로직 ---
-            const savedNickname = localStorage.getItem('songmirun_nickname');
-            if (savedNickname) {
-                userNickname = savedNickname;
-                // 기존에 메인으로 바로 보내는 로직이 있다면 여기서 실행
-            }
+            // 2. 로그인 상태 확인
+            userNickname = localStorage.getItem('songmirun_nickname') || "";
 
-            document.getElementById('close-stat-modal').onclick = closeUserStatModal;
-            document.getElementById('stat-detail-modal').onclick = (e) => { if (e.target === document.getElementById('stat-detail-modal')) closeUserStatModal(); };
-            document.getElementById('member-search').addEventListener('input', (e) => { memberSearchTerm = e.target.value; renderMembers(); });
+            // 3. 공통 요소 참조 및 이벤트 바인딩 (DOM 탐색 최소화)
+            const getEl = (id) => document.getElementById(id);
+            const modalProfile = getEl('profile-edit-modal');
             
-            // 프로필 수정 모달 관련
-            document.getElementById('display-nickname').onclick = () => {
+            // 모달 헬퍼 함수
+            const toggleModal = (modal, isOpen) => {
+                modal.classList.toggle('hidden', !isOpen);
+                modal.classList.toggle('flex', isOpen);
+            };
+
+            // 통계/검색 이벤트
+            getEl('close-stat-modal').onclick = closeUserStatModal;
+            getEl('stat-detail-modal').onclick = (e) => { 
+                if (e.target === getEl('stat-detail-modal')) closeUserStatModal(); 
+            };
+            getEl('member-search').oninput = (e) => { 
+                memberSearchTerm = e.target.value; 
+                renderMembers(); 
+            };
+
+            // 4. 프로필 수정 모달 열기
+            getEl('display-nickname').onclick = () => {
                 const userObj = crewMembersList.find(m => m.nickname === userNickname);
-                if(!userObj) return;
+                if (!userObj) return;
+
+                getEl('prof-actual-nick').innerText = userNickname;
+                getEl('prof-current-log-nick').innerText = userObj.log_nickname || '-';
+                getEl('prof-current-team').innerText = userObj.team || '-';
+                getEl('prof-new-log-nick').value = userObj.log_nickname || '';
                 
-                document.getElementById('prof-actual-nick').innerText = userNickname;
-                document.getElementById('prof-current-log-nick').innerText = userObj.log_nickname || '-';
-                document.getElementById('prof-current-team').innerText = userObj.team || '-';
-
-                document.getElementById('prof-new-log-nick').value = userObj.log_nickname || '';
-                document.getElementById('profile-edit-modal').classList.remove('hidden');
-                document.getElementById('profile-edit-modal').classList.add('flex');
-            };
-            document.getElementById('btn-close-profile').onclick = () => {
-                document.getElementById('profile-edit-modal').classList.add('hidden');
-                document.getElementById('profile-edit-modal').classList.remove('flex');
+                toggleModal(modalProfile, true);
             };
 
-            document.getElementById('btn-save-profile').onclick = async () => {
-                const newLogNick = document.getElementById('prof-new-log-nick').value.trim();
-                const newTeam = document.getElementById('prof-new-team').value; // 선택된 소속팀 값
+            getEl('btn-close-profile').onclick = () => toggleModal(modalProfile, false);
+
+            // 5. 프로필 저장 로직
+            getEl('btn-save-profile').onclick = async () => {
+                const newLogNick = getEl('prof-new-log-nick').value.trim();
+                const newTeam = getEl('prof-new-team').value;
+
+                // 유효성 검사
                 if (!newTeam) return showModal("소속팀을 선택하세요.", "alert");
-
-                if(!newLogNick) return showModal("변경할 로그인 닉네임을 입력하세요.", "alert");
-                const isDuplicate = crewMembersList.some(m => 
-                        m.nickname !== userNickname && m.log_nickname === newLogNick
-                    );
-                if (isDuplicate) {
-                        showModal(` [${newLogNick}] : 다른 로그인 닉네임을 추천합니다.\n\n (예-전화번호 뒷자리를 추가)`, "alert");
-                        document.getElementById('btn-close-profile').click(); 
-                        return; // 함수 종료
-                    }
+                if (!newLogNick) return showModal("로그인 닉네임을 입력하세요.", "alert");
 
                 const userObj = crewMembersList.find(m => m.nickname === userNickname);
-                if(!userObj) return;
+                if (!userObj) return;
+
+                // 변경사항 체크 (불필요한 DB 요청 방지)
                 if (userObj.log_nickname === newLogNick && userObj.team === newTeam) {
-                        return document.getElementById('btn-close-profile').click();
-                    }               
+                    return toggleModal(modalProfile, false);
+                }
+
+                // 중복 체크
+                const isDuplicate = crewMembersList.some(m => m.nickname !== userNickname && m.log_nickname === newLogNick);
+                if (isDuplicate) {
+                    showModal(`[${newLogNick}] : 이미 사용 중인 닉네임입니다.`, "alert");
+                    return;
+                }
 
                 try {
-                    // 1. Supabase 테이블 업데이트 실행
                     const { error } = await _supabase
-                        .from('songmirun_members') // 테이블명
-                        .update({ 
-                            log_nickname: newLogNick,
-                            team: newTeam 
-                        })
-                        .eq('id', userObj.id); // Firestore의 doc ID 역할을 하는 조건절
+                        .from('songmirun_members')
+                        .update({ log_nickname: newLogNick, team: newTeam })
+                        .eq('id', userObj.id);
 
                     if (error) throw error;
 
-                    // 2. 로컬 객체 상태 동기화
+                    // 로컬 상태 동기화 및 피드백
                     userObj.log_nickname = newLogNick;
                     userObj.team = newTeam;
-
-                    // 3. UI 피드백 및 모달 닫기
-                    showToast(`${newLogNick} ✨ 로그인닉네임/소속팀이 변경되었습니다.`);
-
-                    updateUI();
-                    //updateUI_Team();
-
                     
-                    const closeBtn = document.getElementById('btn-close-profile');
-                    if (closeBtn) closeBtn.click();
+                    showToast(`${newLogNick} ✨ 프로필이 변경되었습니다.`);
+                    
+                    // UI 전체 갱신 (syncMembers를 재호출하거나 수동으로 필요한 UI만 업데이트)
+                    updateUI(); 
+                    toggleModal(modalProfile, false);
 
                 } catch (e) {
                     console.error("Update Error:", e.message);
@@ -2880,84 +2806,61 @@
             };
         };
 
-        const updateUI = () => {
-            const isLoggedIn = userNickname;
-            document.getElementById('login-screen').classList.toggle('hidden', isLoggedIn);
-            document.getElementById('main-content').classList.toggle('hidden', !isLoggedIn);
+const updateUI = () => {
+    const isLoggedIn = !!userNickname;
+    
+    // 화면 전환
+    const loginScreen = document.getElementById('login-screen');
+    const mainContent = document.getElementById('main-content');
+    if (loginScreen) loginScreen.classList.toggle('hidden', isLoggedIn);
+    if (mainContent) mainContent.classList.toggle('hidden', !isLoggedIn);
 
-            //console.log("2866");
+    if (isLoggedIn) {
+        // 관리자 UI 제어
+        isAdmin = userNickname.toLowerCase().startsWith('admin');
+        const tabMembers = document.getElementById('tab-members');
+        if (tabMembers) tabMembers.classList.toggle('hidden', !isAdmin);
 
-            if (isLoggedIn) {
-                let myCurrentNickname = "";
-                let myCurrentTeam = "";
+        // 핵심: 데이터가 있으면 즉시 렌더링, 없으면 다시 불러오기
+        if (Object.keys(crewMembers).length > 0) {
+            renderHeaderProfile();
+        } else {
+            // 데이터가 아직 로드되지 않았다면 syncMembers 후 렌더링
+            syncMembers().then(() => renderHeaderProfile());
+        }
+    }
+};
 
-                // 1. 함수 정의 시작
-                const fetchAndRender = async () => {
-                    try {
-                        const { data, error } = await _supabase
-                            .from(TABLE_NAME)
-                            .select('*');
+/**
+ * 상단 프로필 영역 렌더링
+ */
+const renderHeaderProfile = () => {
+    const displayArea = document.getElementById('display-nickname2');
+    if (!displayArea) return;
 
-                        if (error) throw error;
+    // 데이터 참조 확인 (crewMembers[userNickname] 구조인지 확인)
+    const myInfo = crewMembers[userNickname];
+    
+    // 소속팀 결정 로직 (데이터가 없으면 '로딩중' 혹은 '무소속' 표시)
+    const myTeamName = myInfo ? (myInfo.team || '무소속') : '확인중';
+    const teamColor = TEAM_COLORS[myTeamName] || '#94a3b8';
 
-                        const members = {};
-                        if (data) {
-                            data.forEach(d => {
-                                members[d.nickname] = {
-                                    team: d.team || '무소속2',
-                                    log_nickname: d.log_nickname,
-                                    nickname: d.nickname
-                                };
-                            });
-                        }
+    displayArea.innerHTML = `
+        <div class="flex items-center gap-1.5">
+            <span class="text-white text-[8px] font-black px-1.5 py-0.5 rounded-md shadow-sm"
+                  style="background-color: ${teamColor};">
+                팀:${myTeamName}
+            </span>
+            <button onclick="window.openUserStatModal('${userNickname}')" 
+                    class="text-emerald-600 hover:text-emerald-700 font-black text-[10px] hover:underline transition-all">
+                ${userNickname}님, 입장!
+            </button>
+        </div>
+    `;
 
-                        const myInfo = members[userNickname];
-                        const myInfo2 = members[userNickname];
-                        //console.log("나의 정보2:", userNickname);
-                        //console.log("나의 정보:", myInfo);
-
-                        if (myInfo) {
-                            myCurrentNickname = myInfo.log_nickname || userNickname;
-                            myCurrentTeam = myInfo.team;
-                        } else {
-                            myCurrentNickname = userNickname;
-                            myCurrentTeam = '무소속';
-                        }
-
-                        const myTeam2 = myCurrentTeam;
-                        const teamBgColor2 = TEAM_COLORS[myTeam2] || '#94a3b8';
-
-                        // UI 렌더링
-                        document.getElementById('display-nickname2').innerHTML = `
-                            <div class="flex items-center gap-1">
-                                <span class="text-white text-[7px] font-black px-1 py-1 rounded-md shadow-sm whitespace-nowrap flex items-center h-fit"
-                                    style="background-color: ${teamBgColor2};">
-                                    팀:${myTeam2}
-                                </span>
-                                <button onclick="window.openUserStatModal('${userNickname}')" 
-                                        class="text-emerald-600 hover:text-emerald-700 hover:underline text-left font-black p-0 m-0 whitespace-nowrap leading-none transition-colors">
-                                    ${userNickname}님, 입장!
-                                </button>
-                            </div>
-                        `;
-                        
-                        if (typeof updateUI_Team === 'function') updateUI_Team();
-
-                    } catch (err) {
-                        console.error("데이터 로드 중 오류:", err.message);
-                    }
-                }; // 2. fetchAndRender 함수 정의 끝
-
-                // 3. 정의한 비동기 함수를 여기서 실행!
-                fetchAndRender();
-
-                // 관리자 관련 UI 제어 (함수 외부/if문 내부)
-                isAdmin = userNickname.toLowerCase().startsWith('admin');
-                document.getElementById('tab-members').classList.toggle('hidden', !isAdmin);
-                document.getElementById('username-field-container').classList.toggle('hidden', !isAdmin);
-                document.getElementById('log-username').value = isAdmin ? (document.getElementById('log-username').value || "Jake") : userNickname;
-            } // 4. if (isLoggedIn) 종료
-        }; // 5. updateUI 종료
+    // 팀 대시보드 연동
+    if (typeof updateUI_Team === 'function') updateUI_Team();
+};
 
 
         async function renderBuffer(v) {
