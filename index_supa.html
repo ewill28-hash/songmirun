@@ -2808,6 +2808,7 @@
                     
                     // UI 전체 갱신 (syncMembers를 재호출하거나 수동으로 필요한 UI만 업데이트)
                     updateUI(); 
+                    setupListeners(); // 여기서 즉시 데이터를 불러오기 시작함
                     updateUI_Team(); 
 
                     toggleModal(modalProfile, false);
