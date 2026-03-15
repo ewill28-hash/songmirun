@@ -1,24 +1,16 @@
 
 
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>쏭-미션</title>
+    <title>쏭/미/션!</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script type="importmap">
-    {
-      "imports": {
-        "firebase/app": "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js",
-        "firebase/auth": "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js",
-        "firebase/firestore": "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js"
-      }
-    }
-    </script>
+    <!-- Supabase JS Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -280,7 +272,6 @@
                         <h2 class="text-sm font-black text-gray-800 italic">Songmirun</h2>
                         <div class="flex items-center gap-1.5">
                             <span id="display-nickname2" class="text-[10px] font-bold text-brand-500 cursor-pointer hover:bg-brand-50 px-1 rounded transition-colors" title="내 정보 상세">-</span>
-                            <span id="admin-badge" class="hidden text-[8px] bg-red-500 text-white px-1.5 rounded-sm font-black uppercase">Admin</span>
                         </div>
                     </div>
                 </div>
@@ -676,24 +667,24 @@
                                 </div>
                             </div>
                             <div class="col-span-2">
-    <div class="grid grid-cols-4 gap-1.5 p-1 bg-gray-50 rounded-2xl border border-gray-100">
-        <button onclick="window.setTeamFilter('전체')" id="filter-tall" 
-                class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all active flex items-center justify-center gap-1">
-            전체
-        </button>
-        <button onclick="window.setTeamFilter('손기정')" id="filter-ts" 
-                class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all inactive flex items-center justify-center gap-1">
-            <span class="w-1.5 h-1.5 rounded-full bg-[#3b82f6]"></span>팀:손기정
-        </button>
-        <button onclick="window.setTeamFilter('황영조')" id="filter-th" 
-                class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all inactive flex items-center justify-center gap-1">
-            <span class="w-1.5 h-1.5 rounded-full bg-[#f87171]"></span>팀:황영조
-        </button>
-        <button onclick="window.setTeamFilter('이봉주')" id="filter-tl" 
-                class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all inactive flex items-center justify-center gap-1">
-            <span class="w-1.5 h-1.5 rounded-full bg-[#22c55e]"></span>팀:이봉주
-        </button>
-    </div>
+                                <div class="grid grid-cols-4 gap-1.5 p-1 bg-gray-50 rounded-2xl border border-gray-100">
+                                    <button onclick="window.setTeamFilter('전체')" id="filter-tall" 
+                                            class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all active flex items-center justify-center gap-1">
+                                        전체
+                                    </button>
+                                    <button onclick="window.setTeamFilter('손기정')" id="filter-ts" 
+                                            class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all inactive flex items-center justify-center gap-1">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-[#3b82f6]"></span>팀:손기정
+                                    </button>
+                                    <button onclick="window.setTeamFilter('황영조')" id="filter-th" 
+                                            class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all inactive flex items-center justify-center gap-1">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-[#f87171]"></span>팀:황영조
+                                    </button>
+                                    <button onclick="window.setTeamFilter('이봉주')" id="filter-tl" 
+                                            class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all inactive flex items-center justify-center gap-1">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-[#22c55e]"></span>팀:이봉주
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -744,7 +735,7 @@
                         <input type="date" id="export-start" class="flex-1 text-[10px] p-2 bg-gray-50 border border-gray-100 rounded-lg outline-none font-bold">
                         <span class="text-gray-300">~</span>
                         <input type="date" id="export-end" class="flex-1 text-[10px] p-2 bg-gray-50 border border-gray-100 rounded-lg outline-none font-bold">
-                        <button id="btn-csv" class="bg-brand-500 hover:bg-brand-600 text-white px-3 py-2 rounded-lg text-[10px] font-bold shadow-sm flex items-center gap-1.5">
+                        <button id="btn-logs-csv" class="bg-brand-500 hover:bg-brand-600 text-white px-3 py-2 rounded-lg text-[10px] font-bold shadow-sm flex items-center gap-1.5">
                             <i class="fa-solid fa-download"></i> CSV 다운로드
                         </button>
                     </div>
@@ -845,10 +836,10 @@
                                     <th class="p-1 sortable-header" onclick="window.toggleSort('gender')">
                                         성별 <i id="sort-gender" class="fa-solid fa-sort sort-icon"></i>
                                     </th>
-                                    <th class="p-1 sortable-header" onclick="window.toggleSort('joinDate')">
+                                    <th class="p-1 sortable-header" onclick="window.toggleSort('join_date')">
                                         가입일 <i id="sort-joinDate" class="fa-solid fa-sort sort-icon"></i>
                                     </th>
-                                    <th class="p-1 sortable-header" onclick="window.toggleSort('lastLogin')">
+                                    <th class="p-1 sortable-header" onclick="window.toggleSort('updated_at')">
                                         최근 접속 <i id="sort-lastLogin" class="fa-solid fa-sort sort-icon"></i>
                                     </th>
                                     <th class="p-1 text-right">관리</th>
@@ -1057,42 +1048,42 @@
             <h2 class="text-2xl font-black italic text-gray-800 mb-6 flex items-center gap-2">
                 <i class="fa-solid fa-user-gear text-brand-500"></i> 로그인 닉네임/소속팀 수정
             </h2>
-<div class="space-y-5">
-    <div>
-        <label class="text-[11px] text-gray-400 font-bold block mb-1.5 ml-1 uppercase tracking-tight">당근 닉네임 (고정)</label>
-        <div id="prof-actual-nick" class="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl text-sm font-bold text-gray-400"></div>
-    </div>
+            <div class="space-y-5">
+                <div>
+                    <label class="text-[11px] text-gray-400 font-bold block mb-1.5 ml-1 uppercase tracking-tight">당근 닉네임 (고정)</label>
+                    <div id="prof-actual-nick" class="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl text-sm font-bold text-gray-400"></div>
+                </div>
 
-    <div class="grid grid-cols-2 gap-3">
-        <div>
-            <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1 uppercase">현재 로그인 닉네임</label>
-            <div id="prof-current-log-nick" class="w-full bg-gray-50 border border-gray-100 p-3 rounded-2xl text-sm font-bold text-gray-400"></div>
-        </div>
-        <div>
-            <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1 uppercase">현재 소속팀</label>
-            <div id="prof-current-team"     class="w-full bg-gray-50 border border-gray-100 p-3 rounded-2xl text-sm font-bold text-gray-400"></div>
-        </div>
-    </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1 uppercase">현재 로그인 닉네임</label>
+                        <div id="prof-current-log-nick" class="w-full bg-gray-50 border border-gray-100 p-3 rounded-2xl text-sm font-bold text-gray-400"></div>
+                    </div>
+                    <div>
+                        <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1 uppercase">현재 소속팀</label>
+                        <div id="prof-current-team"     class="w-full bg-gray-50 border border-gray-100 p-3 rounded-2xl text-sm font-bold text-gray-400"></div>
+                    </div>
+                </div>
 
-    <div class="grid grid-cols-2 gap-3">
-        <div>
-            <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1 uppercase">변경할 로그인 닉네임</label>
-            <input type="text" id="prof-new-log-nick" 
-                   class="w-full bg-white border-2 border-brand-100 p-4 rounded-2xl text-sm font-bold outline-none focus:ring-2 ring-brand-400 shadow-sm transition-all" 
-                   placeholder="닉네임+숫자4자리 추천">
-        </div>
-        <div>
-            <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1 uppercase">변경할 소속팀</label>
-            <select id="prof-new-team" 
-                            class="w-full bg-white border-2 border-brand-100 p-4 rounded-2xl text-sm font-bold outline-none focus:ring-2 ring-brand-400 shadow-sm transition-all appearance-none cursor-pointer">
-                        <option value="" disabled selected>팀 선택</option>
-                        <option value="손기정">팀:손기정</option>
-                        <option value="황영조">팀:황영조</option>
-                        <option value="이봉주">팀:이봉주</option>
-                    </select>
-        </div>
-    </div>
-</div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1 uppercase">변경할 로그인 닉네임</label>
+                        <input type="text" id="prof-new-log-nick" 
+                            class="w-full bg-white border-2 border-brand-100 p-4 rounded-2xl text-sm font-bold outline-none focus:ring-2 ring-brand-400 shadow-sm transition-all" 
+                            placeholder="닉네임+숫자4자리 추천">
+                    </div>
+                    <div>
+                        <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1 uppercase">변경할 소속팀</label>
+                        <select id="prof-new-team" 
+                                        class="w-full bg-white border-2 border-brand-100 p-4 rounded-2xl text-sm font-bold outline-none focus:ring-2 ring-brand-400 shadow-sm transition-all appearance-none cursor-pointer">
+                                    <option value="" disabled selected>팀 선택</option>
+                                    <option value="손기정">팀:손기정</option>
+                                    <option value="황영조">팀:황영조</option>
+                                    <option value="이봉주">팀:이봉주</option>
+                                </select>
+                    </div>
+                </div>
+            </div>
             <div class="grid grid-cols-2 gap-3 mt-8">
                 <button id="btn-close-profile" class="bg-gray-100 text-gray-500 font-black py-4 rounded-2xl active:scale-95 transition-transform text-sm">취소</button>
                 <button id="btn-save-profile" class="bg-brand-500 text-white font-black py-4 rounded-2xl shadow-lg shadow-brand-200 active:scale-95 transition-transform text-sm">변경 내용 저장</button>
@@ -1138,23 +1129,14 @@
     <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-full text-[11px] font-bold transition-opacity opacity-0 pointer-events-none z-[60] shadow-xl"></div>
 
     <script type="module">
-        import { initializeApp } from "firebase/app";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signOut } from "firebase/auth";
-        import { getFirestore, collection, doc, onSnapshot, getDocs, addDoc, updateDoc, deleteDoc, serverTimestamp, query, where } from "firebase/firestore";
+        const SUPABASE_URL = 'https://bwzvgqcfydznuwugyyio.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ3enZncWNmeWR6bnV3dWd5eWlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzNzU2MjcsImV4cCI6MjA4ODk1MTYyN30.SqQJ7w-SsPnm1wN03USOaR6_Fdn0JBzLn8tPhFYJWj8';
+        
+        //const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const TABLE_NAME = 'songmirun_members';
+        const { createClient } = supabase;
+        const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyD1pj4uw9LyUUTtWn_a28ABN0BC-0zkynY",
-            authDomain: "tele-486906.firebaseapp.com",
-            projectId: "tele-486906",
-            storageBucket: "tele-486906.firebasestorage.app",
-            messagingSenderId: "780009385301",
-            appId: "1:780009385301:web:4163b27573a0b5e72e13dc"
-        };
-        const appId = "c_4d3b99e1ebe4d8df_todo_app.html-690";
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
 
         let userNickname = localStorage.getItem('songmirun_nickname') || '';
         let isAdmin = false;
@@ -1163,7 +1145,10 @@
         let memberSearchTerm = '';
         let selectedYear = new Date().getFullYear();
         let selectedGender = '전체';
-        let selectedTeam = '전체';        
+        let selectedTeam = '전체';
+        let selectedGender2 = '전체';
+        let selectedTeam2 = '전체';
+                
         let selectedTarget = '전체'; 
         let selectedType = '전체'; 
         let selectedMonthF = '전체'; 
@@ -1174,6 +1159,20 @@
         let sortConfig = { key: 'log_nickname', direction: 'asc' };
 
         let distChart, paceChart, countChart, timeChart;
+
+        const now = new Date();
+        const currYear = now.getFullYear();
+        const lastYear = currYear - 1;
+        const currMonthStr = `${currYear}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
+        let lastMonthDate = new Date();
+        lastMonthDate.setMonth(now.getMonth() - 1);
+        const lastMonthStr = `${lastMonthDate.getFullYear()}-${(lastMonthDate.getMonth() + 1).toString().padStart(2, '0')}`;
+
+
+
+
+        // 전역 변수 유지
+         let crewMembersList = []; // 전체 리스트용
 
         const showToast = (msg) => {
             const t = document.getElementById('toast');
@@ -1258,7 +1257,7 @@
         };
 
         window.setGenderFilter2 = (gender) => {
-            selectedGender = gender;
+            selectedGender2 = gender;
             ['filter2-all', 'filter2-male', 'filter2-female'].forEach(id => {
                 const el = document.getElementById(id);
                 const isActive = (id === 'filter2-all' && gender === '전체') || (id === 'filter2-male' && gender === '남성') || (id === 'filter2-female' && gender === '여성');
@@ -1280,7 +1279,7 @@
         };
 
         window.setTeamFilter2 = (team) => {
-            selectedTeam = team;
+            selectedTeam2 = team;
             ['filter2-tall', 'filter2-ts', 'filter2-th', 'filter2-tl'].forEach(id => {
                 const el = document.getElementById(id);
                 const isActive = (id === 'filter2-tall' && team === '전체') || (id === 'filter2-ts' && team === '손기정') || (id === 'filter2-th' && team === '황영조')|| (id === 'filter2-tl' && team === '이봉주');
@@ -1294,89 +1293,92 @@
 
         const renderLogs = () => {
             const list = document.getElementById('log-list');
-            const displayLogs = (isAdmin ? allLogs : allLogs.filter(l => l.userName === userNickname))
-                .filter(l => l.date && new Date(l.date).getFullYear() === parseInt(selectedYear))
-                .filter(l => {
-                    if (selectedMonthF === '전체') return true;
-                    // Date 객체의 getMonth()는 0~11을 반환하므로 +1 필요
-                    const logMonth = new Date(l.date).getMonth() + 1;
-                    return logMonth === parseInt(selectedMonthF);
-                })
-                .filter(l => selectedType === '전체' || (l.runType || '번개') === selectedType);
+            if (!list) return;
 
-            const sorted = [...displayLogs].sort((a, b) => {
-                const dateA = new Date(a.date);
-                const dateB = new Date(b.date);
-                return dateB - dateA; // 내림차순
-            })
-            .slice(0, isAdmin ? undefined : 35);
+            // 1. 데이터 필터링 로직 (조건별 가독성 향상)
+            const filteredLogs = allLogs.filter(log => {
+                const isUserMatch = isAdmin || log.user_name === userNickname;
+                if (!isUserMatch || !log.run_date) return false;
 
+                const dateObj = new Date(log.run_date);
+                const isYearMatch = dateObj.getFullYear() === parseInt(selectedYear);
+                const isMonthMatch = selectedMonthF === '전체' || (dateObj.getMonth() + 1) === parseInt(selectedMonthF);
+                const isTypeMatch = selectedType === '전체' || (log.run_type || '번개') === selectedType;
+
+                return isYearMatch && isMonthMatch && isTypeMatch;
+            });
+
+            // 2. 정렬 및 개수 제한
+            const sortedLogs = filteredLogs
+                .sort((a, b) => new Date(b.created_at || b.run_date) - new Date(a.created_at || a.run_date))
+                .slice(0, isAdmin ? undefined : 35);
+
+            // 3. 배지 업데이트
             const lcountBadge = document.getElementById('log-count-badge');
-            if(lcountBadge) lcountBadge.innerText = `${sorted.length}건`;
+            if (lcountBadge) lcountBadge.innerText = `${sortedLogs.length}건`;
 
-
-//onsole.log(`📊 조회된 데이터 건수: ${sorted.length}건`); // 콘솔 출력 추가
-
+            // 4. 상수 정의 (루프 밖으로 이동)
             const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
-            list.innerHTML = sorted.map(l => {
+            const runTypeMap = {
+                '오운완': { icon: '👟', label: '오운완' },
+                '정규': { icon: '📅', label: '정규' },
+                '번개': { icon: '⚡', label: '번개' },
+                '대회': { icon: '🏅', label: '대회' }
+            };
+
+            // 5. HTML 렌더링
+            list.innerHTML = sortedLogs.map(l => {
+                // 시간 및 페이스 계산 (도우미 함수 활용 권장)
                 const hms = minToHMS(l.duration);
-                const timeStr = `${hms.h > 0 ? hms.h + ':' : ''}${hms.m.toString().padStart(2, '0')}:${hms.s.toString().padStart(2, '0')}`;
+                const timeStr = `${hms.h > 0 ? hms.h + ':' : ''}${String(hms.m).padStart(2, '0')}:${String(hms.s).padStart(2, '0')}`;
                 
-                const dist = Number(l.distance || 0);
-                const duration = Number(l.duration || 0);
                 let paceStr = "0'00\"";
-                if (dist > 0) {
-                    const pace = duration / dist;
-                    const mm = Math.floor(pace);
-                    const ss = Math.round((pace - mm) * 60);
-                    paceStr = `${mm}'${ss.toString().padStart(2, '0')}"`;
-                }
-                const dateObj = new Date(l.date);                
-                const dayIndex = dateObj.getDay(); 
-                const dayName = dayNames[dateObj.getDay()]; // 요일 인덱스 추출
-                let dayColorClass = 'text-gray-400'; // 기본 회색
-                if (dayIndex === 1) {
-                    dayColorClass = 'text-green-500 font-medium'; // 월요일: 파란색
-                } else if (dayIndex === 0 || dayIndex === 6) {
-                    dayColorClass = 'text-red-500 font-medium'; // 일요일, 토요일: 빨간색
+                if (l.distance > 0) {
+                    const pace = l.duration / l.distance;
+                    paceStr = `${Math.floor(pace)}'${String(Math.round((pace % 1) * 60)).padStart(2, '0')}"`;
                 }
 
-                const runTypeMap = {
-                    '오운완': { icon: '👟', label: '오운완' },
-                    '정규': { icon: '📅', label: '정규' },
-                    '번개': { icon: '⚡', label: '번개' },
-                    '대회': { icon: '🏅', label: '대회' }
-                };
+                const dateObj = new Date(l.run_date);
+                const dayIndex = dateObj.getDay();
+                const typeInfo = runTypeMap[l.run_type] || runTypeMap['번개'];
 
-                const defaultType = { icon: '⚡', label: '번개' };
-                const typeInfo = runTypeMap[l.runType] || defaultType;
+                // 요일 색상 결정
+                const dayColorClass = (dayIndex === 0 || dayIndex === 6) ? 'text-red-500 font-medium' : 
+                                    (dayIndex === 1) ? 'text-green-500 font-medium' : 'text-gray-400';
 
                 return `
-                <div class="bg-white p-3 rounded-2xl border border-brand-100 shadow-sm relative">
-                    <div class="flex justify-between items-center mb-1"> <span class="text-[9px] font-black ${dayColorClass} bg-gray-50 px-2 py-0 rounded-full leading-none flex items-center h-4"> ${l.date} (${dayName}) | ${typeInfo.icon} ${typeInfo.label}
-                        </span>
-                        <div class="flex gap-1"> <button onclick="window.editLog('${l.id}')" class="text-gray-300 hover:text-brand-500 p-0.5"> <i class="fa-solid fa-pen-to-square text-[10px]"></i> </button>
-                            <button onclick="window.deleteLog('${l.id}')" class="text-gray-300 hover:text-red-500 p-0.5"> <i class="fa-solid fa-trash-can text-[10px]"></i>
-                            </button>
+                    <div class="bg-white p-3 rounded-2xl border border-brand-100 shadow-sm relative">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-[9px] font-black ${dayColorClass} bg-gray-50 px-2 py-0 rounded-full leading-none flex items-center h-4">
+                                ${l.run_date} (${dayNames[dayIndex]}) | ${typeInfo.icon} ${typeInfo.label}
+                            </span>
+                            <div class="flex gap-1">
+                                <button onclick="window.editLog('${l.log_id}')" class="text-gray-300 hover:text-brand-500 p-0.5"><i class="fa-solid fa-pen-to-square text-[10px]"></i></button>
+                                <button onclick="window.deleteLog('${l.log_id}')" class="text-gray-300 hover:text-red-500 p-0.5"><i class="fa-solid fa-trash-can text-[10px]"></i></button>
+                            </div>
                         </div>
-                    </div>
-                    <div class="flex items-center gap-1 mb-1">
-                        <div class="w-5 h-5 bg-brand-100 rounded-full flex items-center justify-center text-[8px] font-bold text-brand-600">${l.userName?.charAt(0) || '?'}</div>
-                        <button onclick="window.openUserStatModal('${l.userName}')" class="text-xs font-bold text-gray-700">
-                                ${l.userName}
-                            </button>
-                    </div>
-                    <div class="grid grid-cols-5 gap-1 text-center bg-brand-50/50 p-2 rounded-xl">
-                        <div><p class="text-[7px] text-gray-400 font-bold">Km</p><p class="text-[11px] font-black">${l.distance}</p></div>
-                        <div><p class="text-[7px] text-gray-400 font-bold">Time</p><p class="text-[11px] font-black">${timeStr}</p></div>
-                        <div><p class="text-[7px] text-emerald-600 font-bold">Pace</p><p class="text-[11px] font-black text-emerald-600">${paceStr}</p></div>
-                        <div><p class="text-[7px] text-gray-400 font-bold text-red-400">Bpm</p><p class="text-[11px] font-black text-red-500">${l.bpm}</p></div>
-                        <div><p class="text-[7px] text-gray-400 font-bold">Cad</p><p class="text-[11px] font-black text-brand-600">${l.cadence}</p></div>
-                    </div>
-                </div>
-            `;}).join('') || '<div class="p-10 text-center text-gray-300 text-xs font-bold">활동 기록이 없습니다.</div>';
+                        <div class="flex items-center gap-1 mb-1">
+                            <div class="w-5 h-5 bg-brand-100 rounded-full flex items-center justify-center text-[8px] font-bold text-brand-600">${(l.user_name || '?').charAt(0)}</div>
+                            <button onclick="window.openUserStatModal('${l.user_name}')" class="text-xs font-bold text-gray-700">${l.user_name}</button>
+                        </div>
+                        <div class="grid grid-cols-5 gap-1 text-center bg-brand-50/50 p-2 rounded-xl">
+                            ${renderStatItem("Km", l.distance, "text-gray-400")}
+                            ${renderStatItem("Time", timeStr, "text-gray-400")}
+                            ${renderStatItem("Pace", paceStr, "text-emerald-600")}
+                            ${renderStatItem("Bpm", l.bpm || 0, "text-red-400", "text-red-500")}
+                            ${renderStatItem("Cad", l.cadence || 0, "text-gray-400", "text-brand-600")}
+                        </div>
+                    </div>`;
+            }).join('') || '<div class="p-10 text-center text-gray-300 text-xs font-bold">활동 기록이 없습니다.</div>';
         };
 
+        // 컴포넌트화를 위한 작은 헬퍼 함수
+        const renderStatItem = (label, value, labelCol, valCol = "") => `
+            <div>
+                <p class="text-[7px] ${labelCol} font-bold">${label}</p>
+                <p class="text-[11px] font-black ${valCol}">${value}</p>
+            </div>
+        `;
 
 
         window.setTypeFilter = (type) => {
@@ -1390,7 +1392,7 @@
             renderLogs();
         };
 
-///////mo- start ==== 기록월
+        ///////mo- start ==== 기록월
         window.setMonthFilter = (month) => {
             selectedMonthF = month;
             const monthIds = ['month-all', ...Array.from({length: 12}, (_, i) => `month-${i + 1}`)];
@@ -1430,7 +1432,7 @@
             // 기존에 버튼 클릭 시 호출하던 함수를 그대로 연결합니다.
             window.setMonthFilter(val === '전체' ? '전체' : Number(val));
         };
-///////mo- end ==== 기록월
+        ///////mo- end ==== 기록월
 
         let currentUser = null;
         let userData = { name: '', team: '' };
@@ -1440,187 +1442,122 @@
         let dataScope = 'avg'; 
         
         window.updateUI_Team = () => {
-            const filtered = allLogs
-                    .filter(l => l.date && new Date(l.date).getFullYear() === parseInt(selectedYear))
-                    .filter(l => {
-                        if (selectedMonthT === '전체') return true;
-                        const logMonth = new Date(l.date).getMonth() + 1;
-                        return logMonth === parseInt(selectedMonthT);
-                    });
-
-            const genderMap = {};
-            const teamMap = {};
-            crewMembers.forEach(m => {
-                genderMap[m.nickname] = m.gender;
-                teamMap[m.nickname] = m.team;
+            // 1. 데이터 필터링 (통합 순회)
+            const filtered = allLogs.filter(l => {
+                if (!l.run_date) return false;
+                const dateObj = new Date(l.run_date);
+                const isYearMatch = dateObj.getFullYear() === parseInt(selectedYear);
+                const isMonthMatch = selectedMonthT === '전체' || (dateObj.getMonth() + 1) === parseInt(selectedMonthT);
+                return isYearMatch && isMonthMatch;
             });
 
             const teams = {};
+            const genders = {};
             let myStats = { dist: 0, time: 0, count: 0 };
 
+            // 2. 집계 로직 통합 (한 번의 순회로 모든 데이터 처리)
             filtered.forEach(r => {
-                const teamName = crewMembers[r.userName] || '무소속';
+                const memberInfo = crewMembers[r.user_name] || {};
+                const teamName = memberInfo.team || '무소속';
+                const genderName = memberInfo.gender || '미설정';
+
+                // 팀 데이터 집계
                 if (!teams[teamName]) {
                     teams[teamName] = { 
-                        name: teamName,
-                        dist: 0, 
-                        time: 0, 
-                        count: 0, 
+                        name: teamName, dist: 0, time: 0, count: 0, 
                         color: TEAM_COLORS[teamName] || '#94a3b8', 
                         members: new Set() 
                     };
                 }
-                teams[teamName].dist += r.distance;
-                teams[teamName].time += r.duration;
+                teams[teamName].dist += Number(r.distance || 0);
+                teams[teamName].time += Number(r.duration || 0);
                 teams[teamName].count++;
-                teams[teamName].members.add(r.userName);
+                teams[teamName].members.add(r.user_name);
 
-                if (r.userName === userNickname) {
-                    myStats.dist += r.distance;
-                    myStats.time += r.duration;
+                // 성별 데이터 집계
+                if (!genders[genderName]) {
+                    genders[genderName] = { 
+                        name: genderName, dist: 0, time: 0, count: 0, 
+                        color: genderName === '남성' ? '#6366f1' : (genderName === '여성' ? '#f43f5e' : '#fbbf24'),
+                        members: new Set() 
+                    };
+                }
+                genders[genderName].dist += Number(r.distance || 0);
+                genders[genderName].time += Number(r.duration || 0);
+                genders[genderName].count++;
+                genders[genderName].members.add(r.user_name);
+
+                // 내 기록 합산
+                if (r.user_name === userNickname) {
+                    myStats.dist += Number(r.distance || 0);
+                    myStats.time += Number(r.duration || 0);
                     myStats.count++;
                 }
             });
 
+            // 3. 렌더링 헬퍼 함수 (중복되는 리스트 UI 생성 로직 통합)
+            const renderList = (targetId, dataObj, titlePrefix = "팀") => {
+                const targetList = document.getElementById(targetId);
+                if (!targetList) return;
 
-            const myTeamName = crewMembers[userNickname] || myTeam;
-            const myTeamData = teams[myTeamName] || { dist: 0, time: 0, count: 0, members: new Set(), color: TEAM_COLORS[myTeamName] || '#94a3b8' };
-            
-            const list = document.getElementById('team-list');
-            if (list) {
-                list.innerHTML = '';
-                const sorted = Object.entries(teams).sort((a,b) => {
-                    const key = currentMetric === 'dist' ? 'dist' : (currentMetric === 'time' ? 'time' : 'count');
-                    return b[1][key] - a[1][key];
-                });
+                const dataArray = Object.values(dataObj).sort((a, b) => b[currentMetric] - a[currentMetric]);
+                const maxVal = Math.max(...dataArray.map(d => d[currentMetric]), 1);
 
-                const maxKey = currentMetric === 'dist' ? 'dist' : (currentMetric === 'time' ? 'time' : 'count');
-                const maxVal = Math.max(...Object.values(teams).map(t => t[maxKey]), 1);
+                targetList.innerHTML = dataArray.map(data => {
+                    const hms = minToHMS(data.time);
+                    const timeStr = `${hms.h > 0 ? hms.h + ':' : ''}${String(hms.m).padStart(2, '0')}:${String(hms.s).padStart(2, '0')}`;
+                    const percent = (data[currentMetric] / maxVal) * 100;
 
-               sorted.forEach(([name, data]) => {
-
-                const hms= minToHMS(data.time);
-                const timeStr = `${hms.h > 0 ? hms.h + ':' : ''}${hms.m.toString().padStart(2, '0')}:${hms.s.toString().padStart(2, '0')}`;
-
-                    list.innerHTML += 
-                    `
-                        <div class="space-y-1 bg-slate-50 p-1 rounded-xl"> 
-                            <div class="flex justify-between items-center bg-slate-50">
-                                <div class="flex items-center gap-1 bg-slate-50">
+                    return `
+                        <div class="space-y-1 bg-slate-50 p-1 rounded-xl mb-2"> 
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center gap-1">
                                     <div class="w-2 h-2 rounded-full" style="background-color: ${data.color}"></div>
-                                    <span class="text-[12px] font-black text-slate-800">팀:${name}</span>
+                                    <span class="text-[12px] font-black text-slate-800">${titlePrefix}:${data.name}</span>
                                     <span class="text-[9px] font-bold text-slate-400">${data.members.size}인</span>
                                 </div>
-                                <div class="flex gap-1 bg-slate-50">
-                                    <span class="badge-stat ${currentMetric==='dist'?'highlight':''}">
-                                        ${data.dist.toFixed(1)}km
-                                    </span>
-                                    <span class="badge-stat ${currentMetric==='time'?'highlight':''}">
-                                        ${timeStr}
-                                    </span>
-                                    <span class="badge-stat ${currentMetric==='count'?'highlight':''}">
-                                        ${data.count}회
-                                    </span>
+                                <div class="flex gap-1">
+                                    <span class="badge-stat ${currentMetric==='dist'?'highlight':''}">${data.dist.toFixed(1)}km</span>
+                                    <span class="badge-stat ${currentMetric==='time'?'highlight':''}">${timeStr}</span>
+                                    <span class="badge-stat ${currentMetric==='count'?'highlight':''}">${data.count}회</span>
                                 </div>
                             </div>
-
-                            <div class="h-2.5 bg-slate/60 rounded-full overflow-hidden">
-                                <div class="h-full transition-all duration-1000 ease-out rounded-full bg-rose-50" 
-                                    style="width: ${(data[maxKey]/maxVal)*100}%; background-color: ${data.color}"></div>
-                            </div>
-                        </div>
-                    `;
-                });
-            }
-
-
-            const genders = {};
-            filtered.forEach(r => {
-                const genderName = r.gender || genderMap[r.userName] || '기타';
-                if (!genders[genderName]) {
-                    genders[genderName] = { 
-                        name: genderName, 
-                        dist: 0, 
-                        time: 0, 
-                        count: 0,
-                        // 남성/여성에 따른 바 컬러 지정
-                        //color: genderName === '남성' ? '#3b82f6' : (genderName === '여성' ? '#ec4899' : '#94a3b8')
-                        color: genderName === '남성' ? '#6366f1' : (genderName === '여성' ? '#f43f5e' : '#fbbf24')                        
-                        , members: new Set()
-                    };
-                }
-                genders[genderName].dist += r.distance;
-                genders[genderName].time += r.duration;
-                genders[genderName].count++;
-                genders[genderName].members.add(r.userName);
-            });
-
-
-            const listGender = document.getElementById('team-list-gender');
-            if (listGender) {
-                listGender.innerHTML = '';
-                const sorted = Object.entries(genders).sort((a,b) => {
-                    const key = currentMetric === 'dist' ? 'dist' : (currentMetric === 'time' ? 'time' : 'count');
-                    return b[1][key] - a[1][key];
-                });
-
-                const maxKey = currentMetric === 'dist' ? 'dist' : (currentMetric === 'time' ? 'time' : 'count');
-                const maxVal = Math.max(...Object.values(genders).map(t => t[maxKey]), 1);
-
-               sorted.forEach(([name, data]) => {
-
-                const hms= minToHMS(data.time);
-                const timeStr = `${hms.h > 0 ? hms.h + ':' : ''}${hms.m.toString().padStart(2, '0')}:${hms.s.toString().padStart(2, '0')}`;
-
-                    listGender.innerHTML += 
-                    `
-                        <div class="space-y-1 bg-slate-50 p-1 rounded-xl"> 
-                            <div class="flex justify-between items-center bg-slate-50">
-                                <div class="flex items-center gap-1 bg-slate-50">
-                                    <div class="w-2 h-2 rounded-full" style="background-color: ${data.color}"></div>
-                                    <span class="text-[12px] font-black text-slate-800">팀:${name}</span>
-                                    <span class="text-[9px] font-bold text-slate-400">${data.members.size}인</span>
-                                </div>
-                                <div class="flex gap-1 bg-slate-50">
-                                    <span class="badge-stat ${currentMetric==='dist'?'highlight':''}">
-                                        ${data.dist.toFixed(1)}km
-                                    </span>
-                                    <span class="badge-stat ${currentMetric==='time'?'highlight':''}">
-                                        ${timeStr}
-                                    </span>
-                                    <span class="badge-stat ${currentMetric==='count'?'highlight':''}">
-                                        ${data.count}회
-                                    </span>
+                            <div class="h-2 bg-slate-200/60 rounded-full overflow-hidden">
+                                <div class="h-full transition-all duration-1000 ease-out" 
+                                    style="width: ${percent}%; background-color: ${data.color}; 
+                                    ${targetId.includes('gender') ? 'background: repeating-linear-gradient(45deg, rgba(255,255,255,0.1) 0px, rgba(255,255,255,0.1) 6px, transparent 6px, transparent 12px), ' + data.color : ''}">
                                 </div>
                             </div>
+                        </div>`;
+                }).join('');
+            };
 
-                        </div>
-                    `;
-                    listGender.innerHTML += `
-                        <div class="space-y-1 bg-slate-50 p-1 rounded-xl"> 
-                            <div class="h-1.5 bg-slate-200/60 rounded-full overflow-hidden">
-                                <div class="h-full transition-all duration-1000 ease-out rounded-full" 
-                                    style="width: ${(data[maxKey] / maxVal) * 100}%; 
-                                            background: repeating-linear-gradient(45deg, rgba(255,255,255,0.2) 0px, rgba(255,255,255,0.2) 6px, transparent 6px, transparent 12px), 
-                                                        linear-gradient(90deg, ${data.color}, ${data.color});">
-                                </div>
-                            </div>
-                        </div>
-                    `;
+            // 4. 리스트 실행
+            renderList('team-list', teams, "팀");
+            renderList('team-list-gender', genders, "성별");
 
-                });
-            }
+            // 5. 상단 카드 및 요약 정보 업데이트
+            const myTeamName = crewMembers[userNickname]?.team || myTeam;
+            const myTeamData = teams[myTeamName] || { dist: 1, time: 1, count: 1 };
 
+            const updateRatio = (id, val, total) => {
+                const el = document.getElementById(id);
+                if (el) el.innerText = ((val / (total || 1)) * 100).toFixed(1) + '%';
+            };
 
-            document.getElementById('card-dist-ratio').innerText = ((myStats.dist / (myTeamData.dist || 1)) * 100).toFixed(1) + '%';
-            document.getElementById('card-time-ratio').innerText = ((myStats.time / (myTeamData.time || 1)) * 100).toFixed(1) + '%';
-            document.getElementById('card-count-ratio').innerText = ((myStats.count / (myTeamData.count || 1)) * 100).toFixed(1) + '%';
+            updateRatio('card-dist-ratio', myStats.dist, myTeamData.dist);
+            updateRatio('card-time-ratio', myStats.time, myTeamData.time);
+            updateRatio('card-count-ratio', myStats.count, myTeamData.count);
             
-            const myPaceSec = myStats.dist > 0 ? (myStats.time / myStats.dist) * 60 : 0;
-            document.getElementById('card-avg-pace').innerText = `${Math.floor(myPaceSec/60)}'${Math.floor(myPaceSec%60).toString().padStart(2,'0')}"`;
+            const avgPaceEl = document.getElementById('card-avg-pace');
+            if (avgPaceEl) {
+                const myPaceSec = myStats.dist > 0 ? (myStats.time / myStats.dist) * 60 : 0;
+                avgPaceEl.innerText = `${Math.floor(myPaceSec/60)}'${Math.floor(myPaceSec%60).toString().padStart(2,'0')}"`;
+            }
 
             renderChart(teams, myStats);
         };
+
 
         const TEAM_COLORS = { 
             '황영조': '#f87171', 
@@ -1657,11 +1594,9 @@
                 o.innerText = ` ${i}월 `;
                 if (i === currentMontht) o.selected = true;
                 targetSelect.appendChild(o);
-
                 //만약 페이지 로드 시점에 currentMontht가 아니라 "전체"를 기본값으로 보여주고 싶다면, 옵션 생성 부분의 
                 //if (i === currentMontht) o.selected = true; 부분을 
                 //삭제하고 mot1.value = '전체';를 마지막에 추가하시면 됩니다.
-
             }
         }
 
@@ -1720,6 +1655,7 @@
             return `${m}:${s.toString().padStart(2, '0')}`;
         };
 
+
         function renderChart(teams, myStats) {
             const canvas = document.getElementById('teamChart');
             if (!canvas) return;
@@ -1729,36 +1665,43 @@
             let dataPoints = [];
             let colors = [];
 
-            if (dataScope === 'me') {
-                labels = ['내 기록', '팀 평균'];
-                //const myTeamName = allMembers[userData.name] || userData.team;
-                const myTeamName = crewMembers[userNickname] || myTeam;
-                const td = teams[myTeamName] || { dist: 0, time: 0, count: 1, members: new Set([1]), color: TEAM_COLORS[myTeamName] || '#3b82f6' };
-                const mCount = td.members.size || 1;
+            // 현재 선택된 지표에 따른 값 추출 헬퍼 함수
+            const getVal = (obj) => {
+                if (currentMetric === 'dist') return obj.dist || 0;
+                if (currentMetric === 'time') return obj.time || 0;
+                return obj.count || 0;
+            };
 
-                if (currentMetric === 'dist') {
-                    dataPoints = [myStats.dist, td.dist / mCount];
-                } else if (currentMetric === 'time') {
-                    dataPoints = [myStats.time, td.time / mCount];
-                } else {
-                    dataPoints = [myStats.count, td.count / mCount];
-                }
-                colors = [td.color, '#e2e8f0'];
+            if (dataScope === 'me') {
+                // [수정] crewMembers[userNickname]은 객체이므로 .team까지 접근해야 합니다.
+                const myTeamName = crewMembers[userNickname]?.team || myTeam || '무소속';
+                
+                // 해당 팀의 데이터 가져오기 (없을 경우 기본값)
+                const td = teams[myTeamName] || { dist: 0, time: 0, count: 0, members: new Set(), color: '#e2e8f0' };
+                
+                // [핵심] 팀 평균 계산: 팀 전체 합산 / 실제 팀원 수
+                const memberCount = td.members.size > 0 ? td.members.size : 1;
+                const teamAvg = getVal(td) / memberCount;
+
+                labels = ['내 기록', `${myTeamName} 평균`];
+                dataPoints = [getVal(myStats), teamAvg];
+                colors = [TEAM_COLORS[myTeamName] || '#3b82f6', '#e2e8f0'];
+
             } else {
-                // 팀 객체의 키 순서대로 데이터를 추출하여 불일치 방지
+                // 전체 팀 비교 모드
                 const teamEntries = Object.values(teams);
-                //labels = teamEntries.map(t => t.name);
-                labels = teamEntries.map(t => `팀: ${t.name}`);
+                labels = teamEntries.map(t => t.name);
 
                 dataPoints = teamEntries.map(t => {
-                    const mCount = t.members.size || 1;
-                    const val = currentMetric === 'dist' ? t.dist : (currentMetric === 'time' ? t.time : t.count);
-                    return dataScope === 'avg' ? val / mCount : val;
+                    const val = getVal(t);
+                    const memberCount = t.members.size > 0 ? t.members.size : 1;
+                    // 'avg' 모드면 평균값, 아니면 총합(sum)
+                    return dataScope === 'avg' ? val / memberCount : val;
                 });
-                colors = teamEntries.map(t => t.color);
+                colors = teamEntries.map(t => t.color || '#94a3b8');
             }
 
-            // 차트 재생성
+            // 차트 재생성 로직
             if (chartInstance) chartInstance.destroy();
             chartInstance = new Chart(ctx, {
                 type: 'doughnut',
@@ -1774,27 +1717,32 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    cutout: '70%',
+                    cutout: '75%', // 도넛 두께를 조금 더 얇게 조절
                     plugins: {
                         legend: {
                             position: 'bottom',
                             labels: {
                                 usePointStyle: true,
-                                font: { size: 10, weight: 'bold' },
+                                font: { size: 11, weight: '600' },
                                 padding: 15
                             }
                         },
                         tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
                             callbacks: {
                                 label: (context) => {
-                                    let label = context.label || '';
-                                    let value = context.parsed;
-                                    let displayVal = value.toFixed(1);
-                                    if (currentMetric === 'time') displayVal = formatTime2(value);
-                                    else if (currentMetric === 'dist') displayVal += 'km';
-                                    else {
-                                        displayVal = value.toFixed(1) + '회';}
-                                    return `${label}: ${displayVal}`;
+                                    const value = context.parsed;
+                                    let displayVal = "";
+                                    
+                                    if (currentMetric === 'time') {
+                                        displayVal = typeof formatTime2 === 'function' ? formatTime2(value) : value.toFixed(1);
+                                    } else if (currentMetric === 'dist') {
+                                        displayVal = value.toFixed(2) + 'km';
+                                    } else {
+                                        displayVal = value.toFixed(1) + '회';
+                                    }
+                                    return ` ${context.label}: ${displayVal}`;
                                 }
                             }
                         }
@@ -1803,12 +1751,7 @@
             });
         }
 
-
-
-        window.syncAndRefresh = () => updateUI_Team();
-
-
-
+       //window.syncAndRefresh = () => updateUI_Team();
 
         // 도시 데이터 (마라톤 성지 포함)
         const DESTINATIONS = [
@@ -1836,7 +1779,7 @@
         ];
 
         window.renderChallengeModal = (title, distance) => {
-            const currentYearLogs = allLogs.filter(l => l.date && new Date(l.date).getFullYear() === parseInt(selectedYear));
+            const currentYearLogs = allLogs.filter(l => l.run_date && new Date(l.run_date).getFullYear() === parseInt(selectedYear));
             const totalDist = currentYearLogs.reduce((sum, l) => sum + Number(l.distance || 0), 0);
             const currentDist = parseFloat(totalDist);
             if (isNaN(currentDist) || currentDist < 0) return;
@@ -1845,8 +1788,11 @@
             const next = DESTINATIONS.find(d => d.dist > currentDist) || DESTINATIONS[DESTINATIONS.length - 1];
 
             document.getElementById('modal-title').innerText = selectedYear+'년 송미런 여정 경로';
-            document.getElementById('cur-val-inner').innerText = currentDist.toLocaleString();
-            
+            document.getElementById('cur-val-inner').innerText = 
+                currentDist.toLocaleString(undefined, { 
+                    minimumFractionDigits: 1, 
+                    maximumFractionDigits: 1 
+                }); 
             const routeText = `송도 → ${reached.name === '송도' ? '' : reached.name + ' → '}${next.name}`;
             document.getElementById('route-text').innerText = reached.name === next.name ? `송도 → ... → ${reached.name} (완주!)` : routeText;
             
@@ -1867,8 +1813,8 @@
             if (next === reached) {
                 document.getElementById('next-challenge-text').innerText = `대단합니다! 더 이상 갈 곳이 없을 정도로 멀리 오셨네요. 이제 당신은 세계적인 마라토너입니다.`;
             } else {
-                const remain = (next.dist - currentDist).toFixed(1);
-                document.getElementById('next-challenge-text').innerHTML = `다음 목표 <span class="text-blue-600 font-black">${next.name}</span>까지 <span class="text-blue-600 font-black">${remain}km</span> 남았습니다.`;
+                const remain = (next.dist - currentDist);
+                document.getElementById('next-challenge-text').innerHTML = `다음 목표 <span class="text-blue-600 font-black">${next.name}</span>까지 <span class="text-blue-600 font-black">${remain.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}km</span> 남았습니다.`;
             }
 
             document.getElementById('challenge-modal').classList.remove('hidden');
@@ -1929,19 +1875,23 @@
             const genderMap = {};
             const teamMap = {};
 
-            crewMembers.forEach(m => {
-                genderMap[m.nickname] = m.gender;
-                teamMap[m.nickname] = m.team;
-            });
-
+            if (crewMembers && typeof crewMembers === 'object' && !Array.isArray(crewMembers)) {
+                Object.entries(crewMembers).forEach(([nickname, info]) => {
+                    // nickname은 "이봉주", "Ben2" 등이고 info는 {team: "...", gender: "..."} 입니다.
+                    genderMap[nickname] = info.gender || '미설정7';
+                    teamMap[nickname] = info.team || '무소속7';
+                });
+            }
 
             const filteredLogs = allLogs.filter(l => {
-                const isCorrectYear = l.date && new Date(l.date).getFullYear() === parseInt(selectedYear);
-                const userGender = genderMap[l.userName] || '미지정';
-                const userTeam = teamMap[l.userName] || '미지정';
+           
+                const isCorrectYear = l.run_date && new Date(l.run_date).getFullYear() === parseInt(selectedYear);
+                const userGender = genderMap[l.user_name] || '미지정';
+                const userTeam = teamMap[l.user_name] || '미지정';
                 const isCorrectGender = selectedGender === '전체' || userGender === selectedGender;
                 const isCorrectTeam = selectedTeam === '전체' || userTeam === selectedTeam;
-                const isCorrectTarget = selectedTarget === '전체' || l.userName === userNickname;
+                const isCorrectTarget = selectedTarget === '전체' || l.user_name === userNickname;
+
                 return isCorrectYear && isCorrectGender && isCorrectTarget && isCorrectTeam;
             });
 
@@ -1950,7 +1900,7 @@
             filteredLogs.forEach(l => {
                 const hms= minToHMS(l.duration);
                 const timeStr = `${hms.h > 0 ? hms.h + ':' : ''}${hms.m.toString().padStart(2, '0')}:${hms.s.toString().padStart(2, '0')}`;
-                const m = new Date(l.date).getMonth();
+                const m = new Date(l.run_date).getMonth();
                 distData[m] += Number(l.distance || 0);
                 timeData[m] += Number(l.duration || 0);
                 countData[m] += 1;
@@ -2039,9 +1989,10 @@
                 }
             });
         };
+//monthLogs
 
         const renderRankingLists = () => {
-            const now = new Date();
+             const now = new Date();
             let year = now.getFullYear();
             let month = now.getMonth() + 1;
             if (selectedRankingPeriod === 'last') {
@@ -2053,29 +2004,70 @@
             const teamMap = {};
             const genderMap = {};
             
-            crewMembers.forEach(m => {
-                genderMap[m.nickname] = m.gender;
-                teamMap[m.nickname] = m.team;
+            Object.entries(crewMembers).forEach(([nickname, info]) => {
+                // nickname: "이봉주", "Ben2" 등 (Key)
+                // info: { team: "...", gender: "..." } (Value)
+
+                if (nickname) {
+                    genderMap[nickname] = info.gender || '미설정';
+                    teamMap[nickname] = info.team || '무소속';
+                }
             });
 
             const monthLogs = allLogs.filter(l => {
-                const isCorrectMonth = l.date && l.date.startsWith(prefix);
-                const userGender = genderMap[l.userName] || '미지정';
-                const userTeam = teamMap[l.userName] || '미지정';
-                const isCorrectTeam = selectedTeam === '전체' || userTeam === selectedTeam;
-                const isCorrectGender = selectedGender === '전체' || userGender === selectedGender;
-                return isCorrectMonth && isCorrectTeam && isCorrectGender;
+                // 1. 날짜 필드 확인 (l.date 대신 l.run_date)
+                const isCorrectMonth = l.run_date && l.run_date.startsWith(prefix);
+                
+                // 2. 유저 이름 필드 확인 (l.userName 대신 l.user_name)
+                // 앞서 만든 genderMap과 teamMap의 Key인 닉네임과 매칭됩니다.
+                const userGender = genderMap[l.user_name] || '미지정';
+                const userTeam = teamMap[l.user_name] || '미지정';
+                
+                // 3. 필터 조건
+                const isCorrectTeam2 = selectedTeam2 === '전체' || userTeam === selectedTeam2;
+                const isCorrectGender2 = selectedGender2 === '전체' || userGender === selectedGender2;
+                
+                return isCorrectMonth && isCorrectTeam2 && isCorrectGender2;
             });
 
-
             const userAgg = {};
+            // 1. 월간 로그 데이터를 순회하며 사용자별로 그룹화
+            // 1. 월간 로그 순회 및 사용자별 그룹화
             monthLogs.forEach(l => {
-                const name = l.userName;
-                if (!userAgg[name]) userAgg[name] = { distance: 0, duration: 0, count: 0 };
+                const name = l.user_name;
+                if (!name) return; // 이름 없는 데이터 방지
+
+                if (!userAgg[name]) {
+                    userAgg[name] = { 
+                        distance: 0, 
+                        duration: 0, 
+                        count: 0 
+                    };
+                }
+
+                // 값 합산 (산술 연산의 안정성을 위해 Number와 기본값 0 처리)
                 userAgg[name].distance += Number(l.distance || 0);
                 userAgg[name].duration += Number(l.duration || 0);
                 userAgg[name].count += 1;
             });
+
+            // 2. 집계 결과를 활용한 랭킹 배열 생성 (정렬 포함)
+            const userRanking = Object.entries(userAgg).map(([name, stats]) => ({
+                name,
+                ...stats,
+                // 평균 페이스 계산 (분/km)
+                avgPace: stats.distance > 0 ? (stats.duration / stats.distance) : 0,
+                // 팀 정보 결합 (앞서 만든 teamMap 활용)
+                team: teamMap[name] || '무소속'
+            })).sort((a, b) => b.distance - a.distance); // 거리순 내림차순 정렬
+
+            // 3. (선택 사항) 집계된 데이터를 배열로 변환하여 거리순 정렬 (랭킹용)
+            const rankingList = Object.entries(userAgg).map(([name, stats]) => ({
+                name,
+                ...stats,
+                avgPace: stats.distance > 0 ? (stats.duration / stats.distance) : 0
+            })).sort((a, b) => b.distance - a.distance);
+
 
             const drawRankList = (elementId, data, unit, isTimeFormat = false) => {
                 const container = document.getElementById(elementId);
@@ -2127,22 +2119,22 @@
             const countRank = Object.entries(userAgg).map(([name, obj]) => ({ name, val: obj.count })).sort((a,b) => b.val - a.val);
             drawRankList('rank-count-list', countRank, '회');
             
-            const singleDistRank = monthLogs.map(l => ({ name: l.userName, val: Number(l.distance || 0).toFixed(3) })).sort((a,b) => b.val - a.val);
+            const singleDistRank = monthLogs.map(l => ({ name: l.user_name, val: Number(l.distance || 0).toFixed(3) })).sort((a,b) => b.val - a.val);
             drawRankList('rank-single-dist-list', singleDistRank, 'km');
             
-            const singleTimeRank = monthLogs.map(l => ({ name: l.userName, valRaw: Number(l.duration || 0), val: Number(l.duration || 0).toFixed(0) })).sort((a,b) => b.valRaw - a.valRaw);
+            const singleTimeRank = monthLogs.map(l => ({ name: l.user_name, valRaw: Number(l.duration || 0), val: Number(l.duration || 0).toFixed(0) })).sort((a,b) => b.valRaw - a.valRaw);
             drawRankList('rank-single-time-list', singleTimeRank, '', true);
         };
 
         const renderStats = () => {
-            const currentYearLogs = allLogs.filter(l => l.date && new Date(l.date).getFullYear() === parseInt(selectedYear));
+            const currentYearLogs = allLogs.filter(l => l.run_date && new Date(l.run_date).getFullYear() === parseInt(selectedYear));
             const totalDist = currentYearLogs.reduce((sum, l) => sum + Number(l.distance || 0), 0);
             const totalTime = currentYearLogs.reduce((sum, l) => sum + Number(l.duration || 0), 0);
             const totalCount = currentYearLogs.length;
 
-            const myYearLogs = allLogs.filter(l => l.date 
-                && new Date(l.date).getFullYear() === parseInt(selectedYear) 
-                &&    l.userName === userNickname);
+            const myYearLogs = allLogs.filter(l => l.run_date 
+                && new Date(l.run_date).getFullYear() === parseInt(selectedYear) 
+                &&    l.user_name === userNickname);
 
             const myDist = myYearLogs.reduce((sum, l) => sum + Number(l.distance || 0), 0);
             const myTime = myYearLogs.reduce((sum, l) => sum + Number(l.duration || 0), 0);
@@ -2197,13 +2189,34 @@
         };
 
         const getFilteredMembers = () => {
-           let filtered = crewMembers.filter(m => (m.nickname + (m.log_nickname || '') + m.gender+ m.team + m.joinDate).toLowerCase().includes(memberSearchTerm.toLowerCase()));
-             filtered.sort((a, b) => {
-                let vA = a[sortConfig.key] || '', vB = b[sortConfig.key] || '';
+            // 1. 검색어가 포함된 멤버 필터링
+            let filtered = crewMembersList.filter(m => {
+                // 모든 필드를 합쳐서 검색 (null/undefined 대비)
+                const searchStr = (
+                    (m.nickname || '') + 
+                    (m.log_nickname || '') + 
+                    (m.gender || '') + 
+                    (m.team || '') + 
+                    (m.join_date || '')
+                ).toLowerCase();
+                
+                return searchStr.includes(memberSearchTerm.toLowerCase());
+            });
+
+            // 2. 정렬 로직
+            filtered.sort((a, b) => {
+                let vA = a[sortConfig.key] ?? ''; // nullish coalescing 사용
+                let vB = b[sortConfig.key] ?? '';
+
+                // 숫자형 데이터일 경우를 대비한 처리
+                if (typeof vA === 'string') vA = vA.toLowerCase();
+                if (typeof vB === 'string') vB = vB.toLowerCase();
+
                 if (vA < vB) return sortConfig.direction === 'asc' ? -1 : 1;
                 if (vA > vB) return sortConfig.direction === 'asc' ? 1 : -1;
                 return 0;
             });
+
             return filtered;
         };
 
@@ -2223,8 +2236,8 @@
                     </td>
                     <td class="px-3 py-0 text-[10px] font-bold ${m.team === '남성' ? 'text-blue-500' : 'text-pink-500'} leading-tight">${m.team}</td>
                     <td class="px-3 py-0 text-[10px] font-bold ${m.gender === '남성' ? 'text-blue-500' : 'text-pink-500'} leading-tight">${m.gender}</td>
-                    <td class="px-3 py-0 text-[10px] text-gray-400 font-medium leading-tight">${m.joinDate}</td>
-                    <td class="px-3 py-0 text-[10px] text-brand-600 font-black italic leading-tight">${m.lastLogin || '-'}</td>
+                    <td class="px-3 py-0 text-[10px] text-gray-400 font-medium leading-tight">${m.join_date}</td>
+                    <td class="px-3 py-0 text-[10px] text-brand-600 font-black italic leading-tight">${m.updated_at.slice(0, 10)}</td>
                     <td class="px-3 py-0">
                         <div class="flex gap-1 justify-end items-center h-full">
                             <button onclick="window.editMember('${m.id}')" class="text-brand-400 p-0.5 hover:bg-brand-50 rounded"><i class="fa-solid fa-user-pen text-[10px]"></i></button>
@@ -2243,9 +2256,14 @@
 
         const calculateRunnerGrade = (logs) => {
             const now = new Date();
+            // 현재 달 (YYYY-MM)
             const currMonthStr = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
-            const monthLogs = logs.filter(l => l.date && l.date.startsWith(currMonthStr));
+            
+            // 1. 이번 달 로그 필터링 (필드명: run_date)
+            const monthLogs = logs.filter(l => l.run_date && l.run_date.startsWith(currMonthStr));
             const count = monthLogs.length;
+
+            // 횟수 점수 계산
             let scoreCount = 5;
             if (count >= 20) scoreCount = 40;
             else if (count >= 18) scoreCount = 35;
@@ -2253,29 +2271,38 @@
             else if (count >= 12) scoreCount = 25;
             else if (count >= 8) scoreCount = 20;
             else if (count >= 4) scoreCount = 15;
-            else if (count >= 2) scoreCount = 10;                
+            else if (count >= 2) scoreCount = 10;
             else if (count >= 1) scoreCount = 5;
 
+            // 거리 점수 계산 (필드명: distance)
             const dist = monthLogs.reduce((sum, l) => sum + Number(l.distance || 0), 0);
             let scoreDist = 5;
             if (dist >= 200) scoreDist = 40;
             else if (dist >= 150) scoreDist = 35;
             else if (dist >= 100) scoreDist = 30;
-            else if (dist >= 50) scoreDist = 25;                
+            else if (dist >= 50) scoreDist = 25;
             else if (dist >= 20) scoreDist = 20;
             else if (dist >= 15) scoreDist = 15;
             else if (dist >= 10) scoreDist = 10;
             else if (dist >= 5) scoreDist = 5;
 
+            // 주간 활성도 보너스 (최근 4주)
             const weekActive = [false, false, false, false];
             for(let i=0; i<4; i++) {
                 const start = new Date(now);
                 start.setDate(now.getDate() - (i + 1) * 7);
                 const end = new Date(now);
                 end.setDate(now.getDate() - i * 7);
-                const weeklyCount = logs.filter(l => { const d = new Date(l.date); return d >= start && d < end; }).length;
+                
+                const weeklyCount = logs.filter(l => { 
+                    if(!l.run_date) return false;
+                    const d = new Date(l.run_date); 
+                    return d >= start && d < end; 
+                }).length;
+                
                 if(weeklyCount >= 2) weekActive[i] = true;
             }
+            
             const activeWeeks = weekActive.filter(x => x).length;
             let scoreBonus = 5;
             if (activeWeeks === 4) scoreBonus = 20;
@@ -2283,6 +2310,8 @@
             else if (activeWeeks === 2) scoreBonus = 10;
 
             const totalScore = scoreCount + scoreDist + scoreBonus;
+            
+            // 등급 정의
             const thresholds = [
                 { threshold: 90, name: '🏵️ 만개', color: 'bg-slate-800 text-white' },
                 { threshold: 70, name: '🌺 열정', color: 'bg-orange-500 text-white' },
@@ -2296,7 +2325,8 @@
                 ...thresholds[currentIdx], 
                 details: { scoreCount, scoreDist, scoreBonus, totalScore } 
             };
-            if (currentIdx > 0) { //
+
+            if (currentIdx > 0) {
                 const next = thresholds[currentIdx - 1];
                 grade.nextGrade = {
                     name: next.name,
@@ -2305,12 +2335,13 @@
             } else {
                 grade.nextGrade = null;
             }
+
             return grade;
         };
 
         window.openUserStatModal = (nickname) => {
             const modal = document.getElementById('stat-detail-modal');
-            const userLogs = allLogs.filter(l => l.userName === nickname);
+            const userLogs = allLogs.filter(l => l.user_name === nickname);
             
             document.getElementById('modal-user-name').innerText = nickname;
             document.getElementById('modal-user-avatar').innerText = nickname.charAt(0);
@@ -2329,8 +2360,8 @@
 
             💰 총합 점수: ${grade.details.totalScore}점
             --------------------------------
-            🌱 새싹➞🌷꽃봉➞
-            🌼 활짝➞🌺열정➞🏵️만개
+            🌱 새싹➜🌷꽃봉➜
+            🌼 활짝➜🌺열정➜🏵️만개
             --------------------------------
            
             ${grade.nextGrade 
@@ -2350,8 +2381,13 @@
                 }
             };
 
+            const userRecord = crewMembersList.find(m => m.nickname === nickname);
 
-            const userRecord = crewMembers.find(m => m.nickname === nickname); // userName -> nickname
+            if (userRecord) {
+                //console.log("찾은 유저 정보:", userRecord);
+                const userTeam = userRecord.team || '무소속';
+                const userGender = userRecord.gender || '미설정';
+            }
             const myTeam2 = userRecord ? userRecord.team : '무소속2';
             const badge = document.getElementById('display-team-badge');
             if (badge) {
@@ -2368,13 +2404,6 @@
                 return { count, distance: distance.toFixed(3), durationRaw: duration, durationHMS: formatTimeHMS(duration), pace: pace > 0 ? `${mm}'${ss.toString().padStart(2, '0')}"` : '0\'00"' };
             };
 
-            const now = new Date();
-            const currYear = now.getFullYear();
-            const lastYear = currYear - 1;
-            const currMonthStr = `${currYear}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
-            let lastMonthDate = new Date();
-            lastMonthDate.setMonth(now.getMonth() - 1);
-            const lastMonthStr = `${lastMonthDate.getFullYear()}-${(lastMonthDate.getMonth() + 1).toString().padStart(2, '0')}`;
 
             const genStatCol = (title, logs, theme) => {
                 const s = calculate(logs);
@@ -2431,10 +2460,10 @@
                     </div>
                 </div>
             `;
-            const curMonthData = userLogs.filter(l => l.date && l.date.startsWith(currMonthStr));
-            const lastMonthData = userLogs.filter(l => l.date && l.date.startsWith(lastMonthStr));
-            const curYearData = userLogs.filter(l => l.date && l.date.startsWith(currYear.toString()));
-            const lastYearData = userLogs.filter(l => l.date && l.date.startsWith(lastYear.toString()));
+            const curMonthData = userLogs.filter(l => l.run_date && l.run_date.startsWith(currMonthStr));
+            const lastMonthData = userLogs.filter(l => l.run_date && l.run_date.startsWith(lastMonthStr));
+            const curYearData = userLogs.filter(l => l.run_date && l.run_date.startsWith(currYear.toString()));
+            const lastYearData = userLogs.filter(l => l.run_date && l.run_date.startsWith(lastYear.toString()));
 
             const totalComparisonContent = `
             <div class="bg-white rounded-3xl p-6 border border-brand-100 shadow-sm">
@@ -2479,42 +2508,55 @@
 
 
         window.deleteLog = async (id) => {
+
             showModal("기록을 삭제하시겠습니까?", "confirm", async () => {
-                try {
-                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'songmirun_logs', id));
+            try {
+                // 1. Supabase 삭제 실행
+                const { error } = await _supabase
+                    .from('songmirun_logs') // 테이블명
+                    .delete()               // 삭제 명령
+                    .eq('log_id', id);          // 조건: id 컬럼의 값이 매개변수 id와 일치하는 행
+                if (error) throw error;
 
-                    document.getElementById('edit-id').value = '';
-                    document.getElementById('form-title').innerHTML = '<i class="fa-solid fa-fire-flame-curved text-brand-600 animate-pulse"></i> 새 러닝 기록 입력';
+                // 2. 편집 상태 및 폼 초기화 (수정 중 삭제했을 경우 대비)
+                document.getElementById('edit-id').value = '';
+                document.getElementById('form-title').innerHTML = `
+                    <i class="fa-solid fa-fire-flame-curved text-brand-600 animate-pulse"></i> 새 러닝 기록 입력
+                `;
 
-                    const fields = ['in-dist', 'in-time-h', 'in-time-m', 'in-time-s', 'in-bpm', 'in-cadence', 'in-memo'];
-                    fields.forEach(fieldId => {
-                        const el = document.getElementById(fieldId);
-                        if (el) el.value = '';
-                    });
-                    showToast("기록이 ✨삭제되었습니다.");
+                const fields = ['in-dist', 'in-time-h', 'in-time-m', 'in-time-s', 'in-bpm', 'in-cadence', 'in-memo'];
+                fields.forEach(fieldId => {
+                    const el = document.getElementById(fieldId);
+                    if (el) el.value = '';
+                });
 
-                } catch (error) {
-                    console.error("삭제 중 오류 발생:", error);
-                    showToast("삭제에 실패했습니다.");
-                }
+                // 3. 알림 출력
+                showToast("기록이 ✨삭제되었습니다.");
+
+                // (선택 사항) 목록 실시간 갱신을 위해 syncLogs() 호출이 필요할 수 있습니다.
+                 if (typeof syncLogs === 'function') await syncLogs();
+
+            } catch (error) {
+                console.error("삭제 중 오류 발생:", error.message);
+                showToast("삭제에 실패했습니다: " + (error.message || "권한이 없습니다."));
+            }
             });
         };
 
 
         window.editLog = (id) => {
-            const l = allLogs.find(x => x.id === id);
+            console.log(id);
+            const l = allLogs.find(x => x.log_id === Number(id));
             if (!l) return;
-
             const setValueAndTrigger = (elementId, value) => {
                 const el = document.getElementById(elementId);
                 if (!el) return;
                 el.value = value ?? ''; // 값이 null/undefined일 경우 빈 문자열 처리
                 el.dispatchEvent(new Event('input', { bubbles: true }));
             };
-
             // 1. 기본 정보 설정
             setValueAndTrigger('edit-id', id);
-            setValueAndTrigger('log-username', l.userName);
+            setValueAndTrigger('log-username', l.user_name);
             setValueAndTrigger('in-dist', l.distance);
 
             // 2. 시간 정보 처리 (분 단위를 시/분/초로 변환)
@@ -2526,8 +2568,8 @@
             // 3. 추가 운동 정보 설정
             setValueAndTrigger('in-bpm', l.bpm);
             setValueAndTrigger('in-cadence', l.cadence);
-            setValueAndTrigger('in-date', l.date);
-            setValueAndTrigger('run-type', l.runType);
+            setValueAndTrigger('in-date', l.run_date);
+            setValueAndTrigger('run-type', l.run_type);
             setValueAndTrigger('in-memo', l.memo || '');
 
             // 4. UI 상태 변경 (수정 모드 표시 및 탭 전환)
@@ -2537,207 +2579,437 @@
             }
 
             document.getElementById('tab-logs')?.click();
+
             window.scrollTo({ top: 0, behavior: 'smooth' });
+    
         };
 
 
         window.deleteMember = async (id) => {
-            if (!auth.currentUser) return;
-            const m = crewMembers.find(x => x.id === id);
-            if(!m) return;
-
+            const m = crewMembersList.find(x => String(x.id) === String(id));
+            if (!m) {
+                console.error("멤버를 찾지 못했습니다. 현재 리스트 상태:", crewMembersList);
+                return;
+            }
             showModal(`${m.log_nickname} / ${m.nickname} \n\n크루 정보를 삭제하시겠습니까?`, "confirm", async () => {
                 try {
-                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'songmirun_members', id));
-                    document.getElementById('mem-edit-id').value = '';
-                    ['mem-log-nickname', 'mem-nickname', 'mem-memo'].forEach(i => {
-                        const el = document.getElementById(i);
-                        if (el) el.value = '';
-                    });
-                    document.getElementById('mem-form-title').innerText = "개별 크루 등록";
-                    showToast(`${m.nickname} ✨해당 크루가 삭제되었습니다.`);
-                } 
-                catch (e) {
-                    console.error("삭제 오류:", e);
-                    showToast("삭제 중 오류가 발생했습니다.");
+                    // 3. Supabase 삭제 실행 (변수명 _supabase 확인 필요)
+                    const { error } = await _supabase
+                        .from('songmirun_members')
+                        .delete()
+                        .eq('id', id);
+
+                    if (error) throw error;
+                    const currentEditId = document.getElementById('mem-edit-id').value;
+                    if (currentEditId === String(id)) {
+                        document.getElementById('mem-edit-id').value = '';
+                        ['mem-log-nickname', 'mem-nickname', 'mem-memo'].forEach(i => {
+                            const el = document.getElementById(i);
+                            if (el) el.value = '';
+                        });
+                        document.getElementById('mem-form-title').innerText = "개별 크루 등록";
+                    }
+
+                    showToast(`✨ ${m.nickname} 크루가 삭제되었습니다.`);
+                    
+                    if (typeof syncMembers === 'function') {
+                        await syncMembers();
+                    }
+
+                } catch (e) {
+                    console.error("삭제 오류:", e.message);
+                    showToast("삭제 실패: " + (e.message || "권한이 없습니다."));
                 }
             });
         };
 
         window.editMember = (id) => {
-            const m = crewMembers.find(x => x.id === id);
+            const m = crewMembersList.find(x => String(x.id) === String(id));
             if(!m) return;
             document.getElementById('mem-edit-id').value = id;
             document.getElementById('mem-log-nickname').value = m.log_nickname || '';
             document.getElementById('mem-nickname').value = m.nickname;
             document.getElementById('mem-gender').value = m.gender;
             document.getElementById('mem-team').value = m.team|| '무소속';
-            document.getElementById('mem-joindate').value = m.joinDate;
+            document.getElementById('mem-joindate').value = m.join_date;
             document.getElementById('mem-memo').value = m.memo || '';
             document.getElementById('mem-form-title').innerText = "크루 정보 수정";
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
-        const setupListeners = () => {
-            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_logs'), (snap) => {
-                allLogs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                renderStats();  renderLogs(); renderRankingLists();updateUI_Team();
-            });
+        const LOGS_TABLE = 'songmirun_logs';
+        const MEMBERS_TABLE = 'songmirun_members';
 
-            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_members'), (snap) => {
-                crewMembers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                snap.docs.forEach(d => { crewMembers[d.data().nickname] = d.data().team; });
-                myTeam = crewMembers[userNickname] || '무소속';
-                 renderMembers(); renderAllCharts();updateUI_Team();
-            });
+        /**
+         * 멤버 데이터 동기화 및 매핑
+         */
+        const syncMembers = async () => {
+            try {
+                const { data, error } = await _supabase.from(MEMBERS_TABLE).select('*');
+                if (error) throw error;
+                if (!data) return;
 
-            document.getElementById('close-stat-modal').onclick = closeUserStatModal;
-            document.getElementById('stat-detail-modal').onclick = (e) => { if (e.target === document.getElementById('stat-detail-modal')) closeUserStatModal(); };
-            document.getElementById('member-search').addEventListener('input', (e) => { memberSearchTerm = e.target.value; renderMembers(); });
+                crewMembersList = data;
+                
+                // reduce를 사용하여 한 번에 객체 매핑 (더 깔끔한 방식)
+                crewMembers = data.reduce((acc, member) => {
+                    acc[member.nickname] = { 
+                        team: member.team || '무소속', 
+                        gender: member.gender || '미설정' 
+                    };
+                    return acc;
+                }, {});
+
+                // 내 팀 정보 갱신
+                myTeam = crewMembers[userNickname]?.team || '무소속';
+
+                // UI 갱신 (관련된 부분만 호출)
+                renderMembers(); 
+                updateUI_Team(); // 팀 통계는 멤버 정보에 의존함
+                renderRankingLists();
+                renderAllCharts();
+                
+            } catch (err) {
+                console.error("Members sync failed:", err.message);
+            }
+        };
+
+        /**
+         * 로그 데이터 동기화 및 통계 갱신
+         */
+        const syncLogs = async () => {
+            try {
+                const { data: logs, error: logError } = await _supabase.from(LOGS_TABLE)
+                    .select('*')
+                    .order('run_date', { ascending: false })
+                    .order('created_at', { ascending: false });
+
+                if (logError) throw logError;
+                if (!logs) return;
+
+                allLogs = logs;
+
+                // UI 갱신 로직 통합 호출
+                refreshAllLogUI();
+                
+            } catch (err) {
+                console.error("run_logs sync failed:", err.message);
+            }
+        };
+
+        /**
+         * 로그 관련 모든 UI를 한 번에 갱신하는 헬퍼 함수
+         */
+        const refreshAllLogUI = () => {
+            renderLogs(); 
+            updateUI_Team();
+            renderStats(); 
+            renderRankingLists();
+            // 필요 시 renderAllCharts() 추가
+        };
+
+        /**
+         * 실시간 구독 설정
+         */
+        function setupRealtime() {
+            _supabase.channel('db-changes')
+                .on('postgres_changes', { event: '*', schema: 'public', table: LOGS_TABLE }, () => {
+                    console.log('🔄 로그 변경 감지');
+                    syncLogs();
+                })
+                .on('postgres_changes', { event: '*', schema: 'public', table: MEMBERS_TABLE }, () => {
+                    console.log('👤 멤버 변경 감지');
+                    syncMembers();
+                })
+                .subscribe();
+        }
+
+        const setupListeners = async () => {
+            // 1. 초기 데이터 로드 (중복 제거 및 병렬 처리)
+            // 기존에 syncLogs()를 두 번 호출하던 부분을 하나로 합치고 로딩 순서를 정리합니다.
+            try {
+                await Promise.all([syncLogs(), syncMembers()]);
+                setupRealtime(); // 데이터 로드 후 실시간 구독 시작
+            } catch (e) {
+                console.error("초기 로드 중 오류:", e);
+            }
+
+            // 2. 로그인 상태 확인
+            userNickname = localStorage.getItem('songmirun_nickname') || "";
+
+            // 3. 공통 요소 참조 및 이벤트 바인딩 (DOM 탐색 최소화)
+            const getEl = (id) => document.getElementById(id);
+            const modalProfile = getEl('profile-edit-modal');
             
-            // 프로필 수정 모달 관련
-            document.getElementById('display-nickname').onclick = () => {
-                const userObj = crewMembers.find(m => m.nickname === userNickname);
-                if(!userObj) return;
-                document.getElementById('prof-actual-nick').innerText = userNickname;
-                document.getElementById('prof-current-log-nick').innerText = userObj.log_nickname || '-';
-                document.getElementById('prof-current-team').innerText = userObj.team || '-';
-
-                document.getElementById('prof-new-log-nick').value = userObj.log_nickname || '';
-                document.getElementById('profile-edit-modal').classList.remove('hidden');
-                document.getElementById('profile-edit-modal').classList.add('flex');
-            };
-            document.getElementById('btn-close-profile').onclick = () => {
-                document.getElementById('profile-edit-modal').classList.add('hidden');
-                document.getElementById('profile-edit-modal').classList.remove('flex');
+            // 모달 헬퍼 함수
+            const toggleModal = (modal, isOpen) => {
+                modal.classList.toggle('hidden', !isOpen);
+                modal.classList.toggle('flex', isOpen);
             };
 
-            document.getElementById('btn-save-profile').onclick = async () => {
-                const newLogNick = document.getElementById('prof-new-log-nick').value.trim();
-                const newTeam = document.getElementById('prof-new-team').value; // 선택된 소속팀 값
-if (!newTeam) return showModal("소속팀을 선택하세요.", "alert");
+            // 통계/검색 이벤트
+            getEl('close-stat-modal').onclick = closeUserStatModal;
+            getEl('stat-detail-modal').onclick = (e) => { 
+                if (e.target === getEl('stat-detail-modal')) closeUserStatModal(); 
+            };
+            getEl('member-search').oninput = (e) => { 
+                memberSearchTerm = e.target.value; 
+                renderMembers(); 
+            };
 
-                if(!newLogNick) return showModal("변경할 로그인 닉네임을 입력하세요.", "alert");
-                const isDuplicate = crewMembers.some(m => 
-                    m.nickname !== userNickname && m.log_nickname === newLogNick
-                );
-                if (isDuplicate) {
-                        showModal(` [${newLogNick}] : 다른 로그인 닉네임을 추천합니다.\n\n (예-전화번호 뒷자리를 추가)`, "alert");
-                        document.getElementById('btn-close-profile').click(); 
-                        return; // 함수 종료
-                    }
+            // 4. 프로필 수정 모달 열기
+            getEl('display-nickname').onclick = () => {
+                const userObj = crewMembersList.find(m => m.nickname === userNickname);
+                if (!userObj) return;
 
+                getEl('prof-actual-nick').innerText = userNickname;
+                getEl('prof-current-log-nick').innerText = userObj.log_nickname || '-';
+                getEl('prof-current-team').innerText = userObj.team || '-';
+                getEl('prof-new-log-nick').value = userObj.log_nickname || '';
+                
+                toggleModal(modalProfile, true);
+            };
 
-                const userObj = crewMembers.find(m => m.nickname === userNickname);
-                if(!userObj) return;
+            getEl('btn-close-profile').onclick = () => toggleModal(modalProfile, false);
+
+            // 5. 프로필 저장 로직
+            getEl('btn-save-profile').onclick = async () => {
+                const newLogNick = getEl('prof-new-log-nick').value.trim();
+                const newTeam = getEl('prof-new-team').value;
+
+                // 유효성 검사
+                if (!newTeam) return showModal("소속팀을 선택하세요.", "alert");
+                if (!newLogNick) return showModal("로그인 닉네임을 입력하세요.", "alert");
+
+                const userObj = crewMembersList.find(m => m.nickname === userNickname);
+                if (!userObj) return;
+
+                // 변경사항 체크 (불필요한 DB 요청 방지)
                 if (userObj.log_nickname === newLogNick && userObj.team === newTeam) {
-                        return document.getElementById('btn-close-profile').click();
-                    }               
+                    return toggleModal(modalProfile, false);
+                }
 
+                // 중복 체크
+                const isDuplicate = crewMembersList.some(m => m.nickname !== userNickname && m.log_nickname === newLogNick);
+                if (isDuplicate) {
+                    showModal(`[${newLogNick}] : 이미 사용 중인 닉네임입니다.`, "alert");
+                    return;
+                }
 
                 try {
-                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'songmirun_members', userObj.id), { 
-                        log_nickname: newLogNick,
-                        team: newTeam // DB의 team 필드 업데이트
-                    });
+                    const { error } = await _supabase
+                        .from('songmirun_members')
+                        .update({ log_nickname: newLogNick, team: newTeam })
+                        .eq('id', userObj.id);
+
+                    if (error) throw error;
+
+                    // 로컬 상태 동기화 및 피드백
                     userObj.log_nickname = newLogNick;
                     userObj.team = newTeam;
-                    showToast(`${newLogNick} ✨ 로그인닉네임/소속팀이 변경되었습니다.`);                    
-                    document.getElementById('btn-close-profile').click();
-                } catch(e) { 
-                    showToast("변경 실패"); 
+                    
+                    showToast(`${newLogNick} ✨ 프로필이 변경되었습니다.`);
+                    
+                    // UI 전체 갱신 (syncMembers를 재호출하거나 수동으로 필요한 UI만 업데이트)
+                    updateUI(); 
+                    setupListeners(); // 여기서 즉시 데이터를 불러오기 시작함
+                    updateUI_Team(); 
+
+                    toggleModal(modalProfile, false);
+
+                } catch (e) {
+                    console.error("Update Error:", e.message);
+                    showToast("변경 실패: " + (e.message || "권한이 없습니다."));
                 }
             };
         };
 
+
         const updateUI = () => {
-            const isLoggedIn = auth.currentUser && userNickname;
+            const isLoggedIn = userNickname;
             document.getElementById('login-screen').classList.toggle('hidden', isLoggedIn);
             document.getElementById('main-content').classList.toggle('hidden', !isLoggedIn);
 
-            if (isLoggedIn) {
+            //console.log("2866");
 
+            if (isLoggedIn) {
                 let myCurrentNickname = "";
                 let myCurrentTeam = "";
 
-                onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_members'), (snap) => {
-                    const members = {};
-                    snap.docs.forEach(d => {
-                            const data = d.data();
-                            members[data.nickname] = {
-                                team: data.team || '무소속',
-                                log_nickname: data.log_nickname,
-                                nickname: data.nickname
-                            };
-                        });
+                // 1. 함수 정의 시작
+                const fetchAndRender = async () => {
+                    try {
+                        const { data, error } = await _supabase
+                            .from(TABLE_NAME)
+                            .select('*');
 
-                    const myInfo = members[userNickname];
+                        if (error) throw error;
 
-                    if (myInfo) {
-                        myCurrentNickname = myInfo.log_nickname || userNickname; // 로그인용 닉네임 (없으면 기본 닉네임)
-                        myCurrentTeam = myInfo.team; // 소속팀
-                    } else {
-                        myCurrentNickname = userNickname;
-                        myCurrentTeam = '무소속';
+                        const members = {};
+                        if (data) {
+                            data.forEach(d => {
+                                members[d.nickname] = {
+                                    team: d.team || '무소속2',
+                                    log_nickname: d.log_nickname,
+                                    nickname: d.nickname
+                                };
+                            });
+                        }
+
+                        const myInfo = members[userNickname];
+                        const myInfo2 = members[userNickname];
+                        //console.log("나의 정보2:", userNickname);
+                        //console.log("나의 정보:", myInfo);
+
+                        if (myInfo) {
+                            myCurrentNickname = myInfo.log_nickname || userNickname;
+                            myCurrentTeam = myInfo.team;
+                        } else {
+                            myCurrentNickname = userNickname;
+                            myCurrentTeam = '무소속';
+                        }
+
+                        const myTeam2 = myCurrentTeam;
+                        const teamBgColor2 = TEAM_COLORS[myTeam2] || '#94a3b8';
+
+                        // UI 렌더링
+                        document.getElementById('display-nickname2').innerHTML = `
+                            <div class="flex items-center gap-1">
+                                <span class="text-white text-[7px] font-black px-1 py-1 rounded-md shadow-sm whitespace-nowrap flex items-center h-fit"
+                                    style="background-color: ${teamBgColor2};">
+                                    팀:${myTeam2}
+                                </span>
+                                <button onclick="window.openUserStatModal('${userNickname}')" 
+                                        class="text-emerald-600 hover:text-emerald-700 hover:underline text-left font-black p-0 m-0 whitespace-nowrap leading-none transition-colors">
+                                    ${userNickname}님, 입장!
+                                </button>
+                            </div>
+                        `;
+                        
+                        //if (typeof updateUI_Team === 'function') updateUI_Team();
+                        updateUI_Team();
+                    } catch (err) {
+                        console.error("데이터 로드 중 오류:", err.message);
                     }
+                }; // 2. fetchAndRender 함수 정의 끝
 
-                    const myTeam2= myCurrentTeam;
+                // 3. 정의한 비동기 함수를 여기서 실행!
+                fetchAndRender();
 
-                    const teamBgColor2 = TEAM_COLORS[myTeam2] || '#94a3b8';
-
-                    document.getElementById('display-nickname2').innerHTML = `
-                        <div class="flex items-center gap-1">
-                            <span class="text-white text-[7px] font-black px-1 py-1 rounded-md shadow-sm whitespace-nowrap flex items-center h-fit"
-                                style="background-color: ${teamBgColor2};">
-                                팀:${myTeam2}
-                            </span>
-
-                            <button onclick="window.openUserStatModal('${userNickname}')" 
-                                    class="text-emerald-600 hover:text-emerald-700 hover:underline text-left font-black p-0 m-0 whitespace-nowrap leading-none transition-colors">
-                                ${userNickname}님, 입장!
-                            </button>
-
-
-                        </div>
-                    `;
-                    updateUI_Team();
-                });
-
-
+                // 관리자 관련 UI 제어 (함수 외부/if문 내부)
                 isAdmin = userNickname.toLowerCase().startsWith('admin');
                 document.getElementById('tab-members').classList.toggle('hidden', !isAdmin);
-                document.getElementById('admin-badge').classList.toggle('hidden', !isAdmin);
-    
                 document.getElementById('username-field-container').classList.toggle('hidden', !isAdmin);
                 document.getElementById('log-username').value = isAdmin ? (document.getElementById('log-username').value || "Jake") : userNickname;
+            } // 4. if (isLoggedIn) 종료
+        }; // 5. updateUI 종료
 
-            }
-        };
+
+
+        async function renderBuffer(v) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(v.toLowerCase().trim());
+            const buffer = await crypto.subtle.digest('SHA-256', data);
+            return Array.from(new Uint8Array(buffer))
+                .map(b => b.toString(16).padStart(2, '0'))
+                .join('');
+        }
+
 
         const init = async () => {
-            onAuthStateChanged(auth, (user) => { if (user) { const saved = localStorage.getItem('songmirun_nickname'); if (saved) { userNickname = saved; updateUI(); setupListeners(); } } else { updateUI(); } });
-            
+            // 1. [핵심 수정] 세션 변경 감시 (기존 로직 유지하되 안전장치 추가)
+            _supabase.auth.onAuthStateChange((event, session) => {
+                const user = session?.user;
+                const savedNickname = localStorage.getItem('songmirun_nickname');
+
+                if (user && savedNickname) {
+                    userNickname = savedNickname;
+                    // 이미 초기화되었다면 중복 실행 방지 로직이 setupListeners에 있으면 좋습니다.
+                    updateUI();
+                    setupListeners();
+                } else if (!user && !savedNickname) {
+                    updateUI(); // 로그아웃 상태 처리
+                }
+            });
+
+            const autoLoginNick = localStorage.getItem('songmirun_nickname');
+                if (autoLoginNick) {
+                    userNickname = autoLoginNick;
+                    updateUI();
+                    setupListeners(); // 여기서 즉시 데이터를 불러오기 시작함
+                }
+                
             document.getElementById('btn-login').onclick = async () => {
                 const nick = document.getElementById('login-nick').value.trim();
-                if(!nick) return;
+                if (!nick) return;
+
                 document.getElementById('login-loader').classList.remove('hidden');
+
                 try {
-                    if(!auth.currentUser) await signInAnonymously(auth);
-                    const membersSnap = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_members'));
-                    const target = membersSnap.docs.find(d => { const data = d.data(); return (data.log_nickname === nick); });
-                    if(!nick.toLowerCase().startsWith('admin') && !target) return showModal("🥕송미런 크루가 아닙니다.\n\n ✨Jake 에게 문의하세요", "alert");
-                    const userFinalNickname = target ? target.data().nickname : nick;
-                    const userFinalNickname2 = target ? target.data().team : nick;
-                    
-                    if (target) await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'songmirun_members', target.id), { lastLogin: new Date().toISOString().split('T')[0] });
+                    // 1. 익명 로그인 (Supabase는 설정에서 Anon Sign-in이 활성화되어 있어야 합니다)
+                    //const { data: authData, error: authError } = await _supabase.auth.getSession();
+                    //if (!authData.session) {
+                      //  const { error: signInError } = await _supabase.auth.signInAnonymously();
+                        //if (signInError) throw signInError;
+                    //}
+
+                    // 2. 멤버 데이터 조회 (Firebase의 getDocs 대체)
+                    // 'songmirun_members' 테이블에서 log_nickname이 일치하는 데이터를 찾습니다.
+                    const { data: members, error: fetchError } = await _supabase
+                        .from('songmirun_members')
+                        .select('*')
+                        .eq('log_nickname', nick)
+                        .maybeSingle(); // 결과가 하나거나 없거나
+
+                    if (fetchError) throw fetchError;
+
+                    // 3. 크루 확인 로직
+                    if (!nick.toLowerCase().startsWith('admin') && !members) {
+                        return showModal("🥕송미런 크루가 아닙니다.\n\n ✨Jake 에게 문의하세요", "alert");
+                    }
+
+                    const userFinalNickname = members ? members.nickname : nick;
+                    const userFinalNickname2 = members ? members.team : nick;
+
+                    // 4. 마지막 로그인 날짜 업데이트
+                    if (members) {
+                        const { error: updateError } = await _supabase
+                            .from('songmirun_members')
+                            .update({ updated_at: new Date().toISOString().split('T')[0] })
+                            .eq('id', members.id); // 해당 ID를 가진 행 업데이트
+                        
+                        if (updateError) throw updateError;
+                    }
+
+                    // 5. 로컬 저장 및 UI 업데이트
                     localStorage.setItem('songmirun_nickname', userFinalNickname);
-                    userNickname = userFinalNickname; updateUI(); setupListeners();
+                    userNickname = userFinalNickname; 
+                    
+                    updateUI(); 
+                    setupListeners();
                     showToast(`${userFinalNickname}님 환영합니다! (팀:${userFinalNickname2})`);
-                } catch(e) { showModal("로그인 오류", "alert"); }
-                finally { document.getElementById('login-loader').classList.add('hidden'); }
+
+                } catch (e) {
+                    console.error(e);
+                    showModal("로그인 오류: " + e.message, "alert");
+                } finally {
+                    document.getElementById('login-loader').classList.add('hidden');
+                }
             };
 
-            document.getElementById('btn-logout').onclick = () => { showModal(`👟${userNickname}님, 러닝 가시려구요?  😊`, "confirm", async () => { localStorage.removeItem('songmirun_nickname'); await signOut(auth); location.reload(); }); };
+
+            document.getElementById('btn-logout').onclick = () => {
+                showModal(
+                    `👟${userNickname}님, 러닝 가시려구요?  😊`,
+                    "confirm",
+                    async () => {
+                        localStorage.removeItem('songmirun_nickname');
+                        location.reload();
+                    }
+                );
+            };
+
+
 
             const tabs = { 'tab-logs': 'section-logs', 'tab-ranking': 'section-ranking', 'tab-stats': 'section-stats', 'tab-members': 'section-members' };
             Object.keys(tabs).forEach(id => {
@@ -2764,48 +3036,80 @@ if (!newTeam) return showModal("소속팀을 선택하세요.", "alert");
                 const totalMin = hmsToMin(h, m, s);
                 const bpm = Number(document.getElementById('in-bpm').value);
                 const cadence = Number(document.getElementById('in-cadence').value);
-                const memo = Number(document.getElementById('in-memo').value);
-
                 const dist = Number(document.getElementById('in-dist').value);
                 const date = document.getElementById('in-date').value;
+                const eid = document.getElementById('edit-id').value; // 수정 모드 여부
+
+                // 유효성 검사
                 if(!date || dist <= 0 || totalMin <= 0) return showModal("💡필수 항목(날짜, 거리, 시간)을 입력해주세요✅", "alert");
 
                 const pace = totalMin / dist;
-                if (pace < 2.0) {
-                    return showModal("잠시만요! ⚡ 현재 페이스가 km당 2분 미만입니다. \n혹시 방금 오토바이를 타고 뛰셨나요? \n아니면 성함이 '어벤져스'인가요? \n\n기록을 다시 확인해 주세요 😊", "alert");
-                } 
-                if (pace < 3.0) {
-                    return showModal("세상에, 올림픽 금메달리스트급 기록이네요! \n🏅 이 속도로 뛰셨다면 당장 협회에 등록하셔야 합니다. \n\n다시 한번 확인해 보시겠어요? ✅", "alert");
-                }
-
-                if (pace > 20) {
-                    return showModal("러닝 시간을 잘 입력하셨나요? \n\n🐢 혹시 달리기 중에 깊은 명상에 빠지셨나요? \n아니면 달팽이와 경주 중이신가요?\n걷는 것보다 뒤로 구르는 게 더 빠를지도 몰라요 😊", "alert");
-                }
+                if (pace < 2.0) return showModal("잠시만요! ⚡ 페이스가 너무 빠릅니다. 기록을 확인해주세요.", "alert");
+                if (pace > 20) return showModal("러닝 시간을 잘 입력하셨나요? 🐢", "alert");
                 
-                if(bpm !== 0 && (bpm < 70 || bpm > 220)) return showModal("심박수는 0(미입력) 또는 70 ~ 220 사이로 입력해주세요.", "alert");
-                if(cadence !== 0 && (cadence < 100 || cadence > 250)) return showModal("케이던스는 0(미입력) 또는 100 ~ 250 사이로 입력해주세요.", "alert");
+                if(bpm !== 0 && (bpm < 70 || bpm > 220)) return showModal("심박수 범위를 확인해주세요.", "alert");
+                if(cadence !== 0 && (cadence < 100 || cadence > 250)) return showModal("케이던스 범위를 확인해주세요.", "alert");
 
-                const data = { userName: isAdmin ? document.getElementById('log-username').value.trim() : userNickname, distance: Number(dist.toFixed(3)), duration: totalMin, bpm: bpm, cadence: cadence, memo: document.getElementById('in-memo').value, date: date, runType: document.getElementById('run-type').value, updatedAt: serverTimestamp() };
-                const eid = document.getElementById('edit-id').value;
                 try {
-                    const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_logs');
-                    if(eid) await updateDoc(doc(colRef, eid), data);
-                    else await addDoc(colRef, { ...data, createdAt: serverTimestamp() });
-                    ['in-dist','in-time-h','in-time-m','in-time-s','in-bpm','in-cadence','in-memo'].forEach(i => document.getElementById(i).value='');
+                    // 1. 데이터 객체 구성
+                    const saveData = {
+                        user_name: isAdmin 
+                            ? document.getElementById('log-username').value.trim() 
+                            : userNickname,
+                        distance: Number(dist.toFixed(3)),
+                        duration: totalMin,
+                        bpm: bpm,
+                        cadence: cadence,
+                        memo: document.getElementById('in-memo').value,
+                        run_date: date,
+                        run_type: document.getElementById('run-type').value,
+                        updated_at: new Date().toISOString()
+                    };
+
+                    // 2. 수정 모드일 경우 처리
+                    if (eid) {
+                        saveData.log_id = eid;
+                        // 만약 기존 생성일(created_at)을 유지해야 한다면 여기에 추가 로직 필요
+                    } else {
+                        saveData.created_at = new Date().toISOString();
+                    }
+
+                    // 3. Supabase 저장 실행 (단 한 번만 실행!)
+                    const { error } = await _supabase
+                        .from('songmirun_logs')
+                        .upsert(saveData);
+
+                    if (error) throw error;
+
+                    // 4. 입력 폼 초기화
+                    ['in-dist', 'in-time-h', 'in-time-m', 'in-time-s', 'in-bpm', 'in-cadence', 'in-memo'].forEach(i => {
+                        const el = document.getElementById(i);
+                        if (el) el.value = '';
+                    });
+
+                    // 5. UI 복구
                     document.getElementById('edit-id').value = '';
-                    document.getElementById('form-title').innerHTML = '<i class="fa-solid fa-fire-flame-curved text-brand-600 animate-pulse"></i> 새 러닝 기록 입력';
-                    showToast("✨저장되었습니다.");
-                } catch(e) { showToast("저장 실패"); }
+                    document.getElementById('form-title').innerHTML = `
+                        <i class="fa-solid fa-fire-flame-curved text-brand-600 animate-pulse"></i> 새 러닝 기록 입력
+                    `;
+                    
+                    if (typeof syncLogs === 'function') await syncLogs();
+                    showToast("✨ 저장되었습니다.");
+
+                } catch (e) {
+                    console.error("Save Error:", e.message);
+                    showToast("저장 실패: " + (e.message || "권한이 없습니다."));
+                }
             };
 
-            document.getElementById('btn-csv').onclick = () => {
+            document.getElementById('btn-logs-csv').onclick = () => {
                 const start = document.getElementById('export-start').value;
                 const end = document.getElementById('export-end').value;
                 if(!start || !end) return showModal("기간을 선택하세요.", "alert");
-                const filtered = allLogs.filter(l => (l.date >= start && l.date <= end) && (isAdmin || l.userName === userNickname)).sort((a,b) => new Date(a.date) - new Date(b.date));
+                const filtered = allLogs.filter(l => (l.run_date >= start && l.run_date <= end) && (isAdmin || l.user_name === userNickname)).sort((a,b) => new Date(a.run_date) - new Date(b.run_date));
                 if(filtered.length === 0) return showModal("내보낼 데이터가 없습니다.", "alert");
                 let csv = "\uFEFF날짜,이름,유형,거리(km),시간(분),심박(bpm),케이던스(spm),Memo\n";
-                filtered.forEach(l => { csv += `${l.date},${l.userName},${l.runType || '일반'},${l.distance},${l.duration.toFixed(2)},${l.bpm || 0},${l.cadence || 0},${l.memo ||'-'}\n`; });
+                filtered.forEach(l => { csv += `${l.run_date},${l.user_name},${l.run_type || '일반'},${l.distance},${l.duration.toFixed(2)},${l.bpm || 0},${l.cadence || 0},${l.memo ||'-'}\n`; });
                 const typeLabel = isAdmin ? "AllRecords" : "MyRecords";
                 const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement("a");
@@ -2819,7 +3123,15 @@ if (!newTeam) return showModal("소속팀을 선택하세요.", "alert");
                 const filtered = getFilteredMembers();
                 if(filtered.length === 0) return showModal("내보낼 크루가 없습니다.", "alert");
                 let csv = "\uFEFFNo,로그인닉,닉네임,팀,성별,가입일,최근접속일,메모\n";
-                filtered.forEach((m, idx) => { csv += `${idx + 1},${m.log_nickname || ''},${m.nickname},${m.team},${m.gender},${m.joinDate},${m.lastLogin || '-'},${(m.memo || '').replace(/,/g, ' ')}\n`; });
+                filtered.forEach((m, idx) => { csv += `${idx + 1},${m.log_nickname || ''},${m.nickname},${m.team},${m.gender},${m.join_date},${new Date(m.updated_at).toLocaleString('ko-KR', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false
+                }).replace(/\. /g, '-').replace('.', '')},${(m.memo || '').replace(/,/g, ' ')}\n`; });
                 const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement("a");
                 link.setAttribute("href", URL.createObjectURL(blob));
@@ -2827,53 +3139,168 @@ if (!newTeam) return showModal("소속팀을 선택하세요.", "alert");
                 link.click();
                 showToast("크루 목록을 다운로드했습니다.");                
             };
+   
+   
             document.getElementById('mem-submit-btn').onclick = async () => {
-                const data = { log_nickname: document.getElementById('mem-log-nickname').value.trim(), nickname: document.getElementById('mem-nickname').value.trim(), gender: document.getElementById('mem-gender').value,  joinDate: document.getElementById('mem-joindate').value, memo: document.getElementById('mem-memo').value.trim(),team: document.getElementById('mem-team').value|| '무소속', updatedAt: serverTimestamp() };
-                if(!data.nickname) return showModal("닉네임을 입력하세요.", "alert");
-                const editId = document.getElementById('mem-edit-id').value;
-                try {
-                    const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_members');
-                    if(editId) await updateDoc(doc(colRef, editId), data);
-                    else await addDoc(colRef, data);
-                    document.getElementById('mem-edit-id').value = '';
-                    ['mem-log-nickname', 'mem-nickname', 'mem-memo'].forEach(i => document.getElementById(i).value='');
-                    document.getElementById('mem-form-title').innerText = "개별 크루 등록";
-                    //showToast("크루 정보 저장 완료");
-                    showToast(`${data.nickname} ✨크루 정보 저장 완료`);
+                // 1. 필수 입력값 체크
+                const nickname = document.getElementById('mem-nickname').value.trim();
+                if (!nickname) return showModal("닉네임을 입력하세요.", "alert");
 
-                } catch(e) { showToast("저장 실패"); }
+                // 2. 멤버 데이터 객체 구성
+                const data = {
+                    log_nickname: document.getElementById('mem-log-nickname').value.trim(),
+                    nickname: nickname,
+                    gender: document.getElementById('mem-gender').value,
+                    
+                    join_date: document.getElementById('mem-joindate').value,
+                    memo: document.getElementById('mem-memo').value.trim(),
+                    team: document.getElementById('mem-team').value || '무소속',
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                };
+
+                // 3. 수정 모드 확인 (input hidden 등에 저장된 id값)
+                const editId = document.getElementById('mem-edit-id').value;
+
+                try {
+                    const TABLE_NAME = 'songmirun_members';
+                    
+                    // 4. 전송할 데이터 구성
+                    const saveData = { ...data };
+                    if (editId) {
+                        saveData.id = editId; // 수정 시에는 id 포함
+                    }
+
+                    // 5. Supabase upsert 실행
+                    // 여기서 _supabase 변수명이 맞는지 확인하세요. (위에서는 supabase라고 썼을 수 있습니다)
+                    const { error } = await _supabase
+                        .from(TABLE_NAME)
+                        .upsert(saveData);
+
+                    if (error) throw error;
+
+                    // 6. 입력 폼 초기화 및 상태 복구
+                    document.getElementById('mem-edit-id').value = '';
+                    ['mem-log-nickname', 'mem-nickname', 'mem-memo'].forEach(i => {
+                        const el = document.getElementById(i);
+                        if (el) el.value = '';
+                    });
+                    document.getElementById('mem-form-title').innerText = "개별 크루 등록";
+
+                    // 7. 알림 및 목록 갱신
+                    showToast(`✨ ${data.nickname} 크루 정보 저장 완료`);
+                    if (typeof syncMembers === 'function') await syncMembers();
+
+                } catch (e) {
+                    console.error("Member Save Error:", e.message);
+                    showToast("저장 실패: " + (e.message || "권한이 없습니다."));
+                }
             };
+
 
             document.getElementById('btn-bulk-import').onclick = async () => {
                 const raw = document.getElementById('bulk-members-input').value.trim();
-                if(!raw) return showModal("데이터를 입력하세요.", "alert");
+                if (!raw) return showModal("데이터를 입력하세요.", "alert");
+
                 const lines = raw.split('\n');
-                let count = 0;
-                const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_members');
-                for(let line of lines) {
+                const TABLE_NAME = 'songmirun_members';
+                const batchData = [];
+
+                // 1. 데이터 파싱
+                for (let line of lines) {
+                    if (!line.trim()) continue; // 빈 줄 건너뛰기
                     const p = line.split(',').map(x => x.trim());
-                    if(p.length >= 5) {
-                        try { await addDoc(colRef, { joinDate: p[0], log_nickname: p[1], nickname: p[2], team: p[3],gender: p[4], memo: '일괄 등록됨', updatedAt: serverTimestamp() }); count++; } catch(e) {}
+
+                    if (p.length >= 5) {
+                        batchData.push({
+                            join_date: p[0],      // 2025-01-01
+                            log_nickname: p[1],   // 999
+                            nickname: p[2],       // 999 (입력 데이터 순서 확인 필요)
+                            team: p[3] || '무소속', // 이봉주
+                            gender: p[4],         // 여성
+                            memo: '일괄 등록됨',
+                            updated_at: new Date().toISOString()
+                        });
                     }
                 }
-                document.getElementById('bulk-members-input').value = '';
-                showModal(`${count}명 등록 완료`, "alert");
+
+                // 2. 데이터 전송
+                if (batchData.length > 0) {
+                    try {
+                        // _supabase 변수명 확인 필수!
+                        const { error } = await _supabase
+                            .from(TABLE_NAME)
+                            .insert(batchData);
+
+                        if (error) throw error;
+
+                        // 3. 성공 처리
+                        document.getElementById('bulk-members-input').value = ''; // 입력창 비우기
+                        showModal(`${batchData.length}명 등록 완료`, "alert");
+                        
+                        if (typeof syncMembers === 'function') await syncMembers();
+
+                    } catch (e) {
+                        console.error("일괄 등록 오류:", e.message);
+                        showToast("오류 발생: " + e.message);
+                    }
+                } else {
+                    showToast("등록할 유효한 데이터 형식이 아닙니다.");
+                }
             };
 
             document.getElementById('btn-bulk-logs-import').onclick = async () => {
                 const raw = document.getElementById('bulk-logs-input').value.trim();
-                if(!raw) return showModal("데이터를 입력하세요.", "alert");
+                if (!raw) return showModal("데이터를 입력하세요.", "alert");
+
                 const lines = raw.split('\n');
-                let count = 0;
-                const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'songmirun_logs');
-                for(let line of lines) {
+                const TABLE_NAME = 'songmirun_logs';
+                const batchData = [];
+
+                // 1. 데이터 파싱
+                for (let line of lines) {
+                    if (!line.trim()) continue; // 빈 줄 건너뛰기
                     const p = line.split(',').map(x => x.trim());
-                    if(p.length >= 5) {
-                        try { await addDoc(colRef, { date: p[0], userName: p[1], runType: p[2] || '번개', distance: Number(p[3]), duration: Number(p[4]), bpm: Number(p[5] || 0), cadence: Number(p[6] || 0), createdAt: serverTimestamp(), updatedAt: serverTimestamp() }); count++; } catch(e) {}
+
+                    // 최소 5개 필드 (날짜, 이름, 타입, 거리, 시간) 검증
+                    if (p.length >= 5) {
+                        batchData.push({
+                            run_date: p[0],                        // 날짜 (YYYY-MM-DD)
+                            user_name: p[1],                       // 이름
+                            run_type: p[2] || '번개',               // 타입
+                            distance: Number(p[3]) || 0,           // 거리 (숫자)
+                            duration: Number(p[4]) || 0,           // 시간 (숫자)
+                            bpm: Number(p[5] || 0),                // 심박수
+                            cadence: Number(p[6] || 0),             // 케이던스
+                            memo: p[7] || '',                      // 메모
+                            updated_at: new Date().toISOString()
+                        });
                     }
                 }
-                document.getElementById('bulk-logs-input').value = '';
-                showModal(`${count}건 등록 완료`, "alert");
+
+                // 2. Supabase 전송
+                if (batchData.length > 0) {
+                    try {
+                        // _supabase 객체명 확인 필수!
+                        const { error } = await _supabase
+                            .from(TABLE_NAME)
+                            .insert(batchData);
+
+                        if (error) throw error;
+
+                        // 3. 성공 처리 (데이터 전송 완료 후 모달 표시)
+                        document.getElementById('bulk-logs-input').value = ''; 
+                        showModal(`${batchData.length}건 등록 완료`, "alert");
+                        
+                        if (typeof syncLogs === 'function') await syncLogs();
+
+                    } catch (e) {
+                        console.error("로그 일괄 등록 오류:", e.message);
+                        showToast("기록 저장 중 오류가 발생했습니다: " + e.message);
+                    }
+                } else {
+                    showToast("등록할 유효한 데이터 형식이 아닙니다.");
+                }
             };
 
             const yr = document.getElementById('year-select');
@@ -2999,6 +3426,8 @@ if (!newTeam) return showModal("소속팀을 선택하세요.", "alert");
 
 
         };
+        // 앱 실행 시 호출
+        //initRealtimeSync();
         init();
     </script>
 </body>
