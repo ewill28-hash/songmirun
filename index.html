@@ -2318,19 +2318,38 @@
             const grade = calculateRunnerGrade(userLogs);
             const gradeBadge = document.getElementById('modal-runner-grade');
             
-            gradeBadge.innerText = grade.name;
-            gradeBadge.className = `runner-grade-badge ${grade.color} text-xs px-2 py-1 cursor-help`;
-            let tooltipText = `[상세 점수]\n` +
-                                `● 횟수점수: ${grade.details.scoreCount} / 거리점수: ${grade.details.scoreDist} / 연속점수: ${grade.details.scoreBonus}\n` +
-                                `● 총합점수: ${grade.details.totalScore}점\n` +
-                                `----------------\n`;
-                        if (grade.nextGrade) {
-                            tooltipText += `✨ 다음 등급 [${grade.nextGrade.name}]까지 ${grade.nextGrade.remaining}점 남았습니다!`;
-                        } else {
-                            tooltipText += `👑 축하합니다! 최고 등급인 ${grade.name}입니다.`;
-                        }
-            
-            gradeBadge.title = tooltipText;
+            gradeBadge.innerHTML = `${grade.name} <i class="fa-solid fa-circle-info text-[9px] opacity-60"></i>`;
+            gradeBadge.className = `runner-grade-badge ${grade.color} text-xs px-2 py-1 cursor-pointer flex items-center gap-1`;
+
+            const detailText = `📊 상세 점수
+            --------------------------------
+            🏃 횟수 점수: ${grade.details.scoreCount}점
+            📏 거리 점수: ${grade.details.scoreDist}점
+            🔥 연속 점수: ${grade.details.scoreBonus}점
+
+            💰 총합 점수: ${grade.details.totalScore}점
+            --------------------------------
+            🌱 새싹➞🌷꽃봉➞
+            🌼 활짝➞🌺열정➞🏵️만개
+            --------------------------------
+           
+            ${grade.nextGrade 
+                ? `✨ 다음 등급 [${grade.nextGrade.name}]까지 ${grade.nextGrade.remaining}점 남았습니다!`
+                : `👑 최고 등급 달성!`}`;
+
+
+           gradeBadge.onclick = (e) => {
+                e.stopPropagation();
+                
+                // 만약 기존에 만든 showModal 함수가 있다면 사용
+                if (typeof showModal === 'function') {
+                    showModal(detailText, "info");
+                } else {
+                    // 커스텀 모달이 없을 경우 최소한의 깔끔한 표시를 위한 alert 대체
+                    alert(tooltipText.replace(/<br>/g, '\n')); 
+                }
+            };
+
 
             const userRecord = crewMembers.find(m => m.nickname === nickname); // userName -> nickname
             const myTeam2 = userRecord ? userRecord.team : '무소속2';
