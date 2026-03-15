@@ -65,15 +65,18 @@
                  * user_name: 사용자 이름 필드
                  * run_date: 운동 날짜 필드 (필터링 기준)
                  * distance: 운동 거리 필드
+                 * updated_at: 데이터 수정 시각 필드 (정렬 및 표시용)
                  */
-                const rawName = item.user_name || 'Unknown'; // 사용자 이름 필드 참조
-                const rawDate = item.run_date || item.created_at || Date.now(); // 날짜 필드 참조
+                const rawName = item.user_name || 'Unknown'; 
+                const rawDate = item.run_date || item.created_at || Date.now();
+                const updateTime = item.updated_at || item.created_at || Date.now();
                 
                 return {
                     id: item.id,
                     userName: rawName.trim(), 
-                    distance: parseFloat(item.distance || 0), // 거리 필드 참조 및 숫자 변환
-                    jsDate: new Date(rawDate)
+                    distance: parseFloat(item.distance || 0), 
+                    jsDate: new Date(rawDate),
+                    updatedAt: new Date(updateTime) // 최근 변경 시각 저장
                 };
             });
 
@@ -116,15 +119,10 @@
             loadingElement.classList.remove('hidden');
             loadingElement.innerText = "이름 변경 중...";
 
-            /**
-             * [데이터 업데이트]
-             * 테이블: songmirun_logs
-             * 필드: user_name (조합 조건 및 업데이트 대상)
-             */
             const { error } = await _supabase
                 .from('songmirun_logs')
-                .update({ user_name: newName }) // 새 사용자 이름으로 업데이트
-                .eq('user_name', currentEditingName); // 기존 이름과 일치하는 행 선택
+                .update({ user_name: newName }) 
+                .eq('user_name', currentEditingName); 
 
             if (error) {
                 console.error("Update failed:", error);
@@ -133,7 +131,22 @@
             fetchLogs();
         };
 
-        // 데이터 필터링 및 통계 계산 로직 (run_date와 distance 기반)
+        // 날짜 포맷팅 헬퍼 함수
+        function formatRelativeDate(date) {
+            const now = new Date();
+            const diff = now - date;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+
+            if (minutes < 1) return '방금 전';
+            if (minutes < 60) return `${minutes}분 전`;
+            if (hours < 24) return `${hours}시간 전`;
+            if (days < 7) return `${days}일 전`;
+            return date.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        }
+
+        // 데이터 필터링 및 통계 계산 로직
         function applyFilters() {
             const selectedYear = yearSelect.value;
             const selectedMonth = monthSelect.value;
@@ -147,7 +160,6 @@
                 const nameKey = log.userName;
                 if (!nameKey || isNaN(log.jsDate.getTime())) return;
                 
-                // [필터링 기준] run_date에서 추출한 년/월
                 const year = log.jsDate.getFullYear().toString();
                 const month = (log.jsDate.getMonth() + 1).toString();
                 
@@ -155,12 +167,17 @@
                 if (selectedMonth !== 'all' && month !== selectedMonth) return;
                 
                 if (!userData[nameKey]) {
-                    userData[nameKey] = { count: 0, totalDistance: 0 };
+                    // [최근 변경 일시 초기화] 각 사용자의 가장 최신 updatedAt을 추적하기 위함
+                    userData[nameKey] = { count: 0, totalDistance: 0, lastUpdate: log.updatedAt };
                 }
                 
-                // [데이터 집계] 참여 횟수 및 거리 누적
                 userData[nameKey].count += 1;
                 userData[nameKey].totalDistance += log.distance; 
+                
+                // [최근 변경 일시 갱신]
+                if (log.updatedAt > userData[nameKey].lastUpdate) {
+                    userData[nameKey].lastUpdate = log.updatedAt;
+                }
                 
                 totalDistSum += log.distance;
                 totalCountSum += 1;
@@ -169,12 +186,15 @@
             totalDistanceElement.innerText = totalDistSum.toFixed(2);
             totalCountElement.innerText = totalCountSum;
 
-            // 정렬 로직 (거리순 또는 횟수순)
+            // 정렬 로직 (거리순, 횟수순, 최근변경순)
             currentSortedData = Object.entries(userData).sort((a, b) => {
                 if (sortBy === 'distance') {
                     if (b[1].totalDistance !== a[1].totalDistance) return b[1].totalDistance - a[1].totalDistance;
-                } else {
+                } else if (sortBy === 'count') {
                     if (b[1].count !== a[1].count) return b[1].count - a[1].count;
+                } else if (sortBy === 'recent') {
+                    // [최근 변경 일시 기준 정렬]
+                    return b[1].lastUpdate - a[1].lastUpdate;
                 }
                 return a[0].localeCompare(b[0]);
             });
@@ -202,13 +222,17 @@
                             ${name.charAt(0)}
                         </div>
                         <div class="flex flex-col">
-                            <span class="text-slate-800 font-bold uppercase tracking-tight">${name}</span>
-                            <button onclick="openRenameModal('${name}')" class="text-[10px] text-emerald-500 hover:text-emerald-700 flex items-center mt-1 font-bold">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-0.5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                                </svg>
-                                이름 수정
-                            </button>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-slate-800 font-bold uppercase tracking-tight leading-tight">${name}</span>
+                                <button onclick="openRenameModal('${name}')" class="text-[10px] text-slate-300 hover:text-emerald-500 flex items-center transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <span class="text-[9px] font-bold text-slate-400 uppercase mt-0.5">
+                                Updated: ${formatRelativeDate(stats.lastUpdate)}
+                            </span>
                         </div>
                     </div>
                     <div class="flex flex-col items-end space-y-1.5">
@@ -237,9 +261,9 @@
             const selectedYear = yearSelect.value === 'all' ? '전체연도' : yearSelect.value + '년';
             const selectedMonth = monthSelect.value === 'all' ? '전체월' : monthSelect.value + '월';
             let csvContent = "\uFEFF";
-            csvContent += "순위,이름,총 거리(km),참여 횟수\n";
+            csvContent += "순위,이름,총 거리(km),참여 횟수,최근 업데이트\n";
             currentSortedData.forEach(([name, stats], index) => {
-                csvContent += `${index + 1},${name},${stats.totalDistance.toFixed(2)},${stats.count}\n`;
+                csvContent += `${index + 1},${name},${stats.totalDistance.toFixed(2)},${stats.count},${stats.lastUpdate.toISOString()}\n`;
             });
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
@@ -309,6 +333,7 @@
                 <div class="flex flex-col">
                     <label class="text-[10px] font-black uppercase mb-1 text-emerald-100">Sort By</label>
                     <select id="sort-filter" class="bg-emerald-700 border-none rounded-lg text-[12px] font-bold p-2 text-white outline-none">
+                        <option value="recent">최근 변경 순</option>
                         <option value="distance">총 거리 순</option>
                         <option value="count">참여 횟수 순</option>
                     </select>
