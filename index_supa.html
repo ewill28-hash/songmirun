@@ -1651,96 +1651,102 @@
             if (h > 0) return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
             return `${m}:${s.toString().padStart(2, '0')}`;
         };
+function renderChart(teams, myStats) {
+    const canvas = document.getElementById('teamChart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
 
-        function renderChart(teams, myStats) {
-            const canvas = document.getElementById('teamChart');
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
+    let labels = [];
+    let dataPoints = [];
+    let colors = [];
 
-            let labels = [];
-            let dataPoints = [];
-            let colors = [];
+    // 현재 선택된 지표에 따른 값 추출 헬퍼 함수
+    const getVal = (obj) => {
+        if (currentMetric === 'dist') return obj.dist || 0;
+        if (currentMetric === 'time') return obj.time || 0;
+        return obj.count || 0;
+    };
 
-            if (dataScope === 'me') {
-                labels = ['내 기록', '팀 평균'];
-                //const myTeamName = allMembers[userData.name] || userData.team;
-                const myTeamName = crewMembers[userNickname] || myTeam;
-                const td = teams[myTeamName] || { dist: 0, time: 0, count: 1, members: new Set([1]), color: TEAM_COLORS[myTeamName] || '#3b82f6' };
-                const mCount = td.members.size || 1;
+    if (dataScope === 'me') {
+        // [수정] crewMembers[userNickname]은 객체이므로 .team까지 접근해야 합니다.
+        const myTeamName = crewMembers[userNickname]?.team || myTeam || '무소속';
+        
+        // 해당 팀의 데이터 가져오기 (없을 경우 기본값)
+        const td = teams[myTeamName] || { dist: 0, time: 0, count: 0, members: new Set(), color: '#e2e8f0' };
+        
+        // [핵심] 팀 평균 계산: 팀 전체 합산 / 실제 팀원 수
+        const memberCount = td.members.size > 0 ? td.members.size : 1;
+        const teamAvg = getVal(td) / memberCount;
 
-                if (currentMetric === 'dist') {
-                    dataPoints = [myStats.dist, td.dist / mCount];
-                } else if (currentMetric === 'time') {
-                    dataPoints = [myStats.time, td.time / mCount];
-                } else {
-                    dataPoints = [myStats.count, td.count / mCount];
-                }
-                colors = [td.color, '#e2e8f0'];
-            } else {
-                // 팀 객체의 키 순서대로 데이터를 추출하여 불일치 방지
-                const teamEntries = Object.values(teams);
-                //labels = teamEntries.map(t => t.name);
-                labels = teamEntries.map(t => `팀: ${t.name}`);
+        labels = ['내 기록', `${myTeamName} 평균`];
+        dataPoints = [getVal(myStats), teamAvg];
+        colors = [TEAM_COLORS[myTeamName] || '#3b82f6', '#e2e8f0'];
 
-                dataPoints = teamEntries.map(t => {
-                    const mCount = t.members.size || 1;
-                    const val = currentMetric === 'dist' ? t.dist : (currentMetric === 'time' ? t.time : t.count);
-                    return dataScope === 'avg' ? val / mCount : val;
-                });
-                colors = teamEntries.map(t => t.color);
-            }
+    } else {
+        // 전체 팀 비교 모드
+        const teamEntries = Object.values(teams);
+        labels = teamEntries.map(t => t.name);
 
-            // 차트 재생성
-            if (chartInstance) chartInstance.destroy();
-            chartInstance = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: dataPoints,
-                        backgroundColor: colors,
-                        borderWidth: 0,
-                        hoverOffset: 10
-                    }]
+        dataPoints = teamEntries.map(t => {
+            const val = getVal(t);
+            const memberCount = t.members.size > 0 ? t.members.size : 1;
+            // 'avg' 모드면 평균값, 아니면 총합(sum)
+            return dataScope === 'avg' ? val / memberCount : val;
+        });
+        colors = teamEntries.map(t => t.color || '#94a3b8');
+    }
+
+    // 차트 재생성 로직
+    if (chartInstance) chartInstance.destroy();
+    chartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: dataPoints,
+                backgroundColor: colors,
+                borderWidth: 0,
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '75%', // 도넛 두께를 조금 더 얇게 조절
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        usePointStyle: true,
+                        font: { size: 11, weight: '600' },
+                        padding: 15
+                    }
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '70%',
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                usePointStyle: true,
-                                font: { size: 10, weight: 'bold' },
-                                padding: 15
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    padding: 12,
+                    callbacks: {
+                        label: (context) => {
+                            const value = context.parsed;
+                            let displayVal = "";
+                            
+                            if (currentMetric === 'time') {
+                                displayVal = typeof formatTime2 === 'function' ? formatTime2(value) : value.toFixed(1);
+                            } else if (currentMetric === 'dist') {
+                                displayVal = value.toFixed(2) + 'km';
+                            } else {
+                                displayVal = value.toFixed(1) + '회';
                             }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: (context) => {
-                                    let label = context.label || '';
-                                    let value = context.parsed;
-                                    let displayVal = value.toFixed(1);
-                                    if (currentMetric === 'time') displayVal = formatTime2(value);
-                                    else if (currentMetric === 'dist') displayVal += 'km';
-                                    else {
-                                        displayVal = value.toFixed(1) + '회';}
-                                    return `${label}: ${displayVal}`;
-                                }
-                            }
+                            return ` ${context.label}: ${displayVal}`;
                         }
                     }
                 }
-            });
+            }
         }
+    });
+}
 
-
-
-       // window.syncAndRefresh = () => updateUI_Team();
-
-
-
+       //window.syncAndRefresh = () => updateUI_Team();
 
         // 도시 데이터 (마라톤 성지 포함)
         const DESTINATIONS = [
