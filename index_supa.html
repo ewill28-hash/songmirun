@@ -1,6 +1,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -965,7 +966,7 @@
                 </button>
             </div>
             
-            <div class="p-8">
+            <div class="p-5">
                 <!-- 여정 요약 텍스트 -->
                 <div class="text-center mb-10">
                     <p id="route-text" class="text-blue-600 font-bold tracking-tight text-lg mb-2 italic">
@@ -1029,9 +1030,14 @@
                     </div>
                 </div>
             </div>
-            
-            <div class="p-4 bg-slate-50 text-center">
-                <button onclick="closeModal()" class="w-full py-4 bg-slate-900 text-white font-black rounded-2xl hover:bg-slate-800 active:scale-[0.98] transition-all shadow-xl shadow-slate-200 flex items-center justify-center gap-2">
+            <div class="p-2 bg-slate-50 text-center">
+                <div id="next-challenge-text"></div>
+                <button id="map-link-btn" class="mt-1 text-sm text-blue-500 underline">
+                    구글 지도로 경로 확인하기 🗺️
+                </button>
+            </div>
+            <div class="p-2 bg-slate-50 text-center">
+                <button onclick="closeModal()" class="w-full py-3 bg-slate-900 text-white font-black rounded-2xl hover:bg-slate-800 active:scale-[0.98] transition-all shadow-xl shadow-slate-200 flex items-center justify-center gap-2">
                     확인하고 계속 달리기
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
@@ -1754,34 +1760,52 @@
 
        //window.syncAndRefresh = () => updateUI_Team();
 
+
         const DESTINATIONS = [
-            { name: "송도 (미추홀)", dist: 0, emoji: "👟" },
-            { name: "서울 (남산타워)", dist: 35, emoji: "🗼" },
-            { name: "평창 (동계올림픽)", dist: 180, emoji: "❄️" },
-            { name: "대전 (성심당)", dist: 160, emoji: "🥖" },
-            { name: "대구 (팔공산)", dist: 260, emoji: "🍎" },
-            { name: "광주 (무등산)", dist: 270, emoji: "🍉" },
-            { name: "부산 (해운대)", dist: 330, emoji: "🌊" },
-            { name: "제주도 (한라산)", dist: 450, emoji: "🗿" },
-            { name: "상하이", dist: 800, emoji: "🏮" },
-            { name: "도쿄 (마라톤 성지)", dist: 1200, emoji: "🗼" },
-            { name: "홍콩", dist: 2000, emoji: "🏙️" },
-            { name: "방콕", dist: 3700, emoji: "🛕" },
-            { name: "싱가포르", dist: 4700, emoji: "🦁" },
-            { name: "발리 (인도네시아)", dist: 5200, emoji: "🏖️" }, // 추가
-            { name: "퍼스 (호주 서부)", dist: 7200, emoji: "☀️" }, // 추가
-            { name: "시드니", dist: 8300, emoji: "🦘" },
-            { name: "베를린 (마라톤 성지)", dist: 8500, emoji: "🏰" },
-            { name: "모스크바", dist: 9300, emoji: "🇷🇺" },
-            { name: "런던 (마라톤 성지)", dist: 11000, emoji: "🎡" },
-            { name: "보스턴 (마라톤 성지)", dist: 11500, emoji: "🏛️" },
-            { name: "뉴욕 (마라톤 성지)", dist: 13000, emoji: "🗽" },
-            { name: "시카고 (마라톤 성지)", dist: 13500, emoji: "🏙️" },
-            { name: "멕시코시티", dist: 14500, emoji: "🌮" }, // 추가
-            { name: "리마 (페루)", dist: 16300, emoji: "🦙" }, // 추가
-            { name: "상파울루 (지구반바퀴)", dist: 18000, emoji: "⚽" }
+            { name: "송도 (미추홀)", dist: 0, emoji: "👟", lat: 37.3860, lng: 126.6389 },
+            { name: "서울 (남산타워)", dist: 35, emoji: "🗼", lat: 37.5511, lng: 126.9882 },
+            { name: "평창 (동계올림픽)", dist: 180, emoji: "❄️", lat: 37.3704, lng: 128.3902 },
+            { name: "대전 (성심당)", dist: 160, emoji: "🥖", lat: 36.3276, lng: 127.4273 },
+            { name: "대구 (팔공산)", dist: 260, emoji: "🍎", lat: 35.8714, lng: 128.6014 },
+            { name: "광주 (무등산)", dist: 270, emoji: "🍉", lat: 35.1595, lng: 126.8526 },
+            { name: "부산 (해운대)", dist: 330, emoji: "🌊", lat: 35.1587, lng: 129.1603 },
+            { name: "제주도 (한라산)", dist: 450, emoji: "🗿", lat: 33.3616, lng: 126.5292 },
+            { name: "상하이", dist: 800, emoji: "🏮", lat: 31.2304, lng: 121.4737 },
+            { name: "도쿄 (마라톤 성지)", dist: 1200, emoji: "🗼", lat: 35.6895, lng: 139.6917 },
+            { name: "홍콩", dist: 2000, emoji: "🏙️", lat: 22.3193, lng: 114.1694 },
+            { name: "방콕", dist: 3700, emoji: "🛕", lat: 13.7563, lng: 100.5018 },
+            { name: "싱가포르", dist: 4700, emoji: "🦁", lat: 1.3521, lng: 103.8198 },
+            { name: "발리 (인도네시아)", dist: 5200, emoji: "🏖️", lat: -8.4095, lng: 115.1889 },
+            { name: "퍼스 (호주 서부)", dist: 7200, emoji: "☀️", lat: -31.9505, lng: 115.8605 },
+            { name: "시드니", dist: 8300, emoji: "🦘", lat: -33.8688, lng: 151.2093 },
+            { name: "베를린 (마라톤 성지)", dist: 8500, emoji: "🏰", lat: 52.5200, lng: 13.4050 },
+            { name: "모스크바", dist: 9300, emoji: "🇷🇺", lat: 55.7558, lng: 37.6173 },
+            { name: "런던 (마라톤 성지)", dist: 11000, emoji: "🎡", lat: 51.5074, lng: -0.1278 },
+            { name: "보스턴 (마라톤 성지)", dist: 11500, emoji: "🏛️", lat: 42.3601, lng: -71.0589 },
+            { name: "뉴욕 (마라톤 성지)", dist: 13000, emoji: "🗽", lat: 40.7128, lng: -74.0060 },
+            { name: "시카고 (마라톤 성지)", dist: 13500, emoji: "🏙️", lat: 41.8781, lng: -87.6298 },
+            { name: "멕시코시티", dist: 14500, emoji: "🌮", lat: 19.4326, lng: -99.1332 },
+            { name: "리마 (페루)", dist: 16300, emoji: "🦙", lat: -12.0464, lng: -77.0428 },
+            { name: "상파울루 (지구반바퀴)", dist: 18000, emoji: "⚽", lat: -23.5505, lng: -46.6333 }
         ];
-        
+
+        window.getGoogleMapsLink = (target) => {
+            const origin = { name: "인천광역시 송도동", lat: 37.3860, lng: 126.6389 };
+            
+            // 아직 출발 전이거나 송도에 머물러 있는 경우
+            if (target.dist === 0) {
+                // 송도 위치만 찍어주는 간단한 검색 URL 반환
+                return `https://www.google.com/maps/search/?api=1&query=${origin.lat},${origin.lng}`;
+            }
+            // 400km 미만: 운전 경로
+            if (target.dist < 400) {
+                return `https://www.google.com/maps/dir/${origin.lat},${origin.lng}/${target.lat},${target.lng}/data=!3m1!4b1!4m2!4m1!3e0`;
+            } 
+            // 400km 이상: 항공 경로
+            return `https://www.google.com/maps/dir/${origin.name}/${target.name}/@${target.lat},${target.lng},4z/data=!3m1!4b1!4m2!4m1!3e4`;
+        };
+
+                
         window.renderChallengeModal = (title, distance) => {
             const currentYearLogs = allLogs.filter(l => l.run_date && new Date(l.run_date).getFullYear() === parseInt(selectedYear));
             const totalDist = currentYearLogs.reduce((sum, l) => sum + Number(l.distance || 0), 0);
@@ -1791,12 +1815,11 @@
             const reached = [...DESTINATIONS].filter(d => d.dist <= currentDist).pop() || DESTINATIONS[0];
             const next = DESTINATIONS.find(d => d.dist > currentDist) || DESTINATIONS[DESTINATIONS.length - 1];
 
-            document.getElementById('modal-title').innerText = selectedYear+'년 송미런 여정 경로';
+            // 기본 텍스트 설정
+            document.getElementById('modal-title').innerText = selectedYear + '년 송미런 여정 경로';
             document.getElementById('cur-val-inner').innerText = 
-                currentDist.toLocaleString(undefined, { 
-                    minimumFractionDigits: 1, 
-                    maximumFractionDigits: 1 
-                }); 
+                currentDist.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }); 
+            
             const routeText = `송도 → ${reached.name === '송도' ? '' : reached.name + ' → '}${next.name}`;
             document.getElementById('route-text').innerText = reached.name === next.name ? `송도 → ... → ${reached.name} (완주!)` : routeText;
             
@@ -1804,8 +1827,34 @@
             document.getElementById('reached-emoji').innerText = reached.emoji;
             document.getElementById('next-emoji').innerText = next.emoji;
             document.getElementById('prev-city').innerText = reached.name;
-            document.getElementById('next-city').innerText = next === reached ? "Final Destination" : next.name;
+            
+            // --- 목적지 링크 로직 (수정됨) ---
+            const nextCityLink = document.getElementById('next-city');
+            nextCityLink.innerText = next === reached ? "Final Destination" : next.name;
 
+            nextCityLink.onclick = () => {
+                    // reached가 송도(0km)라면 지도를 여는 의미가 적으므로, 
+                    // 도달한 곳이 있을 때만 열거나 송도-송도 경로를 보여줍니다.
+                    const url = window.getGoogleMapsLink(next);
+                    window.open(url, '_blank');
+                };
+
+            // 스타일 적용
+            nextCityLink.style.cursor = 'pointer';
+            nextCityLink.style.textDecoration = 'underline';
+            nextCityLink.classList.add('text-blue-600', 'font-bold');
+
+        // --- [수정] 하단 지도 버튼 로직 ---
+            const mapBtn = document.getElementById('map-link-btn');
+            if (mapBtn) {
+                mapBtn.onclick = () => {
+                    // next가 아닌 reached 객체를 전달하여 '지금까지 온 길'을 확인
+                    const url = window.getGoogleMapsLink(reached);
+                    window.open(url, '_blank');
+                };
+            }
+
+            // 프로그레스 바 및 남은 거리 계산
             const progress = (next === reached) ? 100 : Math.min(100, (currentDist / next.dist) * 100);
             document.getElementById('modal-progress').style.width = '0%';
             setTimeout(() => {
@@ -1815,7 +1864,7 @@
             document.getElementById('target-dist-label').innerText = `${next.dist.toLocaleString()} KM`;
             
             if (next === reached) {
-                document.getElementById('next-challenge-text').innerText = `대단합니다! 더 이상 갈 곳이 없을 정도로 멀리 오셨네요. 이제 당신은 세계적인 마라토너입니다.`;
+                document.getElementById('next-challenge-text').innerText = `대단합니다! 더 이상 갈 곳이 없을 정도로 멀리 오셨네요.`;
             } else {
                 const remain = (next.dist - currentDist);
                 document.getElementById('next-challenge-text').innerHTML = `다음 목표 <span class="text-blue-600 font-black">${next.name}</span>까지 <span class="text-blue-600 font-black">${remain.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}km</span> 남았습니다.`;
@@ -1824,8 +1873,10 @@
             document.getElementById('challenge-modal').classList.remove('hidden');
             document.body.classList.add('modal-active');
         };
-
         
+
+
+
         let globalYearlyStats = {};
         window.closeModal = () => {
             document.getElementById('challenge-modal').classList.add('hidden');
