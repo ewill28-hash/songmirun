@@ -3476,17 +3476,27 @@
             });
 
             document.addEventListener('DOMContentLoaded', () => {
-
                 const updateAndDispatch = (inputEl, newValue, decimal) => {
                     if (!inputEl) return;
-
                     inputEl.value = newValue.toFixed(decimal);
-
                     inputEl.dispatchEvent(new Event('input', { bubbles: true }));
-
- 
+                    
                     inputEl.classList.add('border-emerald-500');
                     setTimeout(() => inputEl.classList.remove('border-emerald-500'), 200);
+                };
+
+                // 공통 이벤트 바인딩 함수 (터치 + 클릭 대응)
+                const addTapListener = (id, callback) => {
+                    const el = document.getElementById(id);
+                    if (!el) return;
+
+                    const handleEvent = (e) => {
+                        e.preventDefault(); // 모바일에서 클릭 지연 및 중복 방지
+                        callback();
+                    };
+
+                    el.addEventListener('touchstart', handleEvent, { passive: false });
+                    el.addEventListener('click', handleEvent);
                 };
 
                 const distInput = document.getElementById('in-dist');
@@ -3500,14 +3510,16 @@
                     'label-dist42': { type: 'set', val: 42.195 }
                 };
 
+                // 거리 관련 이벤트 적용
                 Object.entries(distMap).forEach(([id, config]) => {
-                    document.getElementById(id)?.addEventListener('click', () => {
+                    addTapListener(id, () => {
                         const current = parseFloat(distInput.value) || 0;
                         const targetVal = config.type === 'add' ? current + config.val : config.val;
                         updateAndDispatch(distInput, targetVal, 3);
                     });
                 });
 
+                // 시간 관련 이벤트 적용
                 const timeConfigs = [
                     { id: 'label-timeH', targetId: 'in-time-h', increment: 1 },
                     { id: 'label-timeM', targetId: 'in-time-m', increment: 10 },
@@ -3515,10 +3527,8 @@
                 ];
 
                 timeConfigs.forEach(({ id, targetId, increment }) => {
-                    const btn = document.getElementById(id);
                     const input = document.getElementById(targetId);
-
-                    btn?.addEventListener('click', () => {
+                    addTapListener(id, () => {
                         const current = parseFloat(input.value) || 0;
                         updateAndDispatch(input, current + increment, 0);
                     });
