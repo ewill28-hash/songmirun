@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스네이크 방식 그룹 배정기</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700;900&display=swap');
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f8fafc; }
+        .snake-card { transition: all 0.3s ease; }
+        .snake-card:hover { transform: translateY(-5px); }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-6xl mx-auto">
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl font-black text-slate-800 mb-2">🐍 스마트 밸런스 3그룹 배정기</h1>
+            <p class="text-slate-500">하위 6명부터 거리 합계를 계산하여 최적의 밸런스로 배정합니다.</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- 입력 영역 -->
+            <div class="lg:col-span-1 space-y-4">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <label class="block text-sm font-bold text-slate-700 mb-2">데이터 입력 (이름 거리)</label>
+                    <textarea id="inputData" rows="15" 
+                        class="w-full p-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm leading-relaxed"
+                        placeholder="김철수 150.5&#10;이영희 230&#10;박지성 80&#10;손흥민 310..."></textarea>
+                    
+                    <button onclick="processGrouping()" 
+                        class="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-colors shadow-lg shadow-blue-200">
+                        그룹 배정하기
+                    </button>
+
+                    <button id="downloadBtn" onclick="downloadExcel()" 
+                        class="w-full mt-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition-colors shadow-lg shadow-emerald-200 hidden flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        엑셀 다운로드 (.csv)
+                    </button>
+                    
+                    <div class="mt-4 text-xs text-slate-400 leading-5">
+                        * 한 줄에 한 명씩 입력하세요.<br>
+                        * 이름과 거리 사이는 공백으로 구분합니다.<br>
+                        * <strong>밸런스 모드:</strong> 하위 6명은 팀별 총합을 고려하여 보정 배정됩니다.
+                    </div>
+                </div>
+            </div>
+
+            <!-- 결과 영역 -->
+            <div class="lg:col-span-2">
+                <div id="resultContainer" class="grid grid-cols-1 md:grid-cols-3 gap-4 hidden">
+                    <!-- 그룹 1: 손기정팀 -->
+                    <div class="bg-white rounded-2xl shadow-sm border-t-4 border-blue-500 p-5 snake-card border border-slate-200">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-black text-blue-600">손기정팀</h2>
+                            <span id="count-0" class="bg-blue-50 text-blue-600 text-xs font-bold px-2 py-1 rounded-lg">0명</span>
+                        </div>
+                        <div id="group-0" class="space-y-2 min-h-[100px]"></div>
+                        <div class="mt-6 pt-4 border-t border-dashed border-slate-200">
+                            <div class="text-xs text-slate-400">총 거리 합계</div>
+                            <div id="sum-0" class="text-lg font-bold text-slate-700">0 km</div>
+                        </div>
+                    </div>
+
+                    <!-- 그룹 2: 황영조팀 -->
+                    <div class="bg-white rounded-2xl shadow-sm border-t-4 border-emerald-500 p-5 snake-card border border-slate-200">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-black text-emerald-600">황영조팀</h2>
+                            <span id="count-1" class="bg-emerald-50 text-emerald-600 text-xs font-bold px-2 py-1 rounded-lg">0명</span>
+                        </div>
+                        <div id="group-1" class="space-y-2 min-h-[100px]"></div>
+                        <div class="mt-6 pt-4 border-t border-dashed border-slate-200">
+                            <div class="text-xs text-slate-400">총 거리 합계</div>
+                            <div id="sum-1" class="text-lg font-bold text-slate-700">0 km</div>
+                        </div>
+                    </div>
+
+                    <!-- 그룹 3: 이봉주팀 -->
+                    <div class="bg-white rounded-2xl shadow-sm border-t-4 border-amber-500 p-5 snake-card border border-slate-200">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-black text-amber-600">이봉주팀</h2>
+                            <span id="count-2" class="bg-amber-50 text-amber-600 text-xs font-bold px-2 py-1 rounded-lg">0명</span>
+                        </div>
+                        <div id="group-2" class="space-y-2 min-h-[100px]"></div>
+                        <div class="mt-6 pt-4 border-t border-dashed border-slate-200">
+                            <div class="text-xs text-slate-400">총 거리 합계</div>
+                            <div id="sum-2" class="text-lg font-bold text-slate-700">0 km</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 초기 안내 문구 -->
+                <div id="emptyGuide" class="h-full flex flex-col items-center justify-center text-slate-300 border-2 border-dashed border-slate-200 rounded-2xl p-20">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 005.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    <p class="font-medium">데이터를 입력하고 버튼을 눌러주세요.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let lastGroups = [];
+        const teamNames = ["손기정팀", "황영조팀", "이봉주팀"];
+
+        function processGrouping() {
+            const text = document.getElementById('inputData').value.trim();
+            if (!text) {
+                alert("데이터를 입력해 주세요.");
+                return;
+            }
+
+            const lines = text.split('\n');
+            const players = [];
+
+            lines.forEach(line => {
+                const parts = line.trim().split(/\s+/);
+                if (parts.length >= 2) {
+                    const name = parts.slice(0, -1).join(' ');
+                    const dist = parseFloat(parts[parts.length - 1]);
+                    if (!isNaN(dist)) {
+                        players.push({ name, dist });
+                    }
+                }
+            });
+
+            if (players.length < 3) {
+                alert("최소 3명 이상의 데이터가 필요합니다.");
+                return;
+            }
+
+            // 거리순 내림차순 정렬
+            players.sort((a, b) => b.dist - a.dist);
+
+            const numGroups = 3;
+            const groups = [[], [], []];
+            const groupSums = [0, 0, 0];
+
+            const totalPlayers = players.length;
+            
+            // 밸런스 구간 설정: 하위 6명 (인원이 적을 경우 유동적으로 조절)
+            // 전체 인원이 9명 미만이면 모든 인원을 스마트 밸런스로 배정하거나 최소 3명만 스네이크
+            const balanceCount = Math.min(6, totalPlayers); 
+            const snakeCount = totalPlayers - balanceCount;
+
+            // 1. 상위 인원들: 전통적인 스네이크 배정
+            for (let i = 0; i < snakeCount; i++) {
+                const round = Math.floor(i / numGroups);
+                const pos = i % numGroups;
+                const groupIdx = (round % 2 === 0) ? pos : (numGroups - 1 - pos);
+                
+                groups[groupIdx].push(players[i]);
+                groupSums[groupIdx] += players[i].dist;
+            }
+
+            // 2. 하위 6명(또는 잔여): 스마트 밸런스 배정
+            // 현재까지의 총합이 가장 낮은 그룹에 순차적으로 배정
+            const remainingPlayers = players.slice(snakeCount);
+            
+            remainingPlayers.forEach(player => {
+                let minSumIdx = 0;
+                let minSum = groupSums[0];
+                
+                // 합계가 가장 작은 팀 찾기
+                for (let j = 1; j < numGroups; j++) {
+                    if (groupSums[j] < minSum) {
+                        minSum = groupSums[j];
+                        minSumIdx = j;
+                    }
+                }
+                
+                groups[minSumIdx].push(player);
+                groupSums[minSumIdx] += player.dist;
+            });
+
+            lastGroups = groups;
+            renderGroups(groups);
+            document.getElementById('downloadBtn').classList.remove('hidden');
+        }
+
+        function renderGroups(groups) {
+            document.getElementById('emptyGuide').classList.add('hidden');
+            document.getElementById('resultContainer').classList.remove('hidden');
+
+            groups.forEach((group, idx) => {
+                const listEl = document.getElementById(`group-${idx}`);
+                const countEl = document.getElementById(`count-${idx}`);
+                const sumEl = document.getElementById(`sum-${idx}`);
+                
+                listEl.innerHTML = '';
+                let sum = 0;
+
+                const sortedGroup = [...group].sort((a,b) => b.dist - a.dist);
+
+                sortedGroup.forEach((p, pIdx) => {
+                    sum += p.dist;
+                    const item = document.createElement('div');
+                    item.className = "flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100 hover:bg-white hover:shadow-sm transition-all";
+                    item.innerHTML = `
+                        <span class="text-sm font-medium text-slate-600"><span class="text-slate-300 mr-2 font-mono">${pIdx + 1}</span>${p.name}</span>
+                        <span class="text-sm font-bold text-slate-800">${p.dist.toLocaleString()} <span class="text-[10px] text-slate-400 font-normal ml-1">km</span></span>
+                    `;
+                    listEl.appendChild(item);
+                });
+
+                countEl.innerText = `${group.length}명`;
+                sumEl.innerText = `${sum.toLocaleString(undefined, {minimumFractionDigits:1})} km`;
+            });
+        }
+
+        function downloadExcel() {
+            if (lastGroups.length === 0) return;
+
+            let csvContent = "\uFEFF"; 
+            csvContent += "팀명,순번,이름,거리(km)\n";
+
+            lastGroups.forEach((group, idx) => {
+                const teamName = teamNames[idx];
+                const sortedGroup = [...group].sort((a,b) => b.dist - a.dist);
+                sortedGroup.forEach((p, pIdx) => {
+                    csvContent += `${teamName},${pIdx + 1},"${p.name}",${p.dist}\n`;
+                });
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            
+            const now = new Date();
+            const dateStr = now.toISOString().split('T')[0];
+            
+            link.setAttribute("href", url);
+            link.setAttribute("download", `그룹배정결과_${dateStr}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>
