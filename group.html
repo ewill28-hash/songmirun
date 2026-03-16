@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>스네이크 방식 그룹 배정기</title>
+    <title>스네이크 방식 팀 배정기</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700;900&display=swap');
@@ -16,8 +16,8 @@
 
     <div class="max-w-6xl mx-auto">
         <header class="mb-8 text-center">
-            <h1 class="text-3xl font-black text-slate-800 mb-2">🐍 스마트 밸런스 3그룹 배정기</h1>
-            <p class="text-slate-500">하위 6명부터 거리 합계를 계산하여 최적의 밸런스로 배정합니다.</p>
+            <h1 class="text-3xl font-black text-slate-800 mb-2">🐍 쏭미션 팀 배정</h1>
+            <p class="text-slate-500">거리합계로 최적의 밸런스로 배정합니다.-Jake-</p>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -31,13 +31,13 @@
                             + 샘플 데이터 입력
                         </button>
                     </div>
-                    <textarea id="inputData" rows="15" 
+                    <textarea id="inputData" rows="10" 
                         class="w-full p-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm leading-relaxed"
                         placeholder="김철수 150.5&#10;이영희 230&#10;박지성 80&#10;손흥민 310..."></textarea>
                     
                     <button onclick="processGrouping()" 
                         class="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-colors shadow-lg shadow-blue-200">
-                        그룹 배정하기
+                        팀 배정하기
                     </button>
 
                     <button id="downloadBtn" onclick="downloadExcel()" 
@@ -62,7 +62,7 @@
                     <!-- 그룹 1: 손기정팀 -->
                     <div class="bg-white rounded-2xl shadow-sm border-t-4 border-blue-500 p-5 snake-card border border-slate-200">
                         <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-xl font-black text-blue-600">손기정팀</h2>
+                            <h2 class="text-xl font-black text-blue-600">팀:손기정</h2>
                             <span id="count-0" class="bg-blue-50 text-blue-600 text-xs font-bold px-2 py-1 rounded-lg">0명</span>
                         </div>
                         <div id="group-0" class="space-y-2 min-h-[100px]"></div>
@@ -75,7 +75,7 @@
                     <!-- 그룹 2: 황영조팀 -->
                     <div class="bg-white rounded-2xl shadow-sm border-t-4 border-emerald-500 p-5 snake-card border border-slate-200">
                         <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-xl font-black text-emerald-600">황영조팀</h2>
+                            <h2 class="text-xl font-black text-emerald-600">팀:황영조</h2>
                             <span id="count-1" class="bg-emerald-50 text-emerald-600 text-xs font-bold px-2 py-1 rounded-lg">0명</span>
                         </div>
                         <div id="group-1" class="space-y-2 min-h-[100px]"></div>
@@ -88,7 +88,7 @@
                     <!-- 그룹 3: 이봉주팀 -->
                     <div class="bg-white rounded-2xl shadow-sm border-t-4 border-amber-500 p-5 snake-card border border-slate-200">
                         <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-xl font-black text-amber-600">이봉주팀</h2>
+                            <h2 class="text-xl font-black text-amber-600">팀:이봉주</h2>
                             <span id="count-2" class="bg-amber-50 text-amber-600 text-xs font-bold px-2 py-1 rounded-lg">0명</span>
                         </div>
                         <div id="group-2" class="space-y-2 min-h-[100px]"></div>
@@ -112,7 +112,7 @@
 
     <script>
         let lastGroups = [];
-        const teamNames = ["손기정팀", "황영조팀", "이봉주팀"];
+        const teamNames = ["팀:손기정", "팀:황영조", "팀:이봉주"];
 
         // 이미지 명단 기반 샘플 데이터
         const sampleNames = [
@@ -252,7 +252,7 @@
             const dateStr = now.toISOString().split('T')[0];
             
             link.setAttribute("href", url);
-            link.setAttribute("download", `그룹배정결과_${dateStr}.csv`);
+            link.setAttribute("download", `팀배정결과_${dateStr}.csv`);
             link.style.visibility = 'hidden';
             document.body.appendChild(link);
             link.click();
