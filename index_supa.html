@@ -2831,6 +2831,14 @@
                 getEl('prof-current-log-nick').innerText = userObj.log_nickname || '-';
                 getEl('prof-current-team').innerText = userObj.team || '-';
                 getEl('prof-new-log-nick').value = userObj.log_nickname || '';
+
+
+            // [추가된 부분] 셀렉트 박스의 선택값을 현재 사용자의 소속팀으로 설정
+                if (userObj.team) {
+                    getEl('prof-new-team').value = userObj.team;
+                } else {
+                    getEl('prof-new-team').value = ""; // 소속팀이 없을 경우 기본값(선택하세요 등)으로 설정
+                }
                 
                 toggleModal(modalProfile, true);
             };
