@@ -27,6 +27,7 @@
                 }
             }
         }
+
     </script>
      <script>
             function toggleMoreOptions() {
@@ -238,7 +239,24 @@
     .medal-2 { color: #94a3b8; }
     .medal-3 { color: #b45309; }
 </style>
+<style>
+        /* 레이블 텍스트 드래그 방지 및 터치 피드백 개선 */
+        label[id^="label-dist"], 
+        label[id^="label-time"] {
+            user-select: none;
+            -webkit-user-select: none; /* Safari용 */
+            -webkit-tap-highlight-color: transparent; /* 터치 시 파란 박스 제거 */
+            cursor: pointer; /* 마우스 오버 시 손가락 모양 */
+        }
 
+        /* 추가 팁: 터치 시 시각적 피드백을 주고 싶다면 아래 코드도 추천합니다 */
+        label[id^="label-dist"]:active, 
+        label[id^="label-time"]:active {
+            opacity: 0.6;
+            transform: scale(0.95); /* 살짝 눌리는 느낌 */
+            transition: all 0.1s;
+        }
+    </style>
 </head>
 <body class="pb-20">
 
@@ -373,6 +391,7 @@
                             </select>
                         </div>
 
+
                         <div class="col-span-1">
                             <label id="label-dist0" title="Click Zero" class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1 cursor-pointer">거리 (km)</label>
                             <div class="grid grid-cols-6 gap-1">
@@ -395,11 +414,12 @@
                                 <label id="label-timeS" title="Click +10s" class="text-[11px] text-brand-500 font-black block mb-1 ml cursor-pointer text-center">+10s</label>
                             </div>
                             <div class="grid grid-cols-3 gap-1">
-                                <input type="number" id="in-time-h" placeholder="몇시간?" min="0" class="w-full bg-white border-2 border-brand-100 p-3 rounded-xl text-center text-xs font-bold outline-none shadow-sm">
-                                <input type="number" id="in-time-m" placeholder="몇분?" min="0" max="59" class="w-full bg-white border-2 border-brand-100 p-3 rounded-xl text-center text-xs font-bold outline-none shadow-sm">
-                                <input type="number" id="in-time-s" placeholder="몇초?" min="0" max="59" class="w-full bg-white border-2 border-brand-100 p-3 rounded-xl text-center text-xs font-bold outline-none shadow-sm">
+                                <input type="number" id="in-time-h" placeholder="시" min="0" class="w-full bg-white border-2 border-brand-100 p-3 rounded-xl text-center text-xs font-bold outline-none shadow-sm">
+                                <input type="number" id="in-time-m" placeholder="분" min="0" max="59" class="w-full bg-white border-2 border-brand-100 p-3 rounded-xl text-center text-xs font-bold outline-none shadow-sm">
+                                <input type="number" id="in-time-s" placeholder="초" min="0" max="59" class="w-full bg-white border-2 border-brand-100 p-3 rounded-xl text-center text-xs font-bold outline-none shadow-sm">
                             </div>
                         </div>
+
                     </div>
 
                     <!-- 더보기 버튼 (More) -->
@@ -1033,12 +1053,12 @@
             <div class="p-2 bg-slate-50 text-center">
                 <div id="next-challenge-text"></div>
                 <button id="map-link-btn" class="mt-1 text-sm text-blue-500 underline">
-                    구글 지도로 경로 확인하기 🗺️
+                    구글지도로 경로 확인해보기 🗺️
                 </button>
             </div>
             <div class="p-2 bg-slate-50 text-center">
                 <button onclick="closeModal()" class="w-full py-3 bg-slate-900 text-white font-black rounded-2xl hover:bg-slate-800 active:scale-[0.98] transition-all shadow-xl shadow-slate-200 flex items-center justify-center gap-2">
-                    확인하고 계속 달리기
+                    😎 확인하고 계속 달리기 👟
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                     </svg>
@@ -1105,12 +1125,15 @@
                     <i class="fa-solid fa-xmark"></i>
                 </button>
                 <div class="flex items-center gap-4 mb-2">
-                    <div id="modal-user-avatar" class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-3xl font-black italic">S</div>
+                    <div id="modal-user-avatar" class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center text-3xl font-black italic">S</div>
                     <div>
-                        <div class="flex items-center gap-2">
-                            <h2 id="modal-user-name" class="text-2xl font-black italic">Runner Name</h2>
-                            <div class="text-[9px] font-black px-3 py-1 rounded-lg text-white uppercase" id="display-team-badge">TEAM</div>          
-                            <div id="modal-runner-grade" class="text-[10px] font-black px-3 py-1.5 rounded-lg text-white uppercase"></div>
+                        <div class="flex flex-col gap-1">
+                            <h2 id="modal-user-name" class="text-xl font-black italic leading-tight">Runner Name</h2>
+                            
+                            <div class="flex items-center gap-1.5">
+                                <div id="display-team-badge" class="text-[9px] font-black px-3 py-1 rounded-lg text-white uppercase">TEAM</div>           
+                                <div id="modal-runner-grade" class="text-[10px] font-black px-3 py-1.5 rounded-lg text-white uppercase"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -2640,7 +2663,7 @@
             // 4. UI 상태 변경 (수정 모드 표시 및 탭 전환)
             const formTitle = document.getElementById('form-title');
             if (formTitle) {
-                formTitle.innerHTML = '<i class="fa-solid fa-pen text-brand-500"></i> 기록 수정';
+                formTitle.innerHTML = '<i class="fa-solid fa-pen text-rose-600"></i> 기록 수정';
             }
 
             document.getElementById('tab-logs')?.click();
@@ -3465,33 +3488,39 @@
                 }
             }
 
+
             [inDist, inTimeH, inTimeM, inTimeS].forEach(el => {
                 el.addEventListener('input', calculatePace);
             });
 
-            document.getElementById('label-time0').addEventListener('click', function() {
-                document.getElementById('in-time-h').value = 0;
-                document.getElementById('in-time-m').value = 0;
-                document.getElementById('in-time-s').value = 0;
+
+
+
+            
+            // 1. 단순 초기화 버튼 (기존 잘 되는 부분 유지)
+            document.getElementById('label-time0')?.addEventListener('click', function() {
+                ['in-time-h', 'in-time-m', 'in-time-s'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.value = 0;
+                });
             });
-
-            document.addEventListener('DOMContentLoaded', () => {
-
+            
+            // 2. 통합 설정 함수
+            const initRunnerInputs = () => {
                 const updateAndDispatch = (inputEl, newValue, decimal) => {
                     if (!inputEl) return;
-
                     inputEl.value = newValue.toFixed(decimal);
-
                     inputEl.dispatchEvent(new Event('input', { bubbles: true }));
-
- 
+                    
+                    // 시각적 피드백
                     inputEl.classList.add('border-emerald-500');
                     setTimeout(() => inputEl.classList.remove('border-emerald-500'), 200);
                 };
-
+            
+                // 거리(Distance) 설정 로직
                 const distInput = document.getElementById('in-dist');
                 const distMap = {
-                    'label-dist0':  { type: 'set', val: 0.000 },                    
+                    'label-dist0':  { type: 'set', val: 0.000 },
                     'label-dist1':  { type: 'add', val: 1 },
                     'label-dist2':  { type: 'add', val: 2 },
                     'label-dist5':  { type: 'set', val: 5.000 },
@@ -3499,31 +3528,46 @@
                     'label-dist21': { type: 'set', val: 21.097 },
                     'label-dist42': { type: 'set', val: 42.195 }
                 };
-
-                Object.entries(distMap).forEach(([id, config]) => {
-                    document.getElementById(id)?.addEventListener('click', () => {
-                        const current = parseFloat(distInput.value) || 0;
-                        const targetVal = config.type === 'add' ? current + config.val : config.val;
-                        updateAndDispatch(distInput, targetVal, 3);
+            
+                if (distInput) {
+                    Object.entries(distMap).forEach(([id, config]) => {
+                        const btn = document.getElementById(id);
+                        btn?.addEventListener('click', () => {
+                            const current = parseFloat(distInput.value) || 0;
+                            const targetVal = config.type === 'add' ? current + config.val : config.val;
+                            updateAndDispatch(distInput, targetVal, 3);
+                        });
                     });
-                });
-
+                }
+            
+                // 시간(Time) 증감 로직
                 const timeConfigs = [
                     { id: 'label-timeH', targetId: 'in-time-h', increment: 1 },
                     { id: 'label-timeM', targetId: 'in-time-m', increment: 10 },
                     { id: 'label-timeS', targetId: 'in-time-s', increment: 10 }
                 ];
-
+            
                 timeConfigs.forEach(({ id, targetId, increment }) => {
                     const btn = document.getElementById(id);
                     const input = document.getElementById(targetId);
-
                     btn?.addEventListener('click', () => {
-                        const current = parseFloat(input.value) || 0;
-                        updateAndDispatch(input, current + increment, 0);
+                        if (input) {
+                            const current = parseFloat(input.value) || 0;
+                            updateAndDispatch(input, current + increment, 0);
+                        }
                     });
                 });
-            });
+            };
+            
+            // 3. 문서 로드 상태에 따라 실행
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initRunnerInputs);
+            } else {
+                initRunnerInputs(); // 이미 로드되었다면 즉시 실행
+            }
+
+
+
 
 
 
