@@ -1790,19 +1790,27 @@
         ];
 
         window.getGoogleMapsLink = (target) => {
-            const origin = { name: "인천광역시 송도동", lat: 37.3860, lng: 126.6389 };
+            const origin = { name: "인천공항", lat: 37.4602, lng: 126.4407 }; // 송도 대신 인천공항을 기점으로 잡아야 항공권이 더 잘 뜹니다.
             
-            // 아직 출발 전이거나 송도에 머물러 있는 경우
             if (target.dist === 0) {
-                // 송도 위치만 찍어주는 간단한 검색 URL 반환
-                return `https://www.google.com/maps/search/?api=1&query=${origin.lat},${origin.lng}`;
+                return `https://www.google.com/maps/search/?api=1&query=${target.lat},${target.lng}`;
             }
+
+            // 괄호 및 부가 설명 제거 (예: "도쿄 (마라톤 성지)" -> "도쿄")
+            const cleanDestName = target.name.split('(')[0].trim();
+
             // 400km 미만: 운전 경로
             if (target.dist < 400) {
-                return `https://www.google.com/maps/dir/${origin.lat},${origin.lng}/${target.lat},${target.lng}/data=!3m1!4b1!4m2!4m1!3e0`;
+                return `https://www.google.com/maps/dir/?api=1&origin=${origin.lat},${origin.lng}&destination=${target.lat},${target.lng}&travelmode=driving`;
             } 
-            // 400km 이상: 항공 경로
-            return `https://www.google.com/maps/dir/${origin.name}/${target.name}/@${target.lat},${target.lng},4z/data=!3m1!4b1!4m2!4m1!3e4`;
+
+            // 400km 이상: 항공 경로 (모바일 앱 최적화)
+            // 모바일 앱 대응을 위해 'dir' 대신 'dir_action=navigate'와 'directionsmode=transit' 조합 사용
+            // 목적지 뒤에 'Airport'를 붙여주면 구글 앱이 항공 경로를 우선적으로 찾습니다.
+            const destinationQuery = encodeURIComponent(cleanDestName + " Airport");
+            const originQuery = encodeURIComponent("인천공항");
+
+            return `https://www.google.com/maps/dir/?api=1&origin=${originQuery}&destination=${destinationQuery}&directionsmode=transit`;
         };
 
                 
