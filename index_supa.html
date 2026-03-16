@@ -1754,21 +1754,22 @@
 
        //window.syncAndRefresh = () => updateUI_Team();
 
-        // 도시 데이터 (마라톤 성지 포함)
         const DESTINATIONS = [
             { name: "송도 (미추홀)", dist: 0, emoji: "👟" },
-            { name: "서울 (남산타워)", dist: 35, emoji: "🗼" }, // 매우 가까운 거리
-            { name: "평창 (동계올림픽)", dist: 180, emoji: "❄️" }, // 강원권
-            { name: "대전 (성심당)", dist: 160, emoji: "🥖" }, // 중부권
-            { name: "대구 (팔공산)", dist: 260, emoji: "🍎" }, // 영남권
-            { name: "광주 (무등산)", dist: 270, emoji: "🍉" }, // 호남권
-            { name: "부산 (해운대)", dist: 330, emoji: "🌊" }, // 남단
-            { name: "제주도 (한라산)", dist: 450, emoji: "🗿" }, // 섬 지역
+            { name: "서울 (남산타워)", dist: 35, emoji: "🗼" },
+            { name: "평창 (동계올림픽)", dist: 180, emoji: "❄️" },
+            { name: "대전 (성심당)", dist: 160, emoji: "🥖" },
+            { name: "대구 (팔공산)", dist: 260, emoji: "🍎" },
+            { name: "광주 (무등산)", dist: 270, emoji: "🍉" },
+            { name: "부산 (해운대)", dist: 330, emoji: "🌊" },
+            { name: "제주도 (한라산)", dist: 450, emoji: "🗿" },
             { name: "상하이", dist: 800, emoji: "🏮" },
             { name: "도쿄 (마라톤 성지)", dist: 1200, emoji: "🗼" },
             { name: "홍콩", dist: 2000, emoji: "🏙️" },
             { name: "방콕", dist: 3700, emoji: "🛕" },
             { name: "싱가포르", dist: 4700, emoji: "🦁" },
+            { name: "발리 (인도네시아)", dist: 5200, emoji: "🏖️" }, // 추가
+            { name: "퍼스 (호주 서부)", dist: 7200, emoji: "☀️" }, // 추가
             { name: "시드니", dist: 8300, emoji: "🦘" },
             { name: "베를린 (마라톤 성지)", dist: 8500, emoji: "🏰" },
             { name: "모스크바", dist: 9300, emoji: "🇷🇺" },
@@ -1776,9 +1777,11 @@
             { name: "보스턴 (마라톤 성지)", dist: 11500, emoji: "🏛️" },
             { name: "뉴욕 (마라톤 성지)", dist: 13000, emoji: "🗽" },
             { name: "시카고 (마라톤 성지)", dist: 13500, emoji: "🏙️" },
+            { name: "멕시코시티", dist: 14500, emoji: "🌮" }, // 추가
+            { name: "리마 (페루)", dist: 16300, emoji: "🦙" }, // 추가
             { name: "상파울루 (지구반바퀴)", dist: 18000, emoji: "⚽" }
         ];
-
+        
         window.renderChallengeModal = (title, distance) => {
             const currentYearLogs = allLogs.filter(l => l.run_date && new Date(l.run_date).getFullYear() === parseInt(selectedYear));
             const totalDist = currentYearLogs.reduce((sum, l) => sum + Number(l.distance || 0), 0);
