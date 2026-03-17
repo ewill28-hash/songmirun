@@ -9,12 +9,14 @@
     <!-- React & ReactDOM -->
     <script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
-    <!-- Prop-Types (Recharts dependency for UMD) -->
+    <!-- Prop-Types (Mandatory for Recharts UMD) -->
     <script src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js"></script>
+    <script>
+        // Recharts needs PropTypes to be available globally
+        window.PropTypes = window.PropTypes || window.PropTypes;
+    </script>
     <!-- Babel -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Recharts -->
     <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js"></script>
     <!-- Firebase SDK (v11) - Compatibility version -->
@@ -51,17 +53,28 @@
 
         .fade-in { animation: fadeIn 0.5s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900">
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useMemo } = React;
-        // Recharts extraction with fallback
-        const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } = window.Recharts || {};
+        const { useState, useEffect, useMemo, useCallback } = React;
+        const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } = window.Recharts;
 
-        // Firebase configuration
+        // Inline SVG Icons
+        const Icons = {
+            Utensils: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 2 1.9 19a2 2 0 0 0 2 2h10.2a2 2 0 0 0 2-2L21 2Z"/><path d="M12 2v21"/><path d="M7 2h10"/><path d="m5 15 7-4 7 4"/></svg>,
+            Maximize2: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>,
+            CheckCircle: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>,
+            AlertTriangle: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        };
+
         const firebaseConfig = {
             apiKey: "AIzaSyDIHVIGy54UX1wMQ0cTbYcBc3uOip-Nyl4",
             authDomain: "project-accd2db4-b2ef-4370-b2c.firebaseapp.com",
@@ -78,42 +91,36 @@
         }
         const db = firebase.firestore();
         const auth = firebase.auth();
-const INITIAL_MENU_DATA = [
-  // A식당
-  { id: '1', date: '2026-03-03', restaurant: 'A식당', menu: '*개학식, 비빔밥&볶음고추장, 팽이미소된장국, 수제하트모양피자, 꿀토마토샐러드, 깍두기, 오렌지&포도', imageUrl: 'https://nhd.icems.kr/upload/foodlist/nhdms/1772512962750.jpg' },
-  { id: '2', date: '2026-03-04', restaurant: 'A식당', menu: '흑미밥, 생새우오징어찌개, 돼지LA갈비, 도토리묵&양념장, 깻잎순볶음(자율), 포기김치, 두바이쫀득쿠키', imageUrl: 'https://nhd.icems.kr/upload/foodlist/nhdms/1772599024648.jpg' },
-  { id: '3', date: '2026-03-05', restaurant: 'A식당', menu: '현미찹쌀밥, 쇠고기미역국, 분모자찜닭, 두부부침&양념장, 포기김치, 딸기&바나나', imageUrl: 'https://nhd.icems.kr/upload/foodlist/nhdms/1772687270617.jpg' },
-  { id: '4', date: '2026-03-06', restaurant: 'A식당', menu: '차수수밥, 샤브샤브국, 모둠햄구이, 해물볶음우동, 봄취나물(자율), 포기김치, 크로플&메이플시럽', imageUrl: 'https://nhd.icems.kr/upload/foodlist/nhdms/1772773096917.jpg' },
-  { id: '5', date: '2026-03-09', restaurant: 'A식당', menu: '혼합잡곡밥, 맑은순두부탕, 유린기, 달래무침(자율), 오이양파무침, 포기김치, 토마토꿀절임', imageUrl: 'https://nhd.icems.kr/upload/foodlist/nhdms/1773025378418.jpg' },
-  { id: '6', date: '2026-03-10', restaurant: 'A식당', menu: '발아현미밥, 시금치달걀국, 수육&쌈채소&쌈장, 참나물무생채, 보쌈김치, 식물성유산균요구르트', imageUrl: 'https://nhd.icems.kr/upload/foodlist/nhdms/1773112013820.jpg' },
-  { id: '7', date: '2026-03-11', restaurant: 'A식당', menu: '오므라이스, 근대콩나물된장국, 시즈닝뿌린회오리감자, 부추새송이무침, 포기김치, 딸바라떼', imageUrl: 'https://nhd.icems.kr/upload/foodlist/nhdms/1773198403698.jpg' },
-  { id: '8', date: '2026-03-12', restaurant: 'A식당', menu: '기장밥, 어묵무국, 닭볶음탕, 꼬막무침, 봄동겉절이(자율), 총각김치, 흰우유(미니)', imageUrl: 'https://nhd.icems.kr/upload/foodlist/nhdms/1773285308870.jpg' },
-  { id: '9', date: '2026-03-13', restaurant: 'A식당', menu: '흑미밥, 김치콩나물국, 불향직화불고기, 흑임자드레싱샐러드, 미나리겉절이(자율), 깍두기, 골드파인애플&딸기', imageUrl: 'https://nhd.icems.kr/upload/foodlist/nhdms/1773372044233.jpg' },
 
-  // B식당
-  { id: '10', date: '2026-03-03', restaurant: 'B식당', menu: '발아현미밥, 전복갈비탕 , 청포묵무침 , 새우동그랑땡 , 석박지 , 미니딸기도넛 ', imageUrl: 'https://ihs.icehs.kr/upload/foodlist/ihs_h/1772589571365.jpg' },
-  { id: '11', date: '2026-03-04', restaurant: 'B식당', menu: '카레라이스 , 아보카도샐러드 , 더블치즈스테이크 , 포기김치 , 애플망고주스', imageUrl: 'https://ihs.icehs.kr/upload/foodlist/ihs_h/1772591410671.jpg' },
-  { id: '12', date: '2026-03-05', restaurant: 'B식당', menu: '모듬잡곡밥 , 새알심미역국 , 가마보꼬감자조림 , 마라오리불고기 , 포기김치 , 초코프레첼 ', imageUrl: 'https://ihs.icehs.kr/upload/foodlist/ihs_h/1772678552287.jpg' },
-  { id: '13', date: '2026-03-06', restaurant: 'B식당', menu: '수수차조밥, 콩나물김치국 , 등갈비조림 , 오이지무침, 브로콜리버섯볶음 , 쿠키앤크림우유 ', imageUrl: 'https://ihs.icehs.kr/upload/foodlist/ihs_h/1772768278307.jpg' },
-  { id: '14', date: '2026-03-09', restaurant: 'B식당', menu: '찹쌀보리밥, 달래된장찌개 , 숙주고사리볶음 , 돈육고추장불고기 , 보쌈김치 , 초코로쉐 ', imageUrl: 'https://ihs.icehs.kr/upload/foodlist/ihs_h/1773024308264.jpg' },
-  { id: '15', date: '2026-03-10', restaurant: 'B식당', menu: '채식의 날 - 발아흑미밥, 들깨수제비 , 도토리묵무침 , 오징어김치전(완제) , 겉절이 , 요거톡 ', imageUrl: 'https://ihs.icehs.kr/upload/foodlist/ihs_h/1773110500067.jpg' },
-  { id: '16', date: '2026-03-11', restaurant: 'B식당', menu: '채식의 날 - 검은깨밥 , 국물떡볶이 , 김말이 , 통새우만두, 반달단무지, 야채주스', imageUrl: 'https://ihs.icehs.kr/upload/foodlist/ihs_h/1773208065840.jpg' },
-  { id: '17', date: '2026-03-12', restaurant: 'B식당', menu: '오색쌀밥, 햄모듬찌개(라면), 브로콜리된장마요무침 , 연어데리야끼구이 , 궁채장아찌, 워터젤리(복숭아) ', imageUrl: 'https://ihs.icehs.kr/upload/foodlist/ihs_h/1773294559368.jpg' },
-  { id: '18', date: '2026-03-13', restaurant: 'B식당', menu: '현미차조밥, 해물두부찌개, 명란계란찜 , 어묵잡채 , 총각김치 , 아이스크림 ', imageUrl: 'https://ihs.icehs.kr/upload/foodlist/ihs_h/1773375557872.jpg' },
-
-  // C식당
-  { id: '19', date: '2026-03-03', restaurant: 'C식당', menu: '흑미밥, 소고기미역국, 치즈닭볶음, 한식잡채, 도라지오이무침, 배추김치, 딸기', imageUrl: 'https://ongnyeon-gh.icehs.kr/upload/foodlist/okryun_h/1772507012819.jpg' },
-  { id: '20', date: '2026-03-04', restaurant: 'C식당', menu: '카레라이스, 얼큰콩나물국, 등심돈까스*소스, 치커리사과무침, 배추김치, 구슬아이스크림', imageUrl: 'https://ongnyeon-gh.icehs.kr/upload/foodlist/okryun_h/1772594455633.jpg' },
-  { id: '21', date: '2026-03-05', restaurant: 'C식당', menu: '기장밥, 부대찌개, 돼지고기장조림, 꽃맛살어묵볶음, 시금치나물, 깍두기, 천혜향', imageUrl: 'https://ongnyeon-gh.icehs.kr/upload/foodlist/okryun_h/1772684670982.jpg' },
-  { id: '22', date: '2026-03-06', restaurant: 'C식당', menu: '참치야채비빔밥, 고추장/김가루, 달걀호박국, 허니버터회오리감자, 배추김치, 꿀자몽블랙티', imageUrl: 'https://ongnyeon-gh.icehs.kr/upload/foodlist/okryun_h/1772766994109.jpg' },
-  { id: '23', date: '2026-03-09', restaurant: 'C식당', menu: '흑미밥, 돈육김치찌개, 훈제오리햄볶음, 마파두부, 김자반볶음, 배추김치, 마카롱', imageUrl: 'https://ongnyeon-gh.icehs.kr/upload/foodlist/okryun_h/1773025960038.jpg' },
-  { id: '24', date: '2026-03-10', restaurant: 'C식당', menu: '차조밥, 설렁탕*소면, 비비고떡갈비, 단호박고구마맛탕, 골뱅이채소무침, 깍두기, 초코라떼', imageUrl: 'https://ongnyeon-gh.icehs.kr/upload/foodlist/okryun_h/1773110758628.jpg' },
-  { id: '25', date: '2026-03-11', restaurant: 'C식당', menu: '베이컨계란볶음밥, 팽이버섯장국, 오븐에구운탕수육, 마라떡볶이, 배추김치, 샤인머스캣', imageUrl: 'https://ongnyeon-gh.icehs.kr/upload/foodlist/okryun_h/1773192963845.jpg' },
-  { id: '26', date: '2026-03-12', restaurant: 'C식당', menu: '기장밥, 뼈없는감자탕, 불닭마요치킨, 달걀찜, 흑임자브로콜리무침, 배추김치, 사르르딸기콘', imageUrl: 'https://ongnyeon-gh.icehs.kr/upload/foodlist/okryun_h/1773279280156.jpg' },
-  { id: '27', date: '2026-03-13', restaurant: 'C식당', menu: '백미밥, 순두부맑은국, 소고기버섯볶음, 물만두땅콩강정, 검은깨올밤묵무침, 배추겉절이, 오렌지', imageUrl: 'https://ongnyeon-gh.icehs.kr/upload/foodlist/okryun_h/1773366403875.jpg' }
-];
-
-        const Icon = ({ name, size = 20, className = "" }) => <i data-lucide={name} style={{ width: size, height: size }} className={`inline-block ${className}`}></i>;
+        const INITIAL_MENU_DATA = [
+            { id: '1', date: '2025-05-03', restaurant: 'A식당', menu: '*개학식, 비빔밥&볶음고추장, 팽이미소된장국, 수제하트모양피자, 꿀토마토샐러드, 깍두기, 오렌지&포도', imageUrl: 'https://nhd.icems.kr/upload/foodlist/nhdms/1772512962750.jpg' },
+            { id: '2', date: '2025-05-04', restaurant: 'A식당', menu: '흑미밥, 생새우오징어찌개, 돼지LA갈비, 도토리묵&양념장, 깻잎순볶음(자율), 포기김치, 두바이쫀득쿠키', imageUrl: 'https://nhd.icems.kr/upload/foodlist/nhdms/1772599024648.jpg' },
+            { id: '3', date: '2025-05-05', restaurant: 'A식당', menu: '현미찹쌀밥, 쇠고기미역국, 분모자찜닭, 두부부침&양념장, 포기김치, 딸기&바나나', imageUrl: 'https://nhd.icems.kr/upload/foodlist/nhdms/1772687270617.jpg' },
+            { id: '4', date: '2025-05-06', restaurant: 'A식당', menu: '차수수밥, 샤브샤브국, 모둠햄구이, 해물볶음우동, 봄취나물(자율), 포기김치, 크로플&메이플시럽', imageUrl: 'https://nhd.icems.kr/upload/foodlist/nhdms/1772773096917.jpg' },
+            { id: '5', date: '2025-05-09', restaurant: 'A식당', menu: '혼합잡곡밥, 맑은순두부탕, 유린기, 달래무침(자율), 오이양파무침, 포기김치, 토마토꿀절임', imageUrl: 'https://nhd.icems.kr/upload/foodlist/nhdms/1773025378418.jpg' },
+            { id: '6', date: '2025-05-10', restaurant: 'A식당', menu: '발아현미밥, 시금치달걀국, 수육&쌈채소&쌈장, 참나물무생채, 보쌈김치, 식물성유산균요구르트', imageUrl: 'https://nhd.icems.kr/upload/foodlist/nhdms/1773112013820.jpg' },
+            { id: '7', date: '2025-05-11', restaurant: 'A식당', menu: '오므라이스, 근대콩나물된장국, 시즈닝뿌린회오리감자, 부추새송이무침, 포기김치, 딸바라떼', imageUrl: 'https://nhd.icems.kr/upload/foodlist/nhdms/1773198403698.jpg' },
+            { id: '8', date: '2025-05-12', restaurant: 'A식당', menu: '기장밥, 어묵무국, 닭볶음탕, 꼬막무침, 봄동겉절이(자율), 총각김치, 흰우유(미니)', imageUrl: 'https://nhd.icems.kr/upload/foodlist/nhdms/1773285308870.jpg' },
+            { id: '9', date: '2025-05-13', restaurant: 'A식당', menu: '흑미밥, 김치콩나물국, 불향직화불고기, 흑임자드레싱샐러드, 미나리겉절이(자율), 깍두기, 골드파인애플&딸기', imageUrl: 'https://nhd.icems.kr/upload/foodlist/nhdms/1773372044233.jpg' },
+            { id: '10', date: '2025-05-03', restaurant: 'B식당', menu: '발아현미밥, 전복갈비탕 , 청포묵무침 , 새우동그랑땡 , 석박지 , 미니딸기도넛 ', imageUrl: 'https://ihs.icehs.kr/upload/foodlist/ihs_h/1772589571365.jpg' },
+            { id: '11', date: '2025-05-04', restaurant: 'B식당', menu: '카레라이스 , 아보카도샐러드 , 더블치즈스테이크 , 포기김치 , 애플망고주스', imageUrl: 'https://ihs.icehs.kr/upload/foodlist/ihs_h/1772591410671.jpg' },
+            { id: '12', date: '2025-05-05', restaurant: 'B식당', menu: '모듬잡곡밥 , 새알심미역국 , 가마보꼬감자조림 , 마라오리불고기 , 포기김치 , 초코프레첼 ', imageUrl: 'https://ihs.icehs.kr/upload/foodlist/ihs_h/1772678552287.jpg' },
+            { id: '13', date: '2025-05-06', restaurant: 'B식당', menu: '수수차조밥, 콩나물김치국 , 등갈비조림 , 오이지무침, 브로콜리버섯볶음 , 쿠키앤크림우유 ', imageUrl: 'https://ihs.icehs.kr/upload/foodlist/ihs_h/1772768278307.jpg' },
+            { id: '14', date: '2025-05-09', restaurant: 'B식당', menu: '찹쌀보리밥, 달래된장찌개 , 숙주고사리볶음 , 돈육고추장불고기 , 보쌈김치 , 초코로쉐 ', imageUrl: 'https://ihs.icehs.kr/upload/foodlist/ihs_h/1773024308264.jpg' },
+            { id: '15', date: '2025-05-10', restaurant: 'B식당', menu: '채식의 날 - 발아흑미밥, 들깨수제비 , 도토리묵무침 , 오징어김치전(완제) , 겉절이 , 요거톡 ', imageUrl: 'https://ihs.icehs.kr/upload/foodlist/ihs_h/1773110500067.jpg' },
+            { id: '16', date: '2025-05-11', restaurant: 'B식당', menu: '채식의 날 - 검은깨밥 , 국물떡볶이 , 김말이 , 통새우만두, 반달단무지, 야채주스', imageUrl: 'https://ihs.icehs.kr/upload/foodlist/ihs_h/1773208065840.jpg' },
+            { id: '17', date: '2025-05-12', restaurant: 'B식당', menu: '오색쌀밥, 햄모듬찌개(라면), 브로콜리된장마요무침 , 연어데리야끼구이 , 궁채장아찌, 워터젤리(복숭아) ', imageUrl: 'https://ihs.icehs.kr/upload/foodlist/ihs_h/1773294559368.jpg' },
+            { id: '18', date: '2025-05-13', restaurant: 'B식당', menu: '현미차조밥, 해물두부찌개, 명란계란찜 , 어묵잡채 , 총각김치 , 아이스크림 ', imageUrl: 'https://ihs.icehs.kr/upload/foodlist/ihs_h/1773375557872.jpg' },
+            { id: '19', date: '2025-05-03', restaurant: 'C식당', menu: '흑미밥, 소고기미역국, 치즈닭볶음, 한식잡채, 도라지오이무침, 배추김치, 딸기', imageUrl: 'https://ongnyeon-gh.icehs.kr/upload/foodlist/okryun_h/1772507012819.jpg' },
+            { id: '20', date: '2025-05-04', restaurant: 'C식당', menu: '카레라이스, 얼큰콩나물국, 등심돈까스, 치커리사과무침, 배추김치, 구슬아이스크림', imageUrl: 'https://ongnyeon-gh.icehs.kr/upload/foodlist/okryun_h/1772594455633.jpg' },
+            { id: '21', date: '2025-05-05', restaurant: 'C식당', menu: '기장밥, 부대찌개, 돼지고기장조림, 꽃맛살어묵볶음, 시금치나물, 깍두기, 천혜향', imageUrl: 'https://ongnyeon-gh.icehs.kr/upload/foodlist/okryun_h/1772684670982.jpg' },
+            { id: '22', date: '2025-05-06', restaurant: 'C식당', menu: '참치야채비빔밥, 고추장/김가루, 달걀호박국, 허니버터회오리감자, 배추김치, 꿀자몽블랙티', imageUrl: 'https://ongnyeon-gh.icehs.kr/upload/foodlist/okryun_h/1772766994109.jpg' },
+            { id: '23', date: '2025-05-09', restaurant: 'C식당', menu: '흑미밥, 돈육김치찌개, 훈제오리햄볶음, 마파두부, 김자반볶음, 배추김치, 마카롱', imageUrl: 'https://ongnyeon-gh.icehs.kr/upload/foodlist/okryun_h/1773025960038.jpg' },
+            { id: '24', date: '2025-05-10', restaurant: 'C식당', menu: '차조밥, 설렁탕*소면, 비비고떡갈비, 단호박고구마맛탕, 골뱅이채소무침, 깍두기, 초코라떼', imageUrl: 'https://ongnyeon-gh.icehs.kr/upload/foodlist/okryun_h/1773110758628.jpg' },
+            { id: '25', date: '2025-05-11', restaurant: 'C식당', menu: '베이컨계란볶음밥, 팽이버섯장국, 오븐에구운탕수육, 마라떡볶이, 배추김치, 샤인머스캣', imageUrl: 'https://ongnyeon-gh.icehs.kr/upload/foodlist/okryun_h/1773192963845.jpg' },
+            { id: '26', date: '2025-05-12', restaurant: 'C식당', menu: '기장밥, 뼈없는감자탕, 불닭마요치킨, 달걀찜, 흑임자브로콜리무침, 배추김치, 사르르딸기콘', imageUrl: 'https://ongnyeon-gh.icehs.kr/upload/foodlist/okryun_h/1773279280156.jpg' },
+            { id: '27', date: '2025-05-13', restaurant: 'C식당', menu: '백미밥, 순두부맑은국, 소고기버섯볶음, 물만두땅콩강정, 검은깨올밤묵무침, 배추겉절이, 오렌지', imageUrl: 'https://ongnyeon-gh.icehs.kr/upload/foodlist/okryun_h/1773366403875.jpg' }
+        ];
 
         const shuffleArray = (array) => {
             const newArr = [...array];
@@ -130,6 +137,9 @@ const INITIAL_MENU_DATA = [
             const [currentSelections, setCurrentSelections] = useState({});
             const [votes, setVotes] = useState([]);
             const [loading, setLoading] = useState(true);
+            const [showDeleteModal, setShowDeleteModal] = useState(false);
+            const [isDeleting, setIsDeleting] = useState(false);
+            const [isSubmitting, setIsSubmitting] = useState(false);
 
             useEffect(() => {
                 const initAuth = async () => {
@@ -148,13 +158,12 @@ const INITIAL_MENU_DATA = [
                     const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     setVotes(data);
                     setLoading(false);
-                }, (error) => console.error("데이터 읽기 에러:", error));
+                }, (error) => {
+                    console.error("데이터 읽기 에러:", error);
+                    setLoading(false);
+                });
                 return () => unsubscribe();
             }, [user]);
-
-            useEffect(() => {
-                if (window.lucide) window.lucide.createIcons();
-            }, [view, loading]);
 
             const randomizedGroupedMenus = useMemo(() => {
                 const groups = {};
@@ -170,7 +179,7 @@ const INITIAL_MENU_DATA = [
                 return result;
             }, []);
 
-            const handleRankSelection = (date, menuId, rank) => {
+            const handleRankSelection = useCallback((date, menuId, rank) => {
                 setCurrentSelections(prev => {
                     const dateSelections = { ...(prev[date] || {}) };
                     Object.keys(dateSelections).forEach(r => {
@@ -179,10 +188,11 @@ const INITIAL_MENU_DATA = [
                     dateSelections[rank] = menuId;
                     return { ...prev, [date]: dateSelections };
                 });
-            };
+            }, []);
 
             const submitAllVotes = async () => {
-                if (!user) return;
+                if (!user || isSubmitting) return;
+                
                 const dates = Object.keys(randomizedGroupedMenus);
                 const incomplete = dates.find(d => {
                     const sel = currentSelections[d];
@@ -194,9 +204,11 @@ const INITIAL_MENU_DATA = [
                     return;
                 }
 
+                setIsSubmitting(true);
                 try {
                     const votesRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('votes');
                     const batch = db.batch();
+                    
                     dates.forEach(date => {
                         const newDocRef = votesRef.doc();
                         batch.set(newDocRef, {
@@ -206,45 +218,72 @@ const INITIAL_MENU_DATA = [
                             uid: user.uid
                         });
                     });
+                    
                     await batch.commit();
-                    alert("투표가 성공적으로 저장되었습니다!");
+                    alert("투표가 완료되었습니다! (중복 참여가 가능합니다)");
                     setCurrentSelections({});
                     setView('admin');
                 } catch (e) {
-                    alert("저장에 실패했습니다. 다시 시도해주세요.");
+                    alert("투표 저장에 실패했습니다.");
+                } finally {
+                    setIsSubmitting(false);
                 }
             };
 
-            const resetData = async () => {
-                if (!confirm("모든 투표 데이터를 초기화하시겠습니까?")) return;
+            const confirmResetData = async () => {
+                setIsDeleting(true);
                 try {
                     const votesRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('votes');
                     const snapshot = await votesRef.get();
-                    const batch = db.batch();
-                    snapshot.docs.forEach(doc => batch.delete(doc.ref));
-                    await batch.commit();
-                    alert("데이터가 초기화되었습니다.");
-                } catch (e) { alert("초기화 실패"); }
+                    
+                    if (snapshot.empty) {
+                        alert("초기화할 데이터가 없습니다.");
+                        setShowDeleteModal(false);
+                        setIsDeleting(false);
+                        return;
+                    }
+
+                    const docs = snapshot.docs;
+                    const chunks = [];
+                    for (let i = 0; i < docs.length; i += 400) {
+                        chunks.push(docs.slice(i, i + 400));
+                    }
+
+                    for (const chunk of chunks) {
+                        const batch = db.batch();
+                        chunk.forEach(doc => batch.delete(doc.ref));
+                        await batch.commit();
+                    }
+                    
+                    alert("모든 투표 데이터가 초기화되었습니다.");
+                    setShowDeleteModal(false);
+                } catch (e) {
+                    alert("데이터 초기화에 실패했습니다.");
+                } finally {
+                    setIsDeleting(false);
+                }
             };
 
             const stats = useMemo(() => {
                 const result = { overall: { 'A식당': 0, 'B식당': 0, 'C식당': 0 }, byDate: {} };
                 votes.forEach(vote => {
                     if (!result.byDate[vote.date]) result.byDate[vote.date] = { 'A식당': 0, 'B식당': 0, 'C식당': 0 };
-                    [1, 2, 3].forEach(rank => {
-                        const menuId = vote.ranks[rank];
-                        const menu = INITIAL_MENU_DATA.find(m => m.id === menuId);
-                        if (menu) {
-                            const score = 4 - parseInt(rank);
-                            result.overall[menu.restaurant] += score;
-                            result.byDate[vote.date][menu.restaurant] += score;
-                        }
-                    });
+                    if (vote.ranks) {
+                        [1, 2, 3].forEach(rank => {
+                            const menuId = vote.ranks[rank];
+                            const menu = INITIAL_MENU_DATA.find(m => m.id === menuId);
+                            if (menu) {
+                                const score = 4 - parseInt(rank);
+                                result.overall[menu.restaurant] += score;
+                                result.byDate[vote.date][menu.restaurant] += score;
+                            }
+                        });
+                    }
                 });
                 return result;
             }, [votes]);
 
-            const chartData = Object.entries(stats.overall).map(([name, value]) => ({ name, value }));
+            const chartData = useMemo(() => Object.entries(stats.overall).map(([name, value]) => ({ name, value })), [stats.overall]);
 
             if (loading) return (
                 <div className="min-h-screen flex flex-col items-center justify-center bg-white">
@@ -256,10 +295,10 @@ const INITIAL_MENU_DATA = [
                 <div className="min-h-screen bg-slate-50 flex flex-col">
                     <nav className="bg-white/80 backdrop-blur-md border-b sticky top-0 z-50 px-4 h-16 flex items-center justify-between">
                         <div className="flex items-center gap-2 font-bold text-xl text-blue-700">
-                            <Icon name="utensils" size={24} />
+                            <Icons.Utensils />
                             <span>식단 랭킹</span>
                         </div>
-                        <div className="flex bg-slate-100 p-1 rounded-xl">
+                        <div className="flex bg-slate-100 p-1 rounded-xl shadow-inner">
                             <button onClick={() => setView('user')} className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${view === 'user' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500'}`}>투표</button>
                             <button onClick={() => setView('admin')} className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${view === 'admin' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500'}`}>통계</button>
                         </div>
@@ -267,13 +306,13 @@ const INITIAL_MENU_DATA = [
 
                     <main className="flex-1 max-w-6xl mx-auto w-full p-4 sm:p-8">
                         {view === 'user' ? (
-                            <div className="space-y-12 fade-in">
+                            <div key="user-view" className="space-y-12 fade-in">
                                 <header className="text-center">
                                     <h1 className="text-2xl sm:text-4xl font-black text-slate-900 mb-2">오늘의 원픽 식당은?</h1>
-                                    <p className="text-slate-500 text-sm">메뉴 순서는 랜덤으로 섞여 보여집니다.</p>
+                                    <p className="text-slate-500 text-sm">중복 참여가 가능합니다. 최고의 식단을 뽑아주세요!</p>
                                 </header>
 
-                                <div className="space-y-16 pb-24">
+                                <div className="space-y-16 pb-32">
                                     {Object.entries(randomizedGroupedMenus).sort().map(([date, menus]) => (
                                         <section key={date} className="space-y-4">
                                             <div className="flex items-center gap-2 text-xl font-bold text-slate-800">
@@ -289,9 +328,11 @@ const INITIAL_MENU_DATA = [
                                                         >
                                                             <img src={item.imageUrl} className="w-full h-full object-cover transition-transform group-hover:scale-105"  />
                                                             <div className="absolute inset-0 bg-black/5 group-hover:bg-black/20 transition-all flex items-center justify-center">
-                                                                <Icon name="maximize-2" className="text-white opacity-0 group-hover:opacity-100 drop-shadow-lg" size={24} />
+                                                                <div className="text-white opacity-0 group-hover:opacity-100 drop-shadow-lg">
+                                                                    <Icons.Maximize2 />
+                                                                </div>
                                                             </div>
-                                                            <div className="absolute top-3 left-3 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold text-blue-700 shadow-sm">Menu</div>
+                                                            <div className="absolute top-3 left-3 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold text-blue-700 shadow-sm">menu</div>
                                                         </div>
                                                         <div className="p-5 flex-1 flex flex-col justify-between">
                                                             <p className="text-sm leading-relaxed text-slate-700 line-clamp-4 mb-6">{item.menu}</p>
@@ -303,7 +344,7 @@ const INITIAL_MENU_DATA = [
                                                                         className={`flex-1 py-3 rounded-xl border-2 text-xs font-bold transition-all ${
                                                                             currentSelections[date]?.[rank] === item.id 
                                                                             ? 'bg-blue-600 border-blue-600 text-white shadow-lg' 
-                                                                            : 'bg-slate-50 border-slate-100 text-slate-400'
+                                                                            : 'bg-slate-50 border-slate-100 text-slate-400 hover:border-blue-200'
                                                                         }`}
                                                                     >
                                                                         {rank}순위
@@ -319,30 +360,43 @@ const INITIAL_MENU_DATA = [
                                 </div>
 
                                 <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-full max-w-xs px-4">
-                                    <button onClick={submitAllVotes} className="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold shadow-2xl active:scale-95 transition-transform flex items-center justify-center gap-2">
-                                        <Icon name="check-circle" size={20} /> 투표 완료하기
+                                    <button 
+                                        onClick={submitAllVotes} 
+                                        disabled={isSubmitting}
+                                        className={`w-full bg-slate-900 text-white py-4 rounded-2xl font-bold shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-2 ${isSubmitting ? 'opacity-70 cursor-not-allowed' : 'hover:bg-blue-700'}`}
+                                    >
+                                        <div className="w-5 h-5"><Icons.CheckCircle /></div> 
+                                        {isSubmitting ? "투표 저장 중..." : "투표 완료하기"}
                                     </button>
                                 </div>
                             </div>
                         ) : (
-                            <div className="space-y-10 fade-in">
+                            <div key="admin-view" className="space-y-10 fade-in">
                                 <section className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-10 shadow-sm text-center">
                                     <h2 className="text-xl font-bold mb-8">종합 선호도 랭킹 (누적 점수)</h2>
                                     <div className="h-72 w-full">
-                                        {chartData.length > 0 && ResponsiveContainer ? (
-                                            <ResponsiveContainer>
+                                        {chartData.some(d => d.value > 0) ? (
+                                            <ResponsiveContainer width="100%" height="100%">
                                                 <BarChart data={chartData}>
                                                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                                                     <XAxis dataKey="name" axisLine={false} tickLine={false} />
                                                     <YAxis hide />
-                                                    <Tooltip cursor={{fill: 'transparent'}} contentStyle={{borderRadius:'12px', border:'none'}} />
-                                                    <Bar dataKey="value" radius={[8, 8, 0, 0]} barSize={60}>
-                                                        {chartData.map((e, i) => <Cell key={i} fill={['#3b82f6', '#10b981', '#f59e0b'][i % 3]} />)}
+                                                    <Tooltip 
+                                                        cursor={{fill: '#f8fafc'}} 
+                                                        contentStyle={{borderRadius:'16px', border:'none', boxShadow:'0 20px 25px -5px rgb(0 0 0 / 0.1)'}} 
+                                                    />
+                                                    <Bar dataKey="value" radius={[12, 12, 0, 0]} barSize={60}>
+                                                        {chartData.map((e, i) => (
+                                                            <Cell key={`cell-${i}`} fill={['#3b82f6', '#10b981', '#f59e0b'][i % 3]} />
+                                                        ))}
                                                     </Bar>
                                                 </BarChart>
                                             </ResponsiveContainer>
                                         ) : (
-                                            <div className="h-full flex items-center justify-center text-slate-400">데이터가 없습니다.</div>
+                                            <div className="h-full flex flex-col items-center justify-center text-slate-400 space-y-2">
+                                                <Icons.Utensils />
+                                                <p>아직 집계된 투표 데이터가 없습니다.</p>
+                                            </div>
                                         )}
                                     </div>
                                 </section>
@@ -359,27 +413,69 @@ const INITIAL_MENU_DATA = [
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-slate-100">
-                                                {Object.entries(stats.byDate).sort().map(([date, val]) => (
-                                                    <tr key={date}>
-                                                        <td className="p-4 pl-6 font-bold">{date}</td>
-                                                        <td className="p-4 text-center text-blue-600 font-semibold">{val['A식당']}</td>
-                                                        <td className="p-4 text-center text-emerald-600 font-semibold">{val['B식당']}</td>
-                                                        <td className="p-4 text-center text-amber-600 font-semibold">{val['C식당']}</td>
+                                                {Object.keys(stats.byDate).length > 0 ? (
+                                                    Object.entries(stats.byDate).sort().map(([date, val]) => (
+                                                        <tr key={date} className="hover:bg-slate-50 transition-colors">
+                                                            <td className="p-4 pl-6 font-bold">{date}</td>
+                                                            <td className="p-4 text-center text-blue-600 font-semibold">{val['A식당']}</td>
+                                                            <td className="p-4 text-center text-emerald-600 font-semibold">{val['B식당']}</td>
+                                                            <td className="p-4 text-center text-amber-600 font-semibold">{val['C식당']}</td>
+                                                        </tr>
+                                                    ))
+                                                ) : (
+                                                    <tr>
+                                                        <td colSpan="4" className="p-10 text-center text-slate-400 italic">상세 데이터가 없습니다.</td>
                                                     </tr>
-                                                ))}
+                                                )}
                                             </tbody>
                                         </table>
                                     </div>
                                 </section>
 
                                 <div className="pt-10 flex flex-col items-center">
-                                    <button onClick={resetData} className="px-6 py-2 rounded-lg bg-red-50 text-red-500 text-xs font-bold">
+                                    <button 
+                                        onClick={() => setShowDeleteModal(true)} 
+                                        className="px-6 py-2 rounded-lg bg-red-50 text-red-500 text-xs font-bold transition-all hover:bg-red-100 active:scale-95"
+                                    >
                                         관리자: 모든 데이터 초기화
                                     </button>
                                 </div>
                             </div>
                         )}
                     </main>
+
+                    {/* Custom Modal */}
+                    {showDeleteModal && (
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 modal-overlay fade-in">
+                            <div className="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl space-y-6">
+                                <div className="flex flex-col items-center text-center space-y-4">
+                                    <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center">
+                                        <Icons.AlertTriangle />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <h3 className="text-xl font-bold text-slate-900">데이터 초기화</h3>
+                                        <p className="text-slate-500 text-sm">정말로 모든 투표 데이터를 삭제하시겠습니까?<br/>이 작업은 되돌릴 수 없습니다.</p>
+                                    </div>
+                                </div>
+                                <div className="flex gap-3">
+                                    <button 
+                                        onClick={() => setShowDeleteModal(false)}
+                                        className="flex-1 py-3 rounded-2xl bg-slate-100 text-slate-600 font-bold hover:bg-slate-200 transition-colors"
+                                        disabled={isDeleting}
+                                    >
+                                        취소
+                                    </button>
+                                    <button 
+                                        onClick={confirmResetData}
+                                        className="flex-1 py-3 rounded-2xl bg-red-600 text-white font-bold hover:bg-red-700 transition-colors shadow-lg shadow-red-600/20 disabled:opacity-50"
+                                        disabled={isDeleting}
+                                    >
+                                        {isDeleting ? "삭제 중..." : "확인"}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             );
         }
