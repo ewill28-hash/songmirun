@@ -7,10 +7,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>쏭/미/션</title>
+    <title>쏭/미/션!</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Supabase JS Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         tailwind.config = {
@@ -26,13 +27,17 @@
                 }
             }
         }
+
     </script>
      <script>
             function toggleMoreOptions() {
                 const options = document.getElementById('more-options');
                 const icon = document.getElementById('more-icon');
+                
                 const isActive = options.classList.toggle('active');
                 icon.classList.toggle('active');
+                
+                // 시각적 피드백을 위해 약간의 여백 조절
                 if (isActive) {
                     options.style.marginTop = "0.1rem";
                     options.style.marginBottom = "0.1rem";
@@ -42,189 +47,199 @@
                 }
             }
     </script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
-        body { 
-            font-family: 'Pretendard', sans-serif; 
-            background-color: #f8fafc; 
-            color: #0f172a; 
-            -webkit-tap-highlight-color: transparent; 
-            line-height: 1.5;
-        }
-        /* [스크롤바 커스텀] */
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
-        /* [공통 유틸리티] */
-        .hidden { display: none !important; }
-        .glass-card, .rank-card, .modal-comparison-card {
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
+    
+    /* [기본 설정] */
+    body { 
+        font-family: 'Pretendard', sans-serif; 
+        background-color: #f8fafc; 
+        color: #0f172a; 
+        -webkit-tap-highlight-color: transparent; 
+        line-height: 1.5;
+    }
+
+    /* [스크롤바 커스텀] */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+
+    /* [공통 유틸리티] */
+    .hidden { display: none !important; }
+    .glass-card, .rank-card, .modal-comparison-card {
+        background: white;
+        border-radius: 1.5rem;
+        border: 1px solid #f1f5f9;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
+    .loading-spinner { animation: spin 1s linear infinite; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+    .filter-group { 
+        display: flex; 
+        background-color: #ecfdf5; 
+        padding: 2px; 
+        border-radius: 12px; 
+        gap: 2px;
+    }
+ 
+        .filter-btn { 
+            flex: 1;
+            padding: 8px 4px; 
+            font-size: 10px; 
+            font-weight: 800; 
+            border-radius: 8px; 
+            transition: all 0.2s;
+            text-align: center;
             background: white;
-            border-radius: 1.5rem;
-            border: 1px solid #f1f5f9;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            overflow: hidden;
+            color: #64748b;
         }
-        .loading-spinner { animation: spin 1s linear infinite; }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-    
-        .filter-group { 
-            display: flex; 
-            background-color: #ecfdf5; 
-            padding: 2px; 
-            border-radius: 12px; 
-            gap: 2px;
+        
+        .filter-btn.active { 
+
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+
+            background: #22c55e;
+            color: white;
+
         }
-     
-            .filter-btn { 
-                flex: 1;
-                padding: 8px 4px; 
-                font-size: 10px; 
-                font-weight: 800; 
-                border-radius: 8px; 
-                transition: all 0.2s;
-                text-align: center;
-                background: white;
-                color: #64748b;
-            }
-            
-            .filter-btn.active { 
-    
-                box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
-    
-                background: #22c55e;
-                color: white;
-    
-            }
-    
-            .metric-btn {
-                padding: 0.5rem 0.75rem;
-                border-radius: 12px;
-                font-size: 0.7rem;
-                font-weight: 700;
-                border: 1px solid #e2e8f0;
-                background: white;
-                color: #64748b;
-                transition: all 0.2s;
-            }
-    
-            .metric-btn.active {
-                background: #22c55e;
-                color: white;
-                border-color: #22c55e;
-            }
-    
-            .metric-btn2 {
-                padding: 0.5rem 0.75rem;
-                border-radius: 12px;
-                font-size: 0.7rem;
-                font-weight: 700;
-                border: 1px solid #e2e8f0;
-                background: white;
-                color: #64748b;
-                transition: all 0.2s;
-            }
-    
-            .metric-btn2.active {
-                background: #22c55e;
-                color: white;
-                border-color: #22c55e;
-            }
-    
-    
-            .btn-gradient {
-                background: linear-gradient(135deg, #22c55e, #16a34a);
-                color: white;
-                transition: all 0.3s ease;
-            }
-             .stat-mini-card {
-                background: #f8fafc;
-                border-radius: 1rem;
-                padding: 1rem;
-                border: 1px solid #f1f5f9;
-            }       
-        .rank-header {
-            padding: 1rem;
-            border-bottom: 1px solid #f0fdf4;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: #f0fdf4;
-        }
-        .rank-item {
-            position: relative;
-            padding: 0.35rem 1rem;
-            transition: background 0.2s;
-            z-index: 1;
-        }
-        .rank-progress {
-            position: absolute;
-            bottom: 0; left: 0; height: 2px;
-            background: #dcfce7;
-            transition: width 1s ease-out;
-            z-index: 0;
-        }
-        .runner-grade-badge {
-            display: inline-flex;
-            align-items: center;
-            font-size: 0.75rem !important; /* text-xs 크기 */
-            padding: 2px 8px !important;  /* 상하 2px, 좌우 8px */
-            font-weight: 500;
-            border-radius: 6px;
-        }
-        /* [통계 및 뱃지] */
-        .stat-grid-label { font-size: 8px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 2px; }
-        .stat-grid-val { font-size: 11px; font-weight: 900; color: #1e293b; font-style: italic; }
-        .badge-stat {
-            display: inline-block;
-            background: #f8fafc;
-            color: #94a3b8;
-            padding: 3px 10px;
-            border-radius: 8px;
-            font-size: 10px;
-            font-weight: 800;
-            border: 1px solid #f1f5f9;
-            transition: all 0.3s;
-        }
-        .badge-stat.highlight {
-            background: #dcfce7;
-            color: #16a34a;
-            border-color: #bbf7d0;
-            box-shadow: 0 2px 4px rgba(34, 197, 94, 0.1);
-        }
-        .form-input {
-            width: 100%;
-            background-color: #f8fafc;
+
+        .metric-btn {
+            padding: 0.5rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 700;
             border: 1px solid #e2e8f0;
-            padding: 0.85rem 1rem;
-            border-radius: 1rem;
-            font-size: 0.875rem;
-            outline: none;
+            background: white;
+            color: #64748b;
             transition: all 0.2s;
         }
-        .form-input:focus {
+
+        .metric-btn.active {
+            background: #22c55e;
+            color: white;
             border-color: #22c55e;
-            background-color: white;
-            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
         }
-    
-        /* [애니메이션 및 모달] */
-        .expandable-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
-            opacity: 0;
+
+        .metric-btn2 {
+            padding: 0.5rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            border: 1px solid #e2e8f0;
+            background: white;
+            color: #64748b;
+            transition: all 0.2s;
         }
-        .expandable-content.active { max-height: 200px; opacity: 1; }
-        .rotate-icon { transition: transform 0.3s ease; }
-        .rotate-icon.active { transform: rotate(180deg); }
-        .modal-overlay { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(8px); }
+
+        .metric-btn2.active {
+            background: #22c55e;
+            color: white;
+            border-color: #22c55e;
+        }
+
+
+        .btn-gradient {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            transition: all 0.3s ease;
+        }
+         .stat-mini-card {
+            background: #f8fafc;
+            border-radius: 1rem;
+            padding: 1rem;
+            border: 1px solid #f1f5f9;
+        }       
+
+
+    /* [랭킹 및 리스트 아이템] */
+    .rank-header {
+        padding: 1rem;
+        border-bottom: 1px solid #f0fdf4;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: #f0fdf4;
+    }
+    .rank-item {
+        position: relative;
+        padding: 0.35rem 1rem;
+        transition: background 0.2s;
+        z-index: 1;
+    }
+    .rank-progress {
+        position: absolute;
+        bottom: 0; left: 0; height: 2px;
+        background: #dcfce7;
+        transition: width 1s ease-out;
+        z-index: 0;
+    }
+    .runner-grade-badge {
+        display: inline-flex;
+        align-items: center;
+        font-size: 0.75rem !important; /* text-xs 크기 */
+        padding: 2px 8px !important;  /* 상하 2px, 좌우 8px */
+        font-weight: 500;
+        border-radius: 6px;
+    }
+    /* [통계 및 뱃지] */
+    .stat-grid-label { font-size: 8px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 2px; }
+    .stat-grid-val { font-size: 11px; font-weight: 900; color: #1e293b; font-style: italic; }
     
-        /* [메달 색상] */
-        .medal-1 { color: #fbbf24; }
-        .medal-2 { color: #94a3b8; }
-        .medal-3 { color: #b45309; }
-    </style>
-    <style>
+    .badge-stat {
+        display: inline-block;
+        background: #f8fafc;
+        color: #94a3b8;
+        padding: 3px 10px;
+        border-radius: 8px;
+        font-size: 10px;
+        font-weight: 800;
+        border: 1px solid #f1f5f9;
+        transition: all 0.3s;
+    }
+    .badge-stat.highlight {
+        background: #dcfce7;
+        color: #16a34a;
+        border-color: #bbf7d0;
+        box-shadow: 0 2px 4px rgba(34, 197, 94, 0.1);
+    }
+
+    /* [입력 폼] */
+    .form-input {
+        width: 100%;
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        padding: 0.85rem 1rem;
+        border-radius: 1rem;
+        font-size: 0.875rem;
+        outline: none;
+        transition: all 0.2s;
+    }
+    .form-input:focus {
+        border-color: #22c55e;
+        background-color: white;
+        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+    }
+
+    /* [애니메이션 및 모달] */
+    .expandable-content {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+        opacity: 0;
+    }
+    .expandable-content.active { max-height: 200px; opacity: 1; }
+    .rotate-icon { transition: transform 0.3s ease; }
+    .rotate-icon.active { transform: rotate(180deg); }
+    .modal-overlay { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(8px); }
+
+    /* [메달 색상] */
+    .medal-1 { color: #fbbf24; }
+    .medal-2 { color: #94a3b8; }
+    .medal-3 { color: #b45309; }
+</style>
+<style>
         /* 레이블 텍스트 드래그 방지 및 터치 피드백 개선 */
         label[id^="label-dist"], 
         label[id^="label-time"] {
@@ -244,6 +259,8 @@
     </style>
 </head>
 <body class="pb-20">
+
+<!-- Login Screen -->
     <div id="login-screen" class="fixed inset-0 bg-brand-600 z-[100] flex items-center justify-center p-6 transition-all duration-500">
         <div class="bg-white w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl text-center">
             <div class="w-16 h-16 bg-brand-100 text-brand-500 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
@@ -2395,6 +2412,7 @@
             
             // 등급 정의
             const thresholds = [
+                { threshold: 100, name: '🍃 바람', color: 'bg-green-500 text-white' },                
                 { threshold: 90, name: '🏵️ 만개', color: 'bg-slate-800 text-white' },
                 { threshold: 70, name: '🌺 열정', color: 'bg-orange-500 text-white' },
                 { threshold: 50, name: '🌼 활짝', color: 'bg-blue-500 text-white' },
