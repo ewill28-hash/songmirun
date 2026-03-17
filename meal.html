@@ -400,18 +400,20 @@
                                 <div className="fixed bottom-0 left-0 right-0 p-6 glass-panel border-t border-slate-200 flex flex-col items-center gap-3 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
                                     <div className="flex w-full max-w-lg gap-3">
                                         <button 
-                                            onClick={fillRandomly}
-                                            className="flex-1 bg-white border-2 border-slate-200 text-slate-700 py-4.5 rounded-3xl font-black transition-all hover:bg-slate-50 active:scale-95 flex items-center justify-center gap-2 py-4"
-                                        >
-                                            <Icons.Zap /> 랜덤 채우기
-                                        </button>
-                                        <button 
                                             onClick={submitAllVotes} 
                                             disabled={isSubmitting}
                                             className={`flex-[2] bg-blue-600 text-white py-4.5 rounded-3xl font-black shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3 py-4 ${isSubmitting ? 'opacity-70' : 'hover:bg-blue-700'}`}
                                         >
                                             {isSubmitting ? "전송 중..." : "투표 결과 전송하기"}
                                         </button>
+
+                                        <button 
+                                            onClick={fillRandomly}
+                                            className="flex-1 bg-white border-2 border-slate-200 text-slate-700 py-4.5 rounded-3xl font-black transition-all hover:bg-slate-50 active:scale-95 flex items-center justify-center gap-2 py-4"
+                                        >
+                                            <Icons.Zap /> 순위초기화
+                                        </button>
+
                                     </div>
                                     <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">2026 학/운/위</p>
                                 </div>
