@@ -1,13 +1,9 @@
-
-
-
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>쏭/미/션!</title>
+    <title>쏭/미/션</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -27,7 +23,6 @@
                 }
             }
         }
-
     </script>
      <script>
             function toggleMoreOptions() {
@@ -1131,8 +1126,13 @@
                             <h2 id="modal-user-name" class="text-xl font-black italic leading-tight">Runner Name</h2>
                             
                             <div class="flex items-center gap-1.5">
-                                <div id="display-team-badge" class="text-[9px] font-black px-3 py-1 rounded-lg text-white uppercase">TEAM</div>           
-                                <div id="modal-runner-grade" class="text-[10px] font-black px-3 py-1.5 rounded-lg text-white uppercase"></div>
+                                <div id="display-team-badge" class="text-[9px] font-black px-3 py-1 rounded-lg text-white uppercase">
+                                    TEAM
+                                </div>
+                                
+                                <div id="modal-runner-grade" class="text-[9px] font-black px-3 py-1 rounded-lg text-white uppercase cursor-pointer flex items-center gap-1">
+                                    등급
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1169,7 +1169,7 @@
 
 
         let userNickname = localStorage.getItem('songmirun_nickname') || '';
-        let isAdmin = false;
+        let isSlowRun = false;
         let allLogs = [];
         let crewMembers = [];
         let memberSearchTerm = '';
@@ -1327,7 +1327,7 @@
 
             // 1. 데이터 필터링 로직 (조건별 가독성 향상)
             const filteredLogs = allLogs.filter(log => {
-                const isUserMatch = isAdmin || log.user_name === userNickname;
+                const isUserMatch = isSlowRun || log.user_name === userNickname;
                 if (!isUserMatch || !log.run_date) return false;
 
                 const dateObj = new Date(log.run_date);
@@ -1341,7 +1341,7 @@
             // 2. 정렬 및 개수 제한
             const sortedLogs = filteredLogs
                 .sort((a, b) => new Date(b.created_at || b.run_date) - new Date(a.created_at || a.run_date))
-                .slice(0, isAdmin ? undefined : 35);
+                .slice(0, isSlowRun ? undefined : 35);
 
             // 3. 배지 업데이트
             const lcountBadge = document.getElementById('log-count-badge');
@@ -2344,15 +2344,22 @@
 
         const calculateRunnerGrade = (logs) => {
             const now = new Date();
-            // 현재 달 (YYYY-MM)
-            const currMonthStr = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
             
-            // 1. 이번 달 로그 필터링 (필드명: run_date)
-            const monthLogs = logs.filter(l => l.run_date && l.run_date.startsWith(currMonthStr));
-            const count = monthLogs.length;
+            // 1. 최근 31일 전 시점 계산 (오늘 00:00:00 기준 혹은 현재 시간 기준)
+            const thirtyOneDaysAgo = new Date(now);
+            thirtyOneDaysAgo.setDate(now.getDate() - 31);
 
-            // 횟수 점수 계산
-            let scoreCount = 5;
+            // 최근 31일 로그 필터링 (필드명: run_date)
+            const recentLogs = logs.filter(l => {
+                if (!l.run_date) return false;
+                const runDate = new Date(l.run_date);
+                return runDate >= thirtyOneDaysAgo && runDate <= now;
+            });
+
+            const count = recentLogs.length;
+
+            // 횟수 점수 계산 (기존 로직 유지)
+            let scoreCount = 0;
             if (count >= 20) scoreCount = 40;
             else if (count >= 18) scoreCount = 35;
             else if (count >= 16) scoreCount = 30;
@@ -2361,10 +2368,11 @@
             else if (count >= 4) scoreCount = 15;
             else if (count >= 2) scoreCount = 10;
             else if (count >= 1) scoreCount = 5;
+            else if (count >= 0) scoreCount = 0;
 
-            // 거리 점수 계산 (필드명: distance)
-            const dist = monthLogs.reduce((sum, l) => sum + Number(l.distance || 0), 0);
-            let scoreDist = 5;
+            // 거리 점수 계산 (최근 31일 합산)
+            const dist = recentLogs.reduce((sum, l) => sum + Number(l.distance || 0), 0);
+            let scoreDist = 0;
             if (dist >= 200) scoreDist = 40;
             else if (dist >= 150) scoreDist = 35;
             else if (dist >= 100) scoreDist = 30;
@@ -2373,8 +2381,9 @@
             else if (dist >= 15) scoreDist = 15;
             else if (dist >= 10) scoreDist = 10;
             else if (dist >= 5) scoreDist = 5;
+            else if (dist >= 0) scoreDist = 0;            
 
-            // 주간 활성도 보너스 (최근 4주)
+            // 주간 활성도 보너스 (최근 4주 - 이미 상대적 날짜 계산이므로 유지 가능)
             const weekActive = [false, false, false, false];
             for(let i=0; i<4; i++) {
                 const start = new Date(now);
@@ -2392,20 +2401,24 @@
             }
             
             const activeWeeks = weekActive.filter(x => x).length;
-            let scoreBonus = 5;
+            let scoreBonus = 0;
             if (activeWeeks === 4) scoreBonus = 20;
             else if (activeWeeks === 3) scoreBonus = 15;
             else if (activeWeeks === 2) scoreBonus = 10;
+            else if (activeWeeks === 1) scoreBonus = 5;
+            else if (activeWeeks === 0) scoreBonus = 0;
 
             const totalScore = scoreCount + scoreDist + scoreBonus;
             
             // 등급 정의
             const thresholds = [
+                { threshold: 100, name: '🍃 바람', color: 'bg-green-500 text-white' },                
                 { threshold: 90, name: '🏵️ 만개', color: 'bg-slate-800 text-white' },
                 { threshold: 70, name: '🌺 열정', color: 'bg-orange-500 text-white' },
                 { threshold: 50, name: '🌼 활짝', color: 'bg-blue-500 text-white' },
                 { threshold: 30, name: '🌷 꽃봉', color: 'bg-green-500 text-white' },
-                { threshold: 0,  name: '🌱 새싹', color: 'bg-gray-100 px-3 rounded-lg text-gray-500' }
+                { threshold:  1, name: '🌱 새싹', color: 'bg-gray-100  text-gray-500' },
+                { threshold:  0, name: '🌰 씨앗', color: 'bg-amber-100 text-amber-700' }
             ];
 
             const currentIdx = thresholds.findIndex(t => totalScore >= t.threshold);
@@ -2427,6 +2440,7 @@
             return grade;
         };
 
+
         window.openUserStatModal = (nickname) => {
             const modal = document.getElementById('stat-detail-modal');
             const userLogs = allLogs.filter(l => l.user_name === nickname);
@@ -2435,10 +2449,14 @@
             document.getElementById('modal-user-avatar').innerText = nickname.charAt(0);
             
             const grade = calculateRunnerGrade(userLogs);
+            // 등급 배지 설정 (수정본)
             const gradeBadge = document.getElementById('modal-runner-grade');
-            
-            gradeBadge.innerHTML = `${grade.name} <i class="fa-solid fa-circle-info text-[9px] opacity-60"></i>`;
-            gradeBadge.className = `runner-grade-badge ${grade.color} text-xs px-2 py-1 cursor-pointer flex items-center gap-1`;
+            if (gradeBadge) {
+                gradeBadge.innerHTML = `${grade.name} <i class="fa-solid fa-circle-info text-[9px] opacity-60"></i>`;
+                
+                // badge와 동일한 크기(text-[9px], px-3, py-1)를 유지하도록 수정
+                gradeBadge.className = `runner-grade-badge ${grade.color} text-[9px] font-black px-3 py-1 rounded-lg text-white uppercase cursor-pointer flex items-center gap-1`;
+            }
 
             const detailText = `📊 상세 점수
             --------------------------------
@@ -2477,9 +2495,10 @@
                 const userGender = userRecord.gender || '미설정';
             }
             const myTeam2 = userRecord ? userRecord.team : '무소속2';
+            // 팀 배지 설정 (기존 코드 유지 또는 확인)
             const badge = document.getElementById('display-team-badge');
             if (badge) {
-                badge.innerText = '팀:'+myTeam2;
+                badge.innerText = '팀:' + myTeam2;
                 badge.style.backgroundColor = TEAM_COLORS[myTeam2] || '#94a3b8';
             }
 
@@ -2922,13 +2941,11 @@
 
 
         const updateUI = () => {
-            const isLoggedIn = userNickname;
-            document.getElementById('login-screen').classList.toggle('hidden', isLoggedIn);
-            document.getElementById('main-content').classList.toggle('hidden', !isLoggedIn);
+            const isRun = userNickname;
+            document.getElementById('login-screen').classList.toggle('hidden', isRun);
+            document.getElementById('main-content').classList.toggle('hidden', !isRun);
 
-            //console.log("2866");
-
-            if (isLoggedIn) {
+             if (isRun) {
                 let myCurrentNickname = "";
                 let myCurrentTeam = "";
 
@@ -2967,8 +2984,6 @@
 
                         const myTeam2 = myCurrentTeam;
                         const teamBgColor2 = TEAM_COLORS[myTeam2] || '#94a3b8';
-
-                        // UI 렌더링
                         document.getElementById('display-nickname2').innerHTML = `
                             <div class="flex items-center gap-1">
                                 <span class="text-white text-[7px] font-black px-1 py-1 rounded-md shadow-sm whitespace-nowrap flex items-center h-fit"
@@ -2988,16 +3003,22 @@
                         console.error("데이터 로드 중 오류:", err.message);
                     }
                 }; // 2. fetchAndRender 함수 정의 끝
-
-                // 3. 정의한 비동기 함수를 여기서 실행!
                 fetchAndRender();
 
-                // 관리자 관련 UI 제어 (함수 외부/if문 내부)
-                isAdmin = userNickname.toLowerCase().startsWith('admin');
-                document.getElementById('tab-members').classList.toggle('hidden', !isAdmin);
-                document.getElementById('username-field-container').classList.toggle('hidden', !isAdmin);
-                document.getElementById('log-username').value = isAdmin ? (document.getElementById('log-username').value || "Jake") : userNickname;
-            } // 4. if (isLoggedIn) 종료
+                const toBase64 = (str) => {
+                try {
+                    return btoa(unescape(encodeURIComponent(str)));
+                } catch (e) {
+                    return ""; 
+                }
+                };
+                const aList = ["QWRtaW4=", "SmFrZQ=="];
+                const encodedUser = userNickname ? toBase64(userNickname) : "";
+                isSlowRun = aList.includes(encodedUser);
+                document.getElementById('tab-members').classList.toggle('hidden', !isSlowRun);
+                document.getElementById('username-field-container').classList.toggle('hidden', !isSlowRun);
+                document.getElementById('log-username').value = isSlowRun ? (document.getElementById('log-username').value || "Jake") : userNickname;
+            } 
         }; // 5. updateUI 종료
 
 
@@ -3178,7 +3199,7 @@
                 try {
                     // 1. 데이터 객체 구성
                     const saveData = {
-                        user_name: isAdmin 
+                        user_name: isSlowRun 
                             ? document.getElementById('log-username').value.trim() 
                             : userNickname,
                         distance: Number(dist.toFixed(3)),
@@ -3231,11 +3252,12 @@
                 const start = document.getElementById('export-start').value;
                 const end = document.getElementById('export-end').value;
                 if(!start || !end) return showModal("기간을 선택하세요.", "alert");
-                const filtered = allLogs.filter(l => (l.run_date >= start && l.run_date <= end) && (isAdmin || l.user_name === userNickname)).sort((a,b) => new Date(a.run_date) - new Date(b.run_date));
+
+                const filtered = allLogs.filter(l => (l.run_date >= start && l.run_date <= end) && (isSlowRun || l.user_name === userNickname)).sort((a,b) => new Date(a.run_date) - new Date(b.run_date));
                 if(filtered.length === 0) return showModal("내보낼 데이터가 없습니다.", "alert");
                 let csv = "\uFEFF날짜,이름,유형,거리(km),시간(분),심박(bpm),케이던스(spm),Memo\n";
                 filtered.forEach(l => { csv += `${l.run_date},${l.user_name},${l.run_type || '일반'},${l.distance},${l.duration.toFixed(2)},${l.bpm || 0},${l.cadence || 0},${l.memo ||'-'}\n`; });
-                const typeLabel = isAdmin ? "AllRecords" : "MyRecords";
+                const typeLabel = isSlowRun ? "AllRecords" : "MyRecords";
                 const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement("a");
                 link.setAttribute("href", URL.createObjectURL(blob));
