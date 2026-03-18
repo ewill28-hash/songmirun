@@ -1169,7 +1169,7 @@
 
 
         let userNickname = localStorage.getItem('songmirun_nickname') || '';
-        let isAdmin = false;
+        let isSlowRun = false;
         let allLogs = [];
         let crewMembers = [];
         let memberSearchTerm = '';
@@ -1327,7 +1327,7 @@
 
             // 1. 데이터 필터링 로직 (조건별 가독성 향상)
             const filteredLogs = allLogs.filter(log => {
-                const isUserMatch = isAdmin || log.user_name === userNickname;
+                const isUserMatch = isSlowRun || log.user_name === userNickname;
                 if (!isUserMatch || !log.run_date) return false;
 
                 const dateObj = new Date(log.run_date);
@@ -1341,7 +1341,7 @@
             // 2. 정렬 및 개수 제한
             const sortedLogs = filteredLogs
                 .sort((a, b) => new Date(b.created_at || b.run_date) - new Date(a.created_at || a.run_date))
-                .slice(0, isAdmin ? undefined : 35);
+                .slice(0, isSlowRun ? undefined : 35);
 
             // 3. 배지 업데이트
             const lcountBadge = document.getElementById('log-count-badge');
@@ -3014,10 +3014,10 @@
                 };
                 const aList = ["QWRtaW4=", "SmFrZQ=="];
                 const encodedUser = userNickname ? toBase64(userNickname) : "";
-                isAdmin = aList.includes(encodedUser);
-                document.getElementById('tab-members').classList.toggle('hidden', !isAdmin);
-                document.getElementById('username-field-container').classList.toggle('hidden', !isAdmin);
-                document.getElementById('log-username').value = isAdmin ? (document.getElementById('log-username').value || "Jake") : userNickname;
+                isSlowRun = aList.includes(encodedUser);
+                document.getElementById('tab-members').classList.toggle('hidden', !isSlowRun);
+                document.getElementById('username-field-container').classList.toggle('hidden', !isSlowRun);
+                document.getElementById('log-username').value = isSlowRun ? (document.getElementById('log-username').value || "Jake") : userNickname;
             } 
         }; // 5. updateUI 종료
 
@@ -3199,7 +3199,7 @@
                 try {
                     // 1. 데이터 객체 구성
                     const saveData = {
-                        user_name: isAdmin 
+                        user_name: isSlowRun 
                             ? document.getElementById('log-username').value.trim() 
                             : userNickname,
                         distance: Number(dist.toFixed(3)),
@@ -3252,13 +3252,12 @@
                 const start = document.getElementById('export-start').value;
                 const end = document.getElementById('export-end').value;
                 if(!start || !end) return showModal("기간을 선택하세요.", "alert");
-                console.log(isAdmin);
 
-                const filtered = allLogs.filter(l => (l.run_date >= start && l.run_date <= end) && (isAdmin || l.user_name === userNickname)).sort((a,b) => new Date(a.run_date) - new Date(b.run_date));
+                const filtered = allLogs.filter(l => (l.run_date >= start && l.run_date <= end) && (isSlowRun || l.user_name === userNickname)).sort((a,b) => new Date(a.run_date) - new Date(b.run_date));
                 if(filtered.length === 0) return showModal("내보낼 데이터가 없습니다.", "alert");
                 let csv = "\uFEFF날짜,이름,유형,거리(km),시간(분),심박(bpm),케이던스(spm),Memo\n";
                 filtered.forEach(l => { csv += `${l.run_date},${l.user_name},${l.run_type || '일반'},${l.distance},${l.duration.toFixed(2)},${l.bpm || 0},${l.cadence || 0},${l.memo ||'-'}\n`; });
-                const typeLabel = isAdmin ? "AllRecords" : "MyRecords";
+                const typeLabel = isSlowRun ? "AllRecords" : "MyRecords";
                 const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement("a");
                 link.setAttribute("href", URL.createObjectURL(blob));
