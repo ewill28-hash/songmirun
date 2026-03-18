@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>쏭/미/션</title>
+    <title>쏭~미션</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -379,9 +379,9 @@
                         <div class="col-span-1">
                             <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1">러닝 유형</label>
                             <select id="run-type" class="w-full bg-white border-2 border-brand-100 p-3.5 rounded-2xl text-sm font-bold outline-none shadow-sm">
-                                <option value="오운완">👟 오운완</option>
-                                <option value="정규">📅 정규</option>
-                                <option value="번개">⚡ 번개</option>
+                                <option value="오운완">👟 오운완(개인)</option>
+                                <option value="정규">📅 정규런(정기)</option>
+                                <option value="번개">⚡ 번개런</option>
                                 <option value="대회">🏅 대회</option>
                             </select>
                         </div>
@@ -2444,7 +2444,31 @@
         window.openUserStatModal = (nickname) => {
             const modal = document.getElementById('stat-detail-modal');
             const userLogs = allLogs.filter(l => l.user_name === nickname);
-            
+
+
+            const getRank = (logs, periodStr, targetNickname, type = 'distance') => {
+                // 1. 해당 기간의 로그 필터링
+                const periodLogs = logs.filter(l => l.run_date && l.run_date.startsWith(periodStr));
+                
+                // 2. 사용자별 통계 합산
+                const userStats = {};
+                periodLogs.forEach(l => {
+                    if (!userStats[l.user_name]) userStats[l.user_name] = 0;
+                    
+                    if (type === 'distance') {
+                        userStats[l.user_name] += Number(l.distance || 0);
+                    } else if (type === 'count') {
+                        userStats[l.user_name] += 1;
+                    }
+                });
+
+                // 3. 정렬 및 순위 추출
+                const sortedUserNames = Object.keys(userStats).sort((a, b) => userStats[b] - userStats[a]);
+                const rank = sortedUserNames.indexOf(targetNickname) + 1;
+                
+                return rank > 0 ? rank : '-'; // 숫자만 반환 (UI에서 '위'를 붙임)
+            };
+
             document.getElementById('modal-user-name').innerText = nickname;
             document.getElementById('modal-user-avatar').innerText = nickname.charAt(0);
             
@@ -2512,7 +2536,19 @@
             };
 
 
-            const genStatCol = (title, logs, theme) => {
+            // 거리 순위 (Dist Rank)
+            const curMonthDistRank = getRank(allLogs, currMonthStr, nickname, 'distance');
+            const lastMonthDistRank = getRank(allLogs, lastMonthStr, nickname, 'distance');
+            const curYearDistRank = getRank(allLogs, currYear.toString(), nickname, 'distance');
+            const lastYearDistRank = getRank(allLogs, lastYear.toString(), nickname, 'distance');
+
+            // 횟수 순위 (Count Rank)
+            const curMonthCountRank = getRank(allLogs, currMonthStr, nickname, 'count');
+            const lastMonthCountRank = getRank(allLogs, lastMonthStr, nickname, 'count');
+            const curYearCountRank = getRank(allLogs, currYear.toString(), nickname, 'count');
+            const lastYearCountRank = getRank(allLogs, lastYear.toString(), nickname, 'count');
+
+            const genStatCol = (title, logs, theme, distRank, countRank) => {
                 const s = calculate(logs);
                 return `
                     <div class="p-1 bg-white">
@@ -2521,13 +2557,19 @@
                         </div>
                         <div class="space-y-2">
                             <div>
+                                <p class="stat-grid-val text-emerald-600">${distRank !== '-' ? distRank + '위' : '-'}</p>
+                            </div>
+                            <div>
                                 <p class="stat-grid-val text-emerald-600">${Number(s.distance).toFixed(0)}km</p>
                             </div>
                             <div>
                                 <p class="stat-grid-val text-orange-600 ">${s.durationHMS}</p>
                             </div>
                             <div>
-                                <p class="stat-grid-val text-purple-600">${s.count}회</p>
+                                <p class="stat-grid-val text-purple-600">${countRank !== '-' ? countRank + '위' : '-'}</p>
+                            </div>
+                            <div>
+                                <p class="stat-grid-val text-purple-600">${s.count}번 뜀</p>
                             </div>
                             <div>
                                 <p class="stat-grid-val text-rose-600 font-bold">${s.pace}</p>
@@ -2543,10 +2585,7 @@
                     <h4 class="text-[11px] font-black text-brand-600 mb-4 flex items-center gap-2 uppercase tracking-tight">
                         <i class="fa-solid fa-globe"></i> Lifetime Performance
                     </h4>
-                    
                     <div class="grid grid-cols-4 gap-3">
-
-                        
                         <div class="text-center bg-gray-50 py-3 rounded-2xl">
                             <p class="stat-grid-label">Dist</p>
                             <p class="stat-grid-val text-emerald-500">${Number(lifetimeStats.distance).toFixed(0)}km</p>
@@ -2589,17 +2628,17 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td class="py-3 text-emerald-500 ">
-                                    ${genStatCol('', curMonthData, 'blue')}
+                                <td class="py-2 text-emerald-500 ">
+                                    ${genStatCol('', curMonthData, 'blue', curMonthDistRank, curMonthCountRank)}
                                 </td>
-                                <td class="py-3 text-orange-500 opacity-80">
-                                    ${genStatCol('', lastMonthData, 'gray')}
+                                <td class="py-2 text-orange-500 opacity-80">
+                                    ${genStatCol('', lastMonthData, 'gray', lastMonthDistRank, lastMonthCountRank)}
                                 </td>
-                                <td class="py-3 text-purple-500 border-l border-brand-50 pl-4">
-                                    ${genStatCol('', curYearData, 'blue')}
+                                <td class="py-2 text-purple-500 border-l border-brand-50 pl-4">
+                                    ${genStatCol('', curYearData, 'blue', curYearDistRank, curYearCountRank)}
                                 </td>
-                                <td class="py-3 text-rose-500 opacity-80">
-                                    ${genStatCol('', lastYearData, 'gray')}
+                                <td class="py-2 text-rose-500 opacity-80">
+                                    ${genStatCol('', lastYearData, 'gray', lastYearDistRank, lastYearCountRank)}
                                 </td>
                             </tr>
                         </tbody>
@@ -3190,10 +3229,10 @@
                 if(!date || dist <= 0 || totalMin <= 0) return showModal("💡필수 항목(날짜, 거리, 시간)을 입력해주세요✅", "alert");
 
                 const pace = totalMin / dist;
-                if (pace < 2.0) return showModal("잠시만요! ⚡ 페이스가 너무 빠릅니다. 기록을 확인해주세요.", "alert");
+                if (pace < 3.0) return showModal("잠시만요! ⚡ 페이스가 너무 빠릅니다. 기록을 확인해주세요.", "alert");
                 if (pace > 20) return showModal("러닝 시간을 잘 입력하셨나요? 🐢", "alert");
                 
-                if(bpm !== 0 && (bpm < 70 || bpm > 220)) return showModal("심박수 범위를 확인해주세요.", "alert");
+                if(bpm !== 0 && (bpm < 70 || bpm > 220)) return showModal("⚡인간의 심박수가 아님 \n\n심박수 범위를 확인해주세요.", "alert");
                 if(cadence !== 0 && (cadence < 100 || cadence > 250)) return showModal("케이던스 범위를 확인해주세요.", "alert");
 
                 try {
@@ -3240,7 +3279,7 @@
                     `;
                     
                     if (typeof syncLogs === 'function') await syncLogs();
-                    showToast("✨ 저장되었습니다.");
+                    showToast("✨ 기록이 저장되었습니다.");
 
                 } catch (e) {
                     console.error("Save Error:", e.message);
@@ -3318,8 +3357,6 @@
                         saveData.id = editId; // 수정 시에는 id 포함
                     }
 
-                    // 5. Supabase upsert 실행
-                    // 여기서 _supabase 변수명이 맞는지 확인하세요. (위에서는 supabase라고 썼을 수 있습니다)
                     const { error } = await _supabase
                         .from(TABLE_NAME)
                         .upsert(saveData);
@@ -3516,9 +3553,6 @@
             });
 
 
-
-
-            
             // 1. 단순 초기화 버튼 (기존 잘 되는 부분 유지)
             document.getElementById('label-time0')?.addEventListener('click', function() {
                 ['in-time-h', 'in-time-m', 'in-time-s'].forEach(id => {
@@ -3587,9 +3621,6 @@
             } else {
                 initRunnerInputs(); // 이미 로드되었다면 즉시 실행
             }
-
-
-
 
 
 
