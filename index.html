@@ -9,7 +9,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase JS Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bcryptjs/2.4.3/bcryptjs.min.js"></script>    
     <script>
         tailwind.config = {
             theme: {
@@ -3010,9 +3009,16 @@
                 }; // 2. fetchAndRender 함수 정의 끝
                 fetchAndRender();
 
-
-                //const isAdmin = ["$2b$10$7R3v...", "$2b$10$P9kL..."].some(h => bcrypt.compareSync(userNickname, h));
-                const isAdmin = ["QWRtaW4=", "SmFrZQ=="].includes(userNickname ? btoa(userNickname) : "");
+                const toBase64 = (str) => {
+                try {
+                    return btoa(unescape(encodeURIComponent(str)));
+                } catch (e) {
+                    return ""; // 에러 발생 시 빈 문자열 반환
+                }
+                };
+                const aList = ["QWRtaW4=", "SmFrZQ=="];
+                const encodedUser = userNickname ? toBase64(userNickname) : "";
+                const isAdmin = aList.includes(encodedUser);
                 document.getElementById('tab-members').classList.toggle('hidden', !isAdmin);
                 document.getElementById('username-field-container').classList.toggle('hidden', !isAdmin);
                 document.getElementById('log-username').value = isAdmin ? (document.getElementById('log-username').value || "Jake") : userNickname;
