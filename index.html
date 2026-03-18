@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>쏭/미/션</title>
+    <title>쏭~미션</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -3229,10 +3229,10 @@
                 if(!date || dist <= 0 || totalMin <= 0) return showModal("💡필수 항목(날짜, 거리, 시간)을 입력해주세요✅", "alert");
 
                 const pace = totalMin / dist;
-                if (pace < 2.0) return showModal("잠시만요! ⚡ 페이스가 너무 빠릅니다. 기록을 확인해주세요.", "alert");
+                if (pace < 3.0) return showModal("잠시만요! ⚡ 페이스가 너무 빠릅니다. 기록을 확인해주세요.", "alert");
                 if (pace > 20) return showModal("러닝 시간을 잘 입력하셨나요? 🐢", "alert");
                 
-                if(bpm !== 0 && (bpm < 70 || bpm > 220)) return showModal("심박수 범위를 확인해주세요.", "alert");
+                if(bpm !== 0 && (bpm < 70 || bpm > 220)) return showModal("⚡인간의 심박수가 아님 \n\n심박수 범위를 확인해주세요.", "alert");
                 if(cadence !== 0 && (cadence < 100 || cadence > 250)) return showModal("케이던스 범위를 확인해주세요.", "alert");
 
                 try {
@@ -3279,7 +3279,7 @@
                     `;
                     
                     if (typeof syncLogs === 'function') await syncLogs();
-                    showToast("✨ 저장되었습니다.");
+                    showToast("✨ 기록이 저장되었습니다.");
 
                 } catch (e) {
                     console.error("Save Error:", e.message);
@@ -3357,8 +3357,6 @@
                         saveData.id = editId; // 수정 시에는 id 포함
                     }
 
-                    // 5. Supabase upsert 실행
-                    // 여기서 _supabase 변수명이 맞는지 확인하세요. (위에서는 supabase라고 썼을 수 있습니다)
                     const { error } = await _supabase
                         .from(TABLE_NAME)
                         .upsert(saveData);
@@ -3555,9 +3553,6 @@
             });
 
 
-
-
-            
             // 1. 단순 초기화 버튼 (기존 잘 되는 부분 유지)
             document.getElementById('label-time0')?.addEventListener('click', function() {
                 ['in-time-h', 'in-time-m', 'in-time-s'].forEach(id => {
@@ -3626,9 +3621,6 @@
             } else {
                 initRunnerInputs(); // 이미 로드되었다면 즉시 실행
             }
-
-
-
 
 
 
