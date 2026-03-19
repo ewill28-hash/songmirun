@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -1505,8 +1506,8 @@
                     obj[key].time += t;
                     obj[key].count += 1;
                     obj[key].members.add(r.user_name);
-                    // 종합점수 계산: 거리 * 1 + 횟수 * 2 (한 번 뛸 때마다 2점 + 거리당 1점)
-                    obj[key].score = obj[key].dist * 1 + obj[key].count * 2;
+                    // 종합점수 계산: 거리 * 1 + 횟수 * 1 (한 번 뛸 때마다 1점 + 거리당 1점)
+                    obj[key].score = obj[key].dist * 1 + obj[key].count * 1;
                 };
 
                 aggregate(teams, teamName, TEAM_COLORS[teamName] || '#94a3b8');
@@ -1784,47 +1785,56 @@
        //window.syncAndRefresh = () => updateUI_Team();
 
 
- const DESTINATIONS = [
-    { name: "송도 (미추홀)", code: "ICN", dist: 0, emoji: "👟" }, // 시작점
-    { name: "서울 (남산타워)", code: "GMP", dist: 35, emoji: "🗼" },
-    { name: "평창 (동계올림픽)", code: "YNY", dist: 180, emoji: "❄️" }, // 양양공항 기준
-    { name: "대전 (성심당)", code: "CJJ", dist: 160, emoji: "🥖" }, // 청주공항 기준
-    { name: "대구 (팔공산)", code: "TAE", dist: 260, emoji: "🍎" },
-    { name: "광주 (무등산)", code: "KWJ", dist: 270, emoji: "🍉" },
-    { name: "부산 (해운대)", code: "PUS", dist: 330, emoji: "🌊" },
-    { name: "제주도 (한라산)", code: "CJU", dist: 450, emoji: "🗿" },
-    { name: "상하이 (중국)", code: "PVG", dist: 800, emoji: "🏮" },
-    { name: "도쿄 (마라톤 성지)", code: "HND", dist: 1200, emoji: "🗼" },
-    { name: "홍콩", code: "HKG", dist: 2000, emoji: "🏙️" },
-    { name: "방콕", code: "BKK", dist: 3700, emoji: "🛕" },
-    { name: "싱가포르", code: "SIN", dist: 4700, emoji: "🦁" },
-    { name: "발리 (인도네시아)", code: "DPS", dist: 5200, emoji: "🏖️" },
-    { name: "퍼스 (호주 서부)", code: "PER", dist: 7200, emoji: "☀️" },
-    { name: "시드니(호주)", code: "SYD", dist: 8300, emoji: "🦘" },
-    { name: "베를린 (마라톤 성지)", code: "BER", dist: 8500, emoji: "🏰" },
-    { name: "모스크바 (러시아)", code: "SVO", dist: 9300, emoji: "🇷🇺" },
-    { name: "런던 (마라톤 성지)", code: "LHR", dist: 11000, emoji: "🎡" },
-    { name: "보스턴 (마라톤 성지)", code: "BOS", dist: 11500, emoji: "🏛️" },
-    { name: "뉴욕 (마라톤 성지)", code: "JFK", dist: 13000, emoji: "🗽" },
-    { name: "시카고 (마라톤 성지)", code: "ORD", dist: 13500, emoji: "🏙️" },
-    { name: "멕시코시티", code: "MEX", dist: 14500, emoji: "🌮" },
-    { name: "리마 (페루)", code: "LIM", dist: 16300, emoji: "🦙" },
-    { name: "상파울루 (지구반바퀴)", code: "GRU", dist: 18000, emoji: "⚽" },
-    { name: "지구 한 바퀴 (완주!)", code: "ICN", dist: 40075, emoji: "🌍" }
-];
+        const DESTINATIONS = [
+            { name: "송도 (미추홀)", code: "ICN", dist: 0, emoji: "👟" }, // 시작점
+            { name: "서울 (남산타워)", code: "GMP", dist: 35, emoji: "🗼" },
+            { name: "평창 (동계올림픽)", code: "YNY", dist: 180, emoji: "❄️" }, // 양양공항 기준
+            { name: "대전 (성심당)", code: "CJJ", dist: 160, emoji: "🥖" }, // 청주공항 기준
+            { name: "대구 (팔공산)", code: "TAE", dist: 260, emoji: "🍎" },
+            { name: "광주 (무등산)", code: "KWJ", dist: 270, emoji: "🍉" },
+            { name: "부산 (해운대)", code: "PUS", dist: 330, emoji: "🌊" },
+            { name: "제주도 (한라산)", code: "CJU", dist: 450, emoji: "🗿" },
+            { name: "상하이 (중국)", code: "PVG", dist: 800, emoji: "🏮" },
+            { name: "도쿄 (마라톤 성지)", code: "HND", dist: 1200, emoji: "🗼" },
+            { name: "홍콩", code: "HKG", dist: 2000, emoji: "🏙️" },
+            { name: "방콕", code: "BKK", dist: 3700, emoji: "🛕" },
+            { name: "싱가포르", code: "SIN", dist: 4700, emoji: "🦁" },
+            { name: "발리 (인도네시아)", code: "DPS", dist: 5200, emoji: "🏖️" },
+            { name: "퍼스 (호주 서부)", code: "PER", dist: 7200, emoji: "☀️" },
+            { name: "시드니(호주)", code: "SYD", dist: 8300, emoji: "🦘" },
+            { name: "베를린 (마라톤 성지)", code: "BER", dist: 8500, emoji: "🏰" },
+            { name: "모스크바 (러시아)", code: "SVO", dist: 9300, emoji: "🇷🇺" },
+            { name: "런던 (마라톤 성지)", code: "LHR", dist: 11000, emoji: "🎡" },
+            { name: "보스턴 (마라톤 성지)", code: "BOS", dist: 11500, emoji: "🏛️" },
+            { name: "뉴욕 (마라톤 성지)", code: "JFK", dist: 13000, emoji: "🗽" },
+            { name: "시카고 (마라톤 성지)", code: "ORD", dist: 13500, emoji: "🏙️" },
+            { name: "멕시코시티", code: "MEX", dist: 14500, emoji: "🌮" },
+            { name: "리마 (페루)", code: "LIM", dist: 16300, emoji: "🦙" },
+            { name: "상파울루 (지구반바퀴)", code: "GRU", dist: 18000, emoji: "⚽" },
+            { name: "지구 한 바퀴 (완주!)", code: "ICN", dist: 40075, emoji: "🌍" }
+        ];
 
-window.getGreatCircleMapLink = (target) => {
-    const originCode = "ICN"; // 기점: 인천공항
-    const destCode = target.code || "ICN";
-    
-    // 시작점이거나 코드가 같으면 단순히 인천공항 지도 표시
-    if (target.dist === 0 || originCode === destCode) {
-        return `https://www.greatcirclemap.com/satellite?routes=${originCode}`;
-    }
+        window.getGreatCircleMapLink = (target) => {
+            const originCode = "ICN"; // 기점: 인천공항
+            const destCode = target.code || "ICN";
+            
+            // 시작점이거나 코드가 같으면 단순히 인천공항 지도 표시
+            if (target.dist === 0 || originCode === destCode) {
+                return `https://www.greatcirclemap.com/?routes=${originCode}-${destCode}`;
+            }
 
-    // Great Circle Map 경로 링크 (예: ICN-DPS)
-    return `https://www.greatcirclemap.com/satellite?routes=${originCode}-${destCode}`;
-};
+        // 1. 세 가지 타입의 URL 베이스를 배열로 정의
+            const urlTypes = [
+                `https://www.greatcirclemap.com/roadmap?routes=${originCode}-${destCode}`,
+                `https://www.greatcirclemap.com/satellite?routes=${originCode}-${destCode}`
+            ];
+
+            // 2. 0~2 사이의 랜덤한 인덱스 선택
+            const randomIndex = Math.floor(Math.random() * urlTypes.length);
+
+            // 3. 랜덤하게 선택된 URL 반환
+            return urlTypes[randomIndex];
+        };
 
                 
         window.renderChallengeModal = (title, distance) => {
@@ -2163,34 +2173,47 @@ window.getGreatCircleMapLink = (target) => {
                 const sorted = data.slice(0, 5);
                 const maxVal = sorted.length > 0 ? Number(sorted[0].valRaw || sorted[0].val) : 1;
 
+                const isDistanceRank = elementId.includes('dist');
+
                 container.innerHTML = sorted.map((item, i) => {
                     const isTop3 = i < 3;
+                    
+                    // 거리 랭킹 1~3위일 때만 적용할 스타일 (필터: 블러)
+                    // group-hover:filter-none -> 마우스 올리면 블러 해제
+                    const maskStyles = (isDistanceRank && isTop3) 
+                        ? 'filter blur-[4px] group-hover:blur-none transition-all duration-300' 
+                        : '';
+                    
                     const medalClass = i === 0 ? 'medal-1' : i === 1 ? 'medal-2' : i === 2 ? 'medal-3' : 'text-gray-300';
                     const progressWidth = (Number(item.valRaw || item.val) / maxVal) * 100;
-                    
+
                     let displayValue = item.val;
                     let displayUnit = unit;
                     if (isTimeFormat) {
                         displayValue = formatTimeHMS(item.valRaw || item.val);
-                        displayUnit = ""; 
+                        displayUnit = "";
                     }
 
                     return `
-                    <div class="rank-item ${item.name === userNickname ? 'bg-rose-50/50' : ''}">
+                    <div class="rank-item group ${item.name === userNickname ? 'bg-rose-50/50' : ''}">
                         <div class="flex items-center justify-between relative z-10">
                             <div class="flex items-center gap-1">
                                 <div class="w-7 h-7 flex items-center justify-center">
                                     ${isTop3 ? `<i class="fa-solid fa-medal text-lg ${medalClass}"></i>` : `<span class="text-[11px] font-black text-gray-300">${i + 1}</span>`}
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <div class="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-[8px] font-black text-gray-400">
+                                    <div class="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-[8px] font-black text-gray-400 ${maskStyles}">
                                         ${item.name.charAt(0)}
                                     </div>
-                                    <span class="text-xs font-bold ${item.name === userNickname ? 'text-brand-700' : 'text-gray-700'}">${item.name}</span>
+                                    <span class="text-xs font-bold ${item.name === userNickname ? 'text-brand-700' : 'text-gray-700'} ${maskStyles}">
+                                        ${item.name}
+                                    </span>
                                 </div>
                             </div>
                             <div class="text-right">
-                                <span class="text-xs font-black italic ${isTop3 ? 'text-brand-600' : 'text-gray-500'}">${displayValue}<span class="text-[9px] font-bold ml-0.5 ml-1 not-italic">${displayUnit}</span></span>
+                                <span class="text-xs font-black italic ${isTop3 ? 'text-brand-600' : 'text-gray-500'} ${maskStyles}">
+                                    ${displayValue}<span class="text-[9px] font-bold ml-0.5 ml-1 not-italic">${displayUnit}</span>
+                                </span>
                             </div>
                         </div>
                         <div class="rank-progress" style="width: ${progressWidth}%"></div>
@@ -2198,6 +2221,7 @@ window.getGreatCircleMapLink = (target) => {
                     `;
                 }).join('') || '<div class="p-8 text-center text-gray-300 text-[10px] font-bold italic">기록이 없습니다.</div>';
             };
+
 
             const distRank = Object.entries(userAgg).map(([name, obj]) => ({ name, val: obj.distance.toFixed(3) })).sort((a,b) => b.val - a.val);
             drawRankList('rank-dist-list', distRank, 'km');
