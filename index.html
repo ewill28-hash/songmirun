@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -2172,34 +2173,48 @@
                 const sorted = data.slice(0, 5);
                 const maxVal = sorted.length > 0 ? Number(sorted[0].valRaw || sorted[0].val) : 1;
 
+                const isDistanceRank = elementId.includes('dist');
+
                 container.innerHTML = sorted.map((item, i) => {
                     const isTop3 = i < 3;
+                    
+                    // 거리 랭킹 1~3위일 때만 적용할 스타일 (필터: 블러)
+                    // group-hover:filter-none -> 마우스 올리면 블러 해제
+                    //const maskStyles = (isDistanceRank && isTop3) 
+                    const maskStyles = (isTop3)                     
+                        ? 'filter blur-[4px] group-hover:blur-none transition-all duration-300' 
+                        : '';
+                    
                     const medalClass = i === 0 ? 'medal-1' : i === 1 ? 'medal-2' : i === 2 ? 'medal-3' : 'text-gray-300';
                     const progressWidth = (Number(item.valRaw || item.val) / maxVal) * 100;
-                    
+
                     let displayValue = item.val;
                     let displayUnit = unit;
                     if (isTimeFormat) {
                         displayValue = formatTimeHMS(item.valRaw || item.val);
-                        displayUnit = ""; 
+                        displayUnit = "";
                     }
 
                     return `
-                    <div class="rank-item ${item.name === userNickname ? 'bg-rose-50/50' : ''}">
+                    <div class="rank-item group ${item.name === userNickname ? 'bg-rose-50/50' : ''}">
                         <div class="flex items-center justify-between relative z-10">
                             <div class="flex items-center gap-1">
                                 <div class="w-7 h-7 flex items-center justify-center">
                                     ${isTop3 ? `<i class="fa-solid fa-medal text-lg ${medalClass}"></i>` : `<span class="text-[11px] font-black text-gray-300">${i + 1}</span>`}
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <div class="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-[8px] font-black text-gray-400">
+                                    <div class="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-[8px] font-black text-gray-400 ${maskStyles}">
                                         ${item.name.charAt(0)}
                                     </div>
-                                    <span class="text-xs font-bold ${item.name === userNickname ? 'text-brand-700' : 'text-gray-700'}">${item.name}</span>
+                                    <span class="text-xs font-bold ${item.name === userNickname ? 'text-brand-700' : 'text-gray-700'} ${maskStyles}">
+                                        ${item.name}
+                                    </span>
                                 </div>
                             </div>
                             <div class="text-right">
-                                <span class="text-xs font-black italic ${isTop3 ? 'text-brand-600' : 'text-gray-500'}">${displayValue}<span class="text-[9px] font-bold ml-0.5 ml-1 not-italic">${displayUnit}</span></span>
+                                <span class="text-xs font-black italic ${isTop3 ? 'text-brand-600' : 'text-gray-500'} ${maskStyles}">
+                                    ${displayValue}<span class="text-[9px] font-bold ml-0.5 ml-1 not-italic">${displayUnit}</span>
+                                </span>
                             </div>
                         </div>
                         <div class="rank-progress" style="width: ${progressWidth}%"></div>
@@ -2207,6 +2222,7 @@
                     `;
                 }).join('') || '<div class="p-8 text-center text-gray-300 text-[10px] font-bold italic">기록이 없습니다.</div>';
             };
+
 
             const distRank = Object.entries(userAgg).map(([name, obj]) => ({ name, val: obj.distance.toFixed(3) })).sort((a,b) => b.val - a.val);
             drawRankList('rank-dist-list', distRank, 'km');
