@@ -1518,7 +1518,7 @@
                     myStats.dist += d;
                     myStats.time += t;
                     myStats.count += 1;
-                    myStats.score = myStats.dist * 1 + myStats.count * 2;
+                    myStats.score = myStats.dist * 1 + myStats.count * 1;
                 }
             });
 
@@ -2180,7 +2180,8 @@
                     
                     // 거리 랭킹 1~3위일 때만 적용할 스타일 (필터: 블러)
                     // group-hover:filter-none -> 마우스 올리면 블러 해제
-                    const maskStyles = (isDistanceRank && isTop3) 
+                    //const maskStyles = (isDistanceRank && isTop3) 
+                    const maskStyles = (isTop3)                     
                         ? 'filter blur-[4px] group-hover:blur-none transition-all duration-300' 
                         : '';
                     
