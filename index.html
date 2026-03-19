@@ -1015,7 +1015,7 @@
                         </div>
                         <div class="text-center opacity-40">
                             <span id="next-emoji" class="block text-xl mb-1">🏁</span>
-                            <span id="next-city" class="text-[10px] font-bold text-slate-400 uppercase">목표 도시</span>
+                            <span id="next-city" class="text-[12px] font-bold text-purple-800 uppercase">목표 도시</span>
                         </div>
                     </div>
 
@@ -1050,15 +1050,9 @@
                 </div>
             </div>
             <div class="p-2 bg-slate-50 text-center">
-                <div id="next-challenge-text"></div>
-                <button id="map-link-btn" class="mt-1 text-sm text-blue-500 underline">
+                <button id="map-link-btn" class="w-full py-2 bg-slate-900 text-white font-black rounded-xl hover:bg-slate-800 active:scale-[0.98] transition-all shadow-xl shadow-slate-200 flex items-center justify-center gap-2">
                     🗺️ 지도로 경로 확인해보기
-                </button>
-            </div>
-            <div class="p-2 bg-slate-50 text-center">
-                <button onclick="closeModal()" class="w-full py-3 bg-slate-900 text-white font-black rounded-2xl hover:bg-slate-800 active:scale-[0.98] transition-all shadow-xl shadow-slate-200 flex items-center justify-center gap-2">
-                    😎 확인하고 계속 달리기 👟
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                     </svg>
                 </button>
@@ -1854,31 +1848,32 @@ window.getGreatCircleMapLink = (target) => {
             document.getElementById('reached-emoji').innerText = reached.emoji;
             document.getElementById('next-emoji').innerText = next.emoji;
             document.getElementById('prev-city').innerText = reached.name;
+
             
             // --- 목적지 링크 로직 (수정됨) ---
             const nextCityLink = document.getElementById('next-city');
             nextCityLink.innerText = next === reached ? "Final Destination" : next.name;
 
-// 1. 다음 목표 도시 텍스트 클릭 시
-nextCityLink.onclick = () => {
-    const url = window.getGreatCircleMapLink(next);
-    window.open(url, '_blank');
-};
+            // 1. 다음 목표 도시 텍스트 클릭 시
+            nextCityLink.onclick = () => {
+                const url = window.getGreatCircleMapLink(next);
+                window.open(url, '_blank');
+            };
 
             // 스타일 적용
             nextCityLink.style.cursor = 'pointer';
             nextCityLink.style.textDecoration = 'underline';
             nextCityLink.classList.add('text-blue-600', 'font-bold');
 
-// 2. 하단 '지금까지 온 길' 지도 버튼 클릭 시
-const mapBtn = document.getElementById('map-link-btn');
-if (mapBtn) {
-    mapBtn.onclick = () => {
-        // reached 객체(현재 도달한 도시)를 전달
-        const url = window.getGreatCircleMapLink(reached);
-        window.open(url, '_blank');
-    };
-}
+            // 2. 하단 '지금까지 온 길' 지도 버튼 클릭 시
+            const mapBtn = document.getElementById('map-link-btn');
+            if (mapBtn) {
+                mapBtn.onclick = () => {
+                    // reached 객체(현재 도달한 도시)를 전달
+                    const url = window.getGreatCircleMapLink(reached);
+                    window.open(url, '_blank');
+                };
+            }
 
             // 프로그레스 바 및 남은 거리 계산
             const progress = (next === reached) ? 100 : Math.min(100, (currentDist / next.dist) * 100);
@@ -1893,7 +1888,20 @@ if (mapBtn) {
                 document.getElementById('next-challenge-text').innerText = `대단합니다! 더 이상 갈 곳이 없을 정도로 멀리 오셨네요.`;
             } else {
                 const remain = (next.dist - currentDist);
-                document.getElementById('next-challenge-text').innerHTML = `다음 목표 <span class="text-blue-600 font-black">${next.name}</span>까지 <span class="text-blue-600 font-black">${remain.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}km</span> 남았습니다.`;
+                
+                // 1. span에 id="target-city-inline"과 cursor 스타일을 추가합니다.
+                document.getElementById('next-challenge-text').innerHTML = 
+                    `다음 목표 <span id="target-city-inline" class="text-blue-600 font-black cursor-pointer underline">${next.name}</span>까지 ` +
+                    `<span class="text-blue-600 font-black">${remain.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}km</span> 남았습니다.`;
+
+                // 2. 위에서 만든 span을 찾아 클릭 이벤트를 연결합니다.
+                const inlineLink = document.getElementById('target-city-inline');
+                if (inlineLink) {
+                    inlineLink.onclick = () => {
+                        const url = window.getGreatCircleMapLink(next);
+                        window.open(url, '_blank');
+                    };
+                }
             }
 
             document.getElementById('challenge-modal').classList.remove('hidden');
