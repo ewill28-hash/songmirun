@@ -1505,8 +1505,8 @@
                     obj[key].time += t;
                     obj[key].count += 1;
                     obj[key].members.add(r.user_name);
-                    // 종합점수 계산: 거리 * 1 + 횟수 * 2 (한 번 뛸 때마다 2점 + 거리당 1점)
-                    obj[key].score = obj[key].dist * 1 + obj[key].count * 2;
+                    // 종합점수 계산: 거리 * 1 + 횟수 * 1 (한 번 뛸 때마다 1점 + 거리당 1점)
+                    obj[key].score = obj[key].dist * 1 + obj[key].count * 1;
                 };
 
                 aggregate(teams, teamName, TEAM_COLORS[teamName] || '#94a3b8');
