@@ -2405,15 +2405,16 @@ if (mapBtn) {
 
             const totalScore = scoreCount + scoreDist + scoreBonus;
             
-            // 등급 정의
             const thresholds = [
-                { threshold: 100, name: '🍃 바람', color: 'bg-green-500 text-white' },                
-                { threshold: 90, name: '🏵️ 만개', color: 'bg-slate-800 text-white' },
-                { threshold: 70, name: '🌺 열정', color: 'bg-orange-500 text-white' },
-                { threshold: 50, name: '🌼 활짝', color: 'bg-blue-500 text-white' },
-                { threshold: 30, name: '🌷 꽃봉', color: 'bg-green-500 text-white' },
-                { threshold:  1, name: '🌱 새싹', color: 'bg-gray-100  text-gray-500' },
-                { threshold:  0, name: '🌰 씨앗', color: 'bg-amber-100 text-amber-700' }
+                [
+                    { threshold: 100, name: '🍃 바람', color: 'bg-teal-500 text-white' },        // 더 청량한 테일(Teal)색으로 차별화
+                    { threshold: 90, name: '🏵️ 만개', color: 'bg-slate-800 text-white' },       
+                    { threshold: 70, name: '🌺 열정', color: 'bg-rose-500 text-white' },        // 꽃의 붉은 느낌을 살린 Rose색
+                    { threshold: 50, name: '🌼 활짝', color: 'bg-amber-400 text-amber-900' },    // 노란 꽃 느낌을 강조한 조합
+                    { threshold: 30, name: '🌷 꽃봉', color: 'bg-emerald-500 text-white' },     // 새싹보다는 진하고 바람보다는 연한 초록
+                    { threshold:  1, name: '🌱 새싹', color: 'bg-green-100 text-green-700' },    // 연회색보다는 연초록 배경이 더 직관적
+                    { threshold:  0, name: '🌰 씨앗', color: 'bg-amber-100 text-amber-800' }
+                ]
             ];
 
             const currentIdx = thresholds.findIndex(t => totalScore >= t.threshold);
