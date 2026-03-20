@@ -334,17 +334,18 @@
                         <span class="text-[10px] opacity-70 not-italic mr-1">All:</span>0 km
                     </p>
                 </div>
-                <div class="bg-orange-50 p-3 rounded-2xl border border-orange-100 shadow-sm">
+               <div class="bg-orange-50 p-3 rounded-2xl border border-orange-100 shadow-sm">
                     <p class="text-[9px] text-orange-400 font-bold uppercase tracking-tighter">Time (me/all)</p>
                     
-                    <p id="stat-timem" class="text-[15px] text-center font-black text-orange-600 italic leading-none mt-1">
+                    <p id="stat-timem" class="text-[15px] text-right font-black text-orange-600 italic leading-none mt-1 pr-10">
                         Me: 0 m
                     </p>
                     
-                    <p id="stat-time" class="text-[15px] text-center font-black text-orange-400 italic leading-none mt-1">
+                    <p id="stat-time" class="text-[15px] text-right font-black text-orange-400 italic leading-none mt-1 pr-10">
                         All: 0 m
                     </p>
                 </div>
+
                 <div class="bg-purple-50 p-3 rounded-2xl border border-purple-100 shadow-sm">
                     <p class="text-[9px] text-purple-600 font-bold uppercase tracking-tighter">Count</p>
                     
@@ -2255,8 +2256,9 @@
             const myCount = myYearLogs.length;
 
 
-            document.getElementById('stat-dist').innerText = totalDist.toFixed(0).toLocaleString()+ ' km';
-            
+            //document.getElementById('stat-dist').innerText = totalDist.toFixed(0).toLocaleString()+ ' km';
+            document.getElementById('stat-dist').innerText = Math.round(totalDist).toLocaleString() + ' km';
+
             const roundedTotalTime = Math.round(totalTime);
             const days = Math.floor(roundedTotalTime / 1440);
             const hours = Math.floor((roundedTotalTime % 1440) / 60);
@@ -2278,12 +2280,16 @@
             timeHTMLm += `${minsm}m`;
 
             document.getElementById('stat-time').innerHTML = timeHTML;
-            document.getElementById('stat-count').innerText = totalCount.toLocaleString() + ' 회';
+            //document.getElementById('stat-count').innerText = totalCount.toLocaleString() + ' 회';
 
-            document.getElementById('stat-distm').innerText = myDist.toFixed(0).toLocaleString()+ ' km';
+            document.getElementById('stat-distm').innerText = Math.round(myDist).toLocaleString() + ' km';
+
             document.getElementById('stat-timem').innerHTML = timeHTMLm;
-            document.getElementById('stat-countm').innerText = myCount.toLocaleString() + ' 회';
-            
+            //document.getElementById('stat-countm').innerText = myCount.toLocaleString() + ' 회';
+
+            document.getElementById('stat-countm').innerText = Math.round(myCount).toLocaleString() + ' 회';
+            document.getElementById('stat-count').innerText = Math.round(totalCount).toLocaleString() + ' 회';
+
             renderAllCharts();
         };
 
