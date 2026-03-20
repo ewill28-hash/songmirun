@@ -336,11 +336,11 @@
                <div class="bg-orange-50 p-3 rounded-2xl border border-orange-100 shadow-sm">
                     <p class="text-[9px] text-orange-400 font-bold uppercase tracking-tighter">Time (me/all)</p>
                     
-                    <p id="stat-timem" class="text-[15px] text-right font-black text-orange-600 italic leading-none mt-1 pr-10">
+                    <p id="stat-timem" class="text-[15px] text-right font-black text-orange-600 italic leading-none mt-1 pr-2">
                         Me: 0 m
                     </p>
                     
-                    <p id="stat-time" class="text-[15px] text-right font-black text-orange-400 italic leading-none mt-1 pr-10">
+                    <p id="stat-time" class="text-[15px] text-right font-black text-orange-400 italic leading-none mt-1 pr-2">
                         All: 0 m
                     </p>
                 </div>
@@ -1174,7 +1174,7 @@
             <div class="p-4 bg-white border-t border-slate-50">
                 <button onclick="closeModal_tm()" 
                     class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 rounded-xl text-[12px] shadow-lg shadow-slate-200 transition-all active:scale-[0.97]">
-                    🪢창 닫고 팀원들에게 응원(?)하러 가기🏃‍♂️
+                    🪢 창 닫고 팀원들에게 응원(?)하러 가기 🏃‍♂️
                 </button>
             </div>
         </div>
@@ -1664,6 +1664,18 @@
                                 <span class="text-[11px] font-extrabold text-slate-700 leading-tight">${name}</span>
                             </div>
                         </div>
+                        <div class="flex items-center gap-1">
+                            <div class="text-right min-w-[35px]">
+                                <span class="text-[10px] font-black text-slate-600"></span>
+                                <span class="text-[8px] text-slate-400"></span>
+                            </div>
+                            <div class="w-[1px] h-2.5 bg-slate-200"></div>
+                            <div class="text-right min-w-[25px]">
+                                <span class="text-[10px] text-white">${mCount}</span>
+                                <span class="text-[8px] text-slate-400"></span>
+                            </div>
+                        </div>
+
                     </div>
                 `;
 
@@ -2342,10 +2354,13 @@
                     // 거리 랭킹 1~3위일 때만 적용할 스타일 (필터: 블러)
                     // group-hover:filter-none -> 마우스 올리면 블러 해제
                     //const maskStyles = (isDistanceRank && isTop3) 
-                    const maskStyles = (isTop3)                     
-                        ? 'filter blur-[4px] group-hover:blur-none transition-all duration-300' 
+                    const maskStyles = (isTop3) 
+                        ? 'filter blur-[4px] backdrop-blur-[4px] ' + // backdrop-blur 추가 (사파리 보정용)
+                        'transition-all duration-300 will-change-[filter] transform-gpu ' +
+                        'group-hover:blur-none ' +     // PC 마우스
+                        'group-active:blur-none ' +    // 모바일 터치 시 (사파리 필수)
+                        'group-focus:blur-none'        // 클릭 후 유지
                         : '';
-                    
                     const medalClass = i === 0 ? 'medal-1' : i === 1 ? 'medal-2' : i === 2 ? 'medal-3' : 'text-gray-300';
                     const progressWidth = (Number(item.valRaw || item.val) / maxVal) * 100;
 
@@ -2356,14 +2371,14 @@
                         displayUnit = "";
                     }
 
-                    return `
+                return `
                     <div class="rank-item group ${item.name === userNickname ? 'bg-rose-50/50' : ''}">
                         <div class="flex items-center justify-between relative z-10">
                             <div class="flex items-center gap-1">
                                 <div class="w-7 h-7 flex items-center justify-center">
                                     ${isTop3 ? `<i class="fa-solid fa-medal text-lg ${medalClass}"></i>` : `<span class="text-[11px] font-black text-gray-300">${i + 1}</span>`}
                                 </div>
-                                <div class="flex items-center gap-2">
+                                <div class="flex items-center gap-2 cursor-pointer" tabindex="0">
                                     <div class="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-[8px] font-black text-gray-400 ${maskStyles}">
                                         ${item.name.charAt(0)}
                                     </div>
@@ -2372,7 +2387,7 @@
                                     </span>
                                 </div>
                             </div>
-                            <div class="text-right">
+                            <div class="text-right cursor-pointer" tabindex="0">
                                 <span class="text-xs font-black italic ${isTop3 ? 'text-brand-600' : 'text-gray-500'} ${maskStyles}">
                                     ${displayValue}<span class="text-[9px] font-bold ml-0.5 ml-1 not-italic">${displayUnit}</span>
                                 </span>
@@ -2380,7 +2395,7 @@
                         </div>
                         <div class="rank-progress" style="width: ${progressWidth}%"></div>
                     </div>
-                    `;
+                `;
                 }).join('') || '<div class="p-8 text-center text-gray-300 text-[10px] font-bold italic">기록이 없습니다.</div>';
             };
 
