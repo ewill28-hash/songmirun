@@ -323,9 +323,10 @@
                             </div>
                             <div class="flex items-center space-x-2 mt-0.5">
                                 <span class="text-[9px] font-black text-orange-600 bg-orange-50 px-1 rounded">${grade.score}pt</span>
-                                <span class="text-[8px] font-bold text-slate-400 uppercase">
-                                    Update: ${formatRelativeDate(stats.logUpdatedAt || stats.memberUpdatedAt)}
-                                </span>
+                                <div class="flex flex-col text-[8px] font-bold text-slate-400 uppercase leading-tight">
+                                    <span>Log: ${formatRelativeDate(stats.logUpdatedAt)}</span>
+                                    <span>Mem: ${formatRelativeDate(stats.memberUpdatedAt)}</span>
+                                </div>
                             </div>
                         </div>
                     </div>
