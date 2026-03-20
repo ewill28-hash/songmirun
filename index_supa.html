@@ -336,11 +336,11 @@
                <div class="bg-orange-50 p-3 rounded-2xl border border-orange-100 shadow-sm">
                     <p class="text-[9px] text-orange-400 font-bold uppercase tracking-tighter">Time (me/all)</p>
                     
-                    <p id="stat-timem" class="text-[15px] text-right font-black text-orange-600 italic leading-none mt-1 pr-10">
+                    <p id="stat-timem" class="text-[15px] text-right font-black text-orange-600 italic leading-none mt-1 pr-2">
                         Me: 0 m
                     </p>
                     
-                    <p id="stat-time" class="text-[15px] text-right font-black text-orange-400 italic leading-none mt-1 pr-10">
+                    <p id="stat-time" class="text-[15px] text-right font-black text-orange-400 italic leading-none mt-1 pr-2">
                         All: 0 m
                     </p>
                 </div>
@@ -1174,7 +1174,7 @@
             <div class="p-4 bg-white border-t border-slate-50">
                 <button onclick="closeModal_tm()" 
                     class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 rounded-xl text-[12px] shadow-lg shadow-slate-200 transition-all active:scale-[0.97]">
-                    🪢창 닫고 팀원들에게 응원(?)하러 가기🏃‍♂️
+                    🪢 창 닫고 팀원들에게 응원(?)하러 가기 🏃‍♂️
                 </button>
             </div>
         </div>
@@ -2355,9 +2355,11 @@
                     // group-hover:filter-none -> 마우스 올리면 블러 해제
                     //const maskStyles = (isDistanceRank && isTop3) 
                     const maskStyles = (isTop3) 
-                        ? 'filter blur-[4px] group-hover:blur-none transition-all duration-300 will-change-[filter] transform-gpu' 
-                        : '';
-                        
+                        ? 'filter blur-[4px] transition-all duration-300 will-change-[filter] transform-gpu ' +
+                        'group-hover:blur-none ' +      // PC: 마우스 올렸을 때
+                        'group-active:blur-none ' +     // 모바일: 터치하고 있을 때
+                        'group-focus:blur-none'         // 클릭/탭 이후 유지 (포커스 시)
+                        : '';           
 
                     const medalClass = i === 0 ? 'medal-1' : i === 1 ? 'medal-2' : i === 2 ? 'medal-3' : 'text-gray-300';
                     const progressWidth = (Number(item.valRaw || item.val) / maxVal) * 100;
