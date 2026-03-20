@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -981,7 +980,7 @@
     <div id="challenge-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
         <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
             <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                <h3 id="modal-title" class="text-xl font-black text-slate-800">챌린지 리포트</h3>
+                <h3 id="modal-title_c" class="text-xl font-black text-slate-800">챌린지 리포트</h3>
                 <button onclick="closeModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-200 text-slate-500 transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
                 </button>
@@ -1146,6 +1145,41 @@
             </div>
         </div>
     </div>
+
+
+        <!-- 멤버 명단 모달 (초슬림 버전) -->
+    <div id="member-modal_tm" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md transition-opacity" onclick="closeModal_tm()"></div>
+        
+        <div class="relative bg-white w-full max-w-[340px] rounded-[24px] shadow-[0_20px_50px_rgba(0,0,0,0.2)] overflow-hidden flex flex-col max-h-[75vh] ring-1 ring-black/5">
+            
+            <div class="px-5 py-1 border-b border-slate-100 flex justify-between items-center bg-white/80 sticky top-0 backdrop-blur-sm z-10">
+                <div>
+                    <h3 id="modal-title_tm" class="text-[15px] font-extrabold text-slate-900 tracking-tight">팀 구성원 명단</h3>
+                </div>
+                <button onclick="closeModal_tm()" class="group p-2 -mr-2 text-slate-400 hover:bg-slate-50 rounded-full transition-all">
+                    <svg class="w-5 h-5 group-hover:rotate-90 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="px-5 py-1 bg-slate-50/50">
+                <div id="modal-summary_tm" class="text-xs text-slate-600 font-medium"></div>
+            </div>
+            
+            <div id="modal-member-list_tm" class="px-3 py-1 overflow-y-auto flex-1 min-h-[120px] scrollbar-thin scrollbar-thumb-slate-200">
+                </div>
+            
+            <div class="p-4 bg-white border-t border-slate-50">
+                <button onclick="closeModal_tm()" 
+                    class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 rounded-xl text-[12px] shadow-lg shadow-slate-200 transition-all active:scale-[0.97]">
+                    🪢창 닫고 팀원들에게 응원(?)하러 가기🏃‍♂️
+                </button>
+            </div>
+        </div>
+    </div>
+
 
 
     <div id="custom-modal" class="fixed inset-0 bg-black/50 z-[900] hidden items-center justify-center p-4">
@@ -1524,6 +1558,129 @@
             });
 
 
+
+            window.showTeamMembers = (teamName) => {
+                const modal = document.getElementById('member-modal_tm');
+                const titleEl = document.getElementById('modal-title_tm');
+                const listEl = document.getElementById('modal-member-list_tm');
+                const summaryEl = document.getElementById('modal-summary_tm');
+
+                if (!modal || !listEl) return;
+
+                // teams 객체에 접근할 수 없거나 해당 팀 데이터가 없는 경우 예외 처리
+                if (typeof teams === 'undefined' || !teams[teamName]) {
+                    console.error(`Team data not found for: ${teamName}`);
+                    return;
+                }
+
+                const teamData = teams[teamName];
+                // 정의된 팀 컬러 가져오기 (없으면 기본값 설정)
+                const themeColor = TEAM_COLORS[teamName] || '#94a3b8';
+
+                titleEl.innerHTML = `
+                    <div class="flex items-center gap-2 px-3 py-1.5 rounded-full inline-flex" 
+                        style="background-color: ${themeColor}20; border: 1px solid ${themeColor}40;">
+                        <svg class="w-4 h-4" style="color: ${themeColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                        </svg>
+                        <span class="text-[13px] font-bold" style="color: ${themeColor}">
+                            팀:${teamName} 명단
+                        </span>
+                    </div>
+                `;
+
+                summaryEl.innerHTML = `
+                    <div class="flex justify-between items-center text-[11px] text-slate-500 font-bold bg-slate-50 px-2 py-1 rounded-md">
+                        <span>총 인원</span>
+                        <span class="text-[13px] font-extrabold" style="color: ${themeColor}">${teamData.members.size}명</span>
+                    </div>
+                `;
+
+
+                // 3. 멤버별 상세 데이터 추출 (기존 filtered 배열 활용)
+                const sortedMembers = Array.from(teamData.members).sort();
+
+                listEl.innerHTML = sortedMembers.map((name, index) => {
+                    // 현재 팀원(name)의 데이터만 필터링하여 합산
+                    const memberLogs = filtered.filter(l => l.user_name === name);
+                    const mDist = memberLogs.reduce((sum, r) => sum + Number(r.distance || 0), 0);
+                    const mCount = memberLogs.length;
+                    const mGender = crewMembers[name]?.gender || '미설정';
+                    const genderColor = mGender === '남성' ? 'text-blue-400' : (mGender === '여성' ? 'text-pink-400' : 'text-slate-300');
+
+                
+                const headerHtml = `
+                    <div class="flex items-center justify-between px-1.5 py-1 mb-1 border-b-2 border-slate-100 bg-slate-50/50 rounded-t-md sticky top-0 z-10">
+                        <div class="flex items-center gap-1">
+                            <span class="text-[8px] font-bold text-slate-300 w-2.5">#</span>
+                            <button class="text-[10px] font-bold text-slate-500 hover:text-slate-800 transition-colors flex items-center gap-0.5">
+                                이름 <span class="text-[7px]">▼</span>
+                            </button>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <button class="text-[10px] font-bold text-slate-500 hover:text-slate-800 transition-colors flex items-center gap-0.5 min-w-[35px] justify-end">
+                                거리 <span class="text-[7px]"></span>
+                            </button>
+                            <div class="w-[1px] h-2 bg-slate-200"></div>
+                            <button class="text-[10px] font-bold text-slate-500 hover:text-slate-800 transition-colors flex items-center gap-0.5 min-w-[25px] justify-end">
+                                횟수 <span class="text-[7px]"></span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                const runEmojis = ['🏃', '🏃‍♀️', '🏃‍♂️', '👟', '💨', '🏁', '🥇'];
+                const randomEmoji = runEmojis[Math.floor(Math.random() * runEmojis.length)];
+
+                const rowHtml = isSlowRun ? `
+                    <div class="flex items-center justify-between px-1.5 py-0.5 hover:bg-slate-50 rounded-md transition-colors border-b border-slate-50 last:border-0 group">
+                        <div class="flex items-center gap-1">
+                            <span class="text-[8px] font-bold text-slate-300 w-2.5">${index + 1}</span>
+                            <div class="flex flex-col">
+                                <div class="flex items-center gap-1">
+                                    <span class="mr-1 text-[11px]">${randomEmoji}</span>
+                                    <span class="text-[12px] font-extrabold text-slate-700 leading-tight">${name}</span>
+                                    <span class="text-[9px] ${genderColor} font-bold">${mGender[0]}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <div class="text-right min-w-[35px]">
+                                <span class="text-[10px] font-black text-slate-600">${mDist.toFixed(1)}</span>
+                                <span class="text-[8px] text-slate-400">km</span>
+                            </div>
+                            <div class="w-[1px] h-2.5 bg-slate-200"></div>
+                            <div class="text-right min-w-[25px]">
+                                <span class="text-[10px] font-black text-slate-600">${mCount}</span>
+                                <span class="text-[8px] text-slate-400">회</span>
+                            </div>
+                        </div>
+                    </div>
+                ` : `
+                    <div class="flex items-center justify-between px-1.5 py-0.5 hover:bg-slate-50 rounded-md transition-colors border-b border-slate-50 last:border-0 group">
+                        <div class="flex items-center gap-1">
+                            <span class="text-[8px] font-bold text-slate-300 w-2.5">${index + 1}</span>                    
+                            <div class="flex items-center py-1">
+                                <span class="mr-1 text-[11px]">🏃‍♂️</span>
+                                <span class="text-[11px] font-extrabold text-slate-700 leading-tight">${name}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // 핵심: 첫 번째 데이터일 때만 헤더를 붙여서 리턴
+                return (index === 0 && isSlowRun ? headerHtml : '') + rowHtml;
+
+                }).join('');
+
+                modal.classList.remove('hidden');
+            };
+
+            // 모달 닫기 함수 (기존 코드 확인용)
+            window.closeModal_tm = () => {
+                document.getElementById('member-modal_tm').classList.add('hidden');
+            };
+
+
         // 3. 렌더링 헬퍼 함수
             const renderList = (targetId, dataObj, titlePrefix = "팀") => {
                 const targetList = document.getElementById(targetId);
@@ -1542,7 +1699,10 @@
                             <div class="flex justify-between items-center">
                                 <div class="flex items-center gap-1">
                                     <div class="w-2 h-2 rounded-full" style="background-color: ${data.color}"></div>
-                                    <span class="text-[12px] font-black text-slate-800">${titlePrefix}:${data.name}</span>
+                                    <span class="text-[12px] font-black text-slate-800 ${titlePrefix === '팀' ? 'cursor-pointer hover:text-blue-600 hover:underline decoration-blue-300 transition-colors' : ''}" 
+                                        ${titlePrefix === '팀' ? `onclick="showTeamMembers('${data.name}')"` : ''}>
+                                        ${titlePrefix}:${data.name}
+                                    </span>
                                     <span class="text-[9px] font-bold text-slate-400">${data.members.size}인</span>
                                 </div>
                                 <div class="flex gap-1">
@@ -1848,7 +2008,7 @@
             const next = DESTINATIONS.find(d => d.dist > currentDist) || DESTINATIONS[DESTINATIONS.length - 1];
 
             // 기본 텍스트 설정
-            document.getElementById('modal-title').innerText = selectedYear + '년 송미런 여정 경로';
+            document.getElementById('modal-title_c').innerText = selectedYear + '년 송미런 여정 경로';
             document.getElementById('cur-val-inner').innerText = 
                 currentDist.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }); 
             
