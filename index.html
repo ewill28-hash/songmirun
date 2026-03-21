@@ -1125,11 +1125,11 @@
                             <h2 id="modal-user-name" class="text-xl font-black italic leading-tight">Runner Name</h2>
                             
                             <div class="flex items-center gap-1.5">
-                                <div id="display-team-badge" class="text-[9px] font-black px-3 py-1 rounded-lg text-white uppercase">
+                                <div id="display-team-badge" class="text-[9px] font-black  py-1 rounded-lg text-white uppercase">
                                     TEAM
                                 </div>
                                 
-                                <div id="modal-runner-grade" class="text-[9px] font-black px-3 py-1 rounded-lg text-white uppercase cursor-pointer flex items-center gap-1">
+                                <div id="modal-runner-grade" class="text-[9px] font-black  py-1 rounded-lg text-white uppercase cursor-pointer flex items-center gap-1">
                                     등급
                                 </div>
                             </div>
@@ -1559,7 +1559,7 @@
 
 
 
-            window.showTeamMembers = (teamName) => {
+            window.showTeamMembers = (teamName, type) => {
                 const modal = document.getElementById('member-modal_tm');
                 const titleEl = document.getElementById('modal-title_tm');
                 const listEl = document.getElementById('modal-member-list_tm');
@@ -1631,7 +1631,7 @@
                 const runEmojis = ['🏃', '🏃‍♀️', '🏃‍♂️', '👟', '💨', '🏁', '🥇'];
                 const randomEmoji = runEmojis[Math.floor(Math.random() * runEmojis.length)];
 
-                const rowHtml = isSlowRun ? `
+                const rowHtml = (isSlowRun && type === "tp2") ? `
                     <div class="flex items-center justify-between px-1.5 py-0.5 hover:bg-slate-50 rounded-md transition-colors border-b border-slate-50 last:border-0 group">
                         <div class="flex items-center gap-1">
                             <span class="text-[8px] font-bold text-slate-300 w-2.5">${index + 1}</span>
@@ -1680,7 +1680,7 @@
                 `;
 
                 // 핵심: 첫 번째 데이터일 때만 헤더를 붙여서 리턴
-                return (index === 0 && isSlowRun ? headerHtml : '') + rowHtml;
+                return (index === 0 && (isSlowRun && type === "tp2") ? headerHtml : '') + rowHtml;
 
                 }).join('');
 
@@ -1712,10 +1712,14 @@
                                 <div class="flex items-center gap-1">
                                     <div class="w-2 h-2 rounded-full" style="background-color: ${data.color}"></div>
                                     <span class="text-[12px] font-black text-slate-800 ${titlePrefix === '팀' ? 'cursor-pointer hover:text-blue-600 hover:underline decoration-blue-300 transition-colors' : ''}" 
-                                        ${titlePrefix === '팀' ? `onclick="showTeamMembers('${data.name}')"` : ''}>
+                                        ${titlePrefix === '팀' ? `onclick="showTeamMembers('${data.name}', 'tp1')"` : ''}>
                                         ${titlePrefix}:${data.name}
                                     </span>
-                                    <span class="text-[9px] font-bold text-slate-400">${data.members.size}인</span>
+                                    <span class="text-[9px] font-bold text-slate-400 
+                                        ${(titlePrefix === '팀' && isSlowRun ) ? 'cursor-pointer hover:text-blue-600 hover:underline decoration-blue-300 transition-colors' : ''}" 
+                                        ${(titlePrefix === '팀' && isSlowRun ) ? `onclick="showTeamMembers('${data.name}', 'tp2')"` : ''}>
+                                        ${data.members.size}인
+                                    </span>
                                 </div>
                                 <div class="flex gap-1">
                                     <span class="badge-stat ${currentMetric==='dist'?'highlight':''}">${data.dist.toFixed(1)}km</span>
@@ -2719,10 +2723,16 @@
             // 등급 배지 설정 (수정본)
             const gradeBadge = document.getElementById('modal-runner-grade');
             if (gradeBadge) {
-                gradeBadge.innerHTML = `${grade.name} <i class="fa-solid fa-circle-info text-[9px] opacity-60"></i>`;
-                
+                gradeBadge.innerHTML = `
+                    <div class="flex items-center space-x-1.5">
+                        <span class="text-slate-800 font-bold uppercase tracking-tight leading-tight text-[10px]">${name}</span>
+                        <span class="px-1.5 py-0.5 rounded text-[10px] font-black ${grade.color}">
+                            ${grade.name} <i class="fa-solid fa-circle-info text-[9px] opacity-60"></i>
+                        </span>
+                    </div>
+                `;
                 // badge와 동일한 크기(text-[9px], px-3, py-1)를 유지하도록 수정
-                gradeBadge.className = `runner-grade-badge ${grade.color} text-[9px] font-black px-3 py-1 rounded-lg text-white uppercase cursor-pointer flex items-center gap-1`;
+              //  gradeBadge.className = `runner-grade-badge ${grade.color} text-[9px] font-black px-3 py-1 rounded-lg text-white uppercase cursor-pointer flex items-center gap-1`;
             }
 
             const detailText = `📊 상세 점수
@@ -2730,11 +2740,10 @@
             🏃 횟수 점수: ${grade.details.scoreCount}점
             📏 거리 점수: ${grade.details.scoreDist}점
             🔥 연속 점수: ${grade.details.scoreBonus}점
-
+            --------------------------------
             💰 총합 점수: ${grade.details.totalScore}점
             --------------------------------
-            🌱 새싹➞🌷꽃봉➞🌼활짝
-                ➞🌺열정➞🏵️만개➞❔
+            🌱 새싹➞🌷꽃봉➞🌼활짝➞🌺열정➞🏵️만개➞❔
             --------------------------------
            
             ${grade.nextGrade 
@@ -2765,8 +2774,14 @@
             // 팀 배지 설정 (기존 코드 유지 또는 확인)
             const badge = document.getElementById('display-team-badge');
             if (badge) {
-                badge.innerText = '팀:' + myTeam2;
+                // 텍스트와 스타일을 동시에 적용
+                badge.innerHTML = `<span class="text-[9px] font-black uppercase">팀: ${myTeam2}</span>`;
+                
+                // 배경색 설정
                 badge.style.backgroundColor = TEAM_COLORS[myTeam2] || '#94a3b8';
+                
+                // 배지 형태를 위한 공통 스타일 (이미 CSS에 없다면 추가)
+                badge.className = `px-1.5 py-0.5 rounded text-white flex items-center justify-center`;
             }
 
             const calculate = (logs) => {
@@ -3428,7 +3443,7 @@
 
             document.getElementById('btn-logout').onclick = () => {
                 showModal(
-                    `👟${userNickname}님, 러닝 가시려구요?  😊`,
+                    `러너 : ${userNickname}님, 러닝👟 가시려구요? 😊`,
                     "confirm",
                     async () => {
                         localStorage.removeItem('songmirun_nickname');
