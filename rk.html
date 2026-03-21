@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -311,7 +312,7 @@
                         </div>
                         <div class="flex flex-col">
                             <div class="flex items-center space-x-1.5">
-                                <span class="text-slate-800 font-bold uppercase tracking-tight leading-tight">${name}</span>
+                                <span class="text-slate-800 font-bold uppercase tracking-tight leading-tight text-xs">${name}</span>
                                 <span class="px-1.5 py-0.5 rounded text-[9px] font-black ${grade.color}">
                                     ${grade.name}
                                 </span>
@@ -324,8 +325,8 @@
                             <div class="flex items-center space-x-2 mt-0.5">
                                 <span class="text-[9px] font-black text-orange-600 bg-orange-50 px-1 rounded">${grade.score}pt</span>
                                 <div class="flex flex-col text-[8px] font-bold text-slate-400 uppercase leading-tight">
-                                    <span>Log: ${formatRelativeDate(stats.logUpdatedAt)}</span>
                                     <span>Mem: ${formatRelativeDate(stats.memberUpdatedAt)}</span>
+                                    <span>Log: ${formatRelativeDate(stats.logUpdatedAt)}</span>
                                 </div>
                             </div>
                         </div>
