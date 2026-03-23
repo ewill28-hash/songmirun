@@ -1504,8 +1504,10 @@
         let userData = { name: '', team: '' };
         let allMembers = {}; // nickname: team 조인용 맵
         let chartInstance = null;
-        let currentMetric = 'dist';
-        let dataScope = 'avg'; 
+        //let currentMetric = 'dist';
+        let currentMetric = 'score';
+        //let dataScope = 'avg'; 
+        let dataScope = 'total'; 
 
 
 
@@ -1724,10 +1726,10 @@
                                     </span>
                                 </div>
                                 <div class="flex gap-1">
+                                    <span class="badge-stat ${currentMetric==='score'?'highlight':''}">${data.score.toFixed(1)}pt</span>
                                     <span class="badge-stat ${currentMetric==='dist'?'highlight':''}">${data.dist.toFixed(1)}km</span>
                                     <span class="badge-stat ${currentMetric==='time'?'highlight':''}">${timeStr}</span>
                                     <span class="badge-stat ${currentMetric==='count'?'highlight':''}">${data.count}회</span>
-                                    <span class="badge-stat ${currentMetric==='score'?'highlight':''}">${data.score.toFixed(1)}pt</span>
                                 </div>
                             </div>
                             <div class="h-2 bg-slate-200/60 rounded-full overflow-hidden">
