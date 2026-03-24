@@ -492,7 +492,7 @@
                                 <label class="text-[10px] font-black text-emerald-700 uppercase mb-1.5 ml-1 flex items-center gap-1">
                                     <i class="fas fa-layer-group text-emerald-500"></i>
                                     <span>데이터 기준</span>
-                                    <span class="text-[8px] font-normal text-emerald-600/80 ml-1">(*포인트=거리+횟수)</span>
+                                    <span class="text-[8px] font-normal text-emerald-600/80 ml-1">(*포인트=거리+시간+횟수)</span>
                                 </label>
                                 <div class="flex gap-2">
                                     <button onclick="setMetric2('score')" id="btn-metric2-score" class="metric-btn2 active flex-1"><i class="fas fa-star mr-1 text-[10px]"></i>포인트</button>
@@ -1552,7 +1552,9 @@
                     obj[key].count += 1;
                     obj[key].members.add(r.user_name);
                     // 종합점수 계산: 거리 * 1 + 횟수 * 1 (한 번 뛸 때마다 1점 + 거리당 1점)
-                    obj[key].score = obj[key].dist * 1 + obj[key].count * 1;
+                    obj[key].score = obj[key].dist * 1 + (obj[key].time / 60).toFixed(1) * 1 + obj[key].count * 1;
+
+
                 };
 
                 aggregate(teams, teamName, TEAM_COLORS[teamName] || '#94a3b8');
@@ -1563,7 +1565,7 @@
                     myStats.dist += d;
                     myStats.time += t;
                     myStats.count += 1;
-                    myStats.score = myStats.dist * 1 + myStats.count * 1;
+                    myStats.score = myStats.dist * 1 + (myStats.time /60).toFixed(1) * 1 + myStats.count * 1;
                 }
             });
 
@@ -3929,7 +3931,6 @@
             } else {
                 initRunnerInputs(); // 이미 로드되었다면 즉시 실행
             }
-
 
 
         };
