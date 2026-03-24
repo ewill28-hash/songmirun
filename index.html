@@ -1736,7 +1736,7 @@
                                 <div class="flex gap-1">
                                     <span class="badge-stat ${currentMetric==='score'?'highlight':''}">${data.score.toFixed(1)}pt</span>
                                     <span class="badge-stat ${currentMetric==='dist'?'highlight':''}">${data.dist.toFixed(1)}km</span>
-                                    <span class="badge-stat ${currentMetric==='time'?'highlight':''}">${timeStr}</span>
+                                    <span class="badge-stat ${currentMetric==='time'?'highlight':''}">${timeStr.split(':').slice(0, 2).join(':')}</span>
                                     <span class="badge-stat ${currentMetric==='count'?'highlight':''}">${data.count}회</span>
                                 </div>
                             </div>
@@ -3931,6 +3931,7 @@
             } else {
                 initRunnerInputs(); // 이미 로드되었다면 즉시 실행
             }
+
 
 
         };
