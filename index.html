@@ -1225,7 +1225,7 @@
         let selectedType = '전체'; 
         let selectedMonthF = '전체'; 
         let selectedMonthT = '전체'; 
-        let myTeam = '무소속'; // 초기값 설정
+        let myTeam = '대기중'; // 초기값 설정
 
         let selectedRankingPeriod = 'this'; 
         let sortConfig = { key: 'log_nickname', direction: 'asc' };
@@ -1534,7 +1534,7 @@
         // 2. 집계 로직 통합
             filtered.forEach(r => {
                 const memberInfo = crewMembers[r.user_name] || {};
-                const teamName = memberInfo.team || '무소속';
+                const teamName = memberInfo.team || '대기중';
                 const genderName = memberInfo.gender || '미설정';
                 const d = Number(r.distance || 0);
                 const t = Number(r.duration || 0);
@@ -1779,7 +1779,7 @@
             '황영조': '#f87171', 
             '손기정': '#3b82f6', 
             '이봉주': '#22c55e', 
-            '무소속': '#94a3b8'     
+            '대기중': '#94a3b8'     
         };
 
         window.setMonthFilterT = (month) => {
@@ -1889,7 +1889,7 @@
             };
 
             if (dataScope === 'me') {
-                const myTeamName = crewMembers[userNickname]?.team || myTeam || '무소속';
+                const myTeamName = crewMembers[userNickname]?.team || myTeam || '대기중';
                 
                 // 해당 팀의 데이터 가져오기
                 const td = teams[myTeamName] || { dist: 0, time: 0, count: 0, score: 0, members: new Set(), color: '#e2e8f0' };
@@ -2165,7 +2165,7 @@
                 Object.entries(crewMembers).forEach(([nickname, info]) => {
                     // nickname은 "이봉주", "Ben2" 등이고 info는 {team: "...", gender: "..."} 입니다.
                     genderMap[nickname] = info.gender || '미설정7';
-                    teamMap[nickname] = info.team || '무소속7';
+                    teamMap[nickname] = info.team || '대기중7';
                 });
             }
 
@@ -2296,7 +2296,7 @@
 
                 if (nickname) {
                     genderMap[nickname] = info.gender || '미설정';
-                    teamMap[nickname] = info.team || '무소속';
+                    teamMap[nickname] = info.team || '대기중';
                 }
             });
 
@@ -2344,7 +2344,7 @@
                 // 평균 페이스 계산 (분/km)
                 avgPace: stats.distance > 0 ? (stats.duration / stats.distance) : 0,
                 // 팀 정보 결합 (앞서 만든 teamMap 활용)
-                team: teamMap[name] || '무소속'
+                team: teamMap[name] || '대기중'
             })).sort((a, b) => b.distance - a.distance); // 거리순 내림차순 정렬
 
             // 3. (선택 사항) 집계된 데이터를 배열로 변환하여 거리순 정렬 (랭킹용)
@@ -2781,10 +2781,10 @@
 
             if (userRecord) {
                 //console.log("찾은 유저 정보:", userRecord);
-                const userTeam = userRecord.team || '무소속';
+                const userTeam = userRecord.team || '대기중';
                 const userGender = userRecord.gender || '미설정';
             }
-            const myTeam2 = userRecord ? userRecord.team : '무소속2';
+            const myTeam2 = userRecord ? userRecord.team : '대기중2';
             // 팀 배지 설정 (기존 코드 유지 또는 확인)
             const badge = document.getElementById('display-team-badge');
             if (badge) {
@@ -3048,7 +3048,7 @@
             document.getElementById('mem-log-nickname').value = m.log_nickname || '';
             document.getElementById('mem-nickname').value = m.nickname;
             document.getElementById('mem-gender').value = m.gender;
-            document.getElementById('mem-team').value = m.team|| '무소속';
+            document.getElementById('mem-team').value = m.team|| '대기중';
             document.getElementById('mem-joindate').value = m.join_date;
             document.getElementById('mem-memo').value = m.memo || '';
             document.getElementById('mem-form-title').innerText = "크루 정보 수정";
@@ -3072,14 +3072,14 @@
                 // reduce를 사용하여 한 번에 객체 매핑 (더 깔끔한 방식)
                 crewMembers = data.reduce((acc, member) => {
                     acc[member.nickname] = { 
-                        team: member.team || '무소속', 
+                        team: member.team || '대기중', 
                         gender: member.gender || '미설정' 
                     };
                     return acc;
                 }, {});
 
                 // 내 팀 정보 갱신
-                myTeam = crewMembers[userNickname]?.team || '무소속';
+                myTeam = crewMembers[userNickname]?.team || '대기중';
 
                 // UI 갱신 (관련된 부분만 호출)
                 renderMembers(); 
@@ -3293,7 +3293,7 @@
                         if (data) {
                             data.forEach(d => {
                                 members[d.nickname] = {
-                                    team: d.team || '무소속2',
+                                    team: d.team || '대기중2',
                                     log_nickname: d.log_nickname,
                                     nickname: d.nickname
                                 };
@@ -3310,7 +3310,7 @@
                             myCurrentTeam = myInfo.team;
                         } else {
                             myCurrentNickname = userNickname;
-                            myCurrentTeam = '무소속';
+                            myCurrentTeam = '대기중';
                         }
 
                         const myTeam2 = myCurrentTeam;
@@ -3632,7 +3632,7 @@
                     
                     join_date: document.getElementById('mem-joindate').value,
                     memo: document.getElementById('mem-memo').value.trim(),
-                    team: document.getElementById('mem-team').value || '무소속',
+                    team: document.getElementById('mem-team').value || '대기중',
                     created_at: new Date().toISOString(),
                     updated_at: new Date().toISOString()
                 };
@@ -3692,7 +3692,7 @@
                             join_date: p[0],      // 2025-01-01
                             log_nickname: p[1],   // 999
                             nickname: p[2],       // 999 (입력 데이터 순서 확인 필요)
-                            team: p[3] || '무소속', // 이봉주
+                            team: p[3] || '대기중', // 이봉주
                             gender: p[4],         // 여성
                             memo: '일괄 등록됨',
                             updated_at: new Date().toISOString()
