@@ -3092,22 +3092,42 @@
             }
         };
 
-        /**
-         * 로그 데이터 동기화 및 통계 갱신
-         */
+                /**
+                 * 로그 데이터 동기화 및 통계 갱신
+                 */
         const syncLogs = async () => {
             try {
-                const { data: logs, error: logError } = await _supabase.from(LOGS_TABLE)
-                    .select('*')
-                    .order('run_date', { ascending: false })
-                    .order('created_at', { ascending: false });
+                let allFetchedLogs = [];
+                let from = 0;
+                const PAGE_SIZE = 1000; // 한 번에 가져올 양
+                const MAX_TOTAL = 20000; // 목표치 (2만 건)
 
-                if (logError) throw logError;
-                if (!logs) return;
+                while (from < MAX_TOTAL) {
+                    const to = from + PAGE_SIZE - 1;
+                    
+                    const { data: logs, error: logError } = await _supabase
+                        .from(LOGS_TABLE)
+                        .select('*')
+                        .order('run_date', { ascending: false })
+                        .order('created_at', { ascending: false })
+                        .range(from, to); // 구간 지정 (0~999, 1000~1999...)
 
-                allLogs = logs;
+                    if (logError) throw logError;
+                    
+                    // 더 이상 가져올 데이터가 없으면 중단
+                    if (!logs || logs.length === 0) break;
 
-                // UI 갱신 로직 통합 호출
+                    allFetchedLogs = [...allFetchedLogs, ...logs];
+                    
+                    // 2만 건을 채웠거나 실제 데이터가 PAGE_SIZE보다 적게 오면(마지막 페이지) 중단
+                    if (allFetchedLogs.length >= MAX_TOTAL || logs.length < PAGE_SIZE) break;
+
+                    from += PAGE_SIZE;
+                }
+
+                allLogs = allFetchedLogs;
+
+                // UI 갱신 로직 호출
                 refreshAllLogUI();
                 
             } catch (err) {
