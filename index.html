@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -378,7 +379,12 @@
                         </div>
                         
                         <div class="col-span-1">
-                            <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1">러닝 유형</label>
+                            <div class="flex items-center gap-2 mb-1.5 ml-1">
+                                <label class="text-[11px] text-brand-700 font-black">러닝 유형</label>
+                                <span id="monday-notice" class="text-[9px] text-red-500 font-bold hidden animate-pulse">
+                                    📅정규런(정기) 선택 확인 👇
+                                </span>
+                            </div>                             
                             <select id="run-type" class="w-full bg-white border-2 border-brand-100 p-3.5 rounded-2xl text-sm font-bold outline-none shadow-sm">
                                 <option value="오운완">👟 오운완(개인)</option>
                                 <option value="정규">📅 정규런(정기)</option>
@@ -3818,6 +3824,22 @@
                 el.addEventListener('input', calculatePace);
             });
 
+            // 날짜 입력 칸과 안내 문구 요소 가져오기
+            const dateInput = document.getElementById('in-date');
+            const mondayNotice = document.getElementById('monday-notice');
+
+            dateInput.addEventListener('change', function() {
+                const selectedDate = new Date(this.value);
+                
+                // getDay()는 0(일) ~ 6(토)를 반환합니다. 1은 월요일입니다.
+                if (selectedDate.getDay() === 1) {
+                    // 월요일이면 문구 표시
+                    mondayNotice.classList.remove('hidden');
+                } else {
+                    // 월요일이 아니면 문구 숨김
+                    mondayNotice.classList.add('hidden');
+                }
+            });
 
             // 1. 단순 초기화 버튼 (기존 잘 되는 부분 유지)
             document.getElementById('label-time0')?.addEventListener('click', function() {
