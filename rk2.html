@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Songmirun Logs - Runner Grade Version</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase JS Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module">
+
+        const SUPABASE_URL = 'https://bwzvgqcfydznuwugyyio.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ3enZncWNmeWR6bnV3dWd5eWlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzNzU2MjcsImV4cCI6MjA4ODk1MTYyN30.SqQJ7w-SsPnm1wN03USOaR6_Fdn0JBzLn8tPhFYJWj8';
+        
+        const { createClient } = supabase;
+        const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        const userListElement = document.getElementById('user-list');
+        const loadingElement = document.getElementById('loading');
+        const countElement = document.getElementById('user-count');
+        const modal = document.getElementById('rename-modal');
+        const newNameInput = document.getElementById('new-name-input');
+        
+        const totalDistanceElement = document.getElementById('total-stats-distance');
+        const totalCountElement = document.getElementById('total-stats-count');
+        
+        const yearSelect = document.getElementById('year-filter');
+        const monthSelect = document.getElementById('month-filter');
+        const sortSelect = document.getElementById('sort-filter');
+        
+        let currentEditingName = '';
+        let allLogs = []; 
+        let allMembers = [];
+        let currentSortedData = [];
+
+        // --- 등급 계산 로직 ---
+        const calculateRunnerGrade = (userLogs) => {
+            const now = new Date();
+            const thirtyOneDaysAgo = new Date(now);
+            thirtyOneDaysAgo.setDate(now.getDate() - 31);
+
+            const recentLogs = userLogs.filter(l => {
+                if (!l.jsDate) return false;
+                return l.jsDate >= thirtyOneDaysAgo && l.jsDate <= now;
+            });
+
+            const count = recentLogs.length;
+            let scoreCount = 0;
+            if (count >= 30) scoreCount = 40;
+            else if (count >= 20) scoreCount = 37;
+            else if (count >= 18) scoreCount = 35;
+            else if (count >= 16) scoreCount = 30;
+            else if (count >= 12) scoreCount = 25;
+            else if (count >= 8) scoreCount = 20;
+            else if (count >= 4) scoreCount = 15;
+            else if (count >= 2) scoreCount = 10;
+            else if (count >= 1) scoreCount = 5;
+            else scoreCount = 0;
+
+            const dist = recentLogs.reduce((sum, l) => sum + Number(l.distance || 0), 0);
+            let scoreDist = 0;
+            if (dist >= 300) scoreDist = 40;
+            else if (dist >= 200) scoreDist = 38;
+            else if (dist >= 150) scoreDist = 35;
+            else if (dist >= 100) scoreDist = 30;
+            else if (dist >= 50) scoreDist = 25;
+            else if (dist >= 20) scoreDist = 20;
+            else if (dist >= 15) scoreDist = 15;
+            else if (dist >= 10) scoreDist = 10;
+            else if (dist >= 5) scoreDist = 5;
+            else scoreDist = 0;
+            
+            const weekActive = [false, false, false, false];
+            for(let i=0; i<4; i++) {
+                const start = new Date(now);
+                start.setDate(now.getDate() - (i + 1) * 7);
+                const end = new Date(now);
+                end.setDate(now.getDate() - i * 7);
+                const weeklyCount = userLogs.filter(l => l.jsDate >= start && l.jsDate < end).length;
+                if(weeklyCount >= 2) weekActive[i] = true;
+            }
+            const activeWeeks = weekActive.filter(x => x).length;
+            let scoreBonus = 0;
+            if (activeWeeks === 4) scoreBonus = 20;
+            else if (activeWeeks === 3) scoreBonus = 15;
+            else if (activeWeeks === 2) scoreBonus = 10;
+            else if (activeWeeks === 1) scoreBonus = 5;
+            else scoreBonus = 0;
+
+            const totalScore = scoreCount + scoreDist + scoreBonus;
+            const thresholds = [
+                { threshold: 100, name: '🍃 바람', color: 'bg-white text-blue-600 border border-blue-200' },
+                { threshold: 90, name: '🏵️ 만개', color: 'bg-purple-500 text-white' },
+                { threshold: 70, name: '🌺 열정', color: 'bg-orange-500 text-white' },
+                { threshold: 50, name: '🌼 활짝', color: 'bg-blue-500 text-white' },
+                { threshold: 30, name: '🌷 꽃봉', color: 'bg-green-500 text-white' },
+                { threshold: 1, name: '🌱 새싹', color: 'bg-green-100 text-green-600 border border-green-200' },
+                { threshold: 0, name: '🌰 씨앗', color: 'bg-amber-100 text-amber-700 border border-amber-200' }
+            ];
+
+            const currentIdx = thresholds.findIndex(t => totalScore >= t.threshold);
+            return { 
+                ...thresholds[currentIdx], 
+                score: totalScore,
+                details: { scoreCount, scoreDist, scoreBonus }
+            };
+        };
+
+        async function initApp() {
+            await Promise.all([fetchMembers(), fetchLogs()]);
+            setupRealtime();
+        }
+
+        async function fetchLogs() {
+            loadingElement.classList.remove('hidden');
+            
+            let allFetchedLogs = [];
+            let rangeStart = 0;
+            const PAGE_SIZE = 1000;
+            let isFinished = false;
+
+            try {
+                while (!isFinished) {
+                    const { data, error } = await _supabase
+                        .from('songmirun_logs')
+                        .select('*')
+                        .range(rangeStart, rangeStart + PAGE_SIZE - 1)
+                        .order('created_at', { ascending: false });
+
+                    if (error) {
+                        console.error("Logs load failed:", error);
+                        break;
+                    }
+
+                    if (data && data.length > 0) {
+                        const mappedData = data.map(item => {
+                            const rawName = item.user_name || 'Unknown'; 
+                            const rawDate = item.run_date || item.created_at || new Date().toISOString();
+                            const updateTime = item.updated_at || item.created_at || new Date().toISOString();
+                            
+                            return {
+                                id: item.id,
+                                userName: rawName.trim(), 
+                                distance: parseFloat(item.distance || 0), 
+                                duration: parseFloat(item.duration || 0), // duration 추가
+                                jsDate: new Date(rawDate),
+                                updatedAt: new Date(updateTime)
+                            };
+                        });
+
+                        allFetchedLogs = [...allFetchedLogs, ...mappedData];
+
+                        if (data.length < PAGE_SIZE) {
+                            isFinished = true;
+                        } else {
+                            rangeStart += PAGE_SIZE;
+                        }
+                    } else {
+                        isFinished = true;
+                    }
+                }
+
+                allLogs = allFetchedLogs;
+                console.log(`Total logs loaded: ${allLogs.length}`);
+                applyFilters();
+
+            } catch (err) {
+                console.error("Unexpected error during logs fetch:", err);
+            } finally {
+                loadingElement.classList.add('hidden');
+            }
+        }
+
+
+        async function fetchMembers() {
+            loadingElement.classList.remove('hidden');
+            
+            let allData = [];
+            let rangeStart = 0;
+            const PAGE_SIZE = 1000;
+            let isFinished = false;
+
+            try {
+                while (!isFinished) {
+                    const { data, error } = await _supabase
+                        .from('songmirun_members')
+                        .select('*')
+                        .range(rangeStart, rangeStart + PAGE_SIZE - 1)
+                        .order('id', { ascending: true });
+
+                    if (error) {
+                        console.error("Members load failed:", error);
+                        break;
+                    }
+
+                    if (data && data.length > 0) {
+                        allData = [...allData, ...data];
+                        
+                        if (data.length < PAGE_SIZE) {
+                            isFinished = true;
+                        } else {
+                            rangeStart += PAGE_SIZE;
+                        }
+                    } else {
+                        isFinished = true;
+                    }
+                }
+
+                allMembers = allData;
+                console.log(`Total members loaded: ${allMembers.length}`);
+                applyFilters();
+
+            } catch (err) {
+                console.error("Unexpected error:", err);
+            } finally {
+                loadingElement.classList.add('hidden');
+            }
+        }
+
+        function setupRealtime() {
+            _supabase
+                .channel('schema-db-changes')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'songmirun_logs' }, () => fetchLogs())
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'songmirun_members' }, () => fetchMembers())
+                .subscribe();
+        }
+
+        window.openRenameModal = (oldName) => {
+            currentEditingName = oldName;
+            newNameInput.value = oldName;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            newNameInput.focus();
+        };
+
+        window.closeRenameModal = () => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        };
+
+        window.confirmRename = async () => {
+            const newName = newNameInput.value.trim();
+            if (!newName || newName === currentEditingName) {
+                closeRenameModal();
+                return;
+            }
+
+            closeRenameModal();
+            loadingElement.classList.remove('hidden');
+            loadingElement.innerText = "이름 변경 중...";
+
+            const now = new Date().toISOString();
+
+            await _supabase
+                .from('songmirun_logs')
+                .update({ user_name: newName, updated_at: now }) 
+                .eq('user_name', currentEditingName); 
+
+            await _supabase
+                .from('songmirun_members')
+                .update({ nickname: newName, updated_at: now })
+                .eq('nickname', currentEditingName);
+
+            fetchLogs();
+            fetchMembers();
+        };
+
+        function formatRelativeDate(date) {
+            if (!date || isNaN(date.getTime())) return '-';
+            const now = new Date();
+            const diff = now - date;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+
+            if (minutes < 1) return '방금 전';
+            if (minutes < 60) return `${minutes}분 전`;
+            if (hours < 24) return `${hours}시간 전`;
+            if (days < 7) return `${days}일 전`;
+            return date.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        }
+
+        function applyFilters() {
+            const selectedYear = yearSelect.value;
+            const selectedMonth = monthSelect.value;
+            const sortBy = sortSelect.value;
+            
+            const userData = {}; 
+            let totalDistSum = 0;
+            let totalCountSum = 0;
+
+            allMembers.forEach(mem => {
+                const nameKey = (mem.nickname || '').trim();
+                if (!nameKey) return;
+                
+                const mUpdate = mem.updated_at || mem.created_at;
+                userData[nameKey] = {
+                    count: 0,
+                    totalDistance: 0,
+                    totalDuration: 0, // duration 누적용
+                    logUpdatedAt: null,
+                    memberUpdatedAt: mUpdate ? new Date(mUpdate) : null,
+                    personalLogs: [] 
+                };
+            });
+            
+            allLogs.forEach(log => {
+                const nameKey = log.userName;
+                const year = log.jsDate.getFullYear().toString();
+                const month = (log.jsDate.getMonth() + 1).toString();
+                
+                if (userData[nameKey]) {
+                    userData[nameKey].personalLogs.push(log);
+                }
+
+                if (selectedYear !== 'all' && year !== selectedYear) return;
+                if (selectedMonth !== 'all' && month !== selectedMonth) return;
+                
+                if (!userData[nameKey]) {
+                    userData[nameKey] = { 
+                        count: 0, 
+                        totalDistance: 0, 
+                        totalDuration: 0,
+                        logUpdatedAt: log.updatedAt, 
+                        memberUpdatedAt: null,
+                        personalLogs: [log]
+                    };
+                }
+                
+                userData[nameKey].count += 1;
+                userData[nameKey].totalDistance += log.distance; 
+                userData[nameKey].totalDuration += log.duration; // 시간 누적
+                
+                if (!userData[nameKey].logUpdatedAt || log.updatedAt > userData[nameKey].logUpdatedAt) {
+                    userData[nameKey].logUpdatedAt = log.updatedAt;
+                }
+                
+                totalDistSum += log.distance;
+                totalCountSum += 1;
+            });
+
+            Object.keys(userData).forEach(name => {
+                userData[name].grade = calculateRunnerGrade(userData[name].personalLogs);
+            });
+
+            totalDistanceElement.innerText = totalDistSum.toFixed(2);
+            totalCountElement.innerText = totalCountSum;
+
+            currentSortedData = Object.entries(userData).sort((a, b) => {
+                const statsA = a[1];
+                const statsB = b[1];
+
+                if (sortBy === 'distance') return statsB.totalDistance - statsA.totalDistance;
+                if (sortBy === 'duration') return statsB.totalDuration - statsA.totalDuration; // 시간 순 정렬 추가
+                if (sortBy === 'count') return statsB.count - statsA.count;
+                if (sortBy === 'log_recent') return (statsB.logUpdatedAt?.getTime() || 0) - (statsA.logUpdatedAt?.getTime() || 0);
+                if (sortBy === 'member_recent') return (statsB.memberUpdatedAt?.getTime() || 0) - (statsA.memberUpdatedAt?.getTime() || 0);
+                if (sortBy === 'score') return statsB.grade.score - statsA.grade.score;
+                return a[0].localeCompare(b[0]);
+            });
+            
+            renderUsers(currentSortedData);
+        }
+
+        function renderUsers(usersWithData) {
+            userListElement.innerHTML = '';
+            countElement.innerText = `총 ${usersWithData.length}명`;
+
+            if (usersWithData.length === 0) {
+                userListElement.innerHTML = '<p class="text-slate-400 text-center py-10 font-medium italic">조건에 맞는 데이터가 없습니다.</p>';
+                return;
+            }
+
+            usersWithData.forEach(([name, stats], i) => {
+                const li = document.createElement('li');
+                li.className = "flex items-center justify-between p-1 bg-white rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-all group";
+                
+                const grade = stats.grade;
+                
+                li.innerHTML = `
+                    <div class="flex items-center">
+                        <span class="text-xs font-black text-slate-500 w-6 mr-1 text-center">${i + 1}</span>
+                        <div class="flex flex-col">
+                            <div class="flex items-center space-x-1.5">
+                                <span class="text-slate-800 font-bold uppercase tracking-tight leading-tight text-xs">${name}</span>
+                                <span class="px-1.5 py-0.5 rounded text-[9px] font-black ${grade.color}">
+                                    ${grade.name}
+                                </span>
+                                <button onclick="openRenameModal('${name}')" class="text-[10px] text-slate-200 hover:text-emerald-500 transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="flex items-center space-x-2 mt-0.5">
+                                <span class="text-[9px] font-black text-emerald-600 bg-emerald-50 px-1 rounded">${grade.score}pt</span>
+                                <div class="flex flex-col text-[8px] font-bold text-slate-400 uppercase leading-tight">
+                                    <span>Mem: ${formatRelativeDate(stats.memberUpdatedAt)}</span>
+                                    <span>Log: ${formatRelativeDate(stats.logUpdatedAt)}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-end space-y-1.5">
+                        <div class="flex items-center space-x-2">
+                            <div class="flex flex-col items-end">
+                                <span class="text-[10px] text-slate-400 uppercase font-black leading-none">Dist</span>
+                                <span class="text-sm font-black text-slate-700">${stats.totalDistance.toFixed(1)}<span class="text-[9px] ml-0.5">km</span></span>
+                            </div>
+                            <div class="flex flex-col items-end border-l border-slate-100 pl-2">
+                                <span class="text-[10px] text-slate-400 uppercase font-black leading-none">Time</span>
+                                <span class="text-sm font-black text-slate-700">${Math.floor(stats.totalDuration)}<span class="text-[9px] ml-0.5">min</span></span>
+                            </div>
+                            <div class="flex flex-col items-end border-l border-slate-100 pl-2">
+                                <span class="text-[10px] text-slate-400 uppercase font-black leading-none">Logs</span>
+                                <span class="text-sm font-black text-emerald-600">${stats.count}<span class="text-[9px] ml-0.5">회</span></span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                userListElement.appendChild(li);
+            });
+        }
+
+        yearSelect.addEventListener('change', applyFilters);
+        monthSelect.addEventListener('change', applyFilters);
+        sortSelect.addEventListener('change', applyFilters);
+
+        window.downloadCSV = () => {
+            if (currentSortedData.length === 0) return;
+            const selectedYear = yearSelect.value === 'all' ? '전체연도' : yearSelect.value + '년';
+            const selectedMonth = monthSelect.value === 'all' ? '전체월' : monthSelect.value + '월';
+            
+            // CSV 헤더 설정
+            let csvContent = "\uFEFF"; // UTF-8 BOM
+            csvContent += "순위,이름,등급,점수,거리(km),시간(분),횟수,최근기록 수정,최근멤버\n";
+            
+            currentSortedData.forEach(([name, stats], index) => {
+                const logUpdate = stats.logUpdatedAt ? stats.logUpdatedAt.toISOString().replace('T', ' ').substring(0, 19) : "-";
+                const memUpdate = stats.memberUpdatedAt ? stats.memberUpdatedAt.toISOString().replace('T', ' ').substring(0, 19) : "-";
+                
+                csvContent += `${index + 1},${name},${stats.grade.name},${stats.grade.score},${stats.totalDistance.toFixed(2)},${stats.totalDuration.toFixed(1)},${stats.count},${logUpdate},${memUpdate}\n`;
+            });
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", `songmirun_ranking_${selectedYear}_${selectedMonth}.csv`);
+            link.click();
+        };
+
+        initApp();
+    </script>
+</head>
+<body class="bg-slate-50 min-h-screen p-4 md:p-10 font-sans text-slate-900">
+    <div class="max-w-md mx-auto">
+        <!-- Header -->
+        <div class="bg-emerald-500 rounded-t-2xl p-6 shadow-lg text-white">
+            <div class="flex justify-between items-center mb-5">
+                <h1 class="text-xl font-black flex items-center tracking-tight uppercase">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                    </svg>
+                    Runner Grade System
+                </h1>
+                <button onclick="downloadCSV()" class="bg-white/20 hover:bg-white/30 text-white text-[10px] font-black py-1.5 px-3 rounded-lg flex items-center transition-colors border border-white/20 uppercase tracking-wider">
+                    CSV Down
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <div class="bg-white/10 rounded-xl p-3 border border-white/10">
+                    <p class="text-[10px] font-black uppercase text-emerald-100 mb-1">Period Dist</p>
+                    <div class="flex items-baseline">
+                        <span id="total-stats-distance" class="text-2xl font-black">0.00</span>
+                        <span class="text-[10px] ml-1 font-bold text-emerald-100 uppercase">km</span>
+                    </div>
+                </div>
+                <div class="bg-white/10 rounded-xl p-3 border border-white/10">
+                    <p class="text-[10px] font-black uppercase text-emerald-100 mb-1">Period Logs</p>
+                    <div class="flex items-baseline">
+                        <span id="total-stats-count" class="text-2xl font-black">0</span>
+                        <span class="text-[10px] ml-1 font-bold text-emerald-100 uppercase">Entries</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+                <div class="flex flex-col">
+                    <label class="text-[10px] font-black uppercase mb-1 text-emerald-100">Period Filter</label>
+                    <div class="flex space-x-1">
+                        <select id="year-filter" class="flex-1 bg-emerald-600 border-none rounded-lg text-[11px] font-bold p-2 text-white outline-none">
+                            <option value="all">전체</option>
+                            <option value="2024">24년</option>
+                            <option value="2025">25년</option>
+                            <option value="2026" selected>26년</option>
+                        </select>
+                        <select id="month-filter" class="flex-1 bg-emerald-600 border-none rounded-lg text-[11px] font-bold p-2 text-white outline-none">
+                            <option value="all">전체</option>
+                            <option value="1">1월</option><option value="2">2월</option><option value="3">3월</option>
+                            <option value="4">4월</option><option value="5">5월</option><option value="6">6월</option>
+                            <option value="7">7월</option><option value="8">8월</option><option value="9">9월</option>
+                            <option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex flex-col">
+                    <label class="text-[10px] font-black uppercase mb-1 text-emerald-100">Sorting</label>
+                    <select id="sort-filter" class="bg-emerald-600 border-none rounded-lg text-[11px] font-bold p-2 text-white outline-none">
+                        <option value="member_recent">최근 로긴순</option>
+                        <option value="score">점수 높은 순</option>
+                        <option value="distance">거리 순</option>
+                        <option value="duration">시간 순</option>
+                        <option value="count">횟수 순</option>
+                        <option value="log_recent">최근 기록순</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-b-2xl shadow-xl p-5 min-h-[400px]">
+            <p id="user-count" class="text-slate-400 text-[10px] font-black mb-4 uppercase tracking-widest border-b border-slate-50 pb-2">Initializing...</p>
+            
+            <div id="loading" class="text-center py-20">
+                <div class="animate-spin inline-block w-8 h-8 border-[3px] border-emerald-600 border-t-transparent rounded-full mb-3"></div>
+                <p class="text-slate-400 text-xs font-bold uppercase tracking-widest">Calculating Grades...</p>
+            </div>
+
+            <ul id="user-list" class="space-y-4"></ul>
+        </div>
+    </div>
+
+    <!-- Rename Modal -->
+    <div id="rename-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl w-full max-w-xs shadow-2xl overflow-hidden">
+            <div class="p-6">
+                <h3 class="text-lg font-black text-slate-800 mb-1">이름 변경</h3>
+                <p class="text-xs text-slate-400 mb-4 font-bold leading-relaxed">기록의 사용자 이름을 수정합니다.</p>
+                <input type="text" id="new-name-input" 
+                       class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-800"
+                       placeholder="새 이름 입력">
+            </div>
+            <div class="flex border-t border-slate-100">
+                <button onclick="closeRenameModal()" class="flex-1 px-4 py-4 text-xs font-black text-slate-400 hover:bg-slate-50 border-r border-slate-100 uppercase tracking-widest">
+                    취소
+                </button>
+                <button onclick="confirmRename()" class="flex-1 px-4 py-4 text-xs font-black text-emerald-600 hover:bg-emerald-50 uppercase tracking-widest">
+                    변경
+                </button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
