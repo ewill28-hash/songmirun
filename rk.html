@@ -114,38 +114,115 @@
 
         async function fetchLogs() {
             loadingElement.classList.remove('hidden');
-            const { data, error } = await _supabase.from('songmirun_logs').select('*');
-            if (error) {
-                console.error("Logs load failed:", error);
-                return;
-            }
+            
+            let allFetchedLogs = [];
+            let rangeStart = 0;
+            const PAGE_SIZE = 1000; // 1,000개씩 끊어서 호출
+            let isFinished = false;
 
-            allLogs = data.map(item => {
-                const rawName = item.user_name || 'Unknown'; 
-                const rawDate = item.run_date || item.created_at || new Date().toISOString();
-                const updateTime = item.updated_at || item.created_at || new Date().toISOString();
+            try {
+                while (!isFinished) {
+                    // 1. 데이터 호출 (Range 사용)
+                    const { data, error } = await _supabase
+                        .from('songmirun_logs')
+                        .select('*')
+                        .range(rangeStart, rangeStart + PAGE_SIZE - 1)
+                        .order('created_at', { ascending: false }); // 최신순 정렬 권장
+
+                    if (error) {
+                        console.error("Logs load failed:", error);
+                        break;
+                    }
+
+                    if (data && data.length > 0) {
+                        // 2. 가져온 즉시 데이터 가공 (Map)
+                        const mappedData = data.map(item => {
+                            const rawName = item.user_name || 'Unknown'; 
+                            const rawDate = item.run_date || item.created_at || new Date().toISOString();
+                            const updateTime = item.updated_at || item.created_at || new Date().toISOString();
+                            
+                            return {
+                                id: item.id,
+                                userName: rawName.trim(), 
+                                distance: parseFloat(item.distance || 0), 
+                                jsDate: new Date(rawDate),
+                                updatedAt: new Date(updateTime)
+                            };
+                        });
+
+                        // 3. 전체 배열에 합치기
+                        allFetchedLogs = [...allFetchedLogs, ...mappedData];
+
+                        // 마지막 페이지 체크
+                        if (data.length < PAGE_SIZE) {
+                            isFinished = true;
+                        } else {
+                            rangeStart += PAGE_SIZE;
+                        }
+                    } else {
+                        isFinished = true;
+                    }
+                }
+
+                allLogs = allFetchedLogs;
+                console.log(`Total logs loaded: ${allLogs.length}`);
                 
-                return {
-                    id: item.id,
-                    userName: rawName.trim(), 
-                    distance: parseFloat(item.distance || 0), 
-                    jsDate: new Date(rawDate),
-                    updatedAt: new Date(updateTime)
-                };
-            });
+                // 4. 필터 적용 및 UI 업데이트
+                applyFilters();
 
-            applyFilters();
-            loadingElement.classList.add('hidden');
+            } catch (err) {
+                console.error("Unexpected error during logs fetch:", err);
+            } finally {
+                loadingElement.classList.add('hidden');
+            }
         }
 
+
         async function fetchMembers() {
-            const { data, error } = await _supabase.from('songmirun_members').select('*');
-            if (error) {
-                console.error("Members load failed:", error);
-                return;
+            loadingElement.classList.remove('hidden'); // 로딩 시작
+            
+            let allData = [];
+            let rangeStart = 0;
+            const PAGE_SIZE = 1000; // 한 번에 가져올 양 (안정적인 수치)
+            let isFinished = false;
+
+            try {
+                while (!isFinished) {
+                    // .range(시작, 끝)를 사용하여 1000개씩 끊어서 호출
+                    const { data, error } = await _supabase
+                        .from('songmirun_members')
+                        .select('*')
+                        .range(rangeStart, rangeStart + PAGE_SIZE - 1)
+                        .order('id', { ascending: true }); // 일관된 순서를 위해 정렬 기준 권장
+
+                    if (error) {
+                        console.error("Members load failed:", error);
+                        break;
+                    }
+
+                    if (data && data.length > 0) {
+                        allData = [...allData, ...data]; // 기존 데이터에 합치기
+                        
+                        // 가져온 데이터가 PAGE_SIZE보다 작으면 마지막 페이지라는 의미
+                        if (data.length < PAGE_SIZE) {
+                            isFinished = true;
+                        } else {
+                            rangeStart += PAGE_SIZE; // 다음 구간 설정
+                        }
+                    } else {
+                        isFinished = true;
+                    }
+                }
+
+                allMembers = allData;
+                console.log(`Total members loaded: ${allMembers.length}`);
+                applyFilters();
+
+            } catch (err) {
+                console.error("Unexpected error:", err);
+            } finally {
+                loadingElement.classList.add('hidden'); // 로딩 완료 후 숨김
             }
-            allMembers = data;
-            applyFilters();
         }
 
         function setupRealtime() {
