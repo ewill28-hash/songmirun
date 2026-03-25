@@ -1197,8 +1197,8 @@
         </div>
     </div>
 
-    <div id="custom-modal" class="fixed inset-0 bg-black/50 z-[900] hidden items-start justify-center p-4 pt-[30vh]">
-        <div class="bg-white rounded-[2rem] p-6 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+    <div id="custom-modal" class="fixed inset-0 bg-black/50 z-[900] hidden items-center justify-center p-4">
+        <div class="bg-white rounded-[2rem] p-6 max-w-sm w-full shadow-2xl">
             <h3 id="modal-title" class="text-base font-black text-gray-800 mb-2">알림</h3>
             <p id="modal-message" class="text-sm text-gray-600 mb-6 font-bold">메시지 내용</p>
             <div class="flex justify-end gap-2" id="modal-buttons"></div>
@@ -3918,7 +3918,7 @@
                 const isMonday = date.getDay() === 1;
 
                 if (selectedType === '정규' && !isMonday) {
-                    showModal(`⚠️ 러닝 날짜가 정규런 날짜(월요일)가 아닙니다.`, "alert");
+                    showModal(`⚠️ 러닝 날짜(${date.toISOString().split('T')[0]})가\n\n 정규런 요일(월요일)이 아닙니다.`, "alert");
                     runTypeSelect.value = "오운완";
                     if (mondayNotice) mondayNotice.classList.add('hidden');
                 } 
