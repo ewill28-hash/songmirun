@@ -618,23 +618,32 @@
                             </section>
 
                         <div class="grid grid-cols-1 gap-3">
+
                             <div class="rank-card">
                                 <div class="rank-header">
-                                    <i class="fa-solid fa-route text-brand-500"></i>
+                                    <i class="fa-solid fa-star text-yellow-500"></i>
+                                    <span class="text-xs font-black text-gray-700">포인트 TOP 5</span>
+                                </div>
+                                <div id="rank-point-list" class="divide-y divide-gray-50"></div>
+                            </div>
+                                                            
+                            <div class="rank-card">
+                                <div class="rank-header">
+                                    <i class="fa-solid fa-road text-brand-500"></i>
                                     <span class="text-xs font-black text-gray-700">누적 거리 TOP 5</span>
                                 </div>
                                 <div id="rank-dist-list" class="divide-y divide-gray-50"></div>
                             </div>
                             <div class="rank-card">
                                 <div class="rank-header">
-                                    <i class="fa-solid fa-stopwatch text-orange-500"></i>
+                                    <i class="fa-solid fa-clock text-orange-500"></i>
                                     <span class="text-xs font-black text-gray-700">누적 시간 TOP 5</span>
                                 </div>
                                 <div id="rank-time-list" class="divide-y divide-gray-50"></div>
                             </div>
                             <div class="rank-card">
                                 <div class="rank-header">
-                                    <i class="fa-solid fa-calendar-check text-purple-500"></i>
+                                    <i class="fa-solid fa-running text-purple-500"></i>
                                     <span class="text-xs font-black text-gray-700">러닝 횟수 TOP 5</span>
                                 </div>
                                 <div id="rank-count-list" class="divide-y divide-gray-50"></div>
@@ -650,7 +659,7 @@
                         <div class="grid grid-cols-1 gap-5">
                             <div class="rank-card">
                                 <div class="rank-header">
-                                    <i class="fa-solid fa-award text-emerald-500"></i>
+                                    <i class="fa-solid fa-route text-emerald-500"></i>
                                     <span class="text-xs font-black text-gray-700">단일 최장 거리 TOP 5</span>
                                 </div>
                                 <div id="rank-single-dist-list" class="divide-y divide-gray-50"></div>
@@ -2370,7 +2379,7 @@
                     // 거리 랭킹 1~3위일 때만 적용할 스타일 (필터: 블러)
                     // group-hover:filter-none -> 마우스 올리면 블러 해제
                     //const maskStyles = (isDistanceRank && isTop3) 
-                    const maskStyles = (isTop3) 
+                    const maskStyles = (isTop3 && !isSlowRun) 
                         ? 'filter blur-[4px] backdrop-blur-[4px] ' + // backdrop-blur 추가 (사파리 보정용)
                         'transition-all duration-300 will-change-[filter] transform-gpu ' +
                         'group-hover:blur-none ' +     // PC 마우스
@@ -2430,6 +2439,19 @@
             
             const singleTimeRank = monthLogs.map(l => ({ name: l.user_name, valRaw: Number(l.duration || 0), val: Number(l.duration || 0).toFixed(0) })).sort((a,b) => b.valRaw - a.valRaw);
             drawRankList('rank-single-time-list', singleTimeRank, '', true);
+
+            const pointRank = Object.entries(userAgg).map(([name, obj]) => {
+                const pointVal = (obj.distance * 1) + (obj.duration * 1) + (obj.count * 0.5);
+                return { 
+                    name, 
+                    valRaw: pointVal, 
+                    val: pointVal.toFixed(1) // 소수점 1자리까지 표시 (필요에 따라 조절)
+                };
+            }).sort((a, b) => b.valRaw - a.valRaw);
+
+            drawRankList('rank-point-list', pointRank, 'pt');
+
+
         };
 
         const renderStats = () => {
@@ -3789,6 +3811,7 @@
 
             const today = new Date().toLocaleDateString('en-CA'); 
             document.getElementById('in-date').value = today;
+
             document.getElementById('mem-joindate').value = today;        
             document.getElementById('export-start').value = `${nowY}-01-01`;
             document.getElementById('export-end').value = today;
@@ -3846,24 +3869,73 @@
                 el.addEventListener('input', calculatePace);
             });
 
-            // 날짜 입력 칸과 안내 문구 요소 가져오기
+
             const dateInput = document.getElementById('in-date');
-            const mondayNotice = document.getElementById('monday-notice');
+            const mondayNotice = document.getElementById('monday-notice'); // 알림 문구
+            const runTypeSelect = document.getElementById('run-type');    // 러닝 유형 선택창
+
+
+            function updateRunTypeByDate(dateString) {
+                const dateInput = document.getElementById('in-date');
+                const mondayNotice = document.getElementById('monday-notice');
+                const runTypeSelect = document.getElementById('run-type');
+
+                if (!dateString) return;
+
+                const selectedDate = new Date(dateString);
+                const dayOfWeek = selectedDate.getDay(); // 0(일) ~ 6(토)
+
+                if (dayOfWeek === 1) {
+                    runTypeSelect.value = '정규';
+                    if (mondayNotice) {
+                        mondayNotice.classList.remove('hidden');
+                        mondayNotice.innerText = '📅 정규런(정기) 선택 확인 👇';
+                    }
+                } else {
+                    runTypeSelect.value = '오운완';
+                    if (mondayNotice) {
+                        mondayNotice.classList.add('hidden');
+                    }
+                }
+            }
+
+
+            if (dateInput) {
+                dateInput.value = today;
+                updateRunTypeByDate(today);
+            }
 
             dateInput.addEventListener('change', function() {
-                const selectedDate = new Date(this.value);
-                
-                // getDay()는 0(일) ~ 6(토)를 반환합니다. 1은 월요일입니다.
-                if (selectedDate.getDay() === 1) {
-                    // 월요일이면 문구 표시
-                    mondayNotice.classList.remove('hidden');
-                } else {
-                    // 월요일이 아니면 문구 숨김
-                    mondayNotice.classList.add('hidden');
-                }
+                updateRunTypeByDate(this.value);
             });
 
-            // 1. 단순 초기화 버튼 (기존 잘 되는 부분 유지)
+
+            function checkRegularRunDate() {
+                const selectedDateValue = dateInput.value;
+                const selectedType = runTypeSelect.value;
+
+                if (!selectedDateValue) return;
+
+                const date = new Date(selectedDateValue);
+                const isMonday = date.getDay() === 1;
+
+                if (selectedType === '정규' && !isMonday) {
+                    showModal(`⚠️ 러닝 날짜가 정규런 날짜(월요일)가 아닙니다.`, "alert");
+                    runTypeSelect.value = "오운완";
+                    if (mondayNotice) mondayNotice.classList.add('hidden');
+                } 
+                else if (isMonday && selectedType !== '정규') {
+                    if (mondayNotice) mondayNotice.classList.remove('hidden');
+                } 
+                else {
+                    if (mondayNotice) mondayNotice.classList.add('hidden');
+                }
+            }
+
+            dateInput.addEventListener('change', checkRegularRunDate);
+            runTypeSelect.addEventListener('change', checkRegularRunDate);
+
+
             document.getElementById('label-time0')?.addEventListener('click', function() {
                 ['in-time-h', 'in-time-m', 'in-time-s'].forEach(id => {
                     const el = document.getElementById(id);
