@@ -1197,10 +1197,8 @@
         </div>
     </div>
 
-
-
-    <div id="custom-modal" class="fixed inset-0 bg-black/50 z-[900] hidden items-center justify-center p-4">
-        <div class="bg-white rounded-[2rem] p-6 max-w-sm w-full shadow-2xl">
+    <div id="custom-modal" class="fixed inset-0 bg-black/50 z-[900] hidden items-start justify-center p-4 pt-[30vh]">
+        <div class="bg-white rounded-[2rem] p-6 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in-95 duration-200">
             <h3 id="modal-title" class="text-base font-black text-gray-800 mb-2">알림</h3>
             <p id="modal-message" class="text-sm text-gray-600 mb-6 font-bold">메시지 내용</p>
             <div class="flex justify-end gap-2" id="modal-buttons"></div>
@@ -3811,6 +3809,7 @@
 
             const today = new Date().toLocaleDateString('en-CA'); 
             document.getElementById('in-date').value = today;
+
             document.getElementById('mem-joindate').value = today;        
             document.getElementById('export-start').value = `${nowY}-01-01`;
             document.getElementById('export-end').value = today;
@@ -3868,24 +3867,73 @@
                 el.addEventListener('input', calculatePace);
             });
 
-            // 날짜 입력 칸과 안내 문구 요소 가져오기
+
             const dateInput = document.getElementById('in-date');
-            const mondayNotice = document.getElementById('monday-notice');
+            const mondayNotice = document.getElementById('monday-notice'); // 알림 문구
+            const runTypeSelect = document.getElementById('run-type');    // 러닝 유형 선택창
+
+
+            function updateRunTypeByDate(dateString) {
+                const dateInput = document.getElementById('in-date');
+                const mondayNotice = document.getElementById('monday-notice');
+                const runTypeSelect = document.getElementById('run-type');
+
+                if (!dateString) return;
+
+                const selectedDate = new Date(dateString);
+                const dayOfWeek = selectedDate.getDay(); // 0(일) ~ 6(토)
+
+                if (dayOfWeek === 1) {
+                    runTypeSelect.value = '정규';
+                    if (mondayNotice) {
+                        mondayNotice.classList.remove('hidden');
+                        mondayNotice.innerText = '📅 정규런(정기) 선택 확인 👇';
+                    }
+                } else {
+                    runTypeSelect.value = '오운완';
+                    if (mondayNotice) {
+                        mondayNotice.classList.add('hidden');
+                    }
+                }
+            }
+
+
+            if (dateInput) {
+                dateInput.value = today;
+                updateRunTypeByDate(today);
+            }
 
             dateInput.addEventListener('change', function() {
-                const selectedDate = new Date(this.value);
-                
-                // getDay()는 0(일) ~ 6(토)를 반환합니다. 1은 월요일입니다.
-                if (selectedDate.getDay() === 1) {
-                    // 월요일이면 문구 표시
-                    mondayNotice.classList.remove('hidden');
-                } else {
-                    // 월요일이 아니면 문구 숨김
-                    mondayNotice.classList.add('hidden');
-                }
+                updateRunTypeByDate(this.value);
             });
 
-            // 1. 단순 초기화 버튼 (기존 잘 되는 부분 유지)
+
+            function checkRegularRunDate() {
+                const selectedDateValue = dateInput.value;
+                const selectedType = runTypeSelect.value;
+
+                if (!selectedDateValue) return;
+
+                const date = new Date(selectedDateValue);
+                const isMonday = date.getDay() === 1;
+
+                if (selectedType === '정규' && !isMonday) {
+                    showModal(`⚠️ 러닝 날짜가 정규런 날짜(월요일)가 아닙니다.`, "alert");
+                    runTypeSelect.value = "오운완";
+                    if (mondayNotice) mondayNotice.classList.add('hidden');
+                } 
+                else if (isMonday && selectedType !== '정규') {
+                    if (mondayNotice) mondayNotice.classList.remove('hidden');
+                } 
+                else {
+                    if (mondayNotice) mondayNotice.classList.add('hidden');
+                }
+            }
+
+            dateInput.addEventListener('change', checkRegularRunDate);
+            runTypeSelect.addEventListener('change', checkRegularRunDate);
+
+
             document.getElementById('label-time0')?.addEventListener('click', function() {
                 ['in-time-h', 'in-time-m', 'in-time-s'].forEach(id => {
                     const el = document.getElementById(id);
