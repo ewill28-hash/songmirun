@@ -623,6 +623,7 @@
                                 <div class="rank-header">
                                     <i class="fa-solid fa-star text-yellow-500"></i>
                                     <span class="text-xs font-black text-gray-700">포인트 TOP 5</span>
+                                    <span class="text-[8px] font-normal text-emerald-600/80 ml-1">(*포인트=거리+분+횟수)</span>
                                 </div>
                                 <div id="rank-point-list" class="divide-y divide-gray-50"></div>
                             </div>
@@ -2441,7 +2442,7 @@
                                 
                 };
             }).sort((a, b) => b.valRaw - a.valRaw);
-            drawRankList('rank-point-list', pointRank, 'pt');
+            drawRankList('rank-point-list', pointRank, 'pm');
 
 
 
