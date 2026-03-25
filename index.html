@@ -382,12 +382,12 @@
                             <div class="flex items-center gap-2 mb-1.5 ml-1">
                                 <label class="text-[11px] text-brand-700 font-black">러닝 유형</label>
                                 <span id="monday-notice" class="text-[9px] text-red-500 font-bold hidden animate-pulse">
-                                    📅정규런(정기) 선택 확인 👇
+                                    📅정기런(월요일) 선택 확인 👇
                                 </span>
                             </div>                             
                             <select id="run-type" class="w-full bg-white border-2 border-brand-100 p-3.5 rounded-2xl text-sm font-bold outline-none shadow-sm">
                                 <option value="오운완">👟 오운완(개인)</option>
-                                <option value="정규">📅 정규런(정기)</option>
+                                <option value="정기">📅 정기런(月)</option>
                                 <option value="번개">⚡ 번개런</option>
                                 <option value="대회">🏅 대회</option>
                             </select>
@@ -548,8 +548,8 @@
                                             class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black transition-all active-btn">🏃 전체</button>
                                     <button onclick="window.setTypeFilter('오운완')" id="type-o" 
                                             class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400  transition-all">👟 오운완</button>
-                                    <button onclick="window.setTypeFilter('정규')" id="type-j" 
-                                            class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400  transition-all">📅 정규</button>
+                                    <button onclick="window.setTypeFilter('정기')" id="type-j" 
+                                            class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400  transition-all">📅 정기</button>
                                     <button onclick="window.setTypeFilter('번개')" id="type-b" 
                                             class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400  transition-all">⚡ 번개</button>
                                     <button onclick="window.setTypeFilter('대회')" id="type-d" 
@@ -895,7 +895,7 @@
                         </h2>
                     </div>
                     <p class="text-[10px] text-gray-400 font-bold mb-3 ml-1">형식: 날짜, 이름, 유형, 거리, 시간, 심박, 케이던스</p>
-                    <textarea id="bulk-logs-input" rows="5" placeholder="2026-01-15, 홍여름, 번개, 10, 50, 160, 180&#10;2026-01-16, 김겨울, 정규, 5, 25, 150, 175" class="w-full bg-gray-50 border border-gray-200 p-4 rounded-2xl text-[11px] font-bold outline-none focus:ring-2 ring-brand-200 mb-4 font-mono"></textarea>
+                    <textarea id="bulk-logs-input" rows="5" placeholder="2026-01-15, 홍여름, 번개, 10, 50, 160, 180&#10;2026-01-16, 김겨울, 정기, 5, 25, 150, 175" class="w-full bg-gray-50 border border-gray-200 p-4 rounded-2xl text-[11px] font-bold outline-none focus:ring-2 ring-brand-200 mb-4 font-mono"></textarea>
                     <button id="btn-bulk-logs-import" class="w-full bg-brand-600 text-white font-black py-4 rounded-2xl shadow-lg shadow-brand-200 active:scale-[0.98] transition-all hover:bg-brand-700 text-lg flex items-center justify-center gap-2">기록 일괄 등록하기</button>
                 </section>
             </div>
@@ -1400,7 +1400,7 @@
             const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
             const runTypeMap = {
                 '오운완': { icon: '👟', label: '오운완' },
-                '정규': { icon: '📅', label: '정규' },
+                '정기': { icon: '📅', label: '정기' },
                 '번개': { icon: '⚡', label: '번개' },
                 '대회': { icon: '🏅', label: '대회' }
             };
@@ -1464,7 +1464,7 @@
             selectedType = type;
             ['type-all', 'type-j', 'type-b', 'type-d', 'type-o'].forEach(id => {
                 const el = document.getElementById(id);
-                const isActive = (id === 'type-all' && type === '전체') || (id === 'type-j' && type === '정규') || (id === 'type-b' && type === '번개') || (id === 'type-d' && type === '대회')|| (id === 'type-o' && type === '오운완');
+                const isActive = (id === 'type-all' && type === '전체') || (id === 'type-j' && type === '정기') || (id === 'type-b' && type === '번개') || (id === 'type-d' && type === '대회')|| (id === 'type-o' && type === '오운완');
                 el.classList.toggle('active', isActive);
                 el.classList.toggle('inactive', !isActive);
             });
@@ -3884,10 +3884,10 @@
                 const dayOfWeek = selectedDate.getDay(); // 0(일) ~ 6(토)
 
                 if (dayOfWeek === 1) {
-                    runTypeSelect.value = '정규';
+                    runTypeSelect.value = '정기';
                     if (mondayNotice) {
                         mondayNotice.classList.remove('hidden');
-                        mondayNotice.innerText = '📅 정규런(정기) 선택 확인 👇';
+                        mondayNotice.innerText = '📅 정기런(月) 선택 확인 👇';
                     }
                 } else {
                     runTypeSelect.value = '오운완';
@@ -3917,12 +3917,12 @@
                 const date = new Date(selectedDateValue);
                 const isMonday = date.getDay() === 1;
 
-                if (selectedType === '정규' && !isMonday) {
-                    showModal(`⚠️ 러닝 날짜(${date.toISOString().split('T')[0]})가\n\n 정규런 요일(월요일)이 아닙니다.`, "alert");
+                if (selectedType === '정기' && !isMonday) {
+                    showModal(`⚠️ 러닝 날짜(${date.toISOString().split('T')[0]})가\n\n 📅 정기런 요일(월요일)이 아닙니다. \n\n나이가 들면 손가락이 예전 같지 않죠?🖐️`, "alert");
                     runTypeSelect.value = "오운완";
                     if (mondayNotice) mondayNotice.classList.add('hidden');
                 } 
-                else if (isMonday && selectedType !== '정규') {
+                else if (isMonday && selectedType !== '정기') {
                     if (mondayNotice) mondayNotice.classList.remove('hidden');
                 } 
                 else {
