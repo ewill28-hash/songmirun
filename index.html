@@ -618,23 +618,32 @@
                             </section>
 
                         <div class="grid grid-cols-1 gap-3">
+
                             <div class="rank-card">
                                 <div class="rank-header">
-                                    <i class="fa-solid fa-route text-brand-500"></i>
+                                    <i class="fa-solid fa-star text-yellow-500"></i>
+                                    <span class="text-xs font-black text-gray-700">포인트 TOP 5</span>
+                                </div>
+                                <div id="rank-point-list" class="divide-y divide-gray-50"></div>
+                            </div>
+                                                            
+                            <div class="rank-card">
+                                <div class="rank-header">
+                                    <i class="fa-solid fa-road text-brand-500"></i>
                                     <span class="text-xs font-black text-gray-700">누적 거리 TOP 5</span>
                                 </div>
                                 <div id="rank-dist-list" class="divide-y divide-gray-50"></div>
                             </div>
                             <div class="rank-card">
                                 <div class="rank-header">
-                                    <i class="fa-solid fa-stopwatch text-orange-500"></i>
+                                    <i class="fa-solid fa-clock text-orange-500"></i>
                                     <span class="text-xs font-black text-gray-700">누적 시간 TOP 5</span>
                                 </div>
                                 <div id="rank-time-list" class="divide-y divide-gray-50"></div>
                             </div>
                             <div class="rank-card">
                                 <div class="rank-header">
-                                    <i class="fa-solid fa-calendar-check text-purple-500"></i>
+                                    <i class="fa-solid fa-running text-purple-500"></i>
                                     <span class="text-xs font-black text-gray-700">러닝 횟수 TOP 5</span>
                                 </div>
                                 <div id="rank-count-list" class="divide-y divide-gray-50"></div>
@@ -650,7 +659,7 @@
                         <div class="grid grid-cols-1 gap-5">
                             <div class="rank-card">
                                 <div class="rank-header">
-                                    <i class="fa-solid fa-award text-emerald-500"></i>
+                                    <i class="fa-solid fa-route text-emerald-500"></i>
                                     <span class="text-xs font-black text-gray-700">단일 최장 거리 TOP 5</span>
                                 </div>
                                 <div id="rank-single-dist-list" class="divide-y divide-gray-50"></div>
@@ -2370,7 +2379,7 @@
                     // 거리 랭킹 1~3위일 때만 적용할 스타일 (필터: 블러)
                     // group-hover:filter-none -> 마우스 올리면 블러 해제
                     //const maskStyles = (isDistanceRank && isTop3) 
-                    const maskStyles = (isTop3) 
+                    const maskStyles = (isTop3 && !isSlowRun) 
                         ? 'filter blur-[4px] backdrop-blur-[4px] ' + // backdrop-blur 추가 (사파리 보정용)
                         'transition-all duration-300 will-change-[filter] transform-gpu ' +
                         'group-hover:blur-none ' +     // PC 마우스
@@ -2430,6 +2439,19 @@
             
             const singleTimeRank = monthLogs.map(l => ({ name: l.user_name, valRaw: Number(l.duration || 0), val: Number(l.duration || 0).toFixed(0) })).sort((a,b) => b.valRaw - a.valRaw);
             drawRankList('rank-single-time-list', singleTimeRank, '', true);
+
+            const pointRank = Object.entries(userAgg).map(([name, obj]) => {
+                const pointVal = (obj.distance * 1) + (obj.duration * 1) + (obj.count * 0.5);
+                return { 
+                    name, 
+                    valRaw: pointVal, 
+                    val: pointVal.toFixed(1) // 소수점 1자리까지 표시 (필요에 따라 조절)
+                };
+            }).sort((a, b) => b.valRaw - a.valRaw);
+
+            drawRankList('rank-point-list', pointRank, 'pt');
+
+
         };
 
         const renderStats = () => {
