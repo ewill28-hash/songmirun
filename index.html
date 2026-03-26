@@ -1393,9 +1393,33 @@
                 .sort((a, b) => new Date(b.created_at || b.run_date) - new Date(a.created_at || a.run_date))
                 .slice(0, isSlowRun ? undefined : 35);
 
-            // 3. 배지 업데이트
+            const formatPace = (totalSeconds, totalDistance) => {
+                if (!totalDistance || totalDistance <= 0) return "0'00\"";
+                
+                const secondsPerKm = totalSeconds / totalDistance;
+                
+                const minutes = Math.floor(secondsPerKm / 60);
+                const seconds = Math.floor(secondsPerKm % 60);
+
+                return `${minutes}'${String(seconds).padStart(2, '0')}"`;
+            };
+
+            const totals = sortedLogs.reduce((acc, log) => {
+                acc.duration += Number(log.duration || 0);
+                acc.distance += Number(log.distance || 0);
+                return acc;
+            }, { duration: 0, distance: 0 });
+
+
             const lcountBadge = document.getElementById('log-count-badge');
-            if (lcountBadge) lcountBadge.innerText = `${sortedLogs.length}건`;
+            if (lcountBadge) {
+                const distanceText = totals.distance.toFixed(2);
+                const durationText = formatTimeHMS(totals.duration); // 01:20:45 형식
+                
+                const avgPaceText = formatPace(totals.duration * 60, totals.distance);
+
+                lcountBadge.innerText = `${sortedLogs.length}건 | ${distanceText}km | ${durationText} | ${avgPaceText}`;
+            }
 
             // 4. 상수 정의 (루프 밖으로 이동)
             const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
