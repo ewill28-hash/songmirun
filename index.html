@@ -623,7 +623,7 @@
                                 <div class="rank-header">
                                     <i class="fa-solid fa-star text-yellow-500"></i>
                                     <span class="text-xs font-black text-gray-700">포인트 TOP 5</span>
-                                    <span class="text-[8px] font-normal text-emerald-600/80 ml-1">(*포인트=거리+분+횟수)</span>
+                                    <span class="text-[8px] font-normal text-emerald-600/80 ml-1">(*포인트=거리+시간+횟수)</span>
                                 </div>
                                 <div id="rank-point-list" class="divide-y divide-gray-50"></div>
                             </div>
@@ -1587,7 +1587,7 @@
                     obj[key].count += 1;
                     obj[key].members.add(r.user_name);
                     // 종합점수 계산: 거리 * 1 + 횟수 * 1 (한 번 뛸 때마다 1점 + 거리당 1점)
-                    obj[key].score = obj[key].dist * 1 + (obj[key].time / 60).toFixed(1) * 1 + obj[key].count * 0.5;
+                    obj[key].score = obj[key].dist * 1 + (obj[key].time / 60*10).toFixed(1) * 1 + obj[key].count * 0.5;
 
 
                 };
@@ -1600,7 +1600,7 @@
                     myStats.dist += d;
                     myStats.time += t;
                     myStats.count += 1;
-                    myStats.score = myStats.dist * 1 + (myStats.time /60).toFixed(1) * 1 + myStats.count * 0.5;
+                    myStats.score = myStats.dist * 1 + (myStats.time /60*10).toFixed(1) * 1 + myStats.count * 0.5;
                 }
             });
 
@@ -1770,7 +1770,7 @@
                                     >
                                     ${data.score.toFixed(1)}pt
                                     </span>
-                                    <span class="badge-stat ${currentMetric==='dist'?'highlight':''}">${data.dist.toFixed(1)}k</span>
+                                    <span class="badge-stat ${currentMetric==='dist'?'highlight':''}">${data.dist.toFixed(1)}km</span>
                                     <span class="badge-stat ${currentMetric==='time'?'highlight':''}">${timeStr.split(':')[0]}h</span>
                                     <span class="badge-stat ${currentMetric==='count'?'highlight':''}">${data.count}</span>
                                 </div>
@@ -2454,8 +2454,8 @@
             };
 
             const pointRank = Object.entries(userAgg).map(([name, obj]) => {
-                //const pointVal = (obj.distance * 1) + (obj.duration/60 * 1) + (obj.count * 0.5);
-                const pointVal = (obj.distance * 1) + (obj.duration * 1) + (obj.count * 0.5);
+                const pointVal = (obj.distance * 1) + (obj.duration/60 * 10) + (obj.count * 0.5);
+                //const pointVal = (obj.distance * 1) + (obj.duration * 1) + (obj.count * 0.5);
                 const timeStr = formatTimeHMS(obj.duration);
 
                 return { 
@@ -2470,7 +2470,7 @@
                                 
                 };
             }).sort((a, b) => b.valRaw - a.valRaw);
-            drawRankList('rank-point-list', pointRank, 'pm');
+            drawRankList('rank-point-list', pointRank, 'pt');
 
 
 
