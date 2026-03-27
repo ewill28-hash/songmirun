@@ -2006,35 +2006,36 @@
         }
 
        //window.syncAndRefresh = () => updateUI_Team();
-
-
+        
         const DESTINATIONS = [
             { name: "송도 (미추홀)", code: "ICN", dist: 0, emoji: "👟" }, // 시작점
             { name: "서울 (남산타워)", code: "GMP", dist: 35, emoji: "🗼" },
-            { name: "평창 (동계올림픽)", code: "YNY", dist: 180, emoji: "❄️" }, // 양양공항 기준
-            { name: "대전 (성심당)", code: "CJJ", dist: 160, emoji: "🥖" }, // 청주공항 기준
+            { name: "대전 (성심당)", code: "CJJ", dist: 160, emoji: "🥖" },
+            { name: "평창 (올림픽)", code: "YNY", dist: 180, emoji: "❄️" },
             { name: "대구 (팔공산)", code: "TAE", dist: 260, emoji: "🍎" },
             { name: "광주 (무등산)", code: "KWJ", dist: 270, emoji: "🍉" },
             { name: "부산 (해운대)", code: "PUS", dist: 330, emoji: "🌊" },
-            { name: "제주도 (한라산)", code: "CJU", dist: 450, emoji: "🗿" },
+            { name: "제주 (한라산)", code: "CJU", dist: 450, emoji: "🗿" },
             { name: "상하이 (중국)", code: "PVG", dist: 800, emoji: "🏮" },
-            { name: "도쿄 (마라톤 성지)", code: "HND", dist: 1200, emoji: "🗼" },
+            { name: "도쿄 (M-Mecca)", code: "HND", dist: 1200, emoji: "🗼" },
             { name: "홍콩", code: "HKG", dist: 2000, emoji: "🏙️" },
             { name: "방콕", code: "BKK", dist: 3700, emoji: "🛕" },
             { name: "싱가포르", code: "SIN", dist: 4700, emoji: "🦁" },
-            { name: "발리 (인도네시아)", code: "DPS", dist: 5200, emoji: "🏖️" },
-            { name: "퍼스 (호주 서부)", code: "PER", dist: 7200, emoji: "☀️" },
+            { name: "발리(모히또)", code: "DPS", dist: 5200, emoji: "🏖️" },
+            { name: "퍼스(호주서부)", code: "PER", dist: 7200, emoji: "☀️" },
             { name: "시드니(호주)", code: "SYD", dist: 8300, emoji: "🦘" },
-            { name: "베를린 (마라톤 성지)", code: "BER", dist: 8500, emoji: "🏰" },
-            { name: "모스크바 (러시아)", code: "SVO", dist: 9300, emoji: "🇷🇺" },
-            { name: "런던 (마라톤 성지)", code: "LHR", dist: 11000, emoji: "🎡" },
-            { name: "보스턴 (마라톤 성지)", code: "BOS", dist: 11500, emoji: "🏛️" },
-            { name: "뉴욕 (마라톤 성지)", code: "JFK", dist: 13000, emoji: "🗽" },
-            { name: "시카고 (마라톤 성지)", code: "ORD", dist: 13500, emoji: "🏙️" },
+            { name: "베를린(M-Mecca)", code: "BER", dist: 8500, emoji: "🏰" },
+            { name: "모스크바", code: "SVO", dist: 9300, emoji: "🇷🇺" },
+            { name: "아테네(M-Origin)", code: "ATH", dist: 9600, emoji: "🏛️" }, 
+            { name: "파리(M-Iconic)", code: "CDG", dist: 10500, emoji: "🇫🇷" },
+            { name: "런던(M-Mecca)", code: "LHR", dist: 11000, emoji: "🎡" },
+            { name: "보스턴(M-Mecca)", code: "BOS", dist: 11500, emoji: "🏛️" },
+            { name: "뉴욕(M-Mecca)", code: "JFK", dist: 13000, emoji: "🗽" },
+            { name: "시카고(M-Mecca)", code: "ORD", dist: 13500, emoji: "🏙️" },
             { name: "멕시코시티", code: "MEX", dist: 14500, emoji: "🌮" },
-            { name: "리마 (페루)", code: "LIM", dist: 16300, emoji: "🦙" },
-            { name: "상파울루 (지구반바퀴)", code: "GRU", dist: 18000, emoji: "⚽" },
-            { name: "지구 한 바퀴 (완주!)", code: "ICN", dist: 40075, emoji: "🌍" }
+            { name: "리마(페루)", code: "LIM", dist: 16300, emoji: "🦙" },
+            { name: "상파울루(지구반바퀴)", code: "GRU", dist: 18000, emoji: "⚽" },
+            { name: "지구 한바퀴(완주!)", code: "ICN", dist: 40075, emoji: "🌍" }
         ];
 
         window.getGreatCircleMapLink = (target) => {
