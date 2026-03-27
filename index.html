@@ -1021,7 +1021,7 @@
                     <div class="flex justify-between items-end mb-4">
                         <div class="text-center group">
                             <span class="block text-xl mb-1 group-hover:scale-110 transition-transform">👟</span>
-                            <span class="text-[10px] font-bold text-slate-400 uppercase">송도</span>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase">송도(Start)</span>
                         </div>
                         <div class="text-center relative">
                             <!-- 현재 거리 툴팁 느낌의 표시 -->
@@ -1458,7 +1458,10 @@
                             </span>
                             <div class="flex gap-1">
                                 <button onclick="window.editLog('${l.log_id}')" class="text-gray-300 hover:text-brand-500 p-0.5"><i class="fa-solid fa-pen-to-square text-[10px]"></i></button>
-                                <button onclick="window.deleteLog('${l.log_id}')" class="text-gray-300 hover:text-red-500 p-0.5"><i class="fa-solid fa-trash-can text-[10px]"></i></button>
+                                <button onclick="window.deleteLog('${l.log_id}', '${l.run_date} (${dayNames[dayIndex]}) | ${typeInfo.icon} ${typeInfo.label}')" class="text-gray-300 hover:text-red-500 p-0.5">
+                                        <i class="fa-solid fa-trash-can text-[10px]"></i>
+                                    </button>
+                                    
                             </div>
                         </div>
                         <div class="flex items-center gap-1 mb-1">
@@ -3021,9 +3024,9 @@
         };
 
 
-        window.deleteLog = async (id) => {
+        window.deleteLog = async (id, runDate) => {
 
-            showModal("기록을 삭제하시겠습니까?", "confirm", async () => {
+            showModal(`[${runDate}] \n\n 🗑️ 기록을 삭제하시겠습니까? `, "confirm", async () => {
             try {
                 // 1. Supabase 삭제 실행
                 const { error } = await _supabase
@@ -3667,7 +3670,7 @@
                     `;
                     
                     if (typeof syncLogs === 'function') await syncLogs();
-                    showToast("✨ 기록이 저장되었습니다.");
+                    showToast(`✨ 개인 기록 및 \n\n 🧑‍🤝‍🧑 Team Challenges 기록이 추가되었습니다.`);
 
                 } catch (e) {
                     console.error("Save Error:", e.message);
