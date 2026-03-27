@@ -326,11 +326,11 @@
                 <div class="bg-brand-500 p-3 rounded-2xl text-white shadow-lg shadow-brand-200 border border-brand-400">
                     <p class="text-[9px] font-bold text-brand-100 uppercase tracking-tighter">Distance</p>
                     
-                    <p id="stat-distm" class="text-xl font-black italic leading-none mt-1 text-center">
+                    <p id="stat-distm" class="text-[15px] font-black italic leading-none mt-1 text-center">
                         <span class="text-[10px] opacity-80 not-italic mr-1">Me:</span>0 km
                     </p>
                     <p id="stat-dist" onclick="renderChallengeModal('year','0')" 
-                    class="text-xl font-black italic leading-none mt-1 text-center text-brand-200 transition-all duration-200 hover:text-white hover:brightness-125 cursor-pointer">
+                                        class="text-[15px] font-black italic leading-none mt-1 text-center text-brand-200 transition-all duration-200 hover:text-white hover:brightness-125 cursor-pointer">
                         <span class="text-[10px] opacity-70 not-italic mr-1">All:</span>0 km
                     </p>
                 </div>
@@ -494,11 +494,11 @@
                                     <span>데이터 기준</span>
                                     <span class="text-[8px] font-normal text-emerald-600/80 ml-1">(*포인트=거리+시간+횟수)</span>
                                 </label>
-                                <div class="flex gap-2">
-                                    <button onclick="setMetric2('score')" id="btn-metric2-score" class="metric-btn2 active flex-1"><i class="fas fa-star mr-1 text-[10px]"></i>포인트</button>
-                                    <button onclick="setMetric2('dist')" id="btn-metric2-dist" class="metric-btn2 flex-1"><i class="fas fa-road mr-1 text-[10px]"></i>거리</button>
-                                    <button onclick="setMetric2('time')" id="btn-metric2-time" class="metric-btn2 flex-1"><i class="fas fa-clock mr-1 text-[10px]"></i>시간</button>
-                                    <button onclick="setMetric2('count')" id="btn-metric2-count" class="metric-btn2 flex-1"><i class="fas fa-running mr-1 text-[10px]"></i>횟수</button>
+                                <div class="flex gap-1">
+                                    <button onclick="setMetric2('score')" id="btn-metric2-score" class="metric-btn2 active flex-1"><i class="fas fa-star  text-[10px]"></i>포인트</button>
+                                    <button onclick="setMetric2('dist')" id="btn-metric2-dist" class="metric-btn2 flex-1"><i class="fas fa-road text-[10px]"></i>거리</button>
+                                    <button onclick="setMetric2('time')" id="btn-metric2-time" class="metric-btn2 flex-1"><i class="fas fa-clock  text-[10px]"></i>시간</button>
+                                    <button onclick="setMetric2('count')" id="btn-metric2-count" class="metric-btn2 flex-1"><i class="fas fa-running  text-[10px]"></i>횟수</button>
 
                                 </div>
                             </div>
@@ -774,7 +774,7 @@
                         <span class="text-gray-300">~</span>
                         <input type="date" id="export-end" class="flex-1 text-[10px] p-2 bg-gray-50 border border-gray-100 rounded-lg outline-none font-bold">
                         <button id="btn-logs-csv" class="bg-brand-500 hover:bg-brand-600 text-white px-3 py-2 rounded-lg text-[10px] font-bold shadow-sm flex items-center gap-1.5">
-                            <i class="fa-solid fa-download"></i> CSV 다운로드
+                            <i class="fa-solid fa-download"></i> CSV
                         </button>
                     </div>
                 </div>
@@ -1762,9 +1762,11 @@
                                     <span class="text-[9px] font-bold text-slate-400 
                                         ${(titlePrefix === '팀' && isSlowRun ) ? 'cursor-pointer hover:text-blue-600 hover:underline decoration-blue-300 transition-colors' : ''}" 
                                         ${(titlePrefix === '팀' && isSlowRun ) ? `onclick="showTeamMembers('${data.name}', 'tp2')"` : ''}>
-                                        ${data.members.size}인
+                                        ${data.members.size}명
                                     </span>
                                 </div>
+                            </div>
+                            <div class="flex justify-end items-center">
                                 <div class="flex gap-1">
                                     <span class="badge-stat ${currentMetric==='score'?'highlight':''}">${data.score.toFixed(1)}pt</span>
                                     <span class="badge-stat ${currentMetric==='dist'?'highlight':''}">${data.dist.toFixed(1)}km</span>
