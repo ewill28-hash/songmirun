@@ -1762,16 +1762,14 @@
                                         ${titlePrefix === '팀' ? `onclick="showTeamMembers('${data.name}', 'tp1')"` : ''}>
                                         ${titlePrefix}:${data.name}
                                     </span>
-                                    <span class="text-[9px] font-bold text-slate-400 
-                                        ${(titlePrefix === '팀' && isSlowRun ) ? 'cursor-pointer hover:text-blue-600 hover:underline decoration-blue-300 transition-colors' : ''}" 
-                                        ${(titlePrefix === '팀' && isSlowRun ) ? `onclick="showTeamMembers('${data.name}', 'tp2')"` : ''}>
-                                        ${data.members.size}명
-                                    </span>
                                 </div>
-                            </div>
-                            <div class="flex justify-end items-center">
                                 <div class="flex gap-1">
-                                    <span class="badge-stat ${currentMetric==='score'?'highlight':''}">${data.score.toFixed(1)}pt</span>
+                                    <span 
+                                    class="badge-stat ${currentMetric === 'score' ? 'highlight' : ''}" 
+                                    ${(titlePrefix === '팀' && isSlowRun) ? `onclick="showTeamMembers('${data.name}', 'tp2')"` : ''}
+                                    >
+                                    ${data.score.toFixed(1)}pt
+                                    </span>
                                     <span class="badge-stat ${currentMetric==='dist'?'highlight':''}">${data.dist.toFixed(1)}km</span>
                                     <span class="badge-stat ${currentMetric==='time'?'highlight':''}">${timeStr.split(':').slice(0, 2).join(':')}</span>
                                     <span class="badge-stat ${currentMetric==='count'?'highlight':''}">${data.count}회</span>
