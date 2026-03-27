@@ -1756,23 +1756,23 @@
                     return `
                         <div class="space-y-1 bg-slate-50 p-1 rounded-xl mb-2"> 
                             <div class="flex justify-between items-center">
-                                <div class="flex items-center gap-1">
+                                <div class="flex items-center gap-0">
                                     <div class="w-2 h-2 rounded-full" style="background-color: ${data.color}"></div>
                                     <span class="text-[12px] font-black text-slate-800 ${titlePrefix === '팀' ? 'cursor-pointer hover:text-blue-600 hover:underline decoration-blue-300 transition-colors' : ''}" 
                                         ${titlePrefix === '팀' ? `onclick="showTeamMembers('${data.name}', 'tp1')"` : ''}>
                                         ${titlePrefix}:${data.name}
                                     </span>
                                 </div>
-                                <div class="flex gap-1">
+                                <div class="flex gap-0">
                                     <span 
                                     class="badge-stat ${currentMetric === 'score' ? 'highlight' : ''}" 
                                     ${(titlePrefix === '팀' && isSlowRun) ? `onclick="showTeamMembers('${data.name}', 'tp2')"` : ''}
                                     >
                                     ${data.score.toFixed(1)}pt
                                     </span>
-                                    <span class="badge-stat ${currentMetric==='dist'?'highlight':''}">${data.dist.toFixed(1)}km</span>
-                                    <span class="badge-stat ${currentMetric==='time'?'highlight':''}">${timeStr.split(':').slice(0, 2).join(':')}</span>
-                                    <span class="badge-stat ${currentMetric==='count'?'highlight':''}">${data.count}회</span>
+                                    <span class="badge-stat ${currentMetric==='dist'?'highlight':''}">${data.dist.toFixed(1)}k</span>
+                                    <span class="badge-stat ${currentMetric==='time'?'highlight':''}">${timeStr.split(':')[0]}h</span>
+                                    <span class="badge-stat ${currentMetric==='count'?'highlight':''}">${data.count}</span>
                                 </div>
                             </div>
                             <div class="h-2 bg-slate-200/60 rounded-full overflow-hidden">
