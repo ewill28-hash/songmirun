@@ -1232,7 +1232,7 @@
         let selectedType = '전체'; 
         let selectedMonthF = '전체'; 
         let selectedMonthT = '전체'; 
-        let myTeam = '대기중'; // 초기값 설정
+        let myTeam = '홀가분'; // 초기값 설정
 
         let selectedRankingPeriod = 'this'; 
         let sortConfig = { key: 'log_nickname', direction: 'asc' };
@@ -1568,7 +1568,7 @@
         // 2. 집계 로직 통합
             filtered.forEach(r => {
                 const memberInfo = crewMembers[r.user_name] || {};
-                const teamName = memberInfo.team || '대기중';
+                const teamName = memberInfo.team || '홀가분';
                 const genderName = memberInfo.gender || '미설정';
                 const d = Number(r.distance || 0);
                 const t = Number(r.duration || 0);
@@ -1591,7 +1591,7 @@
 
                 };
 
-                aggregate(teams, teamName, TEAM_COLORS[teamName] || '#94a3b8');
+                aggregate(teams, teamName, TEAM_COLORS[teamName] || '#facc15');
                 aggregate(genders, genderName, genderName === '남성' ? '#6366f1' : (genderName === '여성' ? '#f43f5e' : '#fbbf24'));
 
                 // 내 기록 합산
@@ -1621,7 +1621,7 @@
 
                 const teamData = teams[teamName];
                 // 정의된 팀 컬러 가져오기 (없으면 기본값 설정)
-                const themeColor = TEAM_COLORS[teamName] || '#94a3b8';
+                const themeColor = TEAM_COLORS[teamName] || '#facc15';
 
                 titleEl.innerHTML = `
                     <div class="flex items-center gap-2 px-3 py-1.5 rounded-full inline-flex" 
@@ -1815,7 +1815,7 @@
             '황영조': '#f87171', 
             '손기정': '#3b82f6', 
             '이봉주': '#22c55e', 
-            '대기중': '#94a3b8'     
+            '홀가분': '#facc15'     
         };
 
         window.setMonthFilterT = (month) => {
@@ -1925,7 +1925,7 @@
             };
 
             if (dataScope === 'me') {
-                const myTeamName = crewMembers[userNickname]?.team || myTeam || '대기중';
+                const myTeamName = crewMembers[userNickname]?.team || myTeam || '홀가분';
                 
                 // 해당 팀의 데이터 가져오기
                 const td = teams[myTeamName] || { dist: 0, time: 0, count: 0, score: 0, members: new Set(), color: '#e2e8f0' };
@@ -1949,7 +1949,7 @@
                     // 'avg' 모드면 평균값, 아니면 총합(sum)
                     return dataScope === 'avg' ? val / memberCount : val;
                 });
-                colors = teamEntries.map(t => t.color || '#94a3b8');
+                colors = teamEntries.map(t => t.color || '#facc15');
             }
 
             // 차트 재생성 로직
@@ -2202,7 +2202,7 @@
                 Object.entries(crewMembers).forEach(([nickname, info]) => {
                     // nickname은 "이봉주", "Ben2" 등이고 info는 {team: "...", gender: "..."} 입니다.
                     genderMap[nickname] = info.gender || '미설정7';
-                    teamMap[nickname] = info.team || '대기중7';
+                    teamMap[nickname] = info.team || '홀가분7';
                 });
             }
 
@@ -2333,7 +2333,7 @@
 
                 if (nickname) {
                     genderMap[nickname] = info.gender || '미설정';
-                    teamMap[nickname] = info.team || '대기중';
+                    teamMap[nickname] = info.team || '홀가분';
                 }
             });
 
@@ -2381,7 +2381,7 @@
                 // 평균 페이스 계산 (분/km)
                 avgPace: stats.distance > 0 ? (stats.duration / stats.distance) : 0,
                 // 팀 정보 결합 (앞서 만든 teamMap 활용)
-                team: teamMap[name] || '대기중'
+                team: teamMap[name] || '홀가분'
             })).sort((a, b) => b.distance - a.distance); // 거리순 내림차순 정렬
 
             // 3. (선택 사항) 집계된 데이터를 배열로 변환하여 거리순 정렬 (랭킹용)
@@ -2877,10 +2877,10 @@
 
             if (userRecord) {
                 //console.log("찾은 유저 정보:", userRecord);
-                const userTeam = userRecord.team || '대기중';
+                const userTeam = userRecord.team || '홀가분';
                 const userGender = userRecord.gender || '미설정';
             }
-            const myTeam2 = userRecord ? userRecord.team : '대기중2';
+            const myTeam2 = userRecord ? userRecord.team : '홀가분2';
             // 팀 배지 설정 (기존 코드 유지 또는 확인)
             const badge = document.getElementById('display-team-badge');
             if (badge) {
@@ -2888,7 +2888,7 @@
                 badge.innerHTML = `<span class="text-[9px] font-black uppercase">팀: ${myTeam2}</span>`;
                 
                 // 배경색 설정
-                badge.style.backgroundColor = TEAM_COLORS[myTeam2] || '#94a3b8';
+                badge.style.backgroundColor = TEAM_COLORS[myTeam2] || '#facc15';
                 
                 // 배지 형태를 위한 공통 스타일 (이미 CSS에 없다면 추가)
                 badge.className = `px-1.5 py-0.5 rounded text-white flex items-center justify-center`;
@@ -3144,7 +3144,7 @@
             document.getElementById('mem-log-nickname').value = m.log_nickname || '';
             document.getElementById('mem-nickname').value = m.nickname;
             document.getElementById('mem-gender').value = m.gender;
-            document.getElementById('mem-team').value = m.team|| '대기중';
+            document.getElementById('mem-team').value = m.team|| '홀가분';
             document.getElementById('mem-joindate').value = m.join_date;
             document.getElementById('mem-memo').value = m.memo || '';
             document.getElementById('mem-form-title').innerText = "크루 정보 수정";
@@ -3168,14 +3168,14 @@
                 // reduce를 사용하여 한 번에 객체 매핑 (더 깔끔한 방식)
                 crewMembers = data.reduce((acc, member) => {
                     acc[member.nickname] = { 
-                        team: member.team || '대기중', 
+                        team: member.team || '홀가분', 
                         gender: member.gender || '미설정' 
                     };
                     return acc;
                 }, {});
 
                 // 내 팀 정보 갱신
-                myTeam = crewMembers[userNickname]?.team || '대기중';
+                myTeam = crewMembers[userNickname]?.team || '홀가분';
 
                 // UI 갱신 (관련된 부분만 호출)
                 renderMembers(); 
@@ -3389,7 +3389,7 @@
                         if (data) {
                             data.forEach(d => {
                                 members[d.nickname] = {
-                                    team: d.team || '대기중2',
+                                    team: d.team || '홀가분2',
                                     log_nickname: d.log_nickname,
                                     nickname: d.nickname
                                 };
@@ -3406,11 +3406,11 @@
                             myCurrentTeam = myInfo.team;
                         } else {
                             myCurrentNickname = userNickname;
-                            myCurrentTeam = '대기중';
+                            myCurrentTeam = '홀가분';
                         }
 
                         const myTeam2 = myCurrentTeam;
-                        const teamBgColor2 = TEAM_COLORS[myTeam2] || '#94a3b8';
+                        const teamBgColor2 = TEAM_COLORS[myTeam2] || '#facc15';
                         document.getElementById('display-nickname2').innerHTML = `
                             <div class="flex items-center gap-1">
                                 <span class="text-white text-[7px] font-black px-1 py-1 rounded-md shadow-sm whitespace-nowrap flex items-center h-fit"
@@ -3728,7 +3728,7 @@
                     
                     join_date: document.getElementById('mem-joindate').value,
                     memo: document.getElementById('mem-memo').value.trim(),
-                    team: document.getElementById('mem-team').value || '대기중',
+                    team: document.getElementById('mem-team').value || '홀가분',
                     created_at: new Date().toISOString(),
                     updated_at: new Date().toISOString()
                 };
@@ -3788,7 +3788,7 @@
                             join_date: p[0],      // 2025-01-01
                             log_nickname: p[1],   // 999
                             nickname: p[2],       // 999 (입력 데이터 순서 확인 필요)
-                            team: p[3] || '대기중', // 이봉주
+                            team: p[3] || '홀가분', // 이봉주
                             gender: p[4],         // 여성
                             memo: '일괄 등록됨',
                             updated_at: new Date().toISOString()
