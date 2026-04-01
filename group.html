@@ -17,7 +17,7 @@
     <div class="max-w-6xl mx-auto">
         <header class="mb-8 text-center">
             <h1 class="text-3xl font-black text-slate-800 mb-2">🐍 쏭미션 팀 배정</h1>
-            <p class="text-slate-500">거리합계로 최적의 밸런스로 배정합니다.-Jake-</p>
+            <p class="text-slate-500">포인트 합계로 최적의 밸런스로 배정합니다.-Jake-</p>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -26,7 +26,7 @@
             <div class="lg:col-span-1 space-y-4">
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
                     <div class="flex justify-between items-end mb-2">
-                        <label class="block text-sm font-bold text-slate-700">데이터 입력 (이름 거리)</label>
+                        <label class="block text-sm font-bold text-slate-700">데이터 입력 (이름 포인트)</label>
                         <button onclick="fillSampleData()" class="text-xs font-bold text-blue-500 hover:text-blue-700 transition-colors">
                             + 샘플 데이터 입력
                         </button>
@@ -50,7 +50,7 @@
                     
                     <div class="mt-4 text-xs text-slate-400 leading-5">
                         * 한 줄에 한 명씩 입력하세요.<br>
-                        * 이름과 거리 사이는 공백으로 구분합니다.<br>
+                        * 이름과 포인트 사이는 공백으로 구분합니다.<br>
                         * <strong>밸런스 모드:</strong> 하위 6명은 팀별 총합을 고려하여 보정 배정됩니다.
                     </div>
                 </div>
@@ -67,8 +67,8 @@
                         </div>
                         <div id="group-0" class="space-y-2 min-h-[100px]"></div>
                         <div class="mt-6 pt-4 border-t border-dashed border-slate-200">
-                            <div class="text-xs text-slate-400">총 거리 합계</div>
-                            <div id="sum-0" class="text-lg font-bold text-slate-700">0 km</div>
+                            <div class="text-xs text-slate-400">총 포인트 합계</div>
+                            <div id="sum-0" class="text-lg font-bold text-slate-700">0 pt</div>
                         </div>
                     </div>
 
@@ -80,8 +80,8 @@
                         </div>
                         <div id="group-1" class="space-y-2 min-h-[100px]"></div>
                         <div class="mt-6 pt-4 border-t border-dashed border-slate-200">
-                            <div class="text-xs text-slate-400">총 거리 합계</div>
-                            <div id="sum-1" class="text-lg font-bold text-slate-700">0 km</div>
+                            <div class="text-xs text-slate-400">총 포인트 합계</div>
+                            <div id="sum-1" class="text-lg font-bold text-slate-700">0 pt</div>
                         </div>
                     </div>
 
@@ -93,8 +93,8 @@
                         </div>
                         <div id="group-2" class="space-y-2 min-h-[100px]"></div>
                         <div class="mt-6 pt-4 border-t border-dashed border-slate-200">
-                            <div class="text-xs text-slate-400">총 거리 합계</div>
-                            <div id="sum-2" class="text-lg font-bold text-slate-700">0 km</div>
+                            <div class="text-xs text-slate-400">총 포인트 합계</div>
+                            <div id="sum-2" class="text-lg font-bold text-slate-700">0 pt</div>
                         </div>
                     </div>
                 </div>
@@ -220,13 +220,13 @@
                     item.className = "flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100 hover:bg-white hover:shadow-sm transition-all";
                     item.innerHTML = `
                         <span class="text-sm font-medium text-slate-600"><span class="text-slate-300 mr-2 font-mono">${pIdx + 1}</span>${p.name}</span>
-                        <span class="text-sm font-bold text-slate-800">${p.dist.toLocaleString()} <span class="text-[10px] text-slate-400 font-normal ml-1">km</span></span>
+                        <span class="text-sm font-bold text-slate-800">${p.dist.toLocaleString()} <span class="text-[10px] text-slate-400 font-normal ml-1">pt</span></span>
                     `;
                     listEl.appendChild(item);
                 });
 
                 countEl.innerText = `${group.length}명`;
-                sumEl.innerText = `${sum.toLocaleString(undefined, {minimumFractionDigits:1})} km`;
+                sumEl.innerText = `${sum.toLocaleString(undefined, {minimumFractionDigits:1})} pt`;
             });
         }
 
@@ -234,7 +234,7 @@
             if (lastGroups.length === 0) return;
 
             let csvContent = "\uFEFF"; 
-            csvContent += "팀명,순번,이름,거리(km)\n";
+            csvContent += "팀명,순번,이름,포인트(pt)\n";
 
             lastGroups.forEach((group, idx) => {
                 const teamName = teamNames[idx];
