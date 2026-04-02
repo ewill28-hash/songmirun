@@ -403,7 +403,9 @@
                                 <label id="label-dist21" title="Click Half" class="text-[11px] text-brand-700 font-black block mb-1 ml cursor-pointer text-center">Half</label>
                                 <label id="label-dist42" title="Click Full" class="text-[11px] text-brand-700 font-black block mb-1 ml cursor-pointer text-center">Full</label>
                             </div>
-                            <input type="number" step="1.000" id="in-dist" placeholder="0.000" class="w-full bg-white border-2 border-brand-100 p-3 rounded-2xl text-sm font-bold outline-none shadow-sm">
+
+                            <input type="number" step="1.000" id="in-dist" placeholder="0.000" 
+                                class="w-full !bg-rose-50 border-2 border-rose-200 p-3 rounded-2xl text-sm font-bold outline-none shadow-sm text-rose-900 placeholder:text-rose-300">
                         </div>
 
                         <!-- Improved Time Input Section -->
@@ -415,9 +417,14 @@
                                 <label id="label-timeS" title="Click +10s" class="text-[11px] text-brand-500 font-black block mb-1 ml cursor-pointer text-center">+10s</label>
                             </div>
                             <div class="grid grid-cols-3 gap-1">
-                                <input type="number" id="in-time-h" placeholder="시" min="0" class="w-full bg-white border-2 border-brand-100 p-3 rounded-xl text-center text-xs font-bold outline-none shadow-sm">
-                                <input type="number" id="in-time-m" placeholder="분" min="0" max="59" class="w-full bg-white border-2 border-brand-100 p-3 rounded-xl text-center text-xs font-bold outline-none shadow-sm">
-                                <input type="number" id="in-time-s" placeholder="초" min="0" max="59" class="w-full bg-white border-2 border-brand-100 p-3 rounded-xl text-center text-xs font-bold outline-none shadow-sm">
+                                <input type="number" id="in-time-h" placeholder="시" min="0" 
+                                    class="w-full !bg-fuchsia-200 border-2 border-fuchsia-300 p-3 rounded-xl text-center text-xs font-bold outline-none shadow-sm text-fuchsia-900 placeholder:text-fuchsia-500">
+                                
+                                <input type="number" id="in-time-m" placeholder="분" min="0" max="59" 
+                                    class="w-full !bg-fuchsia-100 border-2 border-fuchsia-200 p-3 rounded-xl text-center text-xs font-bold outline-none shadow-sm text-fuchsia-800 placeholder:text-fuchsia-400">
+                                
+                                <input type="number" id="in-time-s" placeholder="초" min="0" max="59" 
+                                    class="w-full !bg-fuchsia-50 border-2 border-fuchsia-100 p-3 rounded-xl text-center text-xs font-bold outline-none shadow-sm text-fuchsia-700 placeholder:text-fuchsia-300">
                             </div>
                         </div>
 
@@ -435,17 +442,20 @@
                         <div id="more-options" class="expandable-content grid grid-cols-2 gap-4">
                             <div>
                                 <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1">심박수(bpm)</label>
-                                <input type="number" id="in-bpm" min="60" max="300" placeholder="0" class="w-full bg-white border-2 border-brand-100 p-3 rounded-2xl text-sm font-bold outline-none shadow-sm">
+                                <input type="number" id="in-bpm" min="60" max="300" placeholder="0" 
+                                    class="w-full !bg-rose-50 border-2 border-rose-200 p-3 rounded-2xl text-sm font-bold outline-none shadow-sm focus:border-emerald-400 focus:bg-white transition-all text-emerald-900">
                             </div>
 
                             <div>
                                 <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1">케이던스 (spm)</label>
-                                <input type="number" id="in-cadence" min="60" max="300" placeholder="0" class="w-full bg-white border-2 border-brand-100 p-3 rounded-2xl text-sm font-bold outline-none shadow-sm">
+                                <input type="number" id="in-cadence" min="60" max="300" placeholder="0" 
+                                    class="w-full !bg-rose-50 border-2 border-rose-200 p-3 rounded-2xl text-sm font-bold outline-none shadow-sm focus:border-emerald-400 focus:bg-white transition-all text-emerald-900">
                             </div>
 
                             <div class="col-span-2">
                                 <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1">메모</label>
-                                <input type="text" id="in-memo" placeholder="러닝 메모를 입력하세요" class="w-full bg-white border-2 border-brand-100 p-3 rounded-2xl text-sm font-bold outline-none shadow-sm">
+                                <input type="text" id="in-memo" placeholder="러닝 메모를 입력하세요" 
+                                    class="w-full !bg-rose-50 border-2 border-rose-200 p-3 rounded-2xl text-sm font-bold outline-none shadow-sm focus:border-emerald-400 focus:bg-white transition-all text-emerald-900">
                             </div>
                         </div>                    
                     </div>                    
