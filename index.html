@@ -1677,65 +1677,106 @@
                 `;
 
 
+                // 1. 선택된 년/월을 기준으로 '기준일' 객체 생성
+                // selectedMonthT가 '전체'일 경우 전월 대비가 무의미하므로 기본 처리가 필요합니다.
+                const selYear = parseInt(selectedYear);
+                const selMonth = selectedMonthT === '전체' ? (new Date().getMonth() + 1) : parseInt(selectedMonthT);
+
+                // 2. 기준 월의 1일을 구한 뒤, 1개월 전으로 설정
+                const currentBaseDate = new Date(selYear, selMonth - 1, 1);
+                const lastMonthBaseDate = new Date(selYear, selMonth - 2, 1); // 1개월 전 1일
+
+                const lastYear = lastMonthBaseDate.getFullYear();
+                const lastMonth = lastMonthBaseDate.getMonth() + 1;
+
+                // 3. 지난 데이터 필터링 (lastMonthFiltered)
+                const lastMonthFiltered = allLogs.filter(l => {
+                    if (!l.run_date) return false;
+                    const dateObj = new Date(l.run_date);
+                    const logYear = dateObj.getFullYear();
+                    const logMonth = dateObj.getMonth() + 1;
+
+                    if (selectedMonthT === '전체') {
+                        // [케이스 A] '전체' 선택 시 -> '전년도 전체' 데이터 추출
+                        return logYear === (selYear - 1);
+                    } else {
+                        // [케이스 B] 특정 월 선택 시 -> '전월' 데이터 추출
+                        // (1월일 경우 작년 12월로 자동 계산되는 Date 객체 방식 활용)
+                        const targetDate = new Date(selYear, parseInt(selectedMonthT) - 2, 1);
+                        return logYear === targetDate.getFullYear() && 
+                            logMonth === (targetDate.getMonth() + 1);
+                    }
+                });
+
                 // 3. 멤버별 상세 데이터 추출 (기존 filtered 배열 활용)
                 const sortedMembers = Array.from(teamData.members).sort();
 
                 listEl.innerHTML = sortedMembers.map((name, index) => {
-                    // 현재 팀원(name)의 데이터만 필터링하여 합산
+                // [이번 달] 데이터 필터링 및 합산
                     const memberLogs = filtered.filter(l => l.user_name === name);
                     const mDist = memberLogs.reduce((sum, r) => sum + Number(r.distance || 0), 0);
                     const mCount = memberLogs.length;
+
+                    // [지난 달] 데이터 필터링 및 합산 (lastMonthFiltered 배열이 있다고 가정)
+                    // 만약 변수명이 다르다면 해당 프로젝트의 지난달 배열 변수명으로 변경하세요.
+                    const lastMonthLogs = lastMonthFiltered.filter(l => l.user_name === name);
+                    const lastMDist = lastMonthLogs.reduce((sum, r) => sum + Number(r.distance || 0), 0);
+                                                    
+
                     const mGender = crewMembers[name]?.gender || '미설정';
                     const genderColor = mGender === '남성' ? 'text-blue-400' : (mGender === '여성' ? 'text-pink-400' : 'text-slate-300');
 
                 
-                const headerHtml = `
-                    <div class="flex items-center justify-between px-1.5 py-1 mb-1 border-b-2 border-slate-100 bg-slate-50/50 rounded-t-md sticky top-0 z-10">
-                        <div class="flex items-center gap-1">
-                            <span class="text-[8px] font-bold text-slate-300 w-2.5">#</span>
-                            <button class="text-[10px] font-bold text-slate-500 hover:text-slate-800 transition-colors flex items-center gap-0.5">
-                                이름 <span class="text-[7px]">▼</span>
-                            </button>
+                    const headerHtml = `
+                        <div class="flex items-center justify-between px-1.5 py-1 mb-1 border-b-2 border-slate-100 bg-slate-50/50 rounded-t-md sticky top-0 z-10">
+                            <div class="flex items-center gap-1">
+                                <span class="text-[8px] font-bold text-slate-300 w-2.5">#</span>
+                                <button class="text-[10px] font-bold text-slate-500 hover:text-slate-800 transition-colors flex items-center gap-0.5">
+                                    이름 <span class="text-[7px]">▼</span>
+                                </button>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <button class="text-[10px] font-bold text-slate-500 hover:text-slate-800 transition-colors flex items-center gap-0.5 min-w-[35px] justify-end">
+                                    거리 <span class="text-[7px]"></span>
+                                </button>
+                                <div class="w-[1px] h-2 bg-slate-200"></div>
+                                <button class="text-[10px] font-bold text-slate-500 hover:text-slate-800 transition-colors flex items-center gap-0.5 min-w-[25px] justify-end">
+                                    횟수 <span class="text-[7px]"></span>
+                                </button>
+                            </div>
                         </div>
-                        <div class="flex items-center gap-1">
-                            <button class="text-[10px] font-bold text-slate-500 hover:text-slate-800 transition-colors flex items-center gap-0.5 min-w-[35px] justify-end">
-                                거리 <span class="text-[7px]"></span>
-                            </button>
-                            <div class="w-[1px] h-2 bg-slate-200"></div>
-                            <button class="text-[10px] font-bold text-slate-500 hover:text-slate-800 transition-colors flex items-center gap-0.5 min-w-[25px] justify-end">
-                                횟수 <span class="text-[7px]"></span>
-                            </button>
-                        </div>
-                    </div>
-                `;
-                const runEmojis = ['🏃', '🏃‍♀️', '🏃‍♂️', '👟', '💨', '🏁', '🥇'];
-                const randomEmoji = runEmojis[Math.floor(Math.random() * runEmojis.length)];
+                    `;
+                    const runEmojis = ['🏃', '🏃‍♀️', '🏃‍♂️', '👟', '💨', '🏁', '🥇'];
+                    const randomEmoji = runEmojis[Math.floor(Math.random() * runEmojis.length)];
 
-                const rowHtml = (isSlowRun && type === "tp2") ? `
-                    <div class="flex items-center justify-between px-1.5 py-0.5 hover:bg-slate-50 rounded-md transition-colors border-b border-slate-50 last:border-0 group">
-                        <div class="flex items-center gap-1">
-                            <span class="text-[8px] font-bold text-slate-300 w-2.5">${index + 1}</span>
-                            <div class="flex flex-col">
-                                <div class="flex items-center gap-1">
-                                    <span class="mr-1 text-[11px]">${randomEmoji}</span>
-                                    <span class="text-[12px] font-extrabold text-slate-700 leading-tight">${name}</span>
-                                    <span class="text-[9px] ${genderColor} font-bold">${mGender[0]}</span>
+                    const rowHtml = (isSlowRun && type === "tp2") ? `
+                        <div class="flex items-center justify-between px-1.5 py-0.5 hover:bg-slate-50 rounded-md transition-colors border-b border-slate-50 last:border-0 group">
+                            <div class="flex items-center gap-1">
+                                <span class="text-[8px] font-bold text-slate-300 w-2.5">${index + 1}</span>
+                                <div class="flex flex-col">
+                                    <div class="flex items-center gap-1">
+                                        <span class="mr-1 text-[11px]">${randomEmoji}</span>
+                                        <span class="text-[12px] font-extrabold text-slate-700 leading-tight">${name}</span>
+                                        <span class="text-[9px] ${genderColor} font-bold">${mGender[0]}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <div class="text-right min-w-[35px]">
+
+                                    
+                                    <span class="text-[10px] font-black text-slate-400">(${lastMDist.toFixed(1)})</span>
+                                    <span class="text-[10px] font-black text-slate-600">${mDist.toFixed(1)}</span>
+                                    <span class="text-[8px] text-slate-400">km</span>
+                                </div>
+                                <div class="w-[1px] h-2.5 bg-slate-200"></div>
+                                <div class="text-right min-w-[25px]">
+                                    <span class="text-[10px] font-black text-slate-600">${mCount}</span>
+                                    <span class="text-[8px] text-slate-400">회</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="flex items-center gap-1">
-                            <div class="text-right min-w-[35px]">
-                                <span class="text-[10px] font-black text-slate-600">${mDist.toFixed(1)}</span>
-                                <span class="text-[8px] text-slate-400">km</span>
-                            </div>
-                            <div class="w-[1px] h-2.5 bg-slate-200"></div>
-                            <div class="text-right min-w-[25px]">
-                                <span class="text-[10px] font-black text-slate-600">${mCount}</span>
-                                <span class="text-[8px] text-slate-400">회</span>
-                            </div>
-                        </div>
-                    </div>
-                ` : `
+                    ` : `
                     <div class="flex items-center justify-between px-1.5 py-0.5 hover:bg-slate-50 rounded-md transition-colors border-b border-slate-50 last:border-0 group">
                         <div class="flex items-center gap-1">
                             <span class="text-[8px] font-bold text-slate-300 w-2.5">${index + 1}</span>                    
@@ -1755,7 +1796,6 @@
                                 <span class="text-[8px] text-slate-400"></span>
                             </div>
                         </div>
-
                     </div>
                 `;
 
