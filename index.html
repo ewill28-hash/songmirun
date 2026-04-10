@@ -325,10 +325,10 @@
                 <div class="bg-brand-500 p-3 rounded-2xl text-white shadow-lg shadow-brand-200 border border-brand-400">
                     <p class="text-[9px] font-bold text-brand-100 uppercase tracking-tighter">Distance</p>
                     
-                    <p id="stat-distm" class="text-[15px] font-black italic leading-none mt-1 text-center">
+                    <p id="stat-distm" onclick="renderChallengeModal('me','0')" class="text-[15px] font-black italic leading-none mt-1 text-center">
                         <span class="text-[10px] opacity-80 not-italic mr-1">Me:</span>0 km
                     </p>
-                    <p id="stat-dist" onclick="renderChallengeModal('year','0')" 
+                    <p id="stat-dist" onclick="renderChallengeModal('all','0')" 
                                         class="text-[15px] font-black italic leading-none mt-1 text-center text-brand-200 transition-all duration-200 hover:text-white hover:brightness-125 cursor-pointer">
                         <span class="text-[10px] opacity-70 not-italic mr-1">All:</span>0 km
                     </p>
@@ -2074,14 +2074,30 @@ const DESTINATIONS = [
         window.renderChallengeModal = (title, distance) => {
             const currentYearLogs = allLogs.filter(l => l.run_date && new Date(l.run_date).getFullYear() === parseInt(selectedYear));
             const totalDist = currentYearLogs.reduce((sum, l) => sum + Number(l.distance || 0), 0);
-            const currentDist = parseFloat(totalDist);
+
+            const myYearLogs = allLogs.filter(l => l.run_date 
+                && new Date(l.run_date).getFullYear() === parseInt(selectedYear) 
+                &&    l.user_name === userNickname);
+            const myDist = myYearLogs.reduce((sum, l) => sum + Number(l.distance || 0), 0);
+            
+            let currentDist; 
+            if (title === 'me') {
+                currentDist = parseFloat(myDist);
+                document.getElementById('modal-title_c').innerText = selectedYear + '년 당신의 여정 경로';
+            } else if (title === 'all') {
+                currentDist = parseFloat(totalDist);
+                document.getElementById('modal-title_c').innerText = selectedYear + '년 송미런 여정 경로';
+            } else {
+                // 그 외의 경우 처리
+                currentDist = 0;
+            }
+
+
             if (isNaN(currentDist) || currentDist < 0) return;
 
             const reached = [...DESTINATIONS].filter(d => d.dist <= currentDist).pop() || DESTINATIONS[0];
             const next = DESTINATIONS.find(d => d.dist > currentDist) || DESTINATIONS[DESTINATIONS.length - 1];
 
-            // 기본 텍스트 설정
-            document.getElementById('modal-title_c').innerText = selectedYear + '년 송미런 여정 경로';
             document.getElementById('cur-val-inner').innerText = 
                 currentDist.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }); 
             
