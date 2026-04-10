@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -340,7 +341,8 @@
                         Me: 0 m
                     </p>
                     
-                    <p id="stat-time" class="text-[15px] text-right font-black text-orange-400 italic leading-none mt-1 pr-2">
+                    <p id="stat-time" onclick="openFlowerStageByCurrentProgress()"
+                                    class="text-[15px] text-right font-black text-orange-400 italic leading-none mt-1 pr-2">
                         All: 0 m
                     </p>
                 </div>
@@ -1088,6 +1090,24 @@
         </div>
     </div>
 
+<div id="flower-modal" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white w-full max-w-sm rounded-[3rem] shadow-2xl overflow-hidden border-t-[12px] border-pink-500 animate-in fade-in zoom-in duration-300">
+        <div class="p-10 text-center">
+            <div id="flower-emoji" class="text-7xl mb-6 drop-shadow-lg"></div>
+            
+            <h2 id="flower-title" class="text-3xl font-[900] text-slate-800 mb-3 tracking-tighter"></h2>
+            
+            <div id="flower-status" class="inline-block px-3 py-1 bg-pink-50 text-pink-600 rounded-full text-xs font-black mb-6 tracking-widest">
+            </div>
+            
+            <p id="flower-desc" class="text-slate-500 leading-relaxed font-medium mb-8 text-sm"></p>
+            
+            <button onclick="closeFlowerModal()" class="w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-sm transition-all active:scale-95 hover:bg-black">
+                닫기
+            </button>
+        </div>
+    </div>
+</div>
 
 <!-- Modals -->
     <!-- Profile Edit Modal -->
@@ -2016,48 +2036,123 @@
         }
 
        //window.syncAndRefresh = () => updateUI_Team();
-        
-const DESTINATIONS = [
-    { name: "송도 (미추홀)", code: "ICN", dist: 0, emoji: "👟" }, 
-    { name: "서울 (남산타워)", code: "GMP", dist: 35, emoji: "🗼" },
-    { name: "대전 (성심당)", code: "CJJ", dist: 140, emoji: "🥖" }, // 160 -> 140 (직선거리 조정)
-    { name: "평창 (올림픽)", code: "YNY", dist: 185, emoji: "❄️" },
-    { name: "대구 (팔공산)", code: "TAE", dist: 240, emoji: "🍎" },
-    { name: "광주 (무등산)", code: "KWJ", dist: 270, emoji: "🍉" },
-    { name: "부산 (해운대)", code: "PUS", dist: 330, emoji: "🌊" },
-    { name: "제주 (한라산)", code: "CJU", dist: 450, emoji: "🗿" },
-    { name: "후쿠오카(일본)", code: "FUK", dist: 540, emoji: "🍜" },
-    { name: "칭다오 (중국)", code: "TAO", dist: 560, emoji: "🍺" },
-    { name: "히로시마 (일본)", code: "HIJ", dist: 660, emoji: "⛩️" },
-    { name: "다롄 (중국)", code: "DLC", dist: 760, emoji: "🥟" },
-    { name: "상하이 (중국)", code: "PVG", dist: 830, emoji: "🏮" },
-    { name: "베이징 (중국)", code: "PEK", dist: 950, emoji: "🏯" },
-    { name: "도쿄 (M-Mecca)", code: "HND", dist: 1160, emoji: "🗼" },
-    { name: "타이베이 (대만)", code: "TPE", dist: 1480, emoji: "🥤" },
-    { name: "타이중 (대만)", code: "RMQ", dist: 1590, emoji: "🧋" },
-    { name: "가오슝 (대만)", code: "KHH", dist: 1740, emoji: "⚓" },
-    { name: "샤먼 (중국)", code: "XMN", dist: 1840, emoji: "🏝️" },
-    { name: "산터우 (중국)", code: "SWA", dist: 1960, emoji: "🥨" },
-    { name: "심천 (중국)", code: "SZX", dist: 2060, emoji: "💻" },    
-    { name: "홍콩", code: "HKG", dist: 2100, emoji: "🏙️" },
-    { name: "방콕", code: "BKK", dist: 3650, emoji: "🛕" },
-    { name: "싱가포르", code: "SIN", dist: 4600, emoji: "🦁" },
-    { name: "발리(모히또)", code: "DPS", dist: 5300, emoji: "🏖️" },
-    { name: "퍼스(호주서부)", code: "PER", dist: 7800, emoji: "☀️" },
-    { name: "시드니(호주)", code: "SYD", dist: 8300, emoji: "🦘" },
-    { name: "베를린(M-Mecca)", code: "BER", dist: 8500, emoji: "🏰" },
-    { name: "모스크바", code: "SVO", dist: 9300, emoji: "🇷🇺" },
-    { name: "아테네(M-Origin)", code: "ATH", dist: 9550, emoji: "🏛️" }, 
-    { name: "파리(M-Iconic)", code: "CDG", dist: 9650, emoji: "🇫🇷" }, // 베를린-아테네와 인접
-    { name: "런던(M-Mecca)", code: "LHR", dist: 10400, emoji: "🎡" },
-    { name: "시카고(M-Mecca)", code: "ORD", dist: 10500, emoji: "🏙️" }, // 보스턴보다 가까운 북극항로
-    { name: "보스턴(M-Mecca)", code: "BOS", dist: 10850, emoji: "🏛️" }, // 11500 -> 10850 수정
-    { name: "뉴욕(M-Mecca)", code: "JFK", dist: 11100, emoji: "🗽" }, // 13000 -> 11100 수정
-    { name: "멕시코시티", code: "MEX", dist: 12100, emoji: "🌮" }, // 14500 -> 12100 수정
-    { name: "리마(페루)", code: "LIM", dist: 16300, emoji: "🦙" },
-    { name: "상파울루(지구반바퀴)", code: "GRU", dist: 18400, emoji: "⚽" },
-    { name: "지구 한바퀴(완주!)", code: "ICN", dist: 40075, emoji: "🌍" }
-];
+                
+        const DESTINATIONS = [
+            { name: "송도 (미추홀)", code: "ICN", dist: 0, emoji: "👟" }, 
+            { name: "서울 (남산타워)", code: "GMP", dist: 35, emoji: "🗼" },
+            { name: "대전 (성심당)", code: "CJJ", dist: 140, emoji: "🥖" }, // 160 -> 140 (직선거리 조정)
+            { name: "평창 (올림픽)", code: "YNY", dist: 185, emoji: "❄️" },
+            { name: "대구 (팔공산)", code: "TAE", dist: 240, emoji: "🍎" },
+            { name: "광주 (무등산)", code: "KWJ", dist: 270, emoji: "🍉" },
+            { name: "부산 (해운대)", code: "PUS", dist: 330, emoji: "🌊" },
+            { name: "제주 (한라산)", code: "CJU", dist: 450, emoji: "🗿" },
+            { name: "후쿠오카(일본)", code: "FUK", dist: 540, emoji: "🍜" },
+            { name: "칭다오 (중국)", code: "TAO", dist: 560, emoji: "🍺" },
+            { name: "히로시마 (일본)", code: "HIJ", dist: 660, emoji: "⛩️" },
+            { name: "다롄 (중국)", code: "DLC", dist: 760, emoji: "🥟" },
+            { name: "상하이 (중국)", code: "PVG", dist: 830, emoji: "🏮" },
+            { name: "베이징 (중국)", code: "PEK", dist: 950, emoji: "🏯" },
+            { name: "도쿄 (M-Mecca)", code: "HND", dist: 1160, emoji: "🗼" },
+            { name: "타이베이 (대만)", code: "TPE", dist: 1480, emoji: "🥤" },
+            { name: "타이중 (대만)", code: "RMQ", dist: 1590, emoji: "🧋" },
+            { name: "가오슝 (대만)", code: "KHH", dist: 1740, emoji: "⚓" },
+            { name: "샤먼 (중국)", code: "XMN", dist: 1840, emoji: "🏝️" },
+            { name: "산터우 (중국)", code: "SWA", dist: 1960, emoji: "🥨" },
+            { name: "심천 (중국)", code: "SZX", dist: 2060, emoji: "💻" },    
+            { name: "홍콩", code: "HKG", dist: 2100, emoji: "🏙️" },
+            { name: "방콕", code: "BKK", dist: 3650, emoji: "🛕" },
+            { name: "싱가포르", code: "SIN", dist: 4600, emoji: "🦁" },
+            { name: "발리(모히또)", code: "DPS", dist: 5300, emoji: "🏖️" },
+            { name: "퍼스(호주서부)", code: "PER", dist: 7800, emoji: "☀️" },
+            { name: "시드니(호주)", code: "SYD", dist: 8300, emoji: "🦘" },
+            { name: "베를린(M-Mecca)", code: "BER", dist: 8500, emoji: "🏰" },
+            { name: "모스크바", code: "SVO", dist: 9300, emoji: "🇷🇺" },
+            { name: "아테네(M-Origin)", code: "ATH", dist: 9550, emoji: "🏛️" }, 
+            { name: "파리(M-Iconic)", code: "CDG", dist: 9650, emoji: "🇫🇷" }, // 베를린-아테네와 인접
+            { name: "런던(M-Mecca)", code: "LHR", dist: 10400, emoji: "🎡" },
+            { name: "시카고(M-Mecca)", code: "ORD", dist: 10500, emoji: "🏙️" }, // 보스턴보다 가까운 북극항로
+            { name: "보스턴(M-Mecca)", code: "BOS", dist: 10850, emoji: "🏛️" }, // 11500 -> 10850 수정
+            { name: "뉴욕(M-Mecca)", code: "JFK", dist: 11100, emoji: "🗽" }, // 13000 -> 11100 수정
+            { name: "멕시코시티", code: "MEX", dist: 12100, emoji: "🌮" }, // 14500 -> 12100 수정
+            { name: "리마(페루)", code: "LIM", dist: 16300, emoji: "🦙" },
+            { name: "상파울루(지구반바퀴)", code: "GRU", dist: 18400, emoji: "⚽" },
+            { name: "지구 한바퀴(완주!)", code: "ICN", dist: 40075, emoji: "🌍" }
+        ];
+
+
+        const FLOWER_STAGES = [
+            { day: 1, name: "씨앗", status: "준비", desc: "단단한 껍질 속에서 새로운 생명이 깨어나기를 기다립니다.", emoji: "🫘" },
+            { day: 5, name: "싹틈", status: "시작", desc: "흙을 뚫고 작은 초록색 고개가 고개를 내밀었습니다.", emoji: "🌱" },
+            { day: 10, name: "어린 잎", status: "성장", desc: "햇살을 받기 위해 잎사귀가 조금 더 넓어졌습니다.", emoji: "🌿" },
+            { day: 20, name: "줄기 확장", status: "도약", desc: "줄기가 튼튼해지며 하늘을 향해 곧게 뻗어 나갑니다.", emoji: "🪴" },
+            { day: 30, name: "잎의 무성함", status: "성숙", desc: "많은 잎들이 생겨나며 더 많은 에너지를 모으기 시작합니다.", emoji: "🍃" },
+            { day: 50, name: "꽃봉오리", status: "기대", desc: "작고 소중한 꽃봉오리가 맺혔습니다. 곧 꽃이 필 것 같아요.", emoji: "🎍" },
+            { day: 70, name: "개화 시작", status: "설렘", desc: "꽃잎이 살짝 벌어지며 고운 색깔이 드러나기 시작합니다.", emoji: "🎋" },
+            { day: 100, name: "첫 만개", status: "결실", desc: "드디어 화사한 꽃이 활짝 피어 향기를 머금었습니다.", emoji: "🌸" },
+            { day: 125, name: "향기의 확산", status: "조화", desc: "활짝 핀 꽃의 향기가 바람을 타고 멀리 퍼져나갑니다.", emoji: "🌹" },
+            { day: 150, name: "꽃밭 형성", status: "확장", desc: "주변으로 생명력이 퍼져나가며 아름다운 정원을 이룹니다.", emoji: "🌷" },
+            { day: 175, name: "생명력의 절정", status: "풍요", desc: "정원이 가장 풍성해지며 수많은 생명이 모여듭니다.", emoji: "🌼" },
+            { day: 200, name: "황금기", status: "절정", desc: "가장 찬란하고 아름다운 빛깔로 세상을 수놓습니다.", emoji: "🌺" },
+            { day: 250, name: "씨앗의 전파", status: "영원", desc: "또 다른 시작을 위해 건강한 씨앗을 세상에 남깁니다.", emoji: "🌻" }
+        ];
+
+        window.openFlowerStageByCurrentProgress = () => {
+            // 예: 현재 챌린지 진행 일수를 계산하거나, 특정 변수에서 가져옴
+            // 여기서는 예시로 10일차를 기본값으로 하되, 실제 로직에 맞게 수정 가능합니다.
+            //const currentDay = window.currentChallengeDay || '10'; 
+            const currentYearLogs = allLogs.filter(l => l.run_date && new Date(l.run_date).getFullYear() === parseInt(selectedYear));
+            const totalTime = currentYearLogs.reduce((sum, l) => sum + Number(l.duration || 0), 0);
+            const roundedTotalTime = Math.round(totalTime);
+            const days = Math.floor(roundedTotalTime / 1440);
+
+            // 기존에 만든 모달 오픈 함수 호출
+            window.openFlowerStage(days);
+        };
+
+        window.openFlowerStage = (day) => {
+            const currentDay = parseInt(day, 10);
+            
+            // 1. 현재 날짜보다 크거나 같은(>=) 데이터들만 필터링
+            // 2. 그중에서 day가 가장 작은 것(오름차순 정렬 후 첫 번째)을 선택
+            const stage = FLOWER_STAGES
+                .filter(s => parseInt(s.day, 10) >= currentDay)
+                .sort((a, b) => a.day - b.day)[0];
+
+            // 만약 현재 날짜가 데이터의 최대치를 초과했다면?
+            // 마지막 단계를 보여주거나 예외 처리를 합니다.
+            const finalStage = stage || FLOWER_STAGES[FLOWER_STAGES.length - 1];
+            
+            if (!finalStage) {
+                console.error("FLOWER_STAGES 데이터가 비어있습니다.");
+                return;
+            }
+
+            // 모달 데이터 매핑
+            document.getElementById('flower-emoji').textContent = finalStage.emoji;
+            document.getElementById('flower-title').textContent = `${currentDay}일차 목표: ${finalStage.name}`;
+            document.getElementById('flower-status').textContent = finalStage.status;
+            document.getElementById('flower-desc').textContent = finalStage.desc;
+
+            // 모달 표시 로직
+            const modal = document.getElementById('flower-modal');
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        };
+
+        // 꽃 모달 닫기 함수
+        window.closeFlowerModal = () => {
+            const modal = document.getElementById('flower-modal');
+            modal.classList.add('hidden');
+            document.body.style.overflow = ''; // 배경 스크롤 복구
+        };
+
+        // 모달 바깥쪽 클릭 시 닫기 (선택 사항)
+        window.addEventListener('click', (e) => {
+            const modal = document.getElementById('flower-modal');
+            if (e.target === modal) {
+                closeFlowerModal();
+            }
+        });
 
         window.getGreatCircleMapLink = (target) => {
             const originCode = "ICN"; // 기점: 인천공항
