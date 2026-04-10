@@ -1103,7 +1103,7 @@
             <p id="flower-desc" class="text-slate-500 leading-relaxed font-medium mb-8 text-sm"></p>
             
             <button onclick="closeFlowerModal()" class="w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-sm transition-all active:scale-95 hover:bg-black">
-                닫기
+                꽃길만 달리기
             </button>
         </div>
     </div>
@@ -2097,8 +2097,6 @@
         ];
 
         window.openFlowerStageByCurrentProgress = () => {
-            // 예: 현재 챌린지 진행 일수를 계산하거나, 특정 변수에서 가져옴
-            // 여기서는 예시로 10일차를 기본값으로 하되, 실제 로직에 맞게 수정 가능합니다.
             //const currentDay = window.currentChallengeDay || '10'; 
             const currentYearLogs = allLogs.filter(l => l.run_date && new Date(l.run_date).getFullYear() === parseInt(selectedYear));
             const totalTime = currentYearLogs.reduce((sum, l) => sum + Number(l.duration || 0), 0);
@@ -2111,15 +2109,9 @@
 
         window.openFlowerStage = (day) => {
             const currentDay = parseInt(day, 10);
-            
-            // 1. 현재 날짜보다 크거나 같은(>=) 데이터들만 필터링
-            // 2. 그중에서 day가 가장 작은 것(오름차순 정렬 후 첫 번째)을 선택
             const stage = FLOWER_STAGES
                 .filter(s => parseInt(s.day, 10) >= currentDay)
                 .sort((a, b) => a.day - b.day)[0];
-
-            // 만약 현재 날짜가 데이터의 최대치를 초과했다면?
-            // 마지막 단계를 보여주거나 예외 처리를 합니다.
             const finalStage = stage || FLOWER_STAGES[FLOWER_STAGES.length - 1];
             
             if (!finalStage) {
@@ -2127,9 +2119,8 @@
                 return;
             }
 
-            // 모달 데이터 매핑
             document.getElementById('flower-emoji').textContent = finalStage.emoji;
-            document.getElementById('flower-title').textContent = `${currentDay}일차 목표: ${finalStage.name}`;
+            document.getElementById('flower-title').textContent = `${currentDay}일치 달리다 : ${finalStage.name}`;
             document.getElementById('flower-status').textContent = finalStage.status;
             document.getElementById('flower-desc').textContent = finalStage.desc;
 
