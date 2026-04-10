@@ -2120,7 +2120,9 @@
             }
 
             document.getElementById('flower-emoji').textContent = finalStage.emoji;
-            document.getElementById('flower-title').textContent = `${currentDay}일치 달리다 : ${finalStage.name}`;
+            //document.getElementById('flower-title').textContent = `${currentDay}일치 달리다 : <br>${finalStage.name}`;
+            // 기존 textContent 대신 innerHTML을 사용하세요.
+            document.getElementById('flower-title').innerHTML = `${currentDay}일치 달리다 : <br><br>${finalStage.name}`;
             document.getElementById('flower-status').textContent = finalStage.status;
             document.getElementById('flower-desc').textContent = finalStage.desc;
 
