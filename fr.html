@@ -21,6 +21,7 @@
         
         const totalDistanceElement = document.getElementById('total-stats-distance');
         const totalCountElement = document.getElementById('total-stats-count');
+        const gradeStatsContainer = document.getElementById('grade-stats-container');
         
         const yearSelect = document.getElementById('year-filter');
         const monthSelect = document.getElementById('month-filter');
@@ -29,16 +30,17 @@
         let allLogs = []; 
         let allMembers = [];
         let currentSortedData = [];
+        let currentGradeFilter = null; // 현재 선택된 등급 필터
 
         // --- 등급 기준 정의 ---
         const thresholds = [
-            { threshold: 100, name: '🍃 바람', color: 'bg-white text-blue-600 border border-blue-200' },
-            { threshold: 90, name: '🏵️ 만개', color: 'bg-purple-500 text-white' },
-            { threshold: 70, name: '🌺 열정', color: 'bg-orange-500 text-white' },
-            { threshold: 50, name: '🌼 활짝', color: 'bg-blue-500 text-white' },
-            { threshold: 30, name: '🌷 꽃봉', color: 'bg-green-500 text-white' },
-            { threshold: 1, name: '🌱 새싹', color: 'bg-green-100 text-green-600 border border-green-200' },
-            { threshold: 0, name: '🌰 씨앗', color: 'bg-amber-100 text-amber-700 border border-amber-200' }
+            { id: 'wind', threshold: 100, name: '🍃 바람', color: 'bg-white text-blue-600 border border-blue-200' },
+            { id: 'full', threshold: 90, name: '🏵️ 만개', color: 'bg-purple-500 text-white' },
+            { id: 'passion', threshold: 70, name: '🌺 열정', color: 'bg-orange-500 text-white' },
+            { id: 'bloom', threshold: 50, name: '🌼 활짝', color: 'bg-blue-500 text-white' },
+            { id: 'bud', threshold: 30, name: '🌷 꽃봉', color: 'bg-green-500 text-white' },
+            { id: 'sprout', threshold: 1, name: '🌱 새싹', color: 'bg-green-100 text-green-600 border border-green-200' },
+            { id: 'seed', threshold: 0, name: '🌰 씨앗', color: 'bg-amber-100 text-amber-700 border border-amber-200' }
         ];
 
         // --- 등급 계산 로직 ---
@@ -125,7 +127,6 @@
         };
 
         async function initApp() {
-            // 기본값을 현재 연도와 이번 달로 설정
             const today = new Date();
             const currentYear = today.getFullYear().toString();
             const currentMonth = (today.getMonth() + 1).toString();
@@ -226,6 +227,10 @@
             const userData = {}; 
             let totalDistSum = 0;
             let totalCountSum = 0;
+            
+            // 등급별 집계를 위한 객체 초기화
+            const gradeDistribution = {};
+            thresholds.forEach(t => gradeDistribution[t.name] = 0);
 
             allMembers.forEach(mem => {
                 const nameKey = (mem.nickname || '').trim();
@@ -269,11 +274,27 @@
 
             let filteredUserList = Object.entries(userData).map(([name, stats]) => {
                 stats.grade = calculateGradeDuration(stats.personalLogs);
+                // 등급 분포 집계
+                if (gradeDistribution.hasOwnProperty(stats.grade.name)) {
+                    gradeDistribution[stats.grade.name]++;
+                }
                 return [name, stats];
-            }).filter(([name, stats]) => stats.totalDistance > 0);
+            }).filter(([name, stats]) => {
+                // 기간 내 활동이 있는 사람만 표시
+                const hasActivityInPeriod = stats.totalDistance > 0;
+                
+                // 등급 필터가 활성화된 경우 추가 필터링
+                if (currentGradeFilter) {
+                    return hasActivityInPeriod && stats.grade.name === currentGradeFilter;
+                }
+                
+                return hasActivityInPeriod;
+            });
 
             totalDistanceElement.innerText = totalDistSum.toFixed(2);
             totalCountElement.innerText = totalCountSum;
+            
+            renderGradeStats(gradeDistribution);
 
             currentSortedData = filteredUserList.sort((a, b) => {
                 const statsA = a[1];
@@ -288,9 +309,46 @@
             renderUsers(currentSortedData);
         }
 
+        function renderGradeStats(dist) {
+            gradeStatsContainer.innerHTML = '';
+            // '씨앗' 등급을 제외한 등급 리스트 필터링
+            const visibleThresholds = thresholds.filter(t => t.id !== 'seed');
+            
+            visibleThresholds.forEach(t => {
+                const count = dist[t.name] || 0;
+                const isSelected = currentGradeFilter === t.name;
+                const div = document.createElement('div');
+                
+                // 선택 상태에 따른 스타일 적용
+                const activeClass = isSelected 
+                    ? "bg-white/20 border-white/50 scale-105" 
+                    : "bg-white/5 border-white/5 opacity-70 hover:opacity-100";
+                
+                div.className = `flex flex-col items-center justify-center p-2 rounded-lg border transition-all cursor-pointer min-w-[55px] ${activeClass}`;
+                
+                div.innerHTML = `
+                    <span class="text-[8px] font-black text-sky-100/70 mb-1 leading-none truncate w-full text-center">${t.name.split(' ')[1]}</span>
+                    <span class="text-xs font-black text-white">${count}</span>
+                `;
+                
+                div.onclick = () => {
+                    // 필터 토글 로직
+                    if (currentGradeFilter === t.name) {
+                        currentGradeFilter = null;
+                    } else {
+                        currentGradeFilter = t.name;
+                    }
+                    applyFilters();
+                };
+                
+                gradeStatsContainer.appendChild(div);
+            });
+        }
+
         function renderUsers(usersWithData) {
             userListElement.innerHTML = '';
-            countElement.innerText = `총 ${usersWithData.length}명`;
+            const filterInfo = currentGradeFilter ? ` [${currentGradeFilter.split(' ')[1]} 필터링 중]` : '';
+            countElement.innerText = `총 ${usersWithData.length}명${filterInfo}`;
 
             if (usersWithData.length === 0) {
                 userListElement.innerHTML = '<p class="text-slate-400 text-center py-10 font-medium italic">조건에 맞는 데이터가 없습니다.</p>';
@@ -316,7 +374,6 @@
                                         ${grade.name}
                                     </span>
                                 </div>
-
                                 <div class="flex flex-col items-start">
                                     <span class="text-[7px] text-slate-400 font-bold mt-0.5 leading-none">
                                         ${grade.durationDays > 0 ? grade.durationDays + '일째 유지 중' : '오늘 등급 달성'}
@@ -373,26 +430,32 @@
                 </h1>
             </div>
             
-            <div class="grid grid-cols-2 gap-3 mb-6">
+            <!-- Summary Stats -->
+            <div class="grid grid-cols-2 gap-3 mb-4">
                 <div class="bg-white/10 rounded-xl p-3 border border-white/10">
-                    <p class="text-[10px] font-black uppercase text-emerald-100 mb-1">Period Dist</p>
+                    <p class="text-[10px] font-black uppercase text-sky-100 mb-1 leading-none">Total Distance</p>
                     <div class="flex items-baseline">
-                        <span id="total-stats-distance" class="text-2xl font-black">0.00</span>
-                        <span class="text-[10px] ml-1 font-bold text-emerald-100 uppercase">km</span>
+                        <span id="total-stats-distance" class="text-xl font-black">0.00</span>
+                        <span class="text-[9px] ml-1 font-bold text-sky-100 uppercase">km</span>
                     </div>
                 </div>
                 <div class="bg-white/10 rounded-xl p-3 border border-white/10">
-                    <p class="text-[10px] font-black uppercase text-emerald-100 mb-1">Period Count</p>
+                    <p class="text-[10px] font-black uppercase text-sky-100 mb-1 leading-none">Total Runs</p>
                     <div class="flex items-baseline">
-                        <span id="total-stats-count" class="text-2xl font-black">0</span>
-                        <span class="text-[10px] ml-1 font-bold text-emerald-100 uppercase">run</span>
+                        <span id="total-stats-count" class="text-xl font-black">0</span>
+                        <span class="text-[9px] ml-1 font-bold text-sky-100 uppercase">run</span>
                     </div>
                 </div>
             </div>
 
+            <div class="mb-1 w-full">
+                <div id="grade-stats-container" 
+                    class="flex items-center justify-center space-x-1.5 overflow-x-auto pb-1 no-scrollbar min-w-full">
+                    </div>
+            </div>
             <div class="grid grid-cols-2 gap-2">
                 <div class="flex flex-col">
-                    <label class="text-[10px] font-black uppercase mb-1 text-emerald-100">Period Filter</label>
+                    <label class="text-[10px] font-black uppercase mb-1 text-sky-100">Period Filter</label>
                     <div class="flex space-x-1">
                         <select id="year-filter" class="flex-1 bg-sky-600 border-none rounded-lg text-[11px] font-bold p-2 text-white outline-none">
                             <option value="all">전체</option>
@@ -410,7 +473,7 @@
                     </div>
                 </div>
                 <div class="flex flex-col">
-                    <label class="text-[10px] font-black uppercase mb-1 text-emerald-100">Sorting</label>
+                    <label class="text-[10px] font-black uppercase mb-1 text-sky-100">Sorting</label>
                     <select id="sort-filter" class="bg-sky-600 border-none rounded-lg text-[11px] font-bold p-2 text-white outline-none">
                         <option value="score">등급 높은 순</option>
                         <option value="distance">거리 순</option>
@@ -425,16 +488,15 @@
             <p id="user-count" class="text-slate-400 text-[10px] font-black mb-4 uppercase tracking-widest border-b border-slate-50 pb-2">Initializing...</p>
             
             <div id="loading" class="text-center py-20">
-                <div class="animate-spin inline-block w-8 h-8 border-[3px] border-emerald-600 border-t-transparent rounded-full mb-3"></div>
+                <div class="animate-spin inline-block w-8 h-8 border-[3px] border-sky-600 border-t-transparent rounded-full mb-3"></div>
                 <p class="text-slate-400 text-xs font-bold uppercase tracking-widest">Calculating Grades...</p>
             </div>
 
             <ul id="user-list" class="space-y-4"></ul>
         </div>
 
-
-      <div class="mt-8 border-t border-sky-100 pt-3">
-
+        <!-- Grade Criteria Guide -->
+        <div class="mt-8 border-t border-sky-100 pt-3">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="bg-gradient-to-br from-sky-500 to-blue-500 rounded-xl p-4 shadow-sm border border-sky-400/30">
                     <p class="text-[10px] font-black text-white uppercase mb-2 flex items-center">
@@ -492,10 +554,11 @@
                 * 등급은 최근 31일간의 데이터를 기준으로 매일 갱신됩니다.
             </p>
         </div>
-
-
-
-
     </div>
+
+    <style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
 </body>
 </html>
