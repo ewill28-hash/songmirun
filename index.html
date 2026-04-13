@@ -2371,86 +2371,95 @@
             updateUI_Team();
         };
 
-
         window.getSeqWeekData = () => {
             const selectedYear = parseInt(document.getElementById('year-select').value);
             const startYear = selectedYear - 2;
             const endYear = selectedYear;
             
             const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            
             const userWeeks = {};
+            // [추가] 각 사용자의 주차별 모든 날짜를 저장하기 위한 객체
+            const userDatesByWeek = {}; 
 
-            // 1. 로그 데이터를 순회하며 유저별 '몇 주 전' 기록인지 Set에 저장
             allLogs.forEach(log => {
                 if (!log.user_name || !log.run_date) return;
                 
-                const runDate = new Date(log.run_date);
-                const logYear = runDate.getFullYear();
+                const runDateObj = new Date(log.run_date);
+                if (runDateObj.getFullYear() < startYear || runDateObj.getFullYear() > endYear) return;
 
-                if (logYear < startYear || logYear > endYear) return;
-
-                const diffDays = Math.floor((now - runDate) / (1000 * 60 * 60 * 24));
+                const logDay = new Date(runDateObj.getFullYear(), runDateObj.getMonth(), runDateObj.getDate());
+                const diffDays = Math.floor((today - logDay) / (1000 * 60 * 60 * 24));
                 const weeksAgo = Math.floor(diffDays / 7);
 
                 if (weeksAgo < 0) return;
 
+                // 주차 저장 (Set)
                 if (!userWeeks[log.user_name]) {
                     userWeeks[log.user_name] = new Set();
+                    userDatesByWeek[log.user_name] = {};
                 }
                 userWeeks[log.user_name].add(weeksAgo);
+
+                // [추가] 해당 주차에 해당하는 실제 날짜들을 배열로 저장
+                if (!userDatesByWeek[log.user_name][weeksAgo]) {
+                    userDatesByWeek[log.user_name][weeksAgo] = [];
+                }
+                userDatesByWeek[log.user_name][weeksAgo].push(log.run_date);
             });
 
-            // 2. 각 유저별 연속 주차 계산
             const allCalculatedUsers = Object.entries(userWeeks).map(([name, weeksSet]) => {
                 const sortedWeeks = Array.from(weeksSet).sort((a, b) => a - b);
+                const startPoint = sortedWeeks.find(w => w === 0 || w === 1);
                 
-                // 이번 주(0) 기록이 없으면 연속성 0으로 처리
-                if (sortedWeeks[0] !== 0) {
-                    return { name, total_active_weeks: 0, weeks_list: "" };
+                if (startPoint === undefined) {
+                    return { name, total_active_weeks: 0, weeks_list: "", start_date: "" };
                 }
 
-                // 0부터 시작해서 1씩 커지는 연속 구간 찾기
                 let consecutiveWeeks = [];
+                let currentExpected = startPoint;
+
                 for (let i = 0; i < sortedWeeks.length; i++) {
-                    if (i === 0 || sortedWeeks[i] === sortedWeeks[i - 1] + 1) {
+                    if (sortedWeeks[i] === currentExpected) {
                         consecutiveWeeks.push(sortedWeeks[i]);
-                    } else {
-                        break; // 중간에 끊기면 중단
+                        currentExpected++;
+                    } else if (sortedWeeks[i] > currentExpected) {
+                        break;
                     }
                 }
+
+                // [추가] 연속된 주차 중 가장 큰 값(가장 오래된 주)을 가져옴
+                const oldestWeekIdx = consecutiveWeeks[consecutiveWeeks.length - 1];
+                const datesInOldestWeek = userDatesByWeek[name][oldestWeekIdx];
+                
+                // 해당 주차의 날짜들 중 가장 빠른 날짜(오름차순 정렬 후 첫 번째) 추출
+                const oldestDate = datesInOldestWeek.sort()[0];
 
                 return {
                     name,
                     total_active_weeks: consecutiveWeeks.length,
-                    weeks_list: consecutiveWeeks.join(', ')
+                    weeks_list: consecutiveWeeks.join(', '),
+                    start_date: oldestDate // [결과 추가] 예: "2024-03-10"
                 };
-            }).filter(user => user.total_active_weeks > 0); // 이번 주 활동 없는 사람 제외
+            }).filter(user => user.total_active_weeks > 0);
 
-            // ---------------------------------------------------------
-            // 3. 동적 범위 필터링 추가 (Max ~ Max-5)
-            // ---------------------------------------------------------
-            
-            // 데이터가 없는 경우 빈 배열 반환
+            // ... (이하 필터링 및 정렬 로직은 동일)
             if (allCalculatedUsers.length === 0) return [];
-
-            // 현재 전체 인원 중 가장 높은 연속 주차 값 추출 (예: 15)
             const maxActiveWeeks = Math.max(...allCalculatedUsers.map(u => u.total_active_weeks));
-            
-            // 필터링 하한선 설정 (예: 15 - 5 = 10)
-            const minRange = maxActiveWeeks - 10;
+            const minRange = Math.max(1, maxActiveWeeks - 10); 
 
-            const result = allCalculatedUsers
-                .filter(user => user.total_active_weeks >= minRange) // 설정된 범위 내 사용자만 필터링
+            return allCalculatedUsers
+                .filter(user => user.total_active_weeks >= minRange)
                 .sort((a, b) => {
-                    // 연속 주차 높은 순 -> 이름 가나다 순 정렬
                     if (b.total_active_weeks !== a.total_active_weeks) {
                         return b.total_active_weeks - a.total_active_weeks;
                     }
                     return a.name.localeCompare(b.name);
                 });
-
-            return result;
         };
+
+
 
         window.showRunnerDetail = (name, weeksList) => {
             const detailModalHtml = `
@@ -2498,7 +2507,7 @@
                             <div class="flex items-center gap-2.5 relative z-10">
                                 <span class="text-2xl">🏆</span>
                                 <div>
-                                    <h3 class="font-black text-base text-white leading-none">명예의 전당</h3>
+                                    <h3 class="font-black text-base text-white leading-none">CONTINUOUS RUNNER</h3>
                                     <p class="text-[10px] text-white/80 mt-1 font-medium">매주 멈추지 않는 전설들</p>
                                 </div>
                             </div>
@@ -2528,7 +2537,7 @@
                                                     <span class="text-[12px] font-bold text-gray-700 leading-tight group-hover:text-violet-600 transition-colors">
                                                         ${user.name} <i class="fa-solid fa-magnifying-glass text-[8px] opacity-0 group-hover:opacity-100 transition-opacity"></i>
                                                     </span>
-                                                    <span class="text-[8px] text-gray-400 font-medium tracking-tighter">CONTINUOUS RUNNER</span>
+                                                    <span class="text-[8px] text-gray-400 font-medium tracking-tighter">${user.start_date}부터 매주 꾸준 🏃‍♀️</span>
                                                 </div>
                                             </td>
                                                                                 
@@ -2555,7 +2564,7 @@
                             <div class="flex items-start gap-2 p-3 bg-violet-50 rounded-xl">
                                 <span class="text-xs">💡</span>
                                 <p class="text-[10px] text-violet-600 leading-tight font-medium">
-                                    활동 주차는 <span class="text-red-600 font-black">현재 시점</span>부터 과거로 중단 없이 이어진 기록만 집계됩니다. 계속 달려보세요!
+                                    활동 주차는 <span class="text-red-600 font-black">현재 시점</span>부터 과거로 중단 없이 이어진 기록을 집계됩니다. 계속 달려보세요!
                                 </p>
                             </div>
                         </div>
