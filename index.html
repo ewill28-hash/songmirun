@@ -2093,7 +2093,7 @@
         const DESTINATIONS = [
             { name: "송도 (미추홀)", code: "ICN", dist: 0, emoji: "👟" }, 
             { name: "서울 (남산타워)", code: "GMP", dist: 35, emoji: "🗼" },
-            { name: "대전 (성심당)", code: "CJJ", dist: 140, emoji: "🥖" }, // 160 -> 140 (직선거리 조정)
+            { name: "대전 (성심당)", code: "CJJ", dist: 140, emoji: "🥖" },
             { name: "평창 (올림픽)", code: "YNY", dist: 185, emoji: "❄️" },
             { name: "대구 (팔공산)", code: "TAE", dist: 240, emoji: "🍎" },
             { name: "광주 (무등산)", code: "KWJ", dist: 270, emoji: "🍉" },
@@ -2119,16 +2119,18 @@
             { name: "퍼스(호주서부)", code: "PER", dist: 7800, emoji: "☀️" },
             { name: "시드니(호주)", code: "SYD", dist: 8300, emoji: "🦘" },
             { name: "베를린(M-Mecca)", code: "BER", dist: 8500, emoji: "🏰" },
-            { name: "모스크바", code: "SVO", dist: 9300, emoji: "🇷🇺" },
-            { name: "아테네(M-Origin)", code: "ATH", dist: 9550, emoji: "🏛️" }, 
-            { name: "파리(M-Iconic)", code: "CDG", dist: 9650, emoji: "🇫🇷" }, // 베를린-아테네와 인접
-            { name: "런던(M-Mecca)", code: "LHR", dist: 10400, emoji: "🎡" },
-            { name: "시카고(M-Mecca)", code: "ORD", dist: 10500, emoji: "🏙️" }, // 보스턴보다 가까운 북극항로
-            { name: "보스턴(M-Mecca)", code: "BOS", dist: 10850, emoji: "🏛️" }, // 11500 -> 10850 수정
-            { name: "뉴욕(M-Mecca)", code: "JFK", dist: 11100, emoji: "🗽" }, // 13000 -> 11100 수정
-            { name: "멕시코시티", code: "MEX", dist: 12100, emoji: "🌮" }, // 14500 -> 12100 수정
+            { name: "모스크바", code: "SVO", dist: 6600, emoji: "🇷🇺" }, // 9300 -> 6600 (대권항로 시 획기적으로 단축)
+            { name: "파리(M-Iconic)", code: "CDG", dist: 8900, emoji: "🇫🇷" }, // 9650 -> 8900 조정
+            { name: "런던(M-Mecca)", code: "LHR", dist: 8850, emoji: "🎡" }, // 10400 -> 8850 (북극항로 기준)
+            { name: "아테네(M-Origin)", code: "ATH", dist: 8500, emoji: "🏛️" }, 
+            { name: "시카고(M-Mecca)", code: "ORD", dist: 10500, emoji: "🏙️" }, 
+            { name: "보스턴(M-Mecca)", code: "BOS", dist: 10850, emoji: "🏛️" }, 
+            { name: "뉴욕(M-Mecca)", code: "JFK", dist: 11100, emoji: "🗽" }, 
+            { name: "멕시코시티", code: "MEX", dist: 12100, emoji: "🌮" }, 
+            { name: "보고타(콜롬비아)", code: "BOG", dist: 14850, emoji: "☕" }, // 14500 -> 14850 소폭 조정
             { name: "리마(페루)", code: "LIM", dist: 16300, emoji: "🦙" },
-            { name: "상파울루(지구반바퀴)", code: "GRU", dist: 18400, emoji: "⚽" },
+            { name: "상파울루(브라질)", code: "GRU", dist: 18350, emoji: "⚽" }, // 18400 -> 18350
+            { name: "부에노스아이레스(반바퀴)", code: "EZE", dist: 19400, emoji: "💃" }, 
             { name: "지구 한바퀴(완주!)", code: "ICN", dist: 40075, emoji: "🌍" }
         ];
 
