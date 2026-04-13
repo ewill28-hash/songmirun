@@ -2462,93 +2462,92 @@
                 });
         };
         //시작점 제약 없음 (최근 1주 빠져도 보임)
-        window.getSeqWeekData = () => {
-            const selectedYear = parseInt(document.getElementById('year-select').value);
-            const startYear = selectedYear - 2;
-            const endYear = selectedYear;
-            
-            const now = new Date();
-            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-            
-            const userWeeks = {};
-            // [추가] 각 사용자의 주차별 모든 날짜를 저장하기 위한 객체
-            const userDatesByWeek = {}; 
+ window.getSeqWeekData = () => {
+    const selectedYear = parseInt(document.getElementById('year-select').value);
+    const startYear = selectedYear - 2;
+    const endYear = selectedYear;
+    
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    const userWeeks = {};
+    const userDatesByWeek = {}; 
 
-            allLogs.forEach(log => {
-                if (!log.user_name || !log.run_date) return;
-                
-                const runDateObj = new Date(log.run_date);
-                if (runDateObj.getFullYear() < startYear || runDateObj.getFullYear() > endYear) return;
+    allLogs.forEach(log => {
+        if (!log.user_name || !log.run_date) return;
+        
+        const runDateObj = new Date(log.run_date);
+        if (runDateObj.getFullYear() < startYear || runDateObj.getFullYear() > endYear) return;
 
-                const logDay = new Date(runDateObj.getFullYear(), runDateObj.getMonth(), runDateObj.getDate());
-                const diffDays = Math.floor((today - logDay) / (1000 * 60 * 60 * 24));
-                const weeksAgo = Math.floor(diffDays / 7);
+        const logDay = new Date(runDateObj.getFullYear(), runDateObj.getMonth(), runDateObj.getDate());
+        const diffDays = Math.floor((today - logDay) / (1000 * 60 * 60 * 24));
+        const weeksAgo = Math.floor(diffDays / 7);
 
-                if (weeksAgo < 0) return;
+        if (weeksAgo < 0) return;
 
-                // 주차 저장 (Set)
-                if (!userWeeks[log.user_name]) {
-                    userWeeks[log.user_name] = new Set();
-                    userDatesByWeek[log.user_name] = {};
-                }
-                userWeeks[log.user_name].add(weeksAgo);
+        if (!userWeeks[log.user_name]) {
+            userWeeks[log.user_name] = new Set();
+            userDatesByWeek[log.user_name] = {};
+        }
+        userWeeks[log.user_name].add(weeksAgo);
 
-                // [추가] 해당 주차에 해당하는 실제 날짜들을 배열로 저장
-                if (!userDatesByWeek[log.user_name][weeksAgo]) {
-                    userDatesByWeek[log.user_name][weeksAgo] = [];
-                }
-                userDatesByWeek[log.user_name][weeksAgo].push(log.run_date);
-            });
+        if (!userDatesByWeek[log.user_name][weeksAgo]) {
+            userDatesByWeek[log.user_name][weeksAgo] = [];
+        }
+        userDatesByWeek[log.user_name][weeksAgo].push(log.run_date);
+    });
 
-            const allCalculatedUsers = Object.entries(userWeeks).map(([name, weeksSet]) => {
-                const sortedWeeks = Array.from(weeksSet).sort((a, b) => a - b);
-                const startPoint = sortedWeeks.find(w => w === 0 || w === 1);
-                
-                if (startPoint === undefined) {
-                    return { name, total_active_weeks: 0, weeks_list: "", start_date: "" };
-                }
+    const allCalculatedUsers = Object.entries(userWeeks).map(([name, weeksSet]) => {
+        const sortedWeeks = Array.from(weeksSet).sort((a, b) => a - b);
+        
+        // 0~3주 쉬었어도 상관없이 사용자의 가장 최근 기록부터 시작
+        const startPoint = sortedWeeks[0]; 
+        
+        if (startPoint === undefined) {
+            return { name, total_active_weeks: 0, weeks_list: "", start_date: "" };
+        }
 
-                let consecutiveWeeks = [];
-                let currentExpected = startPoint;
+        let consecutiveWeeks = [];
+        let currentExpected = startPoint;
 
-                for (let i = 0; i < sortedWeeks.length; i++) {
-                    if (sortedWeeks[i] === currentExpected) {
-                        consecutiveWeeks.push(sortedWeeks[i]);
-                        currentExpected++;
-                    } else if (sortedWeeks[i] > currentExpected) {
-                        break;
-                    }
-                }
+        for (let i = 0; i < sortedWeeks.length; i++) {
+            if (sortedWeeks[i] === currentExpected) {
+                consecutiveWeeks.push(sortedWeeks[i]);
+                currentExpected++;
+            } else if (sortedWeeks[i] > currentExpected) {
+                break; // 연속이 끊기면 중단 (예: 4,5,6,7, 9 라면 7까지만 저장)
+            }
+        }
 
-                // [추가] 연속된 주차 중 가장 큰 값(가장 오래된 주)을 가져옴
-                const oldestWeekIdx = consecutiveWeeks[consecutiveWeeks.length - 1];
-                const datesInOldestWeek = userDatesByWeek[name][oldestWeekIdx];
-                
-                // 해당 주차의 날짜들 중 가장 빠른 날짜(오름차순 정렬 후 첫 번째) 추출
-                const oldestDate = datesInOldestWeek.sort()[0];
+        const oldestWeekIdx = consecutiveWeeks[consecutiveWeeks.length - 1];
+        const datesInOldestWeek = userDatesByWeek[name][oldestWeekIdx];
+        const oldestDate = datesInOldestWeek.sort()[0];
 
-                return {
-                    name,
-                    total_active_weeks: consecutiveWeeks.length,
-                    weeks_list: consecutiveWeeks.join(', '),
-                    start_date: oldestDate // [결과 추가] 예: "2024-03-10"
-                };
-            }).filter(user => user.total_active_weeks > 0);
+        return {
+            name,
+            total_active_weeks: consecutiveWeeks.length,
+            weeks_list: consecutiveWeeks.join(', '),
+            start_date: oldestDate
+        };
+    }).filter(user => user.total_active_weeks > 0);
 
-            // ... (이하 필터링 및 정렬 로직은 동일)
-            if (allCalculatedUsers.length === 0) return [];
-            const maxActiveWeeks = Math.max(...allCalculatedUsers.map(u => u.total_active_weeks));
-            const minRange = Math.max(1, maxActiveWeeks - 10); 
+    if (allCalculatedUsers.length === 0) return [];
 
-            return allCalculatedUsers
-                .filter(user => user.total_active_weeks >= minRange)
-                .sort((a, b) => {
-                    if (b.total_active_weeks !== a.total_active_weeks) {
-                        return b.total_active_weeks - a.total_active_weeks;
-                    }
-                    return a.name.localeCompare(b.name);
-                });
-        };
+    // --- 필터링 로직: Max 값 기준 상위 그룹 추출 ---
+    // 1. 전체 사용자 중 최대 연속 주차 계산
+    const maxActiveWeeks = Math.max(...allCalculatedUsers.map(u => u.total_active_weeks));
+    // 2. Max에서 Max-10 사이의 범위 설정
+    const minRange = Math.max(1, maxActiveWeeks - 10); 
+
+    return allCalculatedUsers
+        .filter(user => user.total_active_weeks >= minRange) // 범위 내 러너만 표시
+        .sort((a, b) => {
+            if (b.total_active_weeks !== a.total_active_weeks) {
+                return b.total_active_weeks - a.total_active_weeks;
+            }
+            return a.name.localeCompare(b.name);
+        });
+};
 
         window.showRunnerDetail = (name, weeksList) => {
             const detailModalHtml = `
