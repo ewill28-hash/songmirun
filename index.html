@@ -2881,9 +2881,6 @@
             for(let i=0; i<4; i++) {
                 const start = new Date(now);
                 start.setDate(now.getDate() - (i + 1) * 7);
-
-
-
                 
                 const end = new Date(now);
                 end.setDate(now.getDate() - i * 7);
@@ -2955,7 +2952,15 @@
             const currentIdx = thresholds.findIndex(t => totalScore >= t.threshold);
             let grade = { 
                 ...thresholds[currentIdx], 
-                details: { scoreCount, scoreDist, scoreBonus, totalScore } 
+                details: { 
+                    scoreCount, 
+                    count,       // 추가된 실제 횟수
+                    scoreDist, 
+                    dist,        // 추가된 실제 거리
+                    scoreBonus, 
+                    activeWeeks, // 추가된 실제 활성 주 수
+                    totalScore 
+                } 
             };
 
             if (currentIdx > 0) {
@@ -3019,11 +3024,12 @@
               //  gradeBadge.className = `runner-grade-badge ${grade.color} text-[9px] font-black px-3 py-1 rounded-lg text-white uppercase cursor-pointer flex items-center gap-1`;
             }
 
-            const detailText = `📊 상세 점수
+            const detailText = `📊 상세 점수 (최근 한달)
             --------------------------------
-            🏃 횟수 점수: ${grade.details.scoreCount}점
-            📏 거리 점수: ${grade.details.scoreDist}점
-            🔥 연속 점수: ${grade.details.scoreBonus}점
+            🏃 횟수 점수: ${grade.details.scoreCount}점 (${grade.details.count}회)
+            📏 거리 점수: ${grade.details.scoreDist}점 (${grade.details.dist.toFixed(1)}km)
+            🔥 연속 점수: ${grade.details.scoreBonus}점 (${grade.details.activeWeeks}주 달성)
+
             --------------------------------
             💰 총합 점수: ${grade.details.totalScore}점
             --------------------------------
