@@ -586,11 +586,19 @@
                 <section class="glass-cardb p-51 bg-white rounded-3xl shadow-sm border border-emerald-50">
                    <div id="section-ranking" class="hidden space-y-3">
                             <section class="sticky top-20 z-10 bg-white/95 backdrop-blur-sm p-2 rounded-[2rem] border border-brand-100 shadow-md space-y-2">
-                                <div class="flex items-center gap-2 pb-1">
-                                    <div class="w-8 h-8 bg-yellow-100 rounded-xl flex items-center justify-center text-yellow-600 shadow-sm">
-                                        <i class="fa-solid fa-medal"></i>
+                                <div class="flex items-center justify-between gap-2 pb-1">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-8 h-8 bg-yellow-100 rounded-xl flex items-center justify-center text-yellow-600 shadow-sm">
+                                            <i class="fa-solid fa-medal"></i>
+                                        </div>
+                                        <h2 class="font-black text-lg text-gray-800 italic tracking-tighter">명예의 전당</h2>
                                     </div>
-                                    <h2 class="font-black text-lg text-gray-800 italic tracking-tighter">명예의 전당</h2>
+
+                                    <button onclick="openSeqWeekRunModal()" 
+                                            class="text-[11px] font-bold bg-purple-400 text-white px-4 py-2 rounded-xl transition-all hover:bg-purple-600 hover:shadow-md active:scale-95 flex items-center gap-2">
+                                            🔥매주 연속 러너🔥
+
+                                    </button>
                                 </div>
 
                                 <div class="flex gap-2">
@@ -2361,6 +2369,201 @@
                 if(b) b.classList.toggle('active', id === s);
             });
             updateUI_Team();
+        };
+
+
+        window.getSeqWeekData = () => {
+            const selectedYear = parseInt(document.getElementById('year-select').value);
+            const startYear = selectedYear - 2;
+            const endYear = selectedYear;
+            
+            const now = new Date();
+            const userWeeks = {};
+
+            // 1. 로그 데이터를 순회하며 유저별 '몇 주 전' 기록인지 Set에 저장
+            allLogs.forEach(log => {
+                if (!log.user_name || !log.run_date) return;
+                
+                const runDate = new Date(log.run_date);
+                const logYear = runDate.getFullYear();
+
+                if (logYear < startYear || logYear > endYear) return;
+
+                const diffDays = Math.floor((now - runDate) / (1000 * 60 * 60 * 24));
+                const weeksAgo = Math.floor(diffDays / 7);
+
+                if (weeksAgo < 0) return;
+
+                if (!userWeeks[log.user_name]) {
+                    userWeeks[log.user_name] = new Set();
+                }
+                userWeeks[log.user_name].add(weeksAgo);
+            });
+
+            // 2. 각 유저별 연속 주차 계산
+            const allCalculatedUsers = Object.entries(userWeeks).map(([name, weeksSet]) => {
+                const sortedWeeks = Array.from(weeksSet).sort((a, b) => a - b);
+                
+                // 이번 주(0) 기록이 없으면 연속성 0으로 처리
+                if (sortedWeeks[0] !== 0) {
+                    return { name, total_active_weeks: 0, weeks_list: "" };
+                }
+
+                // 0부터 시작해서 1씩 커지는 연속 구간 찾기
+                let consecutiveWeeks = [];
+                for (let i = 0; i < sortedWeeks.length; i++) {
+                    if (i === 0 || sortedWeeks[i] === sortedWeeks[i - 1] + 1) {
+                        consecutiveWeeks.push(sortedWeeks[i]);
+                    } else {
+                        break; // 중간에 끊기면 중단
+                    }
+                }
+
+                return {
+                    name,
+                    total_active_weeks: consecutiveWeeks.length,
+                    weeks_list: consecutiveWeeks.join(', ')
+                };
+            }).filter(user => user.total_active_weeks > 0); // 이번 주 활동 없는 사람 제외
+
+            // ---------------------------------------------------------
+            // 3. 동적 범위 필터링 추가 (Max ~ Max-5)
+            // ---------------------------------------------------------
+            
+            // 데이터가 없는 경우 빈 배열 반환
+            if (allCalculatedUsers.length === 0) return [];
+
+            // 현재 전체 인원 중 가장 높은 연속 주차 값 추출 (예: 15)
+            const maxActiveWeeks = Math.max(...allCalculatedUsers.map(u => u.total_active_weeks));
+            
+            // 필터링 하한선 설정 (예: 15 - 5 = 10)
+            const minRange = maxActiveWeeks - 10;
+
+            const result = allCalculatedUsers
+                .filter(user => user.total_active_weeks >= minRange) // 설정된 범위 내 사용자만 필터링
+                .sort((a, b) => {
+                    // 연속 주차 높은 순 -> 이름 가나다 순 정렬
+                    if (b.total_active_weeks !== a.total_active_weeks) {
+                        return b.total_active_weeks - a.total_active_weeks;
+                    }
+                    return a.name.localeCompare(b.name);
+                });
+
+            return result;
+        };
+
+        window.showRunnerDetail = (name, weeksList) => {
+            const detailModalHtml = `
+                <div id="runner-detail-modal" class="fixed inset-0 z-[110] flex items-center justify-center p-6 bg-black/40 backdrop-blur-[2px] animate-in fade-in duration-150">
+                    <div class="bg-white w-full max-w-[260px] rounded-2xl shadow-xl overflow-hidden border border-violet-100 transform animate-in zoom-in-95 duration-200">
+                        <div class="p-3 bg-violet-50 border-b border-violet-100 flex justify-between items-center">
+                            <span class="text-[11px] font-black text-violet-700">${name}님의 기록</span>
+                            <button onclick="document.getElementById('runner-detail-modal').remove()" class="text-gray-400 hover:text-gray-600">
+                                <i class="fa-solid fa-xmark text-xs"></i>
+                            </button>
+                        </div>
+                        <div class="p-4">
+                            <p class="text-[10px] text-gray-500 mb-2 font-medium">연속 활동 주차 상세 (Weeks Ago)</p>
+                            <div class="flex flex-wrap gap-1">
+                                ${weeksList.split(', ').map(week => `
+                                    <span class="px-2 py-0.5 bg-violet-100 text-violet-600 rounded text-[10px] font-bold border border-violet-200">
+                                        ${week}주전
+                                    </span>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div class="p-2 text-center bg-gray-50">
+                            <button onclick="document.getElementById('runner-detail-modal').remove()" 
+                                    class="text-[10px] font-bold text-gray-400 hover:text-violet-500 transition-colors">
+                                닫기
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', detailModalHtml);
+        };
+
+        window.openSeqWeekRunModal = () => {
+            const data = window.getSeqWeekData();
+            
+            const modalHtml = `
+                <div id="seq-week-modal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in zoom-in-95 duration-300">
+                    <div class="bg-white w-full max-w-sm rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden border border-white/20">
+                        
+                        <div class="p-5 bg-gradient-to-r from-violet-600 via-fuchsia-500 to-pink-500 flex justify-between items-center relative overflow-hidden">
+                            <div class="absolute top-0 right-0 opacity-10 transform translate-x-4 -translate-y-4">
+                                <i class="fa-solid fa-trophy text-7xl text-white"></i>
+                            </div>
+                            <div class="flex items-center gap-2.5 relative z-10">
+                                <span class="text-2xl">🏆</span>
+                                <div>
+                                    <h3 class="font-black text-base text-white leading-none">명예의 전당</h3>
+                                    <p class="text-[10px] text-white/80 mt-1 font-medium">매주 멈추지 않는 전설들</p>
+                                </div>
+                            </div>
+                            <button onclick="document.getElementById('seq-week-modal').remove()" 
+                                    class="w-8 h-8 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/40 text-white transition-all backdrop-blur-sm">
+                                <i class="fa-solid fa-xmark text-sm"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="max-h-[400px] overflow-y-auto custom-scrollbar px-4 py-2 bg-slate-50/50">
+                            <table class="w-full text-left border-separate border-spacing-y-1">
+                                <tbody>
+                                    ${data.map((user, i) => {
+                                        // 모든 항목에 동일한 보라색 테마 적용
+                                        const bgClass = 'bg-white border-violet-50';
+                                        
+                                        return `
+                                        <tr class="${bgClass} border rounded-xl shadow-sm transition-all hover:bg-violet-50/30">
+                                            <td class="py-2 pl-4 rounded-l-xl w-10">
+                                                <span class="text-[11px] font-black text-violet-400">
+                                                    ${i + 1}
+                                                </span>
+                                            </td>
+                                            
+                                            <td class="py-2 cursor-pointer group" onclick="window.showRunnerDetail('${user.name}', '${user.weeks_list}')">
+                                                <div class="flex flex-col">
+                                                    <span class="text-[12px] font-bold text-gray-700 leading-tight group-hover:text-violet-600 transition-colors">
+                                                        ${user.name} <i class="fa-solid fa-magnifying-glass text-[8px] opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                                                    </span>
+                                                    <span class="text-[8px] text-gray-400 font-medium tracking-tighter">CONTINUOUS RUNNER</span>
+                                                </div>
+                                            </td>
+                                                                                
+                                            <td class="py-2 pr-3 text-right rounded-r-xl" onclick="window.showRunnerDetail('${user.name}', '${user.weeks_list}')">
+                                                <div class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 shadow-sm">
+                                                    <span class="text-white text-[10px] font-black">${user.total_active_weeks}주</span>
+                                                    <span class="text-[9px]">🔥</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        `;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                            ${data.length === 0 ? `
+                                <div class="py-16 text-center">
+                                    <div class="text-4xl mb-3">🏃💨</div>
+                                    <div class="text-gray-400 text-xs font-bold">전설이 되어보세요!</div>
+                                </div>
+                            ` : ''}
+                        </div>
+
+                        <div class="p-4 bg-white border-t border-gray-100">
+                            <div class="flex items-start gap-2 p-3 bg-violet-50 rounded-xl">
+                                <span class="text-xs">💡</span>
+                                <p class="text-[10px] text-violet-600 leading-tight font-medium">
+                                    활동 주차는 <span class="text-red-600 font-black">현재 시점</span>부터 과거로 중단 없이 이어진 기록만 집계됩니다. 계속 달려보세요!
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
         };
 
 
