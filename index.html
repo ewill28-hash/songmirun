@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -383,6 +384,9 @@
                         <div class="col-span-1">
                             <div class="flex items-center gap-2 mb-1.5 ml-1">
                                 <label class="text-[11px] text-brand-700 font-black">러닝 유형</label>
+
+
+
                                 <span id="monday-notice" class="text-[9px] text-red-500 font-bold hidden animate-pulse">
                                     📅정기런(월요일) 선택 확인 👇
                                 </span>
@@ -593,6 +597,11 @@
                                         </div>
                                         <h2 class="font-black text-lg text-gray-800 italic tracking-tighter">명예의 전당</h2>
                                     </div>
+
+                                    <button onclick="openDistributionModal()" 
+                                        class="text-[11px] font-bold bg-sky-400 text-white px-4 py-2 rounded-xl transition-all hover:bg-sky-600 hover:shadow-md active:scale-95 flex items-center gap-2">
+                                        <i class="fa-solid fa-flower"></i> 꽃 등급 분포도
+                                    </button>
 
                                     <button onclick="openSeqWeekRunModal()" 
                                             class="text-[11px] font-bold bg-purple-400 text-white px-4 py-2 rounded-xl transition-all hover:bg-purple-600 hover:shadow-md active:scale-95 flex items-center gap-2">
@@ -1168,6 +1177,29 @@
         </div>
     </div>
 
+
+    <!-- 분포도 모달 -->
+    <div id="dist-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl animate-in zoom-in duration-200">
+            <div class="bg-slate-50 px-5 py-4 flex justify-between items-center border-b border-slate-100">
+                <h3 class="text-sm font-black text-slate-700 uppercase tracking-tight">꽃 등급 구간별 분포</h3>
+                <button id="close-modal" class="text-slate-400 hover:text-slate-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div id="modal-content" class="p-5 space-y-1">
+                <!-- 막대 그래프가 렌더링되는 곳 -->
+            </div>
+            <div class="bg-slate-50 px-5 py-3 flex justify-between items-center text-[11px] font-black text-slate-400 border-t border-slate-100">
+                <span>활동 멤버 총 인원 (씨앗 제외)</span>
+                <span class="text-slate-800 text-sm"><span id="modal-total-count">0</span>명</span>
+            </div>
+        </div>
+    </div>
+
+
     <div id="stat-detail-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[250] hidden items-center justify-center p-4">
         <div class="bg-white rounded-[2.5rem] w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
             <div class="bg-gray-500 p-4 text-white relative">
@@ -1325,6 +1357,20 @@
             }
             modal.classList.remove('hidden'); modal.classList.add('flex');
         };
+        // 모달 닫기 이벤트 리스너
+        document.getElementById('close-modal').addEventListener('click', () => {
+            const modal = document.getElementById('dist-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        });
+
+        // 배경 클릭 시 닫기
+        document.getElementById('dist-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'dist-modal') {
+                e.currentTarget.classList.add('hidden');
+                e.currentTarget.classList.remove('flex');
+            }
+        });
 
         const formatTimeHMS = (totalMinutes) => {
             if (!totalMinutes || totalMinutes <= 0) return "0s";
@@ -2462,7 +2508,7 @@
                 });
         };
         //시작점 제약 없음 (최근 1주 빠져도 보임)
- window.getSeqWeekData = () => {
+ window.getSeqWeekData = () => {
     const selectedYear = parseInt(document.getElementById('year-select').value);
     const startYear = selectedYear - 2;
     const endYear = selectedYear;
@@ -3501,6 +3547,159 @@
             modal.classList.remove('hidden'); modal.classList.add('flex');
         };
 
+
+window.openDistributionModal = () => {
+    const modal = document.getElementById('dist-modal');
+    const content = document.getElementById('modal-content');
+    const totalSpan = document.getElementById('modal-total-count');
+
+
+       
+            const thresholds = [
+                { 
+                    threshold: 100, 
+                    name: '🍃 바람', 
+                    color: 'bg-white text-blue-600 border border-blue-200 shadow-sm' 
+                    // 깨끗한 공기 같은 흰색 배경에 푸른색 포인트
+                },
+                { 
+                    threshold: 90, 
+                    name: '🏵️ 만개', 
+                    color: 'bg-purple-500 text-white'
+                    // 선명하고 화사한 보라색
+                },
+                { 
+                    threshold: 70, 
+                    name: '🌺 열정', 
+                    color: 'bg-orange-500 text-white' 
+                    // 에너지가 느껴지는 주황색
+                },
+                { 
+                    threshold: 50, 
+                    name: '🌼 활짝', 
+                    color: 'bg-blue-500 text-white' 
+                    // 쾌적한 러닝 상태의 파란색
+                },
+                { 
+                    threshold: 30, 
+                    name: '🌷 꽃봉', 
+                    color: 'bg-green-500 text-white' 
+                    // 생동감 있는 초록색
+                },
+                { 
+                    threshold: 1, 
+                    name: '🌱 새싹', 
+                    color: 'bg-green-100 text-green-600 border border-green-200' 
+                    // 부드러운 연초록과 테두리
+                },
+                { 
+                    threshold: 0, 
+                    name: '🌰 씨앗', 
+                    color: 'bg-amber-100 text-amber-700 border border-amber-200' 
+                    // 차분한 연갈색과 테두리
+                }
+            ];
+
+
+            
+    if (!modal || !content) return;
+
+    // 1. 씨앗(threshold: 0)을 제외한 등급 리스트 생성
+    const activeThresholds = thresholds.filter(t => t.threshold > 0);
+    
+    const distribution = {};
+    activeThresholds.forEach(t => {
+        distribution[t.name] = { 
+            count: 0, 
+            color: t.color.split(' ').find(c => c.startsWith('bg-')) || 'bg-slate-400'
+        };
+    });
+
+    let totalActive = 0;
+
+    // 2. 유저별 로그 그룹화
+    const logsByUser = allLogs.reduce((acc, log) => {
+        const name = log.user_name || log.nickname;
+        if (!acc[name]) acc[name] = [];
+        acc[name].push(log);
+        return acc;
+    }, {});
+
+    // 3. 등급 집계 (씨앗 제외)
+    crewMembersList.forEach(member => {
+        const userLogs = logsByUser[member.nickname] || [];
+        const grade = calculateRunnerGrade(userLogs);
+        
+        // thresholds 필터링된 목록(씨앗 제외)에 있는 등급만 카운트
+        if (distribution[grade.name]) {
+            distribution[grade.name].count++;
+            totalActive++; 
+        }
+    });
+
+    // 4. 렌더링 (초기 width를 0%로 설정하여 애니메이션 준비)
+    content.innerHTML = activeThresholds.map((t, index) => {
+        const data = distribution[t.name];
+        const percentage = totalActive > 0 ? Math.round((data.count / totalActive) * 100) : 0;
+
+        // 1. 배경색 감지 및 텍스트/테두리 컬러 설정
+        const isWhiteBg = data.color.includes('bg-white');
+        const textColorClass = isWhiteBg ? 'text-blue-600' : (t.threshold > 30 ? 'text-white' : 'text-slate-600');
+        
+        // [핵심 수정] 흰색 바일 때 부모 컨테이너 스타일 정의
+        // bg-white 면 컨테이너 배경을 아주 연한 파란색으로 바꾸고 테두리를 줌
+        const containerStyle = isWhiteBg 
+            ? 'bg-blue-50/50 border border-blue-100 shadow-sm' 
+            : 'bg-slate-100 shadow-inner';
+            
+        // 흰색 바 자체에는 테두리를 주어 게이지 영역 명시
+        const barStyle = isWhiteBg ? 'bg-white border-r border-blue-200 shadow-md' : data.color;
+
+        return `
+            <div class="flex items-center gap-2 py-1">
+                <div class="w-16 text-[11px] font-bold text-slate-600 truncate flex-shrink-0">
+                    ${t.name}
+                </div>
+
+                <div class="flex-1 ${containerStyle} h-4 rounded-full overflow-hidden relative transition-all duration-300">
+                    <div id="dist-bar-${index}" 
+                        class="${barStyle} h-full transition-all duration-[1000ms] ease-out w-0 rounded-full" 
+                        data-target="${percentage}">
+                    </div>
+                    
+                    <span class="absolute inset-y-0 left-2 flex items-center text-[9px] font-black ${textColorClass} drop-shadow-sm opacity-0 transition-opacity duration-500 delay-500 whitespace-nowrap" id="dist-text-${index}">
+                        ${data.count > 0 ? data.count + '명' : ''}
+                    </span>
+                </div>
+
+                <div class="w-12 text-right text-[11px] font-black text-slate-400 flex-shrink-0 whitespace-nowrap">
+                    ${percentage}%
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    if (totalSpan) totalSpan.innerText = totalActive;
+    
+    // 5. 모달 표시 및 애니메이션 트리거
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+
+    // 브라우저가 DOM을 그린 후 width를 변경해야 애니메이션이 작동합니다.
+    setTimeout(() => {
+        activeThresholds.forEach((_, index) => {
+            const bar = document.getElementById(`dist-bar-${index}`);
+            const text = document.getElementById(`dist-text-${index}`);
+            if (bar) {
+                const target = bar.getAttribute('data-target');
+                bar.style.width = `${target}%`;
+            }
+            if (text) {
+                text.style.opacity = '1'; // 텍스트 서서히 나타나기
+            }
+        });
+    }, 50); // 50ms의 미세한 지연으로 transition 트리거
+};
 
         window.deleteLog = async (id, runDate) => {
 
