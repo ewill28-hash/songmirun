@@ -26,21 +26,29 @@
         const yearSelect = document.getElementById('year-filter');
         const monthSelect = document.getElementById('month-filter');
         const sortSelect = document.getElementById('sort-filter');
+
+        // 모달 관련 요소
+        const graphBtn = document.getElementById('graph-btn');
+        const distModal = document.getElementById('dist-modal');
+        const closeModal = document.getElementById('close-modal');
+        const modalContent = document.getElementById('modal-content');
+        const modalTotalCount = document.getElementById('modal-total-count');
         
         let allLogs = []; 
         let allMembers = [];
         let currentSortedData = [];
-        let currentGradeFilter = null; // 현재 선택된 등급 필터
+        let currentGradeFilter = null;
+        let lastGradeDistribution = {}; // 모달용 데이터 저장
 
         // --- 등급 기준 정의 ---
         const thresholds = [
-            { id: 'wind', threshold: 100, name: '🍃 바람', color: 'bg-white text-blue-600 border border-blue-200' },
-            { id: 'full', threshold: 90, name: '🏵️ 만개', color: 'bg-purple-500 text-white' },
-            { id: 'passion', threshold: 70, name: '🌺 열정', color: 'bg-orange-500 text-white' },
-            { id: 'bloom', threshold: 50, name: '🌼 활짝', color: 'bg-blue-500 text-white' },
-            { id: 'bud', threshold: 30, name: '🌷 꽃봉', color: 'bg-green-500 text-white' },
-            { id: 'sprout', threshold: 1, name: '🌱 새싹', color: 'bg-green-100 text-green-600 border border-green-200' },
-            { id: 'seed', threshold: 0, name: '🌰 씨앗', color: 'bg-amber-100 text-amber-700 border border-amber-200' }
+            { id: 'wind', threshold: 100, name: '🍃 바람', color: 'bg-white text-blue-600 border border-blue-200', bar: 'bg-blue-400', labelColor: 'bg-blue-50 text-blue-600 border-blue-100' },
+            { id: 'full', threshold: 90, name: '🏵️ 만개', color: 'bg-purple-500 text-white', bar: 'bg-purple-500', labelColor: 'bg-purple-500 text-white' },
+            { id: 'passion', threshold: 70, name: '🌺 열정', color: 'bg-orange-500 text-white', bar: 'bg-orange-500', labelColor: 'bg-orange-500 text-white' },
+            { id: 'bloom', threshold: 50, name: '🌼 활짝', color: 'bg-blue-500 text-white', bar: 'bg-blue-500', labelColor: 'bg-blue-500 text-white' },
+            { id: 'bud', threshold: 30, name: '🌷 꽃봉', color: 'bg-green-500 text-white', bar: 'bg-green-500', labelColor: 'bg-green-500 text-white' },
+            { id: 'sprout', threshold: 1, name: '🌱 새싹', color: 'bg-green-100 text-green-600 border border-green-200', bar: 'bg-emerald-400', labelColor: 'bg-green-100 text-green-700 border-green-200' },
+            { id: 'seed', threshold: 0, name: '🌰 씨앗', color: 'bg-amber-100 text-amber-700 border border-amber-200', bar: 'bg-amber-400', labelColor: 'bg-amber-100 text-amber-800 border-amber-200' }
         ];
 
         // --- 등급 계산 로직 ---
@@ -109,31 +117,21 @@
         const calculateGradeDuration = (userLogs) => {
             const now = new Date();
             const currentGrade = calculateRunnerGradeAtDate(userLogs, now);
-            
             let durationDays = 0;
             let checkDate = new Date(now);
-            
             for (let i = 1; i <= 90; i++) {
                 checkDate.setDate(checkDate.getDate() - 1);
                 const prevGrade = calculateRunnerGradeAtDate(userLogs, checkDate);
-                if (prevGrade.name === currentGrade.name) {
-                    durationDays = i;
-                } else {
-                    break;
-                }
+                if (prevGrade.name === currentGrade.name) durationDays = i;
+                else break;
             }
-            
             return { ...currentGrade, durationDays };
         };
 
         async function initApp() {
             const today = new Date();
-            const currentYear = today.getFullYear().toString();
-            const currentMonth = (today.getMonth() + 1).toString();
-            
-            yearSelect.value = currentYear;
-            monthSelect.value = currentMonth;
-
+            yearSelect.value = today.getFullYear().toString();
+            monthSelect.value = (today.getMonth() + 1).toString();
             await Promise.all([fetchMembers(), fetchLogs()]);
             setupRealtime();
         }
@@ -144,7 +142,6 @@
             let rangeStart = 0;
             const PAGE_SIZE = 1000;
             let isFinished = false;
-
             try {
                 while (!isFinished) {
                     const { data, error } = await _supabase
@@ -152,9 +149,7 @@
                         .select('*')
                         .range(rangeStart, rangeStart + PAGE_SIZE - 1)
                         .order('created_at', { ascending: false });
-
                     if (error) break;
-
                     if (data && data.length > 0) {
                         const mappedData = data.map(item => ({
                             id: item.id,
@@ -167,17 +162,12 @@
                         allFetchedLogs = [...allFetchedLogs, ...mappedData];
                         if (data.length < PAGE_SIZE) isFinished = true;
                         else rangeStart += PAGE_SIZE;
-                    } else {
-                        isFinished = true;
-                    }
+                    } else isFinished = true;
                 }
                 allLogs = allFetchedLogs;
                 applyFilters();
-            } catch (err) {
-                console.error(err);
-            } finally {
-                loadingElement.classList.add('hidden');
-            }
+            } catch (err) { console.error(err); } 
+            finally { loadingElement.classList.add('hidden'); }
         }
 
         async function fetchMembers() {
@@ -186,7 +176,6 @@
             let rangeStart = 0;
             const PAGE_SIZE = 1000;
             let isFinished = false;
-
             try {
                 while (!isFinished) {
                     const { data, error } = await _supabase
@@ -194,7 +183,6 @@
                         .select('*')
                         .range(rangeStart, rangeStart + PAGE_SIZE - 1)
                         .order('id', { ascending: true });
-
                     if (error) break;
                     if (data && data.length > 0) {
                         allData = [...allData, ...data];
@@ -204,16 +192,12 @@
                 }
                 allMembers = allData;
                 applyFilters();
-            } catch (err) {
-                console.error(err);
-            } finally {
-                loadingElement.classList.add('hidden');
-            }
+            } catch (err) { console.error(err); } 
+            finally { loadingElement.classList.add('hidden'); }
         }
 
         function setupRealtime() {
-            _supabase
-                .channel('schema-db-changes')
+            _supabase.channel('schema-db-changes')
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'songmirun_logs' }, () => fetchLogs())
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'songmirun_members' }, () => fetchMembers())
                 .subscribe();
@@ -223,192 +207,165 @@
             const selectedYear = yearSelect.value;
             const selectedMonth = monthSelect.value;
             const sortBy = sortSelect.value;
-            
             const userData = {}; 
             let totalDistSum = 0;
             let totalCountSum = 0;
-            
-            // 등급별 집계를 위한 객체 초기화
             const gradeDistribution = {};
             thresholds.forEach(t => gradeDistribution[t.name] = 0);
 
             allMembers.forEach(mem => {
                 const nameKey = (mem.nickname || '').trim();
                 if (!nameKey) return;
-                const mUpdate = mem.updated_at || mem.created_at;
-                userData[nameKey] = {
-                    count: 0, totalDistance: 0, totalDuration: 0,
-                    logUpdatedAt: null,
-                    memberUpdatedAt: mUpdate ? new Date(mUpdate) : null,
-                    personalLogs: [] 
-                };
+                userData[nameKey] = { count: 0, totalDistance: 0, totalDuration: 0, personalLogs: [] };
             });
             
             allLogs.forEach(log => {
                 const nameKey = log.userName;
                 const year = log.jsDate.getFullYear().toString();
                 const month = (log.jsDate.getMonth() + 1).toString();
-                
                 if (userData[nameKey]) userData[nameKey].personalLogs.push(log);
-
                 if (selectedYear !== 'all' && year !== selectedYear) return;
                 if (selectedMonth !== 'all' && month !== selectedMonth) return;
-                
-                if (!userData[nameKey]) {
-                    userData[nameKey] = { 
-                        count: 0, totalDistance: 0, totalDuration: 0,
-                        logUpdatedAt: log.updatedAt, memberUpdatedAt: null,
-                        personalLogs: [log]
-                    };
-                }
-                
+                if (!userData[nameKey]) userData[nameKey] = { count: 0, totalDistance: 0, totalDuration: 0, personalLogs: [log] };
                 userData[nameKey].count += 1;
                 userData[nameKey].totalDistance += log.distance; 
                 userData[nameKey].totalDuration += log.duration; 
-                if (!userData[nameKey].logUpdatedAt || log.updatedAt > userData[nameKey].logUpdatedAt) {
-                    userData[nameKey].logUpdatedAt = log.updatedAt;
-                }
                 totalDistSum += log.distance;
                 totalCountSum += 1;
             });
 
             let filteredUserList = Object.entries(userData).map(([name, stats]) => {
                 stats.grade = calculateGradeDuration(stats.personalLogs);
-                // 등급 분포 집계
-                if (gradeDistribution.hasOwnProperty(stats.grade.name)) {
-                    gradeDistribution[stats.grade.name]++;
-                }
+                if (gradeDistribution.hasOwnProperty(stats.grade.name)) gradeDistribution[stats.grade.name]++;
                 return [name, stats];
             }).filter(([name, stats]) => {
-                // 기간 내 활동이 있는 사람만 표시
                 const hasActivityInPeriod = stats.totalDistance > 0;
-                
-                // 등급 필터가 활성화된 경우 추가 필터링
-                if (currentGradeFilter) {
-                    return hasActivityInPeriod && stats.grade.name === currentGradeFilter;
-                }
-                
+                if (currentGradeFilter) return hasActivityInPeriod && stats.grade.name === currentGradeFilter;
                 return hasActivityInPeriod;
             });
 
             totalDistanceElement.innerText = totalDistSum.toFixed(2);
             totalCountElement.innerText = totalCountSum;
-            
+            lastGradeDistribution = gradeDistribution;
             renderGradeStats(gradeDistribution);
 
             currentSortedData = filteredUserList.sort((a, b) => {
-                const statsA = a[1];
-                const statsB = b[1];
+                const statsA = a[1], statsB = b[1];
                 if (sortBy === 'distance') return statsB.totalDistance - statsA.totalDistance;
                 if (sortBy === 'duration') return statsB.totalDuration - statsA.totalDuration; 
                 if (sortBy === 'count') return statsB.count - statsA.count;
                 if (sortBy === 'score') return statsB.grade.score - statsA.grade.score;
                 return a[0].localeCompare(b[0]);
             });
-            
             renderUsers(currentSortedData);
         }
 
         function renderGradeStats(dist) {
             gradeStatsContainer.innerHTML = '';
-            // '씨앗' 등급을 제외한 등급 리스트 필터링
-            const visibleThresholds = thresholds.filter(t => t.id !== 'seed');
-            
-            visibleThresholds.forEach(t => {
+            thresholds.filter(t => t.id !== 'seed').forEach(t => {
                 const count = dist[t.name] || 0;
                 const isSelected = currentGradeFilter === t.name;
                 const div = document.createElement('div');
-                
-                // 선택 상태에 따른 스타일 적용
-                const activeClass = isSelected 
-                    ? "bg-white/20 border-white/50 scale-105" 
-                    : "bg-white/5 border-white/5 opacity-70 hover:opacity-100";
-                
+                const activeClass = isSelected ? "bg-white/20 border-white/50 scale-105" : "bg-white/5 border-white/5 opacity-70 hover:opacity-100";
                 div.className = `flex flex-col items-center justify-center p-2 rounded-lg border transition-all cursor-pointer min-w-[55px] ${activeClass}`;
-                
                 div.innerHTML = `
                     <span class="text-[8px] font-black text-sky-100/70 mb-1 leading-none truncate w-full text-center">${t.name.split(' ')[1]}</span>
                     <span class="text-xs font-black text-white">${count}</span>
                 `;
-                
                 div.onclick = () => {
-                    // 필터 토글 로직
-                    if (currentGradeFilter === t.name) {
-                        currentGradeFilter = null;
-                    } else {
-                        currentGradeFilter = t.name;
-                    }
+                    currentGradeFilter = (currentGradeFilter === t.name) ? null : t.name;
                     applyFilters();
                 };
-                
                 gradeStatsContainer.appendChild(div);
             });
+        }
+
+        // --- 분포도 모달 렌더링 함수 ---
+        function openDistributionModal() {
+            modalContent.innerHTML = '';
+            
+            // 씨앗 등급 제외한 필터링된 등급 리스트
+            const visibleThresholds = thresholds.filter(t => t.id !== 'seed');
+            
+            // 표시되는 등급 중에서만 최대값 계산
+            const counts = visibleThresholds.map(t => lastGradeDistribution[t.name] || 0);
+            const maxCount = Math.max(...counts, 1);
+            
+            // 표시되는 등급의 총 인원 합산
+            const totalMembers = counts.reduce((a, b) => a + b, 0);
+
+            visibleThresholds.forEach(t => {
+                const count = lastGradeDistribution[t.name] || 0;
+                const widthPct = (count / maxCount) * 100;
+                
+                const row = document.createElement('div');
+                row.className = "flex items-center gap-3 text-xs mb-3";
+                row.innerHTML = `
+                    <div class="w-14 px-1 py-1 rounded-md text-[9px] font-black text-center shadow-sm border ${t.labelColor}">
+                        ${t.name}
+                    </div>
+                    <div class="flex-1 h-7 bg-slate-50 rounded-r-xl border border-slate-100 flex items-center shadow-inner overflow-visible">
+                        ${count > 0 ? `
+                            <div class="h-full ${t.bar} rounded-r-xl transition-all duration-700 ease-out shadow-sm flex items-center justify-end px-2"
+                                 style="width: ${Math.max(widthPct, 15)}%">
+                                <span class="text-white font-black text-[10px] drop-shadow-md">${count}명</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+                modalContent.appendChild(row);
+            });
+
+            modalTotalCount.innerText = totalMembers;
+            distModal.classList.remove('hidden');
+            distModal.classList.add('flex');
         }
 
         function renderUsers(usersWithData) {
             userListElement.innerHTML = '';
             const filterInfo = currentGradeFilter ? ` [${currentGradeFilter.split(' ')[1]} 필터링 중]` : '';
             countElement.innerText = `총 ${usersWithData.length}명${filterInfo}`;
-
             if (usersWithData.length === 0) {
                 userListElement.innerHTML = '<p class="text-slate-400 text-center py-10 font-medium italic">조건에 맞는 데이터가 없습니다.</p>';
                 return;
             }
-
             usersWithData.forEach(([name, stats], i) => {
                 const li = document.createElement('li');
                 li.className = "flex items-center justify-between p-2 bg-white rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-all group";
-                
                 const grade = stats.grade;
-                
                 li.innerHTML = `
                     <div class="flex items-center">
                         <span class="text-xs font-black text-slate-500 w-6 mr-1 text-center">${i + 1}</span>
                         <div class="flex flex-col">
-                            <div class="flex items-center space-x-1.5">
-                                <span class="text-slate-800 font-bold uppercase tracking-tight leading-tight text-xs">${name}</span>
+                            <span class="text-slate-800 font-bold uppercase tracking-tight leading-tight text-xs">${name}</span>
+                            <div class="flex items-center space-x-1.5 mt-0.5">
+                                <span class="px-1.5 py-0.5 rounded text-[8px] font-black ${grade.color}">${grade.name}</span>
+                                <span class="text-[7px] text-slate-400 font-bold leading-none">${grade.durationDays > 0 ? grade.durationDays + '일째' : '오늘 달성'}</span>
                             </div>
-                            <div class="flex items-center space-x-1.5">
-                                <div class="flex flex-col items-start">
-                                    <span class="px-1.5 py-0.5 rounded text-[8px] font-black ${grade.color}">
-                                        ${grade.name}
-                                    </span>
-                                </div>
-                                <div class="flex flex-col items-start">
-                                    <span class="text-[7px] text-slate-400 font-bold mt-0.5 leading-none">
-                                        ${grade.durationDays > 0 ? grade.durationDays + '일째 유지 중' : '오늘 등급 달성'}
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="flex items-center space-x-2 mt-0.5">
+                            <div class="flex items-center space-x-2 mt-1">
                                 <span class="text-[9px] font-black text-emerald-600 bg-emerald-50 px-1 rounded">${grade.score}pt</span>
-                                <div class="flex flex-col text-[8px] font-bold text-slate-400 uppercase leading-tight">
-                                    <span>${grade.details.scoreCount}/${grade.details.scoreDist}/${grade.details.scoreBonus}</span>
-                                    <span>(${grade.details.count}회 ${grade.details.dist.toFixed(1)}km ${grade.details.activeWeeks}주)</span>
-                                </div>
+                                <span class="text-[8px] font-bold text-slate-400 uppercase">(${grade.details.count}회 ${grade.details.dist.toFixed(1)}km)</span>
                             </div>
                         </div>
                     </div>
-                    <div class="flex flex-col items-end space-y-1.5">
-                        <div class="flex items-center space-x-2">
-                            <div class="flex flex-col items-end">
-                                <span class="text-[10px] text-slate-400 uppercase font-black leading-none">Dist</span>
-                                <span class="text-sm font-black text-slate-700">${stats.totalDistance.toFixed(1)}<span class="text-[9px] ml-0.5">km</span></span>
-                            </div>
-                            <div class="flex flex-col items-end border-l border-slate-100 pl-2">
-                                <span class="text-[10px] text-slate-400 uppercase font-black leading-none">Time</span>
-                                <span class="text-sm font-black text-slate-700">${Math.floor(stats.totalDuration)}<span class="text-[9px] ml-0.5">min</span></span>
-                            </div>
-                            <div class="flex flex-col items-end border-l border-slate-100 pl-2">
-                                <span class="text-[10px] text-slate-400 uppercase font-black leading-none">Count</span>
-                                <span class="text-sm font-black text-emerald-600">${stats.count}<span class="text-[9px] ml-0.5">회</span></span>
-                            </div>
+                    <div class="flex items-center space-x-2">
+                         <div class="flex flex-col items-end border-l border-slate-100 pl-2">
+                            <span class="text-[9px] text-slate-400 uppercase font-black leading-none">Dist</span>
+                            <span class="text-sm font-black text-slate-700">${stats.totalDistance.toFixed(1)}</span>
+                        </div>
+                        <div class="flex flex-col items-end border-l border-slate-100 pl-2">
+                            <span class="text-[9px] text-slate-400 uppercase font-black leading-none">Runs</span>
+                            <span class="text-sm font-black text-emerald-600">${stats.count}</span>
                         </div>
                     </div>
                 `;
                 userListElement.appendChild(li);
             });
         }
+
+        graphBtn.addEventListener('click', openDistributionModal);
+        closeModal.addEventListener('click', () => distModal.classList.add('hidden'));
+        distModal.addEventListener('click', (e) => { if(e.target === distModal) distModal.classList.add('hidden'); });
 
         yearSelect.addEventListener('change', applyFilters);
         monthSelect.addEventListener('change', applyFilters);
@@ -418,7 +375,7 @@
     </script>
 </head>
 <body class="bg-slate-50 min-h-screen p-3 md:p-10 font-sans text-slate-900">
-    <div class="max-w-md mx-auto">
+    <div class="max-w-md mx-auto relative">
         <!-- Header -->
         <div class="bg-sky-500 rounded-t-2xl p-3 shadow-lg text-white">
             <div class="flex justify-between items-center mb-3">
@@ -426,131 +383,73 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                     </svg>
-                    SongMission Flower Grade
+                    SongMission Flower
                 </h1>
+                <!-- 그래프 보기 버튼 -->
+                <button id="graph-btn" class="bg-white/20 hover:bg-white/30 text-white p-2 rounded-lg transition-all group">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
+                    </svg>
+                </button>
             </div>
             
-            <!-- Summary Stats -->
             <div class="grid grid-cols-2 gap-3 mb-4">
                 <div class="bg-white/10 rounded-xl p-3 border border-white/10">
-                    <p class="text-[10px] font-black uppercase text-sky-100 mb-1 leading-none">Total Distance</p>
-                    <div class="flex items-baseline">
-                        <span id="total-stats-distance" class="text-xl font-black">0.00</span>
-                        <span class="text-[9px] ml-1 font-bold text-sky-100 uppercase">km</span>
-                    </div>
+                    <p class="text-[10px] font-black uppercase text-sky-100 mb-1">Total Distance</p>
+                    <div class="flex items-baseline"><span id="total-stats-distance" class="text-xl font-black">0.00</span><span class="text-[9px] ml-1 font-bold text-sky-100 uppercase">km</span></div>
                 </div>
                 <div class="bg-white/10 rounded-xl p-3 border border-white/10">
-                    <p class="text-[10px] font-black uppercase text-sky-100 mb-1 leading-none">Total Runs</p>
-                    <div class="flex items-baseline">
-                        <span id="total-stats-count" class="text-xl font-black">0</span>
-                        <span class="text-[9px] ml-1 font-bold text-sky-100 uppercase">run</span>
-                    </div>
+                    <p class="text-[10px] font-black uppercase text-sky-100 mb-1">Total Runs</p>
+                    <div class="flex items-baseline"><span id="total-stats-count" class="text-xl font-black">0</span><span class="text-[9px] ml-1 font-bold text-sky-100 uppercase">run</span></div>
                 </div>
             </div>
 
-            <div class="mb-1 w-full">
-                <div id="grade-stats-container" 
-                    class="flex items-center justify-center space-x-1.5 overflow-x-auto pb-1 no-scrollbar min-w-full">
-                    </div>
+            <div class="mb-1 w-full overflow-hidden">
+                <div id="grade-stats-container" class="flex items-center justify-center space-x-1.5 overflow-x-auto pb-1 no-scrollbar min-w-full"></div>
             </div>
+
             <div class="grid grid-cols-2 gap-2">
-                <div class="flex flex-col">
-                    <div class="flex space-x-1">
-                        <select id="year-filter" class="flex-1 bg-sky-600 border-none rounded-lg text-[11px] font-bold p-2 text-white outline-none">
-                            <option value="all">전체</option>
-                            <option value="2024">24년</option>
-                            <option value="2025">25년</option>
-                            <option value="2026">26년</option>
-                        </select>
-                        <select id="month-filter" class="flex-1 bg-sky-600 border-none rounded-lg text-[11px] font-bold p-2 text-white outline-none">
-                            <option value="all">전체</option>
-                            <option value="1">1월</option><option value="2">2월</option><option value="3">3월</option>
-                            <option value="4">4월</option><option value="5">5월</option><option value="6">6월</option>
-                            <option value="7">7월</option><option value="8">8월</option><option value="9">9월</option>
-                            <option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="flex flex-col">
-                    <select id="sort-filter" class="bg-sky-600 border-none rounded-lg text-[11px] font-bold p-2 text-white outline-none">
-                        <option value="score">등급 높은 순</option>
-                        <option value="distance">거리 순</option>
-                        <option value="duration">시간 순</option>
-                        <option value="count">횟수 순</option>
+                <div class="flex space-x-1">
+                    <select id="year-filter" class="flex-1 bg-sky-600 border-none rounded-lg text-[11px] font-bold p-2 text-white outline-none">
+                        <option value="all">전체</option><option value="2024">24년</option><option value="2025">25년</option><option value="2026">26년</option>
+                    </select>
+                    <select id="month-filter" class="flex-1 bg-sky-600 border-none rounded-lg text-[11px] font-bold p-2 text-white outline-none">
+                        <option value="all">전체</option><option value="1">1월</option><option value="2">2월</option><option value="3">3월</option><option value="4">4월</option><option value="5">5월</option><option value="6">6월</option><option value="7">7월</option><option value="8">8월</option><option value="9">9월</option><option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
                     </select>
                 </div>
+                <select id="sort-filter" class="bg-sky-600 border-none rounded-lg text-[11px] font-bold p-2 text-white outline-none">
+                    <option value="score">등급 순</option><option value="distance">거리 순</option><option value="count">횟수 순</option>
+                </select>
             </div>
         </div>
         
         <div class="bg-white rounded-b-2xl shadow-xl p-5 min-h-[400px]">
             <p id="user-count" class="text-slate-400 text-[10px] font-black mb-4 uppercase tracking-widest border-b border-slate-50 pb-2">Initializing...</p>
-            
             <div id="loading" class="text-center py-20">
                 <div class="animate-spin inline-block w-8 h-8 border-[3px] border-sky-600 border-t-transparent rounded-full mb-3"></div>
-                <p class="text-slate-400 text-xs font-bold uppercase tracking-widest">Calculating Grades...</p>
             </div>
-
             <ul id="user-list" class="space-y-4"></ul>
         </div>
+    </div>
 
-        <!-- Grade Criteria Guide -->
-        <div class="mt-8 border-t border-sky-100 pt-3">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="bg-gradient-to-br from-sky-500 to-blue-500 rounded-xl p-4 shadow-sm border border-sky-400/30">
-                    <p class="text-[10px] font-black text-white uppercase mb-2 flex items-center">
-                        <span class="w-1 h-3 bg-sky-200 rounded-full mr-1.5"></span>
-                        Activities (Max 40pt)
-                    </p>
-                    <div class="space-y-1">
-                        <div class="flex justify-between text-[10px] font-bold border-b border-white/20 pb-1 text-white">
-                            <span>30회 / 20회 / 16회</span>
-                            <span class="text-sky-100 font-black">40 / 37 / 30pt</span>
-                        </div>
-                        <div class="flex justify-between text-[10px] font-bold border-b border-white/20 py-1 text-sky-50/80">
-                            <span>12회 / 8회 / 4회</span>
-                            <span>25 / 20 / 15pt</span>
-                        </div>
-                        <div class="flex justify-between text-[10px] font-bold py-1 text-sky-100/60">
-                            <span>2회 / 1회 미만</span>
-                            <span>10 / 0pt</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-gradient-to-br from-sky-500 to-blue-500 rounded-xl p-4 shadow-sm border border-sky-400/30">
-                    <p class="text-[10px] font-black text-white uppercase mb-2 flex items-center">
-                        <span class="w-1 h-3 bg-sky-200 rounded-full mr-1.5"></span>
-                        Distance (Max 40pt)
-                    </p>
-                    <div class="space-y-1">
-                        <div class="flex justify-between text-[10px] font-bold border-b border-white/20 pb-1 text-white">
-                            <span>300k / 200k / 100k</span>
-                            <span class="text-sky-100 font-black">40 / 38 / 30pt</span>
-                        </div>
-                        <div class="flex justify-between text-[10px] font-bold border-b border-white/20 py-1 text-sky-50/80">
-                            <span>50k / 20k / 10k</span>
-                            <span>25 / 20 / 10pt</span>
-                        </div>
-                        <div class="flex justify-between text-[10px] font-bold py-1 text-sky-100/60">
-                            <span>5k / 5k 미만</span>
-                            <span>5 / 0pt</span>
-                        </div>
-                    </div>
-                </div>
+    <!-- 분포도 모달 -->
+    <div id="dist-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl animate-in zoom-in duration-200">
+            <div class="bg-slate-50 px-5 py-4 flex justify-between items-center border-b border-slate-100">
+                <h3 class="text-sm font-black text-slate-700 uppercase tracking-tight">꽃 등급 구간별 분포</h3>
+                <button id="close-modal" class="text-slate-400 hover:text-slate-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
-
-            <div class="mt-4 px-4 py-3 bg-gradient-to-r from-sky-500 to-blue-500 rounded-xl shadow-sm border border-sky-400/30">
-                <p class="text-[10px] font-black text-white uppercase mb-1 flex items-center">
-                    <span class="mr-1">✨</span> Weekly Bonus (Max 20pt)
-                </p>
-                <p class="text-[9px] font-bold text-sky-50 leading-relaxed">
-                    주 2회 이상 활동 시 1주 인정 | 4주 연속 20pt / 3주 15pt / 2주 10pt
-                </p>
+            <div id="modal-content" class="p-5 space-y-1">
+                <!-- 막대 그래프가 렌더링되는 곳 -->
             </div>
-            
-            <p class="mt-4 text-[8px] text-slate-300 text-center font-bold tracking-tight">
-                * 등급은 최근 31일간의 데이터를 기준으로 매일 갱신됩니다.
-            </p>
+            <div class="bg-slate-50 px-5 py-3 flex justify-between items-center text-[11px] font-black text-slate-400 border-t border-slate-100">
+                <span>활동 멤버 총 인원 (씨앗 제외)</span>
+                <span class="text-slate-800 text-sm"><span id="modal-total-count">0</span>명</span>
+            </div>
         </div>
     </div>
 
