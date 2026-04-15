@@ -329,33 +329,55 @@
                 userListElement.innerHTML = '<p class="text-slate-400 text-center py-10 font-medium italic">조건에 맞는 데이터가 없습니다.</p>';
                 return;
             }
-            usersWithData.forEach(([name, stats], i) => {
+ 
+             usersWithData.forEach(([name, stats], i) => {
                 const li = document.createElement('li');
                 li.className = "flex items-center justify-between p-2 bg-white rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-all group";
+
                 const grade = stats.grade;
+
                 li.innerHTML = `
                     <div class="flex items-center">
                         <span class="text-xs font-black text-slate-500 w-6 mr-1 text-center">${i + 1}</span>
                         <div class="flex flex-col">
-                            <span class="text-slate-800 font-bold uppercase tracking-tight leading-tight text-xs">${name}</span>
-                            <div class="flex items-center space-x-1.5 mt-0.5">
-                                <span class="px-1.5 py-0.5 rounded text-[8px] font-black ${grade.color}">${grade.name}</span>
-                                <span class="text-[7px] text-slate-400 font-bold leading-none">${grade.durationDays > 0 ? grade.durationDays + '일째' : '오늘 달성'}</span>
+                            <div class="flex items-center space-x-1.5">
+                                <span class="text-slate-800 font-bold uppercase tracking-tight leading-tight text-xs">${name}</span>
                             </div>
-                            <div class="flex items-center space-x-2 mt-1">
+                            <div class="flex items-center space-x-1.5">
+                                <div class="flex flex-col items-start">
+                                    <span class="px-1.5 py-0.5 rounded text-[8px] font-black ${grade.color}">
+                                        ${grade.name}
+                                    </span>
+                                </div>
+                                <div class="flex flex-col items-start">
+                                    <span class="text-[7px] text-slate-400 font-bold mt-0.5 leading-none">
+                                        ${grade.durationDays > 0 ? grade.durationDays + '일째 유지 중' : '오늘 등급 달성'}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2 mt-0.5">
                                 <span class="text-[9px] font-black text-emerald-600 bg-emerald-50 px-1 rounded">${grade.score}pt</span>
-                                <span class="text-[8px] font-bold text-slate-400 uppercase">(${grade.details.count}회 ${grade.details.dist.toFixed(1)}km)</span>
+                                <div class="flex flex-col text-[8px] font-bold text-slate-400 uppercase leading-tight">
+                                    <span>${grade.details.scoreCount}/${grade.details.scoreDist}/${grade.details.scoreBonus}</span>
+                                    <span>(${grade.details.count}회 ${grade.details.dist.toFixed(1)}km ${grade.details.activeWeeks}주)</span>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="flex items-center space-x-2">
-                         <div class="flex flex-col items-end border-l border-slate-100 pl-2">
-                            <span class="text-[9px] text-slate-400 uppercase font-black leading-none">Dist</span>
-                            <span class="text-sm font-black text-slate-700">${stats.totalDistance.toFixed(1)}</span>
-                        </div>
-                        <div class="flex flex-col items-end border-l border-slate-100 pl-2">
-                            <span class="text-[9px] text-slate-400 uppercase font-black leading-none">Runs</span>
-                            <span class="text-sm font-black text-emerald-600">${stats.count}</span>
+                    <div class="flex flex-col items-end space-y-1.5">
+                        <div class="flex items-center space-x-2">
+                            <div class="flex flex-col items-end">
+                                <span class="text-[10px] text-slate-400 uppercase font-black leading-none">Dist</span>
+                                <span class="text-sm font-black text-slate-700">${stats.totalDistance.toFixed(1)}<span class="text-[9px] ml-0.5">km</span></span>
+                            </div>
+                            <div class="flex flex-col items-end border-l border-slate-100 pl-2">
+                                <span class="text-[10px] text-slate-400 uppercase font-black leading-none">Time</span>
+                                <span class="text-sm font-black text-slate-700">${Math.floor(stats.totalDuration)}<span class="text-[9px] ml-0.5">min</span></span>
+                            </div>
+                            <div class="flex flex-col items-end border-l border-slate-100 pl-2">
+                                <span class="text-[10px] text-slate-400 uppercase font-black leading-none">Count</span>
+                                <span class="text-sm font-black text-emerald-600">${stats.count}<span class="text-[9px] ml-0.5">회</span></span>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -430,6 +452,69 @@
             </div>
             <ul id="user-list" class="space-y-4"></ul>
         </div>
+
+        <!-- Grade Criteria Guide -->
+        <div class="mt-8 border-t border-sky-100 pt-3">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-gradient-to-br from-sky-500 to-blue-500 rounded-xl p-4 shadow-sm border border-sky-400/30">
+                    <p class="text-[10px] font-black text-white uppercase mb-2 flex items-center">
+                        <span class="w-1 h-3 bg-sky-200 rounded-full mr-1.5"></span>
+                        Activities (Max 40pt)
+                    </p>
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-[10px] font-bold border-b border-white/20 pb-1 text-white">
+                            <span>30회 / 20회 / 16회</span>
+                            <span class="text-sky-100 font-black">40 / 37 / 30pt</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] font-bold border-b border-white/20 py-1 text-sky-50/80">
+                            <span>12회 / 8회 / 4회</span>
+                            <span>25 / 20 / 15pt</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] font-bold py-1 text-sky-100/60">
+                            <span>2회 / 1회 미만</span>
+                            <span>10 / 0pt</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-sky-500 to-blue-500 rounded-xl p-4 shadow-sm border border-sky-400/30">
+                    <p class="text-[10px] font-black text-white uppercase mb-2 flex items-center">
+                        <span class="w-1 h-3 bg-sky-200 rounded-full mr-1.5"></span>
+                        Distance (Max 40pt)
+                    </p>
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-[10px] font-bold border-b border-white/20 pb-1 text-white">
+                            <span>300k / 200k / 100k</span>
+                            <span class="text-sky-100 font-black">40 / 38 / 30pt</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] font-bold border-b border-white/20 py-1 text-sky-50/80">
+                            <span>50k / 20k / 10k</span>
+                            <span>25 / 20 / 10pt</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] font-bold py-1 text-sky-100/60">
+                            <span>5k / 5k 미만</span>
+                            <span>5 / 0pt</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 px-4 py-3 bg-gradient-to-r from-sky-500 to-blue-500 rounded-xl shadow-sm border border-sky-400/30">
+                <p class="text-[10px] font-black text-white uppercase mb-1 flex items-center">
+                    <span class="mr-1">✨</span> Weekly Bonus (Max 20pt)
+                </p>
+                <p class="text-[9px] font-bold text-sky-50 leading-relaxed">
+                    주 2회 이상 활동 시 1주 인정 | 4주 연속 20pt / 3주 15pt / 2주 10pt
+                </p>
+            </div>
+
+            <p class="mt-4 text-[8px] text-slate-300 text-center font-bold tracking-tight">
+                * 등급은 최근 31일간의 데이터를 기준으로 매일 갱신됩니다.
+            </p>
+        </div>
+
+
+
     </div>
 
     <!-- 분포도 모달 -->
@@ -452,6 +537,7 @@
             </div>
         </div>
     </div>
+
 
     <style>
         .no-scrollbar::-webkit-scrollbar { display: none; }
