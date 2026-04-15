@@ -603,7 +603,7 @@
 
                                     <button onclick="openDistributionModal()" 
                                             class="text-[11px] font-bold bg-sky-400 text-white px-4 py-2 rounded-xl transition-all hover:bg-sky-600 hover:shadow-md active:scale-95 flex items-center gap-2">
-                                             🌼꽃 등급 분포
+                                             🌻꽃 등급 분포
                                     </button>
 
                                 </div>
@@ -1175,24 +1175,33 @@
         </div>
     </div>
 
-
-    <!-- 분포도 모달 -->
-    <div id="dist-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl animate-in zoom-in duration-200">
-            <div class="bg-slate-50 px-5 py-4 flex justify-between items-center border-b border-slate-100">
-                <h3 class="text-sm font-black text-slate-700 uppercase tracking-tight">꽃 등급 분포</h3>
-                <button id="close-modal" class="text-slate-400 hover:text-slate-600">
+    <div id="dist-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-sky-900/40 backdrop-blur-md">
+        <div class="bg-sky-50 rounded-3xl w-full max-w-sm overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.2)] animate-in zoom-in duration-300 border border-white/50">
+            
+            <div class="bg-gradient-to-r from-sky-600 to-sky-500 px-6 py-5 flex justify-between items-center shadow-lg relative overflow-hidden">
+                <div class="absolute inset-0 opacity-10 pointer-events-none">
+                    <svg width="100%" height="100%"><rect width="100%" height="100%" fill="url(#pattern-circles)" /></svg>
+                </div>
+                
+                <h3 class="text-base font-black text-white flex items-center gap-2 z-10 drop-shadow-sm">
+                    <span class="text-xl">🌻</span> 꽃 등급 분포 현황
+                </h3>
+                <button id="close-modal" class="text-white/80 hover:text-white transition-colors z-10 bg-white/10 p-1 rounded-full">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
-            <div id="modal-content" class="p-5 space-y-1">
-                <!-- 막대 그래프가 렌더링되는 곳 -->
-            </div>
-            <div class="bg-slate-50 px-5 py-3 flex justify-between items-center text-[11px] font-black text-slate-400 border-t border-slate-100">
-                <span>활동 멤버 총 인원 (씨앗 제외)</span>
-                <span class="text-slate-800 text-sm"><span id="modal-total-count">0</span>명</span>
+
+            <div id="modal-content" class="p-6 space-y-0.5">
+                </div>
+
+            <div class="bg-sky-100/50 px-6 py-4 flex justify-between items-center text-[12px] font-black text-sky-700/70 border-t border-sky-200/50">
+                <div class="flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 bg-sky-400 rounded-full animate-pulse"></span>
+                    활동 멤버 총 인원 <span class="opacity-60 text-[10px]">(씨앗 제외)</span>
+                </div>
+                <span class="text-sky-900 text-base"><span id="modal-total-count" class="font-black text-lg">0</span>명</span>
             </div>
         </div>
     </div>
@@ -3659,30 +3668,30 @@
                     
                 const barStyle = isWhiteBg ? 'bg-white border-r border-blue-200 shadow-md' : data.color;
 
-return `
-    <div class="flex items-center gap-2 py-0.5">
-        <div class="w-16 px-1 py-1 rounded-md text-[11px] font-black text-center truncate flex-shrink-0 shadow-sm border 
-            ${data.color} 
-            ${isWhiteBg ? 'text-slate-600 border-slate-200' : 'text-white border-transparent'}">
-            ${t.name}
-        </div>
+                return `
+                    <div class="flex items-center gap-2 py-0.5">
+                        <div class="w-16 px-1 py-1 rounded-md text-[11px] font-black text-center truncate flex-shrink-0 shadow-sm border 
+                            ${data.color} 
+                            ${isWhiteBg ? 'text-slate-600 border-slate-200' : 'text-white border-transparent'}">
+                            ${t.name}
+                        </div>
 
-        <div class="flex-1 ${containerStyle} h-6 rounded-r-xl overflow-hidden relative transition-all duration-300">
-            <div id="dist-bar-${index}" 
-                class="${barStyle} h-full transition-all duration-[1000ms] ease-out w-0 rounded-r-xl" 
-                data-target="${Math.max(relativeWidth, 12)}"> 
-            </div>
-            
-            <span class="absolute inset-y-0 left-2.5 flex items-center text-[10px] font-black ${textColorClass} drop-shadow-sm opacity-0 transition-opacity duration-500 delay-500 whitespace-nowrap" id="dist-text-${index}">
-                ${data.count > 0 ? data.count + '명' : ''}
-            </span>
-        </div>
+                        <div class="flex-1 ${containerStyle} h-6 rounded-r-xl overflow-hidden relative transition-all duration-300">
+                            <div id="dist-bar-${index}" 
+                                class="${barStyle} h-full transition-all duration-[1000ms] ease-out w-0 rounded-r-xl" 
+                                data-target="${Math.max(relativeWidth, 12)}"> 
+                            </div>
+                            
+                            <span class="absolute inset-y-0 left-2.5 flex items-center text-[10px] font-black ${textColorClass} drop-shadow-sm opacity-0 transition-opacity duration-500 delay-500 whitespace-nowrap" id="dist-text-${index}">
+                                ${data.count > 0 ? data.count + '명' : ''}
+                            </span>
+                        </div>
 
-        <div class="w-12 text-right text-[11px] font-black text-slate-400 flex-shrink-0 whitespace-nowrap">
-            ${totalPercentage}%
-        </div>
-    </div>
-`;
+                        <div class="w-12 text-right text-[11px] font-black text-slate-400 flex-shrink-0 whitespace-nowrap">
+                            ${totalPercentage}%
+                        </div>
+                    </div>
+                `;
             }).join('');
 
             if (totalSpan) totalSpan.innerText = totalActive;
