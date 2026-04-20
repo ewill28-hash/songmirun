@@ -1679,7 +1679,7 @@
                     obj[key].count += 1;
                     obj[key].members.add(r.user_name);
                     // 종합점수 계산: 거리 * 1 + 횟수 * 1 (한 번 뛸 때마다 1점 + 거리당 1점)
-                    obj[key].score = obj[key].dist * 1 + (obj[key].time / 60*10).toFixed(1) * 1 + obj[key].count * 0.5;
+                    obj[key].score = obj[key].dist * 1 + (obj[key].time / 60*10).toFixed(1) * 1 + obj[key].count * 0.1;
 
 
                 };
@@ -1692,7 +1692,7 @@
                     myStats.dist += d;
                     myStats.time += t;
                     myStats.count += 1;
-                    myStats.score = myStats.dist * 1 + (myStats.time /60*10).toFixed(1) * 1 + myStats.count * 0.5;
+                    myStats.score = myStats.dist * 1 + (myStats.time /60*10).toFixed(1) * 1 + myStats.count * 0.1;
                 }
             });
 
@@ -2981,8 +2981,7 @@
             };
 
             const pointRank = Object.entries(userAgg).map(([name, obj]) => {
-                const pointVal = (obj.distance * 1) + (obj.duration/60 * 10) + (obj.count * 0.5);
-                //const pointVal = (obj.distance * 1) + (obj.duration * 1) + (obj.count * 0.5);
+                const pointVal = (obj.distance * 1) + (obj.duration/60 * 10) + (obj.count * 0.1);
                 const timeStr = formatTimeHMS(obj.duration);
 
                 return { 
