@@ -439,7 +439,7 @@
                 const logUpdate = stats.logUpdatedAt ? stats.logUpdatedAt.toISOString().replace('T', ' ').substring(0, 19) : "-";
                 const memUpdate = stats.memberUpdatedAt ? stats.memberUpdatedAt.toISOString().replace('T', ' ').substring(0, 19) : "-";
                 
-                csvContent += `${index + 1},${name},${stats.grade.name},${stats.grade.score},${stats.totalDistance.toFixed(2)},${stats.totalDuration.toFixed(1)},${stats.count},${(stats.totalDistance + stats.totalDuration + stats.count).toFixed(2)},${(stats.totalDistance + stats.totalDuration + (stats.count/2)).toFixed(2)},${(stats.totalDistance + stats.totalDuration/60*10 + (stats.count/2)).toFixed(2)},${logUpdate},${memUpdate}\n`;
+                csvContent += `${index + 1},${name},${stats.grade.name},${stats.grade.score},${stats.totalDistance.toFixed(2)},${stats.totalDuration.toFixed(1)},${stats.count},${(stats.totalDistance + stats.totalDuration + stats.count).toFixed(2)},${(stats.totalDistance + stats.totalDuration/60*10 + (stats.count/5)).toFixed(2)},${(stats.totalDistance + stats.totalDuration/60*10 + (stats.count/10)).toFixed(2)},${logUpdate},${memUpdate}\n`;
             });
             
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
