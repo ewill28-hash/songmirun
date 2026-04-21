@@ -284,7 +284,7 @@
                         <i class="fa-solid fa-person-running icon-btn" id="display-nickname"></i>
                     </div>
                     <div>
-                        <h2 class="text-sm font-black text-gray-800 italic">Songmirun</h2>
+                        <h2 class="text-sm font-black text-gray-800 italic">Songmirun <span class="text-xs text-rose-500 font-bold not-italic ml-1">쏭미션</span></h2>
                         <div class="flex items-center gap-1.5">
                             <span id="display-nickname2" class="text-[10px] font-bold text-brand-500 cursor-pointer hover:bg-brand-50 px-1 rounded transition-colors" title="내 정보 상세">-</span>
                         </div>
@@ -375,20 +375,17 @@
                         
                         <div class="col-span-1">
                             <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1">러닝 날짜</label>
-                            <input type="date" id="in-date" class="w-full bg-white border-2 border-brand-100 p-3.5 rounded-2xl text-sm outline-none font-bold shadow-sm">
+                            <input type="date" id="in-date" class="w-full bg-rose-50 border-2 border-rose-100 p-3.5 rounded-2xl text-sm outline-none font-bold shadow-sm text-rose-900">
                         </div>
                         
                         <div class="col-span-1">
                             <div class="flex items-center gap-2 mb-1.5 ml-1">
                                 <label class="text-[11px] text-brand-700 font-black">러닝 유형</label>
-
-
-
                                 <span id="monday-notice" class="text-[9px] text-red-500 font-bold hidden animate-pulse">
                                     📅정기런(월요일) 선택 확인 👇
                                 </span>
                             </div>                             
-                            <select id="run-type" class="w-full bg-white border-2 border-brand-100 p-3.5 rounded-2xl text-sm font-bold outline-none shadow-sm">
+                            <select id="run-type" class="w-full bg-rose-50 border-2 border-rose-100 p-3.5 rounded-2xl text-sm font-bold outline-none shadow-sm text-rose-900">
                                 <option value="오운완">👟 오운완(개인)</option>
                                 <option value="정기">📅 정기런(月)</option>
                                 <option value="번개">⚡ 번개런</option>
@@ -603,7 +600,7 @@
 
                                     <button onclick="openDistributionModal()" 
                                             class="text-[11px] font-bold bg-sky-400 text-white px-4 py-2 rounded-xl transition-all hover:bg-sky-600 hover:shadow-md active:scale-95 flex items-center gap-2">
-                                             🌻꽃 등급 분포
+                                             🌼 꽃 등급 분포
                                     </button>
 
                                 </div>
@@ -1557,7 +1554,7 @@
                             </div>
                         </div>
                         <div class="flex items-center gap-1 mb-1">
-                            <div onclick="window.scrollToTop('${l.log_id}')"  class="w-5 h-5 bg-brand-100 rounded-full flex items-center justify-center text-[8px] font-bold text-brand-600">${(l.user_name || '?').charAt(0)}</div>
+                            <div class="w-5 h-5 bg-brand-100 rounded-full flex items-center justify-center text-[8px] font-bold text-brand-600">${(l.user_name || '?').charAt(0)}</div>
                             <button onclick="window.openUserStatModal('${l.user_name}')" class="text-xs font-bold text-gray-700">${l.user_name}</button>
                         </div>
                         <div class="grid grid-cols-5 gap-1 text-center bg-brand-50/50 p-2 rounded-xl">
@@ -2228,7 +2225,7 @@
             }
 
             document.getElementById('flower-emoji').textContent = finalStage.emoji;
-            document.getElementById('flower-title').innerHTML = `우린 ${currentDay}일 달렸다 : <br><br>${finalStage.name}`;
+            document.getElementById('flower-title').innerHTML = `We hit ${currentDay} days : <br><br>${finalStage.name}`;
             document.getElementById('flower-status').textContent = finalStage.status;
             document.getElementById('flower-desc').textContent = finalStage.desc;
 
