@@ -1,0 +1,612 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import { initializeApp, getApps } from 'firebase/app';
+import { 
+  getAuth, 
+  signInAnonymously, 
+  signInWithCustomToken, 
+  onAuthStateChanged 
+} from 'firebase/auth';
+import { 
+  getFirestore, 
+  collection, 
+  doc, 
+  addDoc, 
+  updateDoc, 
+  deleteDoc, 
+  onSnapshot, 
+  query,
+  where,
+  getDocs,
+  writeBatch
+} from 'firebase/firestore';
+import { 
+  Trophy, 
+  Clock, 
+  User, 
+  ChevronRight,
+  AlertCircle,
+  RefreshCw,
+  Plus,
+  Settings,
+  Trash2,
+  Database,
+  Download,
+  X,
+  Users
+} from 'lucide-react';
+
+// --- Firebase Configuration ---
+const firebaseConfig = JSON.parse(__firebase_config);
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+export default function App() {
+  const [user, setUser] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [view, setView] = useState('user'); 
+  const [adminPassword, setAdminPassword] = useState('');
+  
+  const [races, setRaces] = useState([]);
+  const [entries, setEntries] = useState([]);
+  const [selectedRace, setSelectedRace] = useState(null);
+  
+  const [filterRaceId, setFilterRaceId] = useState('all');
+
+  const getTodayStr = () => new Date().toISOString().split('T')[0];
+  
+  // User Form State
+  const [nickname, setNickname] = useState('');
+  const [targetTime, setTargetTime] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Modal States
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [showSeedModal, setShowSeedModal] = useState(false);
+  const [showDeleteRaceModal, setShowDeleteRaceModal] = useState(false); // New: Race Delete Modal
+  const [seedCount, setSeedCount] = useState(30);
+  const [targetRaceForSeed, setTargetRaceForSeed] = useState(null);
+  const [targetRaceForDelete, setTargetRaceForDelete] = useState(null); // New: Race for deletion
+
+  // Admin Form State
+  const [newRace, setNewRace] = useState({ title: '', date: getTodayStr(), isActive: true });
+
+  // 1. Authentication
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+          await signInAnonymously(auth);
+        }
+      } catch (err) {
+        console.error("Auth Error:", err);
+      }
+    };
+
+    initAuth();
+    const unsubscribe = onAuthStateChanged(auth, (u) => {
+      setUser(u);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // 2. Data Listeners
+  useEffect(() => {
+    if (!user) return;
+
+    const racesRef = collection(db, 'artifacts', appId, 'public', 'data', 'races');
+    const unsubscribeRaces = onSnapshot(racesRef, (snapshot) => {
+      const raceList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setRaces(raceList);
+    }, (err) => console.error("Races Sync Error:", err));
+
+    const entriesRef = collection(db, 'artifacts', appId, 'public', 'data', 'entries');
+    const unsubscribeEntries = onSnapshot(entriesRef, (snapshot) => {
+      const entryList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setEntries(entryList);
+    }, (err) => console.error("Entries Sync Error:", err));
+
+    return () => {
+      unsubscribeRaces();
+      unsubscribeEntries();
+    };
+  }, [user]);
+
+  // Check if nickname has already entered for the selected race
+  const existingUserEntry = useMemo(() => {
+    if (!selectedRace || !nickname.trim()) return null;
+    const searchName = nickname.trim().toLowerCase();
+    return entries.find(e => 
+      e.raceId === selectedRace.id && 
+      e.nickname.trim().toLowerCase() === searchName
+    );
+  }, [entries, selectedRace, nickname]);
+
+  // Actions
+  const handleAdminLogin = () => {
+    if (adminPassword === '33') {
+      setIsAdmin(true);
+      setView('admin_panel');
+      setAdminPassword('');
+    } else {
+      alert("비밀번호가 틀렸습니다.");
+    }
+  };
+
+  const createRace = async () => {
+    if (!user || !newRace.title || !newRace.date) return;
+    try {
+      const racesRef = collection(db, 'artifacts', appId, 'public', 'data', 'races');
+      await addDoc(racesRef, { ...newRace, createdAt: new Date().toISOString() });
+      setNewRace({ title: '', date: getTodayStr(), isActive: true });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const toggleRaceStatus = async (race) => {
+    if (!user) return;
+    const raceRef = doc(db, 'artifacts', appId, 'public', 'data', 'races', race.id);
+    await updateDoc(raceRef, { isActive: !race.isActive });
+  };
+
+  // Improved: Race Delete Execution with Modal confirmation
+  const executeDeleteRace = async () => {
+    if (!user || !targetRaceForDelete) return;
+    
+    setIsSubmitting(true);
+    try {
+      const entriesRef = collection(db, 'artifacts', appId, 'public', 'data', 'entries');
+      const snapshot = await getDocs(entriesRef);
+      const batch = writeBatch(db);
+      
+      snapshot.docs.forEach((docSnap) => {
+        if (docSnap.data().raceId === targetRaceForDelete.id) {
+          batch.delete(docSnap.ref);
+        }
+      });
+      
+      const raceRef = doc(db, 'artifacts', appId, 'public', 'data', 'races', targetRaceForDelete.id);
+      batch.delete(raceRef);
+      
+      await batch.commit();
+      setShowDeleteRaceModal(false);
+      setTargetRaceForDelete(null);
+    } catch (err) {
+      console.error("Delete Race Error:", err);
+      alert("레이스 삭제 중 오류가 발생했습니다.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // 샘플 데이터 생성 실행 함수
+  const executeSeedData = async () => {
+    if (!user || !targetRaceForSeed || seedCount <= 0) return;
+    
+    setIsSubmitting(true);
+    try {
+      const entriesRef = collection(db, 'artifacts', appId, 'public', 'data', 'entries');
+      const batch = writeBatch(db);
+      
+      const firstNames = ["쾌속", "번개", "폭주", "바람", "빛의", "열정", "희망", "질주", "에이스", "마하"];
+      const lastNames = ["거북이", "토끼", "치타", "러너", "마라토너", "번개", "달리기", "스프린터", "강자", "심장"];
+
+      for (let i = 0; i < seedCount; i++) {
+        const randFirst = firstNames[Math.floor(Math.random() * firstNames.length)];
+        const randLast = lastNames[Math.floor(Math.random() * lastNames.length)];
+        const randNum = Math.floor(Math.random() * 9000) + 1000;
+        
+        const randomTime = (Math.random() * (40 - 10) + 10).toFixed(2);
+        const newDocRef = doc(entriesRef);
+        
+        batch.set(newDocRef, {
+          raceId: targetRaceForSeed.id,
+          raceTitle: targetRaceForSeed.title,
+          nickname: `${randFirst}${randLast}${randNum}`,
+          targetTime: parseFloat(randomTime),
+          userId: "sample_user",
+          submittedAt: new Date().toISOString(),
+          isSample: true
+        });
+      }
+      
+      await batch.commit();
+      setShowSeedModal(false);
+      setTargetRaceForSeed(null);
+    } catch (err) {
+      console.error("Seed Error:", err);
+      alert("데이터 생성 중 오류가 발생했습니다.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const submitEntry = async (e) => {
+    e.preventDefault();
+    if (!user || !selectedRace || !nickname.trim() || !targetTime) return;
+
+    const timeVal = parseFloat(targetTime);
+    if (timeVal > 60) {
+      alert("목표 시간은 60초 이내로 설정해야 합니다.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      if (existingUserEntry) {
+        const entryRef = doc(db, 'artifacts', appId, 'public', 'data', 'entries', existingUserEntry.id);
+        await updateDoc(entryRef, {
+          targetTime: timeVal,
+          updatedAt: new Date().toISOString()
+        });
+        alert("기록이 수정되었습니다.");
+      } else {
+        const entriesRef = collection(db, 'artifacts', appId, 'public', 'data', 'entries');
+        await addDoc(entriesRef, {
+          raceId: selectedRace.id,
+          raceTitle: selectedRace.title,
+          nickname: nickname.trim(),
+          targetTime: timeVal,
+          userId: user.uid,
+          submittedAt: new Date().toISOString()
+        });
+        alert("참여가 완료되었습니다!");
+      }
+      setNickname('');
+      setTargetTime('');
+      setSelectedRace(null);
+    } catch (err) {
+      console.error(err);
+      alert("저장 중 오류가 발생했습니다.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const confirmDeleteMyEntry = async () => {
+    if (!user || !existingUserEntry) return;
+    
+    setIsSubmitting(true);
+    try {
+      const entryRef = doc(db, 'artifacts', appId, 'public', 'data', 'entries', existingUserEntry.id);
+      await deleteDoc(entryRef);
+      setNickname('');
+      setTargetTime('');
+      setSelectedRace(null);
+      setShowCancelModal(false);
+    } catch (err) {
+      console.error("Delete My Entry Error:", err);
+      alert("삭제 처리에 실패했습니다.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const deleteEntryFromAdmin = async (id) => {
+    if (!user) return;
+    if (!confirm("데이터를 삭제하시겠습니까?")) return;
+    try {
+      const entryRef = doc(db, 'artifacts', appId, 'public', 'data', 'entries', id);
+      await deleteDoc(entryRef);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const filteredEntries = useMemo(() => {
+    if (filterRaceId === 'all') return entries;
+    return entries.filter(e => e.raceId === filterRaceId);
+  }, [entries, filterRaceId]);
+
+  const downloadCSV = () => {
+    const headers = ["Race", "Nickname", "TargetTime", "Nickname(TargetTime)", "SubmittedAt"];
+    const rows = filteredEntries.map(e => [
+      `"${e.raceTitle}"`, `"${e.nickname}"`, e.targetTime, `"${e.nickname}(${e.targetTime})"`, `"${e.submittedAt}"`
+    ]);
+    let csvContent = "data:text/csv;charset=utf-8,\uFEFF" + headers.join(",") + "\n" + rows.map(r => r.join(",")).join("\n");
+    const link = document.createElement("a");
+    link.setAttribute("href", encodeURI(csvContent));
+    link.setAttribute("download", `entries_${new Date().toISOString().slice(0,10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const activeRaces = races.filter(r => r.isActive);
+
+  if (!user) return <div className="p-12 text-center text-slate-400 font-medium">연결 중...</div>;
+
+  return (
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans p-4 md:p-8">
+      <div className="max-w-4xl mx-auto">
+        <header className="flex justify-between items-center mb-8 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+          <div className="flex items-center gap-3">
+            <div className="bg-indigo-600 p-2 rounded-lg text-white"><Trophy size={24} /></div>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-800">송미런 타임 타겟 레이스 참여</h1>
+          </div>
+          <button onClick={() => setView(isAdmin ? 'admin_panel' : 'admin_auth')} className={`p-2 rounded-full ${isAdmin ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-500'}`}><Settings size={20} /></button>
+        </header>
+
+        {view === 'user' && (
+          <div className="space-y-6">
+            {!selectedRace ? (
+              <div className="grid gap-4">
+                <h2 className="text-lg font-semibold px-2">레이스 선택</h2>
+                {activeRaces.length === 0 ? (
+                  <div className="text-center py-12 bg-white rounded-2xl border-2 border-dashed border-slate-200 text-slate-400">진행 중인 레이스가 없습니다.</div>
+                ) : (
+                  activeRaces.map(race => (
+                    <button key={race.id} onClick={() => setSelectedRace(race)} className="group flex items-center justify-between p-6 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all text-left">
+                      <div>
+                        <h3 className="text-xl font-bold text-slate-800 group-hover:text-indigo-600">{race.title}</h3>
+                        <p className="text-slate-500 text-sm mt-1 flex items-center gap-1"><Clock size={14} /> {race.date}</p>
+                      </div>
+                      <ChevronRight className="text-slate-300" />
+                    </button>
+                  ))
+                )}
+              </div>
+            ) : (
+              <div className="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                <button onClick={() => { setSelectedRace(null); setNickname(''); setTargetTime(''); }} className="text-slate-400 hover:text-slate-600 mb-6 flex items-center gap-1 text-sm">← 목록으로</button>
+                <div className="mb-8">
+                  <span className="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">Join Race</span>
+                  <h2 className="text-3xl font-black mt-2 text-slate-900">{selectedRace.title}</h2>
+                  <p className="text-slate-500 mt-1 font-medium">{selectedRace.date}</p>
+                </div>
+
+                {existingUserEntry && (
+                  <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3">
+                    <AlertCircle className="text-amber-600 shrink-0 mt-0.5" size={18} />
+                    <div>
+                      <p className="text-sm font-bold text-amber-900">이미 등록된 닉네임입니다.</p>
+                      <p className="text-xs text-amber-700 mt-1">기존 기록: <span className="font-bold underline">{existingUserEntry.targetTime}초</span></p>
+                    </div>
+                  </div>
+                )}
+
+                <form onSubmit={submitEntry} className="space-y-5">
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">닉네임</label>
+                    <div className="relative">
+                      <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                      <input type="text" required value={nickname} onChange={(e) => setNickname(e.target.value)} placeholder="닉네임을 입력하세요" className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">목표 시간 (초)</label>
+                    <div className="relative">
+                      <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                      <input type="number" step="0.01" max="60" required value={targetTime} onChange={(e) => setTargetTime(e.target.value)} placeholder="예: 19.88" className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500" />
+                    </div>
+                  </div>
+                  <div className="flex gap-3 pt-2">
+                    {existingUserEntry && (
+                      <button 
+                        type="button" 
+                        onClick={() => setShowCancelModal(true)} 
+                        disabled={isSubmitting} 
+                        className="flex-1 py-4 bg-rose-50 text-rose-600 rounded-xl font-bold text-lg hover:bg-rose-100 disabled:opacity-50"
+                      >
+                        참여 취소
+                      </button>
+                    )}
+                    <button disabled={isSubmitting} className={`flex-[2] py-4 rounded-xl font-bold text-lg text-white shadow-lg disabled:opacity-50 flex items-center justify-center gap-2 ${existingUserEntry ? 'bg-amber-500 hover:bg-amber-600' : 'bg-indigo-600 hover:bg-indigo-700'}`}>
+                      {isSubmitting ? <RefreshCw className="animate-spin" size={20}/> : (existingUserEntry ? "기록 수정" : "참여 완료")}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Custom Cancel Confirmation Modal */}
+        {showCancelModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+              <div className="p-6 text-center">
+                <div className="mx-auto w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mb-4">
+                  <AlertCircle size={32} />
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 mb-2">참여를 취소하시겠습니까?</h3>
+                <p className="text-slate-500 text-sm leading-relaxed">
+                  등록된 기록({existingUserEntry?.targetTime}초)이 영구적으로 삭제됩니다.
+                </p>
+              </div>
+              <div className="flex border-t border-slate-100">
+                <button 
+                  onClick={() => setShowCancelModal(false)}
+                  className="flex-1 px-6 py-4 text-slate-500 font-bold hover:bg-slate-50 transition-colors"
+                >
+                  아니오
+                </button>
+                <button 
+                  onClick={confirmDeleteMyEntry}
+                  disabled={isSubmitting}
+                  className="flex-1 px-6 py-4 bg-rose-600 text-white font-bold hover:bg-rose-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {isSubmitting ? <RefreshCw size={18} className="animate-spin" /> : "네, 취소합니다"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Custom Seed Data Modal */}
+        {showSeedModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+              <div className="p-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="bg-indigo-100 text-indigo-600 p-2 rounded-lg"><Users size={20} /></div>
+                  <h3 className="text-xl font-bold text-slate-900">샘플 데이터 추가</h3>
+                </div>
+                <p className="text-sm text-slate-500 mb-4 font-medium">
+                  <span className="text-indigo-600">[{targetRaceForSeed?.title}]</span> 레이스에 생성할 인원수를 입력하세요.
+                </p>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider">생성 인원수 (최대 60명)</label>
+                    <input 
+                      type="number" 
+                      min="1" 
+                      max="100"
+                      value={seedCount}
+                      onChange={(e) => setSeedCount(parseInt(e.target.value) || 0)}
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-bold text-lg"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="flex border-t border-slate-100">
+                <button 
+                  onClick={() => setShowSeedModal(false)}
+                  className="flex-1 px-6 py-4 text-slate-500 font-bold hover:bg-slate-50 transition-colors"
+                >
+                  취소
+                </button>
+                <button 
+                  onClick={executeSeedData}
+                  disabled={isSubmitting || seedCount <= 0 || seedCount > 100}
+                  className="flex-1 px-6 py-4 bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {isSubmitting ? <RefreshCw size={18} className="animate-spin" /> : "생성하기"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Custom Race Delete Modal (NEW) */}
+        {showDeleteRaceModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+              <div className="p-6 text-center">
+                <div className="mx-auto w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mb-4">
+                  <Trash2 size={32} />
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 mb-2">레이스를 삭제하시겠습니까?</h3>
+                <p className="text-slate-500 text-sm leading-relaxed mb-4">
+                  <span className="text-rose-600 font-bold">[{targetRaceForDelete?.title}]</span> 레이스와 관련된 모든 참여 기록이 영구적으로 삭제됩니다.
+                </p>
+                <div className="p-3 bg-slate-50 rounded-xl text-xs text-slate-400 font-medium">
+                  이 작업은 되돌릴 수 없습니다.
+                </div>
+              </div>
+              <div className="flex border-t border-slate-100">
+                <button 
+                  onClick={() => { setShowDeleteRaceModal(false); setTargetRaceForDelete(null); }}
+                  className="flex-1 px-6 py-4 text-slate-500 font-bold hover:bg-slate-50 transition-colors"
+                >
+                  취소
+                </button>
+                <button 
+                  onClick={executeDeleteRace}
+                  disabled={isSubmitting}
+                  className="flex-1 px-6 py-4 bg-rose-600 text-white font-bold hover:bg-rose-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {isSubmitting ? <RefreshCw size={18} className="animate-spin" /> : "삭제 확정"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {view === 'admin_auth' && (
+          <div className="max-w-md mx-auto bg-white p-8 rounded-3xl shadow-xl border border-slate-100">
+            <h2 className="text-xl font-bold text-center mb-6">관리자 인증</h2>
+            <input type="password" value={adminPassword} onChange={(e) => setAdminPassword(e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl mb-4" placeholder="비밀번호" onKeyDown={(e) => e.key === 'Enter' && handleAdminLogin()} />
+            <div className="flex gap-2">
+              <button onClick={() => setView('user')} className="flex-1 py-3 bg-slate-100 rounded-xl font-semibold">취소</button>
+              <button onClick={handleAdminLogin} className="flex-1 py-3 bg-indigo-600 text-white rounded-xl font-semibold">확인</button>
+            </div>
+          </div>
+        )}
+
+        {view === 'admin_panel' && (
+          <div className="space-y-8 pb-20 animate-in fade-in">
+            <div className="flex justify-between items-end">
+              <h2 className="text-2xl font-bold">관리자 패널</h2>
+              <button onClick={() => { setIsAdmin(false); setView('user'); }} className="text-sm text-slate-500 underline">로그아웃</button>
+            </div>
+
+            <section className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+              <h3 className="text-lg font-bold mb-4 flex items-center gap-2"><Plus size={18} className="text-indigo-600"/> 새 레이스</h3>
+              <div className="grid md:grid-cols-3 gap-4">
+                <input type="text" placeholder="레이스명" value={newRace.title} onChange={(e) => setNewRace({...newRace, title: e.target.value})} className="px-4 py-2 bg-slate-50 border rounded-lg" />
+                <input type="date" value={newRace.date} onChange={(e) => setNewRace({...newRace, date: e.target.value})} className="px-4 py-2 bg-slate-50 border rounded-lg" />
+                <button onClick={createRace} className="bg-indigo-600 text-white font-bold py-2 rounded-lg hover:bg-indigo-700 transition-colors">생성</button>
+              </div>
+            </section>
+
+            <section>
+              <h3 className="text-lg font-bold mb-4">레이스 목록</h3>
+              <div className="grid gap-3">
+                {races.map(race => (
+                  <div key={race.id} className="bg-white p-4 rounded-xl border flex items-center justify-between shadow-sm">
+                    <div className="flex-1"><h4 className="font-bold text-slate-800">{race.title}</h4><p className="text-xs text-slate-500">{race.date}</p></div>
+                    <div className="flex items-center gap-2">
+                      <button 
+                        onClick={() => { setTargetRaceForSeed(race); setShowSeedModal(true); }} 
+                        disabled={isSubmitting} 
+                        className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg flex items-center gap-1"
+                        title="샘플 데이터 추가"
+                      >
+                        <Database size={18} />
+                      </button>
+                      <button onClick={() => toggleRaceStatus(race)} className={`px-3 py-1 rounded-full text-[11px] font-bold ${race.isActive ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>{race.isActive ? '활성' : '비활성'}</button>
+                      {/* 레이스 삭제 버튼 클릭시 모달 오픈으로 변경 */}
+                      <button 
+                        onClick={() => { setTargetRaceForDelete(race); setShowDeleteRaceModal(true); }} 
+                        className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg"
+                      >
+                        <Trash2 size={18}/>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+              <div className="p-6 border-b flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-50/50">
+                <h3 className="text-lg font-bold">참여자 관리</h3>
+                <div className="flex items-center gap-2 w-full md:w-auto">
+                  <select value={filterRaceId} onChange={(e) => setFilterRaceId(e.target.value)} className="flex-1 md:flex-none text-xs p-2 border rounded-lg bg-white">
+                    <option value="all">전체</option>
+                    {races.map(r => <option key={r.id} value={r.id}>{r.title}</option>)}
+                  </select>
+                  <button onClick={downloadCSV} className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white text-xs font-bold rounded-lg"><Download size={14}/> CSV</button>
+                </div>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm">
+                  <thead className="bg-slate-50 text-[10px] uppercase font-black text-slate-400 tracking-wider border-b">
+                    <tr><th className="px-6 py-4">닉네임</th><th className="px-6 py-4">시간</th><th className="px-6 py-4">레이스</th><th className="px-6 py-4">유형</th><th className="px-6 py-4 text-right">삭제</th></tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {filteredEntries.map(entry => (
+                      <tr key={entry.id} className="hover:bg-slate-50 transition-colors">
+                        <td className="px-6 py-4 font-semibold text-slate-700">{entry.nickname}</td>
+                        <td className="px-6 py-4 font-mono text-indigo-600 font-bold">{entry.targetTime}s</td>
+                        <td className="px-6 py-4 text-xs text-slate-500">{entry.raceTitle}</td>
+                        <td className="px-6 py-4">{entry.isSample ? <span className="bg-slate-100 text-slate-400 px-2 py-0.5 rounded text-[10px]">샘플</span> : <span className="bg-blue-50 text-blue-600 px-2 py-0.5 rounded text-[10px] font-bold">실제</span>}</td>
+                        <td className="px-6 py-4 text-right"><button onClick={() => deleteEntryFromAdmin(entry.id)} className="text-slate-300 hover:text-rose-500"><Trash2 size={16}/></button></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
