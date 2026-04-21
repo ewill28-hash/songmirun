@@ -17,14 +17,12 @@
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans min-h-screen">
 
-  <!-- 로딩 화면 -->
   <div id="loading-state" class="fixed inset-0 flex items-center justify-center bg-slate-50 z-50">
     <div class="text-slate-400 font-medium flex items-center gap-2">
-      <i data-lucide="refresh-cw" class="spin"></i> 데이터베이스 연결 중...
+      <i data-lucide="refresh-cw" class="spin"></i> 인증 확인 중...
     </div>
   </div>
 
-  <!-- 메인 앱 컨테이너 -->
   <div id="main-app" class="p-4 md:p-8 hidden">
     <div class="max-w-4xl mx-auto">
       <header class="flex justify-between items-center mb-8 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
@@ -45,12 +43,9 @@
     </div>
   </div>
 
-  <!-- 토스트 알림 -->
   <div id="toast-container" class="fixed bottom-4 right-4 z-[60] flex flex-col gap-2"></div>
 
-  <!-- ==================== 모달 영역 ==================== -->
-
-  <!-- 참여자 수정 모달 (관리자용) -->
+  <!-- 모달 영역 -->
   <div id="modal-edit-entry" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm hidden animate-fade-in">
     <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-in-up">
       <div class="p-6">
@@ -70,19 +65,18 @@
         </div>
       </div>
       <div class="flex border-t border-slate-100">
-        <button onclick="app.closeModal('edit-entry')" class="flex-1 px-6 py-4 text-slate-500 font-bold hover:bg-slate-50 transition-colors">취소</button>
-        <button id="btn-confirm-edit-entry" class="flex-1 px-6 py-4 bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition-colors">수정 완료</button>
+        <button onclick="app.closeModal('edit-entry')" class="flex-1 px-6 py-4 text-slate-500 font-bold hover:bg-slate-50">취소</button>
+        <button id="btn-confirm-edit-entry" class="flex-1 px-6 py-4 bg-indigo-600 text-white font-bold hover:bg-indigo-700">수정 완료</button>
       </div>
     </div>
   </div>
 
-  <!-- 참여 취소 확인 모달 -->
   <div id="modal-cancel" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm hidden animate-fade-in">
     <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-in-up">
       <div class="p-6 text-center">
         <div class="mx-auto w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mb-4"><i data-lucide="alert-circle" class="w-8 h-8"></i></div>
         <h3 class="text-xl font-bold text-slate-900 mb-2">참여를 취소하시겠습니까?</h3>
-        <p class="text-slate-500 text-sm leading-relaxed" id="modal-cancel-text">등록된 기록이 삭제됩니다.</p>
+        <p class="text-slate-500 text-sm">등록된 기록이 삭제됩니다.</p>
       </div>
       <div class="flex border-t border-slate-100">
         <button onclick="app.closeModal('cancel')" class="flex-1 px-6 py-4 text-slate-500 font-bold hover:bg-slate-50">아니오</button>
@@ -91,7 +85,6 @@
     </div>
   </div>
 
-  <!-- 레이스 삭제 모달 -->
   <div id="modal-delete-race" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm hidden animate-fade-in">
     <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-in-up">
       <div class="p-6 text-center">
@@ -106,7 +99,6 @@
     </div>
   </div>
 
-  <!-- 샘플 데이터 모달 -->
   <div id="modal-seed" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm hidden animate-fade-in">
     <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-in-up">
       <div class="p-6">
@@ -122,10 +114,9 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, onSnapshot, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    // --- DB 설정 적용 ---
     const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
       apiKey: "",
       authDomain: "placeholder.firebaseapp.com",
@@ -149,7 +140,6 @@
       selectedRace: null,
       filterRaceId: 'all',
       isSubmitting: false,
-      existingUserEntry: null,
       targetRaceForSeed: null,
       targetRaceForDelete: null,
       targetEntryForEdit: null
@@ -172,15 +162,35 @@
       lucide.createIcons();
     };
 
+    let unsubRaces, unsubEntries;
+
     const setupListeners = () => {
-      onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'races'), (snap) => {
+      if (!state.user) return;
+      if (unsubRaces) unsubRaces();
+      if (unsubEntries) unsubEntries();
+
+      unsubRaces = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'races'), (snap) => {
         state.races = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         render();
-      });
-      onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'entries'), (snap) => {
+      }, (error) => console.error("Races listener error:", error));
+
+      unsubEntries = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'entries'), (snap) => {
         state.entries = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         render();
-      });
+      }, (error) => console.error("Entries listener error:", error));
+    };
+
+    const initAuth = async () => {
+      try {
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+          await signInAnonymously(auth);
+        }
+      } catch (err) {
+        console.error("Auth initialization error:", err);
+        showToast("인증 서버에 연결할 수 없습니다.", "error");
+      }
     };
 
     onAuthStateChanged(auth, (u) => {
@@ -190,7 +200,7 @@
         document.getElementById('main-app').classList.remove('hidden');
         setupListeners();
       } else {
-        signInAnonymously(auth);
+        initAuth();
       }
     });
 
@@ -223,8 +233,6 @@
       } else {
         const nickname = document.getElementById('input-nickname')?.value || "";
         const entry = state.entries.find(e => e.raceId === state.selectedRace.id && e.nickname === nickname);
-        state.existingUserEntry = entry;
-
         container.innerHTML = `
           <div class="bg-white p-8 rounded-3xl shadow-xl border animate-in-up">
             <button onclick="app.back()" class="text-slate-400 flex items-center gap-1 text-sm mb-6"><i data-lucide="arrow-left" class="w-4 h-4"></i> 뒤로가기</button>
@@ -258,7 +266,9 @@
     };
 
     const renderAdminPanel = () => {
+      const today = new Date().toISOString().split('T')[0];
       const filtered = state.filterRaceId === 'all' ? state.entries : state.entries.filter(e => e.raceId === state.filterRaceId);
+      
       document.getElementById('view-admin-panel').innerHTML = `
         <div class="flex justify-between items-center">
           <h2 class="text-2xl font-bold">관리자 패널</h2>
@@ -266,25 +276,40 @@
         </div>
         <div class="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
           <h3 class="font-bold flex items-center gap-2"><i data-lucide="plus-circle" class="w-4 h-4"></i> 레이스 추가</h3>
-          <div class="flex gap-2"><input id="new-r-t" placeholder="레이스명" class="flex-1 p-3 bg-slate-50 border rounded-xl" /><input type="date" id="new-r-d" class="p-3 bg-slate-50 border rounded-xl" /><button onclick="app.addRace()" class="px-6 bg-indigo-600 text-white font-bold rounded-xl">생성</button></div>
-        </div>
-        <div class="space-y-3">${state.races.map(r => `<div class="bg-white p-4 border rounded-xl flex justify-between items-center shadow-sm"><div><p class="font-bold">${r.title}</p><p class="text-xs text-slate-400">${r.date}</p></div><div class="flex gap-2"><button onclick="app.openSeed('${r.id}')" class="p-2 text-indigo-500 hover:bg-indigo-50 rounded-lg"><i data-lucide="database" class="w-4 h-4"></i></button><button onclick="app.toggleRace('${r.id}',${r.isActive})" class="px-3 py-1 rounded-full text-xs font-bold ${r.isActive ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-400'}">${r.isActive ? '활성' : '비활성'}</button><button onclick="app.openDelRace('${r.id}')" class="p-2 text-rose-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div></div>`).join('')}</div>
-        <div class="bg-white rounded-2xl border shadow-sm overflow-hidden">
-          <div class="p-4 bg-slate-50 border-b flex justify-between items-center">
-            <h3 class="font-bold">참여자 목록 (${filtered.length})</h3>
-            <select onchange="app.setFilter(this.value)" class="text-xs p-2 border rounded-lg">${['all', ...state.races.map(r=>r.id)].map(id=>`<option value="${id}" ${state.filterRaceId===id?'selected':''}>${id==='all'?'전체':state.races.find(r=>r.id===id)?.title}</option>`).join('')}</select>
+          <div class="flex flex-col sm:flex-row gap-2">
+            <input id="new-r-t" placeholder="레이스명 (예: 송미런 1회)" class="flex-1 p-3 bg-slate-50 border rounded-xl outline-none focus:ring-2 ring-indigo-500" />
+            <input type="date" id="new-r-d" value="${today}" class="p-3 bg-slate-50 border rounded-xl outline-none" />
+            <button onclick="app.addRace()" class="px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl whitespace-nowrap">생성</button>
           </div>
-          <table class="w-full text-sm">
-            <thead><tr class="bg-slate-50/50 text-[10px] text-slate-400 uppercase border-b"><th class="p-4 text-left">닉네임</th><th class="p-4 text-left">시간</th><th class="p-4 text-right">관리</th></tr></thead>
-            <tbody>${filtered.map(e => `<tr class="border-b">
-              <td class="p-4 font-bold">${e.nickname}</td>
-              <td class="p-4 text-indigo-600 font-mono">${e.targetTime}s</td>
-              <td class="p-4 text-right flex justify-end gap-2">
-                <button onclick="app.openEditEntry('${e.id}')" class="text-slate-300 hover:text-indigo-600"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
-                <button onclick="app.delEntry('${e.id}')" class="text-slate-300 hover:text-rose-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-              </td>
-            </tr>`).join('')}</tbody>
-          </table>
+        </div>
+        <div class="space-y-3">${state.races.map(r => `<div class="bg-white p-4 border rounded-xl flex justify-between items-center shadow-sm"><div><p class="font-bold">${r.title}</p><p class="text-xs text-slate-400">${r.date}</p></div><div class="flex gap-2"><button title="샘플 데이터" onclick="app.openSeed('${r.id}')" class="p-2 text-indigo-500 hover:bg-indigo-50 rounded-lg"><i data-lucide="database" class="w-4 h-4"></i></button><button onclick="app.toggleRace('${r.id}',${r.isActive})" class="px-3 py-1 rounded-full text-xs font-bold ${r.isActive ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-400'}">${r.isActive ? '활성' : '비활성'}</button><button onclick="app.openDelRace('${r.id}')" class="p-2 text-rose-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div></div>`).join('')}</div>
+        <div class="bg-white rounded-2xl border shadow-sm overflow-hidden">
+          <div class="p-4 bg-slate-50 border-b flex flex-wrap justify-between items-center gap-3">
+            <div class="flex items-center gap-2">
+              <h3 class="font-bold">참여자 목록 (${filtered.length})</h3>
+              <select onchange="app.setFilter(this.value)" class="text-xs p-2 border rounded-lg bg-white outline-none">
+                <option value="all">전체 레이스</option>
+                ${state.races.map(r => `<option value="${r.id}" ${state.filterRaceId === r.id ? 'selected' : ''}>${r.title}</option>`).join('')}
+              </select>
+            </div>
+            <button onclick="app.downloadCSV()" class="flex items-center gap-1 px-3 py-2 bg-slate-800 text-white text-xs font-bold rounded-lg hover:bg-slate-700 transition">
+              <i data-lucide="download" class="w-3 h-3"></i> CSV 다운로드
+            </button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead><tr class="bg-slate-50/50 text-[10px] text-slate-400 uppercase border-b"><th class="p-4 text-left">레이스</th><th class="p-4 text-left">닉네임</th><th class="p-4 text-left">목표시간</th><th class="p-4 text-right">관리</th></tr></thead>
+              <tbody>${filtered.length ? filtered.map(e => `<tr class="border-b hover:bg-slate-50/50 transition-colors">
+                <td class="p-4 text-slate-400 text-xs">${e.raceTitle || 'Unknown'}</td>
+                <td class="p-4 font-bold text-slate-700">${e.nickname}</td>
+                <td class="p-4 text-indigo-600 font-mono font-bold">${e.targetTime}s</td>
+                <td class="p-4 text-right flex justify-end gap-2">
+                  <button onclick="app.openEditEntry('${e.id}')" class="p-2 text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                  <button onclick="app.delEntry('${e.id}')" class="p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </td>
+              </tr>`).join('') : `<tr><td colspan="4" class="p-10 text-center text-slate-400">데이터가 없습니다.</td></tr>`}</tbody>
+            </table>
+          </div>
         </div>
       `;
     };
@@ -294,38 +319,83 @@
       setView: (v) => { state.view = v; render(); },
       back: () => { state.selectedRace = null; render(); },
       selectRace: (id) => { state.selectedRace = state.races.find(r => r.id === id); render(); },
-      login: () => { if (document.getElementById('admin-pw').value === '33') { state.isAdmin = true; app.setView('admin_panel'); } else showToast("비번 틀림", "error"); },
+      login: () => { if (document.getElementById('admin-pw').value === '33') { state.isAdmin = true; app.setView('admin_panel'); } else showToast("비밀번호가 틀렸습니다.", "error"); },
       logout: () => { state.isAdmin = false; app.setView('user'); },
       setFilter: (id) => { state.filterRaceId = id; render(); },
 
-      submitEntry: async () => {
-        const nick = document.getElementById('input-nickname').value.trim();
-        const time = parseFloat(document.getElementById('input-target-time').value);
-        if (!nick || isNaN(time) || time <= 0) return showToast("입력 확인", "error");
+      downloadCSV: () => {
+        const filtered = state.filterRaceId === 'all' ? state.entries : state.entries.filter(e => e.raceId === state.filterRaceId);
+        if (!filtered.length) return showToast("다운로드할 데이터가 없습니다.", "error");
+
+        // BOM 추가하여 엑셀 한글 깨짐 방지
+        let csvContent = "\uFEFF";
+        csvContent += "레이스,닉네임,목표시간(초),닉네임(목표시간),참여일시\n";
         
+        filtered.forEach(e => {
+          const combined = `${e.nickname}(${e.targetTime})`;
+          csvContent += `"${e.raceTitle}","${e.nickname}","${e.targetTime}","${combined}","${e.createdAt || ''}"\n`;
+        });
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        const filename = state.filterRaceId === 'all' ? '전체_참여자_목록.csv' : `${state.races.find(r=>r.id===state.filterRaceId)?.title}_참여자.csv`;
+        
+        link.setAttribute("href", url);
+        link.setAttribute("download", filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        showToast("CSV 다운로드가 시작되었습니다.");
+      },
+
+      submitEntry: async () => {
+        if (!state.user) return;
+        const nick = document.getElementById('input-nickname').value.trim();
+        const timeInput = document.getElementById('input-target-time').value;
+        const time = parseFloat(timeInput);
+        if (!nick || isNaN(time) || time <= 0) return showToast("입력값을 확인해주세요.", "error");
+        
+        const existing = state.entries.find(e => e.raceId === state.selectedRace.id && e.nickname === nick);
+
         toggleBtnLoading('btn-submit', true);
         try {
-          if (state.existingUserEntry) {
-            await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'entries', state.existingUserEntry.id), { nickname: nick, targetTime: time });
+          if (existing) {
+            await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'entries', existing.id), { targetTime: time });
           } else {
-            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'entries'), { raceId: state.selectedRace.id, raceTitle: state.selectedRace.title, nickname: nick, targetTime: time, createdAt: new Date().toISOString() });
+            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'entries'), { 
+              raceId: state.selectedRace.id, 
+              raceTitle: state.selectedRace.title, 
+              nickname: nick, 
+              targetTime: time, 
+              createdAt: new Date().toLocaleString('ko-KR')
+            });
           }
-          showToast("저장 완료");
+          showToast("기록이 저장되었습니다.");
           app.back();
-        } catch(e) { showToast("실패", "error"); } finally { toggleBtnLoading('btn-submit', false, "완료"); }
+        } catch(e) { showToast("저장에 실패했습니다.", "error"); } finally { toggleBtnLoading('btn-submit', false, "참여"); }
       },
 
       addRace: async () => {
-        const t = document.getElementById('new-r-t').value;
+        if (!state.user) return;
+        const t = document.getElementById('new-r-t').value.trim();
         const d = document.getElementById('new-r-d').value;
-        if (!t || !d) return;
+        if (!t || !d) return showToast("정보를 모두 입력해주세요.", "error");
         await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'races'), { title: t, date: d, isActive: true });
-        showToast("생성됨");
+        showToast("레이스가 생성되었습니다.");
+        document.getElementById('new-r-t').value = "";
       },
 
-      toggleRace: async (id, s) => { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'races', id), { isActive: !s }); },
+      toggleRace: async (id, s) => { 
+        if (!state.user) return;
+        await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'races', id), { isActive: !s }); 
+      },
 
-      delEntry: async (id) => { if(confirm("삭제?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'entries', id)); },
+      delEntry: async (id) => { 
+        if (!state.user) return;
+        if(confirm("이 기록을 삭제하시겠습니까?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'entries', id)); 
+      },
 
       openEditEntry: (id) => {
         const e = state.entries.find(entry => entry.id === id);
@@ -338,43 +408,69 @@
       },
 
       confirmEditEntry: async () => {
-        if (!state.targetEntryForEdit) return;
+        if (!state.user || !state.targetEntryForEdit) return;
         const n = document.getElementById('edit-entry-nickname').value.trim();
         const t = parseFloat(document.getElementById('edit-entry-time').value);
-        if (!n || isNaN(t)) return showToast("입력 확인", "error");
+        if (!n || isNaN(t)) return showToast("입력값을 확인해주세요.", "error");
 
         toggleBtnLoading('btn-confirm-edit-entry', true);
         try {
-          await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'entries', state.targetEntryForEdit.id), { nickname: n, targetTime: t });
-          showToast("수정 완료");
+          await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'entries', state.targetEntryForEdit.id), { 
+            nickname: n, 
+            targetTime: t 
+          });
+          showToast("수정되었습니다.");
           app.closeModal('edit-entry');
-        } catch(e) { showToast("수정 실패", "error"); } finally { toggleBtnLoading('btn-confirm-edit-entry', false, "수정 완료"); }
+        } catch(e) { showToast("수정에 실패했습니다.", "error"); } finally { toggleBtnLoading('btn-confirm-edit-entry', false, "수정 완료"); }
       },
 
-      openDelRace: (id) => { state.targetRaceForDelete = state.races.find(r => r.id === id); document.getElementById('modal-delete-race-name').innerText = state.targetRaceForDelete?.title; app.showModal('delete-race'); },
+      openDelRace: (id) => { 
+        state.targetRaceForDelete = state.races.find(r => r.id === id); 
+        document.getElementById('modal-delete-race-name').innerText = state.targetRaceForDelete?.title; 
+        app.showModal('delete-race'); 
+      },
       confirmDelRace: async () => {
-        if (!state.targetRaceForDelete) return;
+        if (!state.user || !state.targetRaceForDelete) return;
         const batch = writeBatch(db);
-        state.entries.filter(e => e.raceId === state.targetRaceForDelete.id).forEach(e => batch.delete(doc(db, 'artifacts', appId, 'public', 'data', 'entries', e.id)));
+        state.entries.filter(e => e.raceId === state.targetRaceForDelete.id).forEach(e => {
+            batch.delete(doc(db, 'artifacts', appId, 'public', 'data', 'entries', e.id));
+        });
         batch.delete(doc(db, 'artifacts', appId, 'public', 'data', 'races', state.targetRaceForDelete.id));
         await batch.commit();
         app.closeModal('delete-race');
+        showToast("레이스와 모든 기록이 삭제되었습니다.");
       },
 
       openSeed: (id) => { state.targetRaceForSeed = state.races.find(r => r.id === id); app.showModal('seed'); },
       confirmSeed: async () => {
+        if (!state.user || !state.targetRaceForSeed) return;
         const count = parseInt(document.getElementById('seed-count-input').value);
         const batch = writeBatch(db);
         for (let i = 0; i < count; i++) {
           const ref = doc(collection(db, 'artifacts', appId, 'public', 'data', 'entries'));
-          batch.set(ref, { raceId: state.targetRaceForSeed.id, raceTitle: state.targetRaceForSeed.title, nickname: "Runner" + Math.floor(Math.random()*1000), targetTime: parseFloat((Math.random()*10+15).toFixed(2)), isSample: true });
+          batch.set(ref, { 
+            raceId: state.targetRaceForSeed.id, 
+            raceTitle: state.targetRaceForSeed.title, 
+            nickname: "Runner_" + Math.floor(Math.random()*9000 + 1000), 
+            targetTime: parseFloat((Math.random()*10+15).toFixed(2)), 
+            createdAt: new Date().toLocaleString('ko-KR'),
+            isSample: true 
+          });
         }
         await batch.commit();
         app.closeModal('seed');
+        showToast("샘플 데이터가 생성되었습니다.");
       },
 
       openCancel: () => app.showModal('cancel'),
-      confirmCancel: async () => { if(state.existingUserEntry) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'entries', state.existingUserEntry.id)); app.closeModal('cancel'); app.back(); },
+      confirmCancel: async () => {
+        if (!state.user) return;
+        const nick = document.getElementById('input-nickname').value.trim();
+        const entry = state.entries.find(e => e.raceId === state.selectedRace.id && e.nickname === nick);
+        if(entry) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'entries', entry.id)); 
+        app.closeModal('cancel'); 
+        app.back(); 
+      },
 
       showModal: (m) => document.getElementById(`modal-${m}`).classList.remove('hidden'),
       closeModal: (m) => document.getElementById(`modal-${m}`).classList.add('hidden')
