@@ -375,11 +375,21 @@
                       onclick="app.openCancel()" 
                       class="flex-1 py-3.5 bg-slate-100 text-slate-500 font-black rounded-[1.5rem] hover:bg-rose-50 hover:text-rose-600 transition-all text-lg flex justify-center items-center gap-1"
                     >
-                      ❌ 참여 취소
+                      ❌ 참여 정보 삭제
                     </button>
                   ` : ''}
                 </div>
 
+                <div class="flex flex-col gap-3">
+                    <div class="flex flex-col gap-1 p-1 bg-orange-50/50 border border-orange-100 rounded-[1.5rem]">
+                    <button 
+                        onclick="app.back()"
+                        class="w-full py-3.5 bg-slate-300 hover:bg-slate-400 text-white rounded-[1.2rem] font-black text-lg transition-all shadow-sm flex justify-center items-center gap-1"
+                    >
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i> 돌아가기
+                    </button>
+                    </div>
+                </div>
 
 
               </div>
