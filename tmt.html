@@ -333,8 +333,8 @@
                 else cls += `bg-white text-slate-700 cursor-pointer hover:bg-orange-50 active:ring-2 active:ring-orange-300`;
 
                 const clickHandler = isOper && player && !match.winner && !isAdmin
-                    ? `onclick="event.stopPropagation(); window.selectWinner(${rIdx}, ${mIdx}, '${player.replace(/'/g, "\\'")}')"` 
-                    : '';
+                    ? `onclick="event.stopPropagation(); window.selectWinner(${rIdx}, ${mIdx}, '${player.replace(/'/g, "\\'")}')"`
+                        : (player ? `onclick="window.showNameToast('${player.replace(/'/g, "\\'")}')"` : '');
 
                 return `
                     <div ${clickHandler} class="${cls}">
@@ -359,6 +359,22 @@
                 </div>
             `;
         }
+
+
+        window.showNameToast = (name) => {
+            let toast = document.getElementById('name-toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'name-toast';
+                toast.className = "fixed bottom-20 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-4 py-2 rounded-full text-sm font-bold z-[100] shadow-xl transition-opacity duration-300 opacity-0 pointer-events-none";
+                document.body.appendChild(toast);
+            }
+            toast.innerText = name;
+            toast.style.opacity = '1';
+            setTimeout(() => { toast.style.opacity = '0'; }, 1500);
+        };
+
+
 
         window.downloadCSV = () => {
             if (!activeComp) return;
