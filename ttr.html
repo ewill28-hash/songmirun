@@ -329,7 +329,22 @@
             <div class="space-y-5">
               <div>
                 <label class="block text-xs font-black text-slate-400 mb-2 ml-2 uppercase">닉네임</label>
-                <input type="text" id="input-nickname" value="${nick}" placeholder="이름 또는 닉네임" oninput="app.render()" class="w-full p-5 bg-orange-50/30 border border-orange-100 rounded-[1.5rem] outline-none font-bold text-lg" />
+                <div class="flex flex-col gap-2">
+                  <input 
+                    type="text" 
+                    id="input-nickname" 
+                    value="${nick}" 
+                    placeholder="닉네임" 
+                    class="w-full p-5 bg-orange-50/30 border border-orange-100 rounded-[1.5rem] outline-none font-bold text-lg" 
+                  />
+                  
+                  <button 
+                    onclick="app.render()" 
+                    class="w-full p-4 bg-orange-500 text-white rounded-[1.5rem] font-bold text-base active:bg-orange-600 transition-colors"
+                  >
+                    닉네임 입력 완료
+                  </button>
+                </div>
               </div>
               <div>
                 <label class="block text-xs font-black text-slate-400 mb-2 ml-2 uppercase">목표 시간 (초)</label>
@@ -475,7 +490,9 @@
         if (!auth.currentUser) return;
         const nick = document.getElementById('input-nickname').value.trim();
         const time = parseFloat(document.getElementById('input-target-time').value);
-        if (!nick || isNaN(time)) return showToast("정확한 값을 입력하세요.", "error");
+        if (!nick?.trim() || isNaN(time) || time < 5 || time > 60) {
+          return showToast("5~60초 사이의 정확한 시간을 입력하세요.", "error");
+        }
         
         const existing = state.entries.find(e => e.raceId === state.selectedRace.id && e.nickname === nick);
         toggleBtnLoading('btn-submit', true);
@@ -585,7 +602,7 @@
           const ref = doc(collection(db, 'artifacts', appId, 'public', 'data', 'entries'));
           batch.set(ref, { 
             raceId: state.targetRaceForSeed.id, raceTitle: state.targetRaceForSeed.title, 
-            nickname: "Tester_" + Math.floor(Math.random()*1000), targetTime: parseFloat((Math.random()*10+20).toFixed(2)), 
+            nickname: "Runner" + Math.floor(Math.random()*1000), targetTime: parseFloat((Math.random()*10+20).toFixed(2)), 
             createdAt: new Date().toISOString()
           });
         }
