@@ -35,11 +35,15 @@
                     <span class="text-orange-500">vs대진표</span> 🍊
                 </h1>
             </div>
-            <div id="header-actions" class="flex items-center gap-2">
+            <div id="header-actions" class="flex items-center gap-1">
                 <div id="auth-status" class="hidden text-[10px] font-bold text-orange-400 bg-orange-50 px-2 py-1 rounded-full uppercase">Connecting...</div>
-                <button id="admin-btn" class="p-2 text-slate-400 hover:text-orange-500 transition-colors">
+                <button id="admin-btn" class="p-1 text-slate-400 hover:text-orange-500 transition-colors">
                     <i data-lucide="settings" class="w-5 h-5"></i>
                 </button>
+                <button id="oper-btn" class="p-1 text-slate-400 hover:text-orange-500 transition-colors">
+                    <i data-lucide="settings" class="w-5 h-5"></i>
+                </button>
+                                
             </div>
         </header>
 
@@ -90,6 +94,8 @@
         let app, auth, db;
         let user = null;
         let isAdmin = false;
+        let isOper = false; // 운영자 상태 추가
+
         let competitions = [];
         let activeComp = null;
 
@@ -180,16 +186,42 @@
             if (window.lucide) lucide.createIcons();
         }
 
+
         function renderEmptyView(container) {
+            // 1. 오늘 날짜 생성 (YYYY년 MM월 DD일 형식)
+            const now = new Date();
+            const dateString = `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일`;
+
+            // 2. 운영자 상태에 따른 태그 생성
+            const operTag = isOper 
+                ? `<span class="mt-2 px-3 py-1 bg-blue-100 text-blue-600 text-xs font-bold rounded-full border border-blue-200">
+                    ⚡ 운영자 인증됨
+                </span>` 
+                : '';
+
             container.innerHTML = `
                 <div class="flex flex-col items-center justify-center h-full p-10 text-center">
-                    <div class="w-20 h-20 bg-orange-100 text-orange-500 rounded-full flex items-center justify-center mb-6">
+                    <div class="mb-4">
+                        <span class="text-xs font-bold text-slate-400 bg-slate-100 px-3 py-1 rounded-full">
+                            ${dateString}
+                        </span>
+                    </div>
+
+                    <div class="w-20 h-20 bg-orange-100 text-orange-500 rounded-full flex items-center justify-center mb-6 shadow-sm">
                         <i data-lucide="calendar-off" class="w-10 h-10"></i>
                     </div>
+
                     <h2 class="text-2xl font-black text-slate-800 mb-2">진행 중인 경기가 없습니다. 🍊</h2>
-                    <p class="text-slate-400 text-sm">관리자가 경기를 활성화할 때까지 기다려주세요.</p>
+                    <p class="text-slate-400 text-sm mb-4">관리자가 경기를 활성화할 때까지 기다려주세요.</p>
+                    
+                    ${operTag}
                 </div>
             `;
+            
+            // Lucide 아이콘을 다시 렌더링 (아이콘이 안 보일 경우 대비)
+            if (window.lucide) {
+                lucide.createIcons();
+            }
         }
 
         function renderAdminView(container) {
@@ -197,7 +229,10 @@
                 <div class="max-w-2xl mx-auto p-6">
                     <div class="flex items-center justify-between mb-8">
                         <h2 class="text-xl font-black">관리자 도구 🛠️</h2>
-                        <button onclick="window.logoutAdmin()" class="text-xs font-bold text-slate-400 hover:text-red-500">로그아웃</button>
+                        <button onclick="window.logoutAdmin()" 
+                                class="px-3 py-1 text-xs font-bold text-white bg-slate-500 hover:bg-red-500 rounded-lg transition-colors">
+                            로그아웃
+                        </button>
                     </div>
                     
                     <button onclick="window.createCompetition()" class="w-full py-4 mb-6 bg-orange-500 text-white rounded-2xl font-bold shadow-lg flex items-center justify-center gap-2">
@@ -290,7 +325,7 @@
                 else if (isLoser) cls += `bg-gray-50 text-gray-300 opacity-40`;
                 else cls += `bg-white text-slate-700 cursor-pointer hover:bg-orange-50 active:ring-2 active:ring-orange-300`;
 
-                const clickHandler = player && !match.winner && !isAdmin
+                const clickHandler = isOper && player && !match.winner && !isAdmin
                     ? `onclick="event.stopPropagation(); window.selectWinner(${rIdx}, ${mIdx}, '${player.replace(/'/g, "\\'")}')"` 
                     : '';
 
@@ -309,7 +344,7 @@
                         ${renderSlot(match.p1, 1)}
                         ${renderSlot(match.p2, 2)}
                     </div>
-                    ${match.winner && !isAdmin ? `
+                    ${isOper && match.winner && !isAdmin ? `
                         <button onclick="event.stopPropagation(); window.undoWinner(${rIdx}, ${mIdx})" class="no-export absolute -right-2 -top-2 w-7 h-7 bg-white text-orange-500 rounded-full shadow-lg border-2 border-orange-100 flex items-center justify-center hover:bg-orange-50 z-20">
                             <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
                         </button>
@@ -370,7 +405,7 @@
         };
 
         window.selectWinner = async (rIdx, mIdx, player) => {
-            if (!activeComp || !user) return;
+            if (!isOper || !activeComp || !user) return;
             const newRounds = JSON.parse(JSON.stringify(activeComp.rounds));
             newRounds[rIdx][mIdx].winner = player;
             let finalWinner = activeComp.finalWinner;
@@ -388,7 +423,7 @@
         };
 
         window.undoWinner = async (rIdx, mIdx) => {
-            if (!activeComp || !user) return;
+            if (!isOper || !activeComp || !user) return;
             const winner = activeComp.rounds[rIdx][mIdx].winner;
             const newRounds = JSON.parse(JSON.stringify(activeComp.rounds));
             newRounds[rIdx][mIdx].winner = null;
@@ -418,6 +453,18 @@
             });
         };
 
+        window.editTitle = (id) => {
+            const comp = competitions.find(c => c.id === id);
+            showModal("경기명 수정 🏷️", `
+                <input type="text" id="edit-title-input" class="w-full p-4 bg-orange-50 rounded-xl border-2 border-transparent focus:border-orange-400 outline-none font-bold" value="${comp.title}">
+            `, async () => {
+                const newTitle = document.getElementById('edit-title-input').value.trim();
+                if (!newTitle) return false;
+                await updateDoc(getCompDoc(id), { title: newTitle });
+                return true;
+            });
+        };
+
         window.toggleActive = async (id) => {
             if (!user) return;
             const batch = competitions.map(c => updateDoc(getCompDoc(c.id), { isActive: c.id === id ? !c.isActive : false }));
@@ -439,12 +486,15 @@
             });
         };
 
-        window.deleteComp = async (id) => {
-            if (!user) return;
-            if (confirm("정말로 이 대회를 삭제하시겠습니까?")) {
+
+        window.deleteComp = (id) => {
+            showModal("경기 삭제 ⚠️", `<p class="text-sm text-slate-500">삭제 후 복구할 수 없습니다.</p>`, async () => {
                 await deleteDoc(getCompDoc(id));
-            }
-        }
+                return true;
+            });
+        };
+
+
 
         window.fillSampleData = () => { document.getElementById('p-list').value = ["강백호", "서태웅", "채치수", "송태섭", "정대만", "권준호", "이한나"].join('\n'); };
 
@@ -512,6 +562,28 @@
             });
         };
 
+        document.getElementById('oper-btn').onclick = () => {
+            // 이미 운영자라면 권한 해제 후 종료
+            if (isOper) { 
+                isOper = false; 
+                render(); 
+                return; 
+            }
+
+            // 운영자 인증 모달 표시
+            showModal("운영자 인증 🔑", `<input type="password" id="oper-pw" class="w-full p-4 bg-blue-50 rounded-xl text-center font-bold" placeholder="운영자 암호 입력">`, () => {
+                const pwInput = document.getElementById('oper-pw');
+                if (pwInput && pwInput.value === "33") { 
+                    isOper = true; 
+                    render(); // 화면 갱신
+                    return true; // 모달 닫기
+                }
+                
+                alert("암호가 틀렸습니다.");
+                return false; // 모달 유지
+            });
+        };
+                
         window.logoutAdmin = () => { isAdmin = false; render(); };
         
         // 초기화 실행
