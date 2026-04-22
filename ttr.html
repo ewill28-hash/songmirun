@@ -285,6 +285,16 @@
           <div class="flex items-center gap-2 px-2 mb-4">
             <span class="text-xl">🏁</span>
             <h2 class="text-lg font-black text-slate-700 uppercase">레이스 목록</h2>
+            
+
+            <button onclick="location.href='./tmt.html'" 
+                    class="flex items-center gap-1.5 px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded-full transition-all transform active:scale-95 shadow-sm shadow-orange-200">
+                <i data-lucide="log-in" class="w-3.5 h-3.5"></i>
+                <span class="text-xs font-bold">대진표</span>
+            </button>
+
+
+
           </div>
           <div class="grid gap-4">` + 
           (activeRaces.length ? activeRaces.map(r => {
