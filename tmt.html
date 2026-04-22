@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tournament Master Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap');
+        
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --accent: #f59e0b;
+            --bg-main: #f8fafc;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-main);
+            color: #1e293b;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* 대진표 커넥터 라인 스타일 */
+        .bracket-connector {
+            position: absolute;
+            border-color: #cbd5e1;
+            border-style: solid;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            z-index: 0;
+        }
+
+        /* 애니메이션 효과 */
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .view-transition {
+            animation: fadeInScale 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .match-card {
+            animation: slideIn 0.3s ease-out forwards;
+            z-index: 10;
+        }
+
+        /* 우승자 하이라이트 */
+        .winner-glow {
+            box-shadow: 0 0 25px rgba(245, 158, 11, 0.4);
+            border: 2px solid var(--accent) !important;
+            animation: pulse-gold 2s infinite;
+        }
+
+        @keyframes pulse-gold {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        /* 커스텀 스크롤바 */
+        .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* 헤더 고정 로직 */
+        .round-header-sticky {
+            position: sticky;
+            top: 0;
+            background: var(--bg-main);
+            z-index: 30;
+            backdrop-filter: blur(8px);
+        }
+
+        /* 컨페티 */
+        .confetti-piece {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            top: -10px;
+            z-index: 100;
+            animation: confetti-fall 3s linear forwards;
+        }
+
+        @keyframes confetti-fall {
+            to { transform: translateY(110vh) rotate(720deg); }
+        }
+    </style>
+</head>
+<body class="custom-scroll">
+
+    <div id="app" class="min-h-screen flex flex-col">
+        <!-- 상단 내비게이션 -->
+        <header class="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between sticky top-0 z-[60] shadow-sm">
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-600 p-2 rounded-lg shadow-blue-200 shadow-lg">
+                    <i data-lucide="layout-grid" class="text-white w-5 h-5"></i>
+                </div>
+                <h1 class="text-lg font-black tracking-tight text-slate-800 uppercase">Tournament <span class="text-blue-600">Pro</span></h1>
+            </div>
+            <div id="header-actions" class="flex gap-2">
+                <!-- Action Buttons Rendered Here -->
+            </div>
+        </header>
+
+        <!-- 메인 콘텐츠 영역 -->
+        <!-- 하단 여백 60px 추가 (pb-[60px]) -->
+        <main id="main-view" class="flex-1 overflow-auto custom-scroll relative pb-[60px]">
+            <!-- Dynamic Content -->
+        </main>
+    </div>
+
+    <!-- 범용 모달 시스템 -->
+    <div id="modal-overlay" class="hidden fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden" id="modal-box">
+            <div class="p-6">
+                <div id="modal-icon" class="mb-4 inline-flex p-3 rounded-2xl bg-slate-100 text-slate-600">
+                    <i data-lucide="alert-circle"></i>
+                </div>
+                <h3 id="modal-title" class="text-xl font-bold text-slate-900 mb-2"></h3>
+                <p id="modal-desc" class="text-slate-500 leading-relaxed"></p>
+            </div>
+            <div class="p-4 bg-slate-50 flex gap-3">
+                <button id="modal-cancel" class="flex-1 py-3 text-slate-600 font-semibold hover:bg-slate-200 rounded-xl transition-colors">취소</button>
+                <button id="modal-confirm" class="flex-1 py-3 bg-blue-600 text-white font-semibold hover:bg-blue-700 rounded-xl transition-shadow shadow-lg shadow-blue-200">확인</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * @typedef {Object} Match
+         * @property {string} id
+         * @property {string|null} p1
+         * @property {string|null} p2
+         * @property {string|null} winner
+         */
+
+        // --- 상수 및 초기 상태 ---
+        const APP_ID = typeof __app_id !== 'undefined' ? __app_id : 'tournament-pro-v2';
+        
+        // 요청하신 예시 데이터 명단
+        const EXAMPLE_DATA = [
+            "지은", "지원", "정숙", "니나", "정순", "복희", "시나", "니키", "혜린", "주희", "영순", "미숙", "유순", "정경"
+        ];
+
+        let state = {
+            view: 'input',
+            participants: [],
+            rounds: [],
+            finalWinner: null
+        };
+
+        // --- 코어 알고리즘 모듈 ---
+
+        const TournamentLogic = {
+            init(names) {
+                const shuffled = [...names].sort(() => Math.random() - 0.5);
+                const count = shuffled.length;
+                
+                let power = 1;
+                while (power < count) power *= 2;
+                
+                const numByes = power - count;
+                const r0Matches = [];
+                let pIdx = 0;
+
+                for (let i = 0; i < power / 2; i++) {
+                    const match = { id: `r0-m${i}`, p1: shuffled[pIdx++] || null, p2: null, winner: null };
+                    
+                    if (pIdx <= count - numByes) {
+                        match.p2 = shuffled[pIdx++] || null;
+                    }
+                    r0Matches.push(match);
+                }
+
+                const rounds = [r0Matches];
+                
+                let matchCount = r0Matches.length / 2;
+                let rIdx = 1;
+                while (matchCount >= 1) {
+                    const round = [];
+                    for (let i = 0; i < matchCount; i++) {
+                        round.push({ id: `r${rIdx}-m${i}`, p1: null, p2: null, winner: null });
+                    }
+                    rounds.push(round);
+                    matchCount /= 2;
+                    rIdx++;
+                }
+
+                return rounds;
+            }
+        };
+
+        // --- UI 컴포넌트 및 렌더링 ---
+
+        const UI = {
+            render() {
+                const main = document.getElementById('main-view');
+                const actions = document.getElementById('header-actions');
+                
+                if (window.lucide) setTimeout(() => lucide.createIcons(), 10);
+
+                if (state.view === 'input') {
+                    actions.innerHTML = '';
+                    main.innerHTML = this.templateInput();
+                } else {
+                    actions.innerHTML = `
+                        <button onclick="App.reset()" class="flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold text-slate-500 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all active:scale-95">
+                            <i data-lucide="rotate-ccw" class="w-4 h-4"></i> 새로 만들기
+                        </button>
+                    `;
+                    main.innerHTML = this.templateBracket();
+                    setTimeout(() => this.drawConnectors(), 100);
+                }
+            },
+
+            templateInput() {
+                return `
+                <div class="max-w-2xl mx-auto px-6 py-12 view-transition">
+                    <div class="bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200 border border-slate-100 overflow-hidden">
+                        <div class="p-8 md:p-12">
+                            <div class="flex items-center gap-4 mb-8">
+                                <div class="bg-blue-600 p-3 rounded-2xl shadow-lg shadow-blue-100">
+                                    <i data-lucide="users" class="text-white w-6 h-6"></i>
+                                </div>
+                                <div>
+                                    <h2 class="text-2xl font-black text-slate-800 tracking-tight">토너먼트 관리자</h2>
+                                    <p class="text-slate-400 text-sm font-medium">참가자 명단을 입력하거나 예시를 불러오세요.</p>
+                                </div>
+                            </div>
+
+                            <div class="space-y-6">
+                                <div class="relative group">
+                                    <textarea id="raw-names" 
+                                        class="w-full h-72 p-6 rounded-[2rem] bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-medium text-slate-700 custom-scroll leading-relaxed"
+                                        placeholder="이름을 콤마(,) 세미콜론(;) 줄바꿈으로 입력하세요...">${state.participants.join(', ')}</textarea>
+                                    <div class="absolute bottom-6 right-8 text-[10px] font-black tracking-widest text-slate-300 uppercase group-focus-within:text-blue-400">
+                                        Capacity: 3 - 64
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-4">
+                                    <button onclick="App.addExamples()" class="py-4 px-4 bg-slate-100 text-slate-700 rounded-2xl font-bold hover:bg-slate-200 transition-all active:scale-95 flex items-center justify-center gap-2">
+                                        <i data-lucide="zap" class="w-4 h-4 text-amber-500"></i> 예시명단
+                                    </button>
+                                    <button onclick="App.clearNames()" class="py-4 px-4 border-2 border-slate-100 text-slate-400 rounded-2xl font-bold hover:bg-slate-50 transition-all active:scale-95">
+                                        모두 지우기
+                                    </button>
+                                </div>
+
+                                <button onclick="App.generate()" class="w-full py-5 bg-blue-600 text-white rounded-[1.5rem] text-lg font-black shadow-xl shadow-blue-200 hover:bg-blue-700 hover:-translate-y-1 transition-all active:scale-[0.98] flex items-center justify-center gap-3">
+                                    대진표 생성하기
+                                    <i data-lucide="arrow-right" class="w-6 h-6"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                `;
+            },
+
+            templateBracket() {
+                let roundsHtml = state.rounds.map((round, rIdx) => {
+                    const isLast = rIdx === state.rounds.length - 1;
+                    const label = isLast ? 'Final' : (rIdx === state.rounds.length - 2 ? 'Semi' : `Round ${rIdx + 1}`);
+                    
+                    return `
+                    <div class="flex flex-col round-column" data-round="${rIdx}">
+                        <div class="round-header-sticky py-6 mb-4 text-center">
+                            <span class="inline-block px-5 py-2 bg-white border border-slate-200 shadow-sm text-slate-800 text-[11px] font-black uppercase tracking-widest rounded-full">
+                                ${label}
+                            </span>
+                        </div>
+                        <div class="flex flex-col justify-around flex-1 gap-12 py-10">
+                            ${round.map((match, mIdx) => this.renderMatchCard(match, rIdx, mIdx)).join('')}
+                        </div>
+                    </div>`;
+                }).join('');
+
+                const finalWinnerHtml = state.finalWinner ? `
+                <div class="flex flex-col justify-center items-center px-24 view-transition">
+                    <div class="text-center p-14 bg-white rounded-[4rem] shadow-2xl border-4 border-amber-400 winner-glow relative">
+                        <div class="absolute -top-12 left-1/2 -translate-x-1/2 w-24 h-24 bg-amber-400 rounded-full flex items-center justify-center shadow-xl border-8 border-white">
+                            <i data-lucide="crown" class="text-white w-12 h-12"></i>
+                        </div>
+                        <h3 class="mt-6 text-amber-600 font-black tracking-[0.2em] uppercase text-xs mb-3">Tournament Champion</h3>
+                        <p class="text-5xl font-black text-slate-900 mb-8 truncate max-w-[280px]">${state.finalWinner}</p>
+                        <button onclick="App.reset()" class="px-8 py-3 bg-slate-900 text-white rounded-full text-sm font-black hover:bg-slate-800 transition-all active:scale-95 shadow-lg">새로운 대진 시작</button>
+                    </div>
+                </div>` : '';
+
+                return `
+                <div id="bracket-area" class="relative p-12 min-w-max min-h-full flex items-stretch gap-24 view-transition">
+                    ${roundsHtml}
+                    ${finalWinnerHtml}
+                </div>`;
+            },
+
+            renderMatchCard(match, rIdx, mIdx) {
+                const isBye = match.p1 && !match.p2 && rIdx === 0;
+                if (isBye && !match.winner) {
+                    setTimeout(() => App.selectWinner(rIdx, mIdx, match.p1), 50);
+                }
+
+                const renderSlot = (player, slotNum) => {
+                    const isWinner = match.winner && match.winner === player;
+                    const isLoser = match.winner && match.winner !== player;
+                    const isEmpty = !player;
+                    const numDisplay = rIdx === 0 && player ? (mIdx * 2 + slotNum) : '';
+
+                    let classes = `h-14 flex items-center px-5 transition-all relative group/slot `;
+                    if (isEmpty) classes += `text-slate-300 bg-slate-50/50`;
+                    else if (isWinner) classes += `bg-blue-600 text-white font-black z-10 shadow-lg scale-[1.02]`;
+                    else if (isLoser) classes += `bg-slate-50 text-slate-300 grayscale opacity-60`;
+                    else classes += `bg-white text-slate-700 hover:bg-blue-50 cursor-pointer active:scale-[0.98]`;
+
+                    return `
+                    <div onclick="App.selectWinner(${rIdx}, ${mIdx}, '${player}')" class="${classes}" title="${player || ''}">
+                        <span class="text-[10px] font-black w-6 opacity-40">${numDisplay}</span>
+                        <span class="truncate flex-1 text-sm font-semibold">${player || (isBye && slotNum === 2 ? '부전승' : '-')}</span>
+                        ${isWinner ? '<i data-lucide="check-circle" class="w-4 h-4 ml-2"></i>' : ''}
+                        ${!isEmpty && !match.winner ? '<i data-lucide="chevron-right" class="w-4 h-4 text-blue-300 opacity-0 group-hover/slot:opacity-100 transition-all"></i>' : ''}
+                    </div>`;
+                };
+
+                return `
+                <div class="relative match-card" id="match-${rIdx}-${mIdx}">
+                    <div class="w-64 rounded-[1.5rem] shadow-xl shadow-slate-200/40 border border-slate-200 bg-white overflow-hidden divide-y divide-slate-100 transition-all">
+                        ${renderSlot(match.p1, 1)}
+                        ${renderSlot(match.p2, 2)}
+                    </div>
+                    ${match.winner ? `
+                    <button onclick="App.undo(${rIdx}, ${mIdx})" class="absolute -right-4 -top-4 w-9 h-9 bg-white text-slate-400 hover:text-rose-500 hover:border-rose-200 rounded-full flex items-center justify-center shadow-xl border-2 border-slate-100 transition-all z-20">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                    </button>` : ''}
+                </div>`;
+            },
+
+            drawConnectors() {
+                const container = document.getElementById('bracket-area');
+                if (!container) return;
+                
+                document.querySelectorAll('.bracket-connector').forEach(c => c.remove());
+
+                state.rounds.forEach((round, rIdx) => {
+                    if (rIdx === state.rounds.length - 1) return;
+
+                    round.forEach((match, mIdx) => {
+                        const cur = document.getElementById(`match-${rIdx}-${mIdx}`);
+                        const next = document.getElementById(`match-${rIdx+1}-${Math.floor(mIdx/2)}`);
+                        if (!cur || !next) return;
+
+                        const rectC = container.getBoundingClientRect();
+                        const r1 = cur.getBoundingClientRect();
+                        const r2 = next.getBoundingClientRect();
+
+                        const x1 = r1.right - rectC.left;
+                        const y1 = r1.top + r1.height / 2 - rectC.top;
+                        const x2 = r2.left - rectC.left;
+                        const y2 = r2.top + (mIdx % 2 === 0 ? r2.height * 0.25 : r2.height * 0.75) - rectC.top;
+
+                        const midX = x1 + (x2 - x1) / 2;
+
+                        this.createLine(x1, y1, midX - x1, 2, 'border-t-2'); 
+                        this.createLine(midX, Math.min(y1, y2), 2, Math.abs(y2 - y1), 'border-l-2'); 
+                        this.createLine(midX, y2, x2 - midX, 2, 'border-t-2'); 
+                    });
+                });
+            },
+
+            createLine(x, y, w, h, cls) {
+                const line = document.createElement('div');
+                line.className = `bracket-connector ${cls}`;
+                line.style.left = `${x}px`;
+                line.style.top = `${y}px`;
+                line.style.width = `${w}px`;
+                line.style.height = `${h}px`;
+                document.getElementById('bracket-area').appendChild(line);
+            }
+        };
+
+        // --- 애플리케이션 핸들러 (App Control) ---
+
+        const App = {
+            init() {
+                const saved = localStorage.getItem(APP_ID);
+                if (saved) state = JSON.parse(saved);
+                UI.render();
+            },
+
+            save() {
+                localStorage.setItem(APP_ID, JSON.stringify(state));
+            },
+
+            addExamples() {
+                const el = document.getElementById('raw-names');
+                el.value = EXAMPLE_DATA.join(', ');
+            },
+
+            clearNames() {
+                document.getElementById('raw-names').value = '';
+            },
+
+            generate() {
+                const raw = document.getElementById('raw-names').value;
+                const names = raw.split(/[\n,;/]+/).map(n => n.trim()).filter(n => n.length > 0);
+
+                if (names.length < 3) return Modal.show('인원 부족', '최소 3명 이상의 참가자가 필요합니다.');
+                if (names.length > 64) return Modal.show('인원 초과', '토너먼트는 최대 64명까지만 생성 가능합니다.');
+
+                state.participants = names;
+                state.rounds = TournamentLogic.init(names);
+                state.view = 'bracket';
+                state.finalWinner = null;
+                
+                this.save();
+                UI.render();
+            },
+
+            selectWinner(rIdx, mIdx, player) {
+                if (!player || player === 'null' || state.rounds[rIdx][mIdx].winner) return;
+
+                state.rounds[rIdx][mIdx].winner = player;
+                const nextR = rIdx + 1;
+
+                if (nextR < state.rounds.length) {
+                    const nextM = Math.floor(mIdx / 2);
+                    if (mIdx % 2 === 0) state.rounds[nextR][nextM].p1 = player;
+                    else state.rounds[nextR][nextM].p2 = player;
+                } else {
+                    state.finalWinner = player;
+                    this.confetti();
+                }
+
+                this.save();
+                UI.render();
+            },
+
+            undo(rIdx, mIdx) {
+                const winner = state.rounds[rIdx][mIdx].winner;
+                state.rounds[rIdx][mIdx].winner = null;
+
+                let cr = rIdx + 1;
+                let cm = Math.floor(mIdx / 2);
+                while (cr < state.rounds.length) {
+                    const m = state.rounds[cr][cm];
+                    if (m.p1 === winner) m.p1 = null;
+                    if (m.p2 === winner) m.p2 = null;
+                    if (m.winner === winner) m.winner = null;
+                    else break;
+                    cm = Math.floor(cm / 2);
+                    cr++;
+                }
+
+                if (state.finalWinner === winner) state.finalWinner = null;
+                
+                this.save();
+                UI.render();
+            },
+
+            reset() {
+                Modal.show('초기화 확인', '진행 중인 데이터를 삭제하고 참가자 입력 화면으로 돌아갑니다.', () => {
+                    state = { view: 'input', participants: [], rounds: [], finalWinner: null };
+                    localStorage.removeItem(APP_ID);
+                    UI.render();
+                });
+            },
+
+            confetti() {
+                const colors = ['#2563eb', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6'];
+                for (let i = 0; i < 80; i++) {
+                    const p = document.createElement('div');
+                    p.className = 'confetti-piece';
+                    p.style.left = Math.random() * 100 + 'vw';
+                    p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    p.style.animationDuration = (Math.random() * 2 + 1.5) + 's';
+                    p.style.animationDelay = Math.random() * 0.3 + 's';
+                    p.style.width = (Math.random() * 6 + 6) + 'px';
+                    p.style.height = p.style.width;
+                    document.body.appendChild(p);
+                    setTimeout(() => p.remove(), 4000);
+                }
+            }
+        };
+
+        const Modal = {
+            show(title, desc, onConfirm = null) {
+                document.getElementById('modal-title').innerText = title;
+                document.getElementById('modal-desc').innerText = desc;
+                const overlay = document.getElementById('modal-overlay');
+                const cancelBtn = document.getElementById('modal-cancel');
+                const confirmBtn = document.getElementById('modal-confirm');
+
+                overlay.classList.remove('hidden');
+                
+                cancelBtn.onclick = () => overlay.classList.add('hidden');
+                confirmBtn.onclick = () => {
+                    if (onConfirm) onConfirm();
+                    overlay.classList.add('hidden');
+                };
+
+                if (!onConfirm) {
+                    cancelBtn.classList.add('hidden');
+                    confirmBtn.innerText = "확인";
+                } else {
+                    cancelBtn.classList.remove('hidden');
+                    confirmBtn.innerText = "진행하기";
+                }
+
+                if (window.lucide) lucide.createIcons();
+            }
+        };
+
+        window.addEventListener('load', () => App.init());
+        window.addEventListener('resize', () => { if(state.view === 'bracket') UI.drawConnectors(); });
+    </script>
+</body>
+</html>
