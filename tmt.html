@@ -6,12 +6,11 @@
     <title>Tournament Master Cloud 🍊</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- 화면 캡쳐를 위한 라이브러리 추가 -->
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
         :root { --primary: #f97316; --bg-main: #fffaf5; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg-main); color: #431407; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: var(--bg-main); color: #431407; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
         .bracket-connector { position: absolute; border-color: #fdba74; border-style: solid; pointer-events: none; z-index: 0; }
         .match-card { z-index: 10; transition: all 0.3s ease; }
         .winner-glow { box-shadow: 0 0 30px rgba(249, 115, 22, 0.3); border: 2px solid var(--primary) !important; animation: pulse 2s infinite; }
@@ -19,12 +18,8 @@
         .round-header-sticky { position: sticky; top: 0; background: rgba(255, 250, 245, 0.9); z-index: 30; backdrop-filter: blur(12px); padding: 12px 0; }
         .custom-scroll::-webkit-scrollbar { width: 4px; height: 4px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #fed7aa; border-radius: 10px; }
-        
-        /* 캡쳐 시 버튼 등 불필요한 요소 숨김 처리 */
         .no-export { data-html2canvas-ignore: true; }
-        
-        /* 캡처 시 텍스트 잘림 방지를 위한 클래스 */
-        .capturing .match-card span { line-height: 1.5 !important; display: inline-block !important; padding-bottom: 2px !important; }
+        .capturing .match-card span { line-height: 1.6 !important; display: inline-block !important; vertical-align: middle; }
     </style>
 </head>
 <body class="custom-scroll select-none">
@@ -52,7 +47,8 @@
         <main id="main-view" class="flex-1 overflow-auto custom-scroll relative bg-[#fffaf5]">
             <div id="loading-view" class="flex flex-col items-center justify-center h-full gap-4">
                 <div class="w-10 h-10 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin"></div>
-                <p class="text-orange-500 font-bold text-sm">데이터를 불러오는 중...</p>
+                <p id="loading-text" class="text-orange-500 font-bold text-sm">데이터를 불러오는 중...</p>
+                <p id="loading-subtext" class="text-slate-400 text-xs">서버 연결을 확인하고 있습니다.</p>
             </div>
         </main>
     </div>
@@ -79,7 +75,7 @@
         import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-            apiKey: "",
+            apiKey: "", 
             authDomain: "tele-486906.firebaseapp.com",
             projectId: "tele-486906",
             storageBucket: "tele-486906.firebasestorage.app",
@@ -88,10 +84,7 @@
         };
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'tournament-cloud-v1';
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
+        let app, auth, db;
         let user = null;
         let isAdmin = false;
         let competitions = [];
@@ -100,6 +93,38 @@
         const getCompCollection = () => collection(db, 'artifacts', appId, 'public', 'data', 'competitions');
         const getCompDoc = (id) => doc(db, 'artifacts', appId, 'public', 'data', 'competitions', id);
 
+        async function initApp() {
+            try {
+                // 1. Initialize Firebase
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+                
+                // 2. Set up Auth Listener BEFORE signing in
+                onAuthStateChanged(auth, (u) => {
+                    user = u;
+                    if (user) {
+                        const statusEl = document.getElementById('auth-status');
+                        if (statusEl) {
+                            statusEl.innerText = "Online 🟢";
+                            statusEl.classList.remove('hidden');
+                        }
+                        subscribeToCompetitions();
+                    }
+                });
+
+                // 3. Perform Sign-in
+                await initAuth();
+                
+            } catch (e) {
+                console.error("Initialization Error", e);
+                const textEl = document.getElementById('loading-text');
+                const subEl = document.getElementById('loading-subtext');
+                if(textEl) textEl.innerText = "설정 오류 발생";
+                if(subEl) subEl.innerText = "Firebase 설정 정보를 확인해주세요.";
+            }
+        }
+
         async function initAuth() {
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -107,23 +132,15 @@
                 } else {
                     await signInAnonymously(auth);
                 }
-            } catch (e) { console.error("Auth Error", e); }
+            } catch (e) { 
+                console.error("Auth Error", e); 
+                const textEl = document.getElementById('loading-text');
+                if(textEl) textEl.innerText = "인증 오류 발생";
+            }
         }
 
-        onAuthStateChanged(auth, (u) => {
-            user = u;
-            if (user) {
-                const statusEl = document.getElementById('auth-status');
-                if (statusEl) {
-                    statusEl.innerText = "Online 🟢";
-                    statusEl.classList.remove('hidden');
-                }
-                subscribeToCompetitions();
-            }
-        });
-
         function subscribeToCompetitions() {
-            if (!user) return;
+            if (!user || !db) return;
             onSnapshot(getCompCollection(), (snapshot) => {
                 competitions = snapshot.docs.map(d => {
                     const data = d.data();
@@ -134,7 +151,13 @@
                 });
                 activeComp = competitions.find(c => c.isActive) || null;
                 render();
-            }, (err) => console.error("Firestore Listen Error", err));
+            }, (err) => {
+                console.error("Firestore Listen Error", err);
+                const textEl = document.getElementById('loading-text');
+                const subEl = document.getElementById('loading-subtext');
+                if(textEl) textEl.innerText = "데이터 연결 실패";
+                if(subEl) subEl.innerText = "권한 설정(Rules)을 확인해주세요.";
+            });
         }
 
         function render() {
@@ -232,12 +255,11 @@
                         <button onclick="window.downloadCSV()" class="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 text-orange-600 rounded-lg text-xs font-bold hover:bg-orange-100 transition-all">
                             <i data-lucide="file-text" class="w-3.5 h-3.5"></i> CSV 저장
                         </button>
-                        <button onclick="window.captureScreenshot(event)" class="flex items-center gap-1.5 px-3 py-1.5 bg-orange-500 text-white rounded-lg text-xs font-bold hover:bg-orange-600 transition-all shadow-md">
+                        <button id="capture-btn" onclick="window.captureScreenshot(event)" class="flex items-center gap-1.5 px-3 py-1.5 bg-orange-500 text-white rounded-lg text-xs font-bold hover:bg-orange-600 transition-all shadow-md">
                             <i data-lucide="camera" class="w-3.5 h-3.5"></i> 이미지 저장
                         </button>
                     </div>
                 </div>
-                <!-- 캡쳐 대상 영역 -->
                 <div id="export-target" class="bg-[#fffaf5]">
                     <div id="bracket-area" class="relative p-6 md:p-12 min-w-max flex items-stretch gap-12 md:gap-24">
                         ${roundsHtml}
@@ -250,10 +272,6 @@
 
         function renderMatchCard(match, rIdx, mIdx) {
             const isBye = match.p1 && !match.p2 && rIdx === 0;
-            if (isBye && !match.winner) {
-                setTimeout(() => window.selectWinner(rIdx, mIdx, match.p1), 50);
-            }
-                
             const renderSlot = (player, slotNum) => {
                 const isWinner = match.winner === player && player;
                 const isLoser = match.winner && match.winner !== player && player;
@@ -294,65 +312,44 @@
             `;
         }
 
-        // --- Result Export Functions ---
-        
         window.downloadCSV = () => {
             if (!activeComp) return;
             let csvContent = "\uFEFF"; 
-            csvContent += "Round,Match ID,Player 1,Player 2,Winner\n";
+            csvContent += "라운드,경기ID,플레이어1,플레이어2,승자\n";
             activeComp.rounds.forEach((round, rIdx) => {
                 round.forEach((match, mIdx) => {
-                    const row = [
-                        `Round ${rIdx + 1}`,
-                        `Match ${mIdx + 1}`,
-                        match.p1 || "N/A",
-                        match.p2 || (rIdx === 0 && match.p1 ? "BYE" : "N/A"),
-                        match.winner || "TBD"
-                    ];
-                    csvContent += row.join(",") + "\n";
+                    csvContent += [`Round ${rIdx + 1}`, `Match ${mIdx + 1}`, match.p1 || "-", match.p2 || (rIdx === 0 && match.p1 ? "부전승" : "-"), match.winner || "-"].join(",") + "\n";
                 });
             });
-            if (activeComp.finalWinner) csvContent += `\nFINAL CHAMPION,${activeComp.finalWinner}\n`;
+            if (activeComp.finalWinner) csvContent += `\n최종 우승자,${activeComp.finalWinner}\n`;
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
-            const url = URL.createObjectURL(blob);
-            link.setAttribute("href", url);
-            link.setAttribute("download", `${activeComp.title}_결과.csv`);
+            link.href = URL.createObjectURL(blob);
+            link.download = `${activeComp.title}_결과.csv`;
             link.click();
         };
 
-        window.captureScreenshot = (event) => {
+        window.captureScreenshot = () => {
+            const btn = document.getElementById('capture-btn');
             const target = document.getElementById('export-target');
-            if (!target || !event) return;
+            if (!target || !btn) return;
 
             document.body.classList.add('capturing');
-            const btn = event.currentTarget;
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> 생성 중...';
             lucide.createIcons();
 
-            const options = {
-                backgroundColor: "#fffaf5",
-                scale: 2, 
-                useCORS: true,
-                logging: false,
-                scrollX: 0,
-                scrollY: 0,
-                windowWidth: target.scrollWidth,
-                windowHeight: target.scrollHeight,
-                onclone: (clonedDoc) => {
-                    const clonedTarget = clonedDoc.getElementById('export-target');
-                    clonedTarget.style.paddingBottom = "100px"; 
-                    // 캡처 시 하단 잘림 방지를 위해 모든 텍스트 컨테이너에 여백 강제
-                    clonedTarget.querySelectorAll('.match-card span').forEach(el => {
-                        el.style.lineHeight = "1.5";
-                        el.style.paddingBottom = "3px";
-                    });
-                }
-            };
-
             setTimeout(() => {
-                html2canvas(target, options).then(canvas => {
+                html2canvas(target, {
+                    backgroundColor: "#fffaf5",
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    onclone: (clonedDoc) => {
+                        const ct = clonedDoc.getElementById('export-target');
+                        if(ct) ct.style.padding = "40px";
+                    }
+                }).then(canvas => {
                     const link = document.createElement('a');
                     link.download = `${activeComp.title}_대진표.png`;
                     link.href = canvas.toDataURL('image/png', 1.0);
@@ -363,15 +360,11 @@
                     btn.innerHTML = originalText;
                     lucide.createIcons();
                 });
-            }, 100);
+            }, 500);
         };
 
-        // --- Logic & Database Functions ---
-        
         window.selectWinner = async (rIdx, mIdx, player) => {
-            if (!activeComp) return; 
-            const match = activeComp.rounds[rIdx][mIdx];
-            if (!player || match.winner) return;
+            if (!activeComp) return;
             const newRounds = JSON.parse(JSON.stringify(activeComp.rounds));
             newRounds[rIdx][mIdx].winner = player;
             let finalWinner = activeComp.finalWinner;
@@ -380,15 +373,12 @@
                 if (mIdx % 2 === 0) newRounds[rIdx + 1][nextMIdx].p1 = player;
                 else newRounds[rIdx + 1][nextMIdx].p2 = player;
             } else finalWinner = player;
-            try {
-                await updateDoc(getCompDoc(activeComp.id), { rounds: JSON.stringify(newRounds), finalWinner });
-            } catch (e) { console.error("Update Error", e); }
+            await updateDoc(getCompDoc(activeComp.id), { rounds: JSON.stringify(newRounds), finalWinner });
         };
 
         window.undoWinner = async (rIdx, mIdx) => {
             if (!activeComp) return;
             const winner = activeComp.rounds[rIdx][mIdx].winner;
-            if (!winner) return;
             const newRounds = JSON.parse(JSON.stringify(activeComp.rounds));
             newRounds[rIdx][mIdx].winner = null;
             let cr = rIdx + 1, cm = Math.floor(mIdx / 2);
@@ -400,12 +390,7 @@
                 else break;
                 cm = Math.floor(cm / 2); cr++;
             }
-            try {
-                await updateDoc(getCompDoc(activeComp.id), { 
-                    rounds: JSON.stringify(newRounds),
-                    finalWinner: activeComp.finalWinner === winner ? null : activeComp.finalWinner
-                });
-            } catch (e) { console.error("Undo Error", e); }
+            await updateDoc(getCompDoc(activeComp.id), { rounds: JSON.stringify(newRounds), finalWinner: activeComp.finalWinner === winner ? null : activeComp.finalWinner });
         };
 
         window.createCompetition = () => {
@@ -418,39 +403,19 @@
             });
         };
 
-        window.editTitle = (id) => {
-            const comp = competitions.find(c => c.id === id);
-            showModal("경기명 수정 🏷️", `<input type="text" id="edit-title-input" class="w-full p-4 bg-orange-50 rounded-xl border-2 border-transparent focus:border-orange-400 outline-none font-bold" value="${comp.title}">`, async () => {
-                const newTitle = document.getElementById('edit-title-input').value.trim();
-                if (!newTitle) return false;
-                await updateDoc(getCompDoc(id), { title: newTitle });
-                return true;
-            });
-        };
-
         window.toggleActive = async (id) => {
             const batch = competitions.map(c => updateDoc(getCompDoc(c.id), { isActive: c.id === id ? !c.isActive : false }));
             await Promise.all(batch);
         };
 
-        window.deleteComp = (id) => {
-            showModal("경기 삭제 ⚠️", `<p class="text-sm text-slate-500">삭제 후 복구할 수 없습니다.</p>`, async () => {
-                await deleteDoc(getCompDoc(id));
-                return true;
-            });
-        };
-
         window.editParticipants = (id) => {
             const comp = competitions.find(c => c.id === id);
             showModal("명단 수정", `
-                <div class="mb-4 flex justify-end">
-                    <button onclick="window.fillSampleData()" class="text-[11px] font-bold bg-slate-200 text-slate-600 px-3 py-1.5 rounded-lg hover:bg-blue-100 hover:text-blue-600 transition-colors flex items-center gap-1">
-                        <i data-lucide="list-plus" class="w-3 h-3"></i> 예시 데이터 채우기
-                    </button>
-                </div>
-                <textarea id="p-list" class="w-full h-64 p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-blue-500 outline-none text-sm font-semibold leading-relaxed" placeholder="한 줄에 한 명씩 이름을 입력하세요">${comp.participants.join('\n')}</textarea>
+                <div class="mb-2 text-right"><button onclick="window.fillSampleData()" class="text-[10px] bg-slate-200 px-2 py-1 rounded">예시 채우기</button></div>
+                <textarea id="p-list" class="w-full h-48 p-4 bg-slate-50 border rounded-xl outline-none text-sm font-semibold" placeholder="한 줄에 한 명씩 이름을 입력하세요">${comp.participants.join('\n')}</textarea>
             `, async () => {
-                const names = document.getElementById('p-list').value.split('\n').map(n => n.trim()).filter(n => n);
+                const textarea = document.getElementById('p-list');
+                const names = textarea.value.split('\n').map(n => n.trim()).filter(n => n);
                 if (names.length < 2) return false;
                 const rounds = generateRounds(names);
                 await updateDoc(getCompDoc(id), { participants: names, rounds: JSON.stringify(rounds), finalWinner: null });
@@ -458,29 +423,20 @@
             });
         };
 
-        window.fillSampleData = () => {
-            const textarea = document.getElementById('p-list');
-            if (textarea) textarea.value = ["강백호", "서태웅", "채치수", "송태섭", "정대만", "권준호", "이한나"].join('\n');
-        };
+        window.fillSampleData = () => { document.getElementById('p-list').value = ["강백호", "서태웅", "채치수", "송태섭", "정대만", "권준호", "이한나"].join('\n'); };
 
         function generateRounds(names) {
             const shuffled = [...names].sort(() => Math.random() - 0.5);
-            const count = shuffled.length;
-            let power = 1; while (power < count) power *= 2;
-            const numByes = power - count;
-            const r0Matches = [];
-            let pIdx = 0;
+            let power = 1; while (power < shuffled.length) power *= 2;
+            const numByes = power - shuffled.length;
+            const r0 = []; let pIdx = 0;
             for (let i = 0; i < power / 2; i++) {
-                const match = { p1: shuffled[pIdx++] || null, p2: null, winner: null };
-                if (pIdx <= count - numByes) match.p2 = shuffled[pIdx++] || null;
-                r0Matches.push(match);
+                const m = { p1: shuffled[pIdx++], p2: null, winner: null };
+                if (pIdx <= shuffled.length - numByes) m.p2 = shuffled[pIdx++];
+                r0.push(m);
             }
-            const rounds = [r0Matches];
-            let mCount = r0Matches.length / 2;
-            while (mCount >= 1) {
-                rounds.push(Array.from({length: mCount}, () => ({ p1: null, p2: null, winner: null })));
-                mCount /= 2;
-            }
+            const rounds = [r0]; let mc = r0.length / 2;
+            while (mc >= 1) { rounds.push(Array.from({length: mc}, () => ({ p1: null, p2: null, winner: null }))); mc /= 2; }
             return rounds;
         }
 
@@ -504,8 +460,7 @@
                     const cur = document.getElementById(`match-${rIdx}-${mIdx}`);
                     const next = document.getElementById(`match-${rIdx+1}-${Math.floor(mIdx/2)}`);
                     if (!cur || !next) return;
-                    const rectA = area.getBoundingClientRect();
-                    const r1 = cur.getBoundingClientRect(), r2 = next.getBoundingClientRect();
+                    const rectA = area.getBoundingClientRect(), r1 = cur.getBoundingClientRect(), r2 = next.getBoundingClientRect();
                     const x1 = r1.right - rectA.left, y1 = r1.top + r1.height / 2 - rectA.top;
                     const x2 = r2.left - rectA.left, y2 = r2.top + (mIdx % 2 === 0 ? r2.height * 0.25 : r2.height * 0.75) - rectA.top;
                     const midX = x1 + (x2 - x1) / 2;
@@ -525,14 +480,17 @@
 
         document.getElementById('admin-btn').onclick = () => {
             if (isAdmin) { isAdmin = false; render(); return; }
-            showModal("관리자 인증 🔒", `<input type="password" id="admin-pw" class="w-full p-4 bg-orange-50 rounded-xl border-2 border-transparent focus:border-orange-400 outline-none text-center font-bold tracking-widest" placeholder="••••">`, () => {
-                if (document.getElementById('admin-pw').value === "33") { isAdmin = true; render(); return true; }
+            showModal("관리자 인증 🔒", `<input type="password" id="admin-pw" class="w-full p-4 bg-orange-50 rounded-xl text-center font-bold" placeholder="암호 입력">`, () => {
+                const pwInput = document.getElementById('admin-pw');
+                if (pwInput && pwInput.value === "33") { isAdmin = true; render(); return true; }
                 return false;
             });
         };
 
         window.logoutAdmin = () => { isAdmin = false; render(); };
-        initAuth();
+        
+        // Final Execution
+        initApp();
     </script>
 </body>
 </html>
