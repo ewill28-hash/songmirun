@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>송미런 TTR</title>
+  <title>TTR</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
@@ -34,7 +34,19 @@
           <div class="bg-orange-500 p-2.5 rounded-2xl text-white shadow-orange-200 shadow-lg">
             <i data-lucide="timer" class="w-6 h-6"></i>
           </div>
-          <h1 class="text-2xl font-black tracking-tight text-slate-800">송미런 타임 타겟 레이스 🏃‍♂️</h1>
+          <div class="space-y-1">
+            <h1 class="text-3xl font-black tracking-tighter text-slate-500 flex items-center gap-2">
+              송/마/레 
+              <span class="text-2xl">-</span>              
+              <span class="text-orange-600">송미런 마가렛 레이스</span>
+            </h1>
+            
+            <p class="text-lg font-bold tracking-tight text-slate-500 flex items-center gap-2">
+              <span class="inline-block animate-pulse text-blue-500">⏱️</span>
+              Time Target Race 
+            </p>
+          </div>
+
         </div>
         <button id="admin-toggle-btn" class="p-3 rounded-2xl bg-orange-50 text-orange-600 hover:bg-orange-100 transition-all border border-orange-100">
           <i data-lucide="settings" class="w-5 h-5"></i>
@@ -49,7 +61,33 @@
 
   <div id="toast-container" class="fixed bottom-4 right-4 z-[60] flex flex-col gap-2"></div>
 
-  <!-- 모달 영역 생략 방지 (동일 유지) -->
+  <!-- 레이스 정보 수정 모달 -->
+  <div id="modal-edit-race" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden animate-fade-in">
+    <div class="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-in-up">
+      <div class="p-8">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="bg-orange-100 text-orange-600 p-2 rounded-xl"><i data-lucide="edit" class="w-5 h-5"></i></div>
+          <h3 class="text-xl font-bold text-slate-900">레이스 정보 수정 🏁</h3>
+        </div>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider ml-1">레이스 제목</label>
+            <input type="text" id="edit-race-title" class="w-full px-5 py-4 bg-orange-50/50 border border-orange-100 rounded-2xl focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 outline-none font-bold text-lg transition-all" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider ml-1">개최 날짜</label>
+            <input type="date" id="edit-race-date" class="w-full px-5 py-4 bg-orange-50/50 border border-orange-100 rounded-2xl focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 outline-none font-bold text-lg transition-all" />
+          </div>
+        </div>
+      </div>
+      <div class="flex p-4 gap-3 bg-slate-50">
+        <button onclick="app.closeModal('edit-race')" class="flex-1 px-6 py-4 text-slate-500 font-bold hover:bg-white rounded-2xl transition-all">취소</button>
+        <button id="btn-confirm-edit-race" class="flex-1 px-6 py-4 bg-orange-500 text-white font-bold hover:bg-orange-600 rounded-2xl shadow-lg shadow-orange-200 transition-all">수정 완료 ✨</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 참여자 정보 수정 모달 -->
   <div id="modal-edit-entry" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden animate-fade-in">
     <div class="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-in-up">
       <div class="p-8">
@@ -120,7 +158,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, onSnapshot, writeBatch, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     // --- 환경 변수 처리 ---
     const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
@@ -148,6 +186,7 @@
       isSubmitting: false,
       targetRaceForSeed: null,
       targetRaceForDelete: null,
+      targetRaceForEdit: null,
       targetEntryForEdit: null
     };
 
@@ -187,19 +226,16 @@
 
     const initAuth = async () => {
       try {
-        // 커스텀 토큰이 존재하는 경우 먼저 시도
         if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
           try {
             await signInWithCustomToken(auth, __initial_auth_token);
           } catch (tokenErr) {
-            console.warn("Custom token failed, falling back to anonymous auth.", tokenErr);
             await signInAnonymously(auth);
           }
         } else {
           await signInAnonymously(auth);
         }
       } catch (err) {
-        console.error("Critical Auth error:", err);
         showToast("인증 초기화 실패", "error");
       }
     };
@@ -336,6 +372,9 @@
               <p class="text-xs text-slate-400 font-bold uppercase tracking-widest">${r.date}</p>
             </div>
             <div class="flex items-center gap-2 mt-2 sm:mt-0">
+              <button title="레이스 정보 수정" onclick="app.openEditRace('${r.id}')" class="w-10 h-10 flex items-center justify-center text-orange-500 bg-orange-50 rounded-xl hover:bg-orange-100 transition-colors">
+                <i data-lucide="edit" class="w-5 h-5"></i>
+              </button>
               <button title="샘플 생성" onclick="app.openSeed('${r.id}')" class="w-10 h-10 flex items-center justify-center text-indigo-500 bg-indigo-50 rounded-xl hover:bg-indigo-100 transition-colors">
                 <i data-lucide="beaker" class="w-5 h-5"></i>
               </button>
@@ -480,6 +519,49 @@
         await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'races', id), { isActive: !s }); 
       },
 
+      openEditRace: (id) => {
+        const r = state.races.find(race => race.id === id);
+        if (r) {
+          state.targetRaceForEdit = r;
+          document.getElementById('edit-race-title').value = r.title;
+          document.getElementById('edit-race-date').value = r.date;
+          app.showModal('edit-race');
+        }
+      },
+
+      confirmEditRace: async () => {
+        if (!state.user || !state.targetRaceForEdit) return;
+        const newTitle = document.getElementById('edit-race-title').value.trim();
+        const newDate = document.getElementById('edit-race-date').value;
+
+        if (!newTitle || !newDate) return showToast("정보를 모두 입력해주세요.", "error");
+
+        toggleBtnLoading('btn-confirm-edit-race', true);
+        try {
+          const batch = writeBatch(db);
+          // 1. 레이스 정보 업데이트
+          batch.update(doc(db, 'artifacts', appId, 'public', 'data', 'races', state.targetRaceForEdit.id), {
+            title: newTitle,
+            date: newDate
+          });
+
+          // 2. 해당 레이스에 속한 모든 엔트리의 raceTitle 업데이트 (선택 사항이지만 데이터 일관성 위해 권장)
+          state.entries.filter(e => e.raceId === state.targetRaceForEdit.id).forEach(e => {
+            batch.update(doc(db, 'artifacts', appId, 'public', 'data', 'entries', e.id), {
+              raceTitle: newTitle
+            });
+          });
+
+          await batch.commit();
+          showToast("레이스 정보가 수정되었습니다.");
+          app.closeModal('edit-race');
+        } catch(e) {
+          showToast("수정에 실패했습니다.", "error");
+        } finally {
+          toggleBtnLoading('btn-confirm-edit-race', false, "수정 완료 ✨");
+        }
+      },
+
       delEntry: async (id) => { 
         if (!state.user) return;
         if(confirm("이 기록을 삭제하시겠습니까?")) {
@@ -575,6 +657,7 @@
     };
 
     document.getElementById('admin-toggle-btn').onclick = () => app.setView(state.isAdmin ? 'admin_panel' : 'admin_auth');
+    document.getElementById('btn-confirm-edit-race').onclick = () => app.confirmEditRace();
     document.getElementById('btn-confirm-edit-entry').onclick = () => app.confirmEditEntry();
     document.getElementById('btn-confirm-cancel').onclick = () => app.confirmCancel();
     document.getElementById('btn-confirm-delete-race').onclick = () => app.confirmDelRace();
