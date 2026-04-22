@@ -517,7 +517,7 @@
           filtered.forEach(e => {
               // e.timestamp 등을 활용해 날짜 형식 변환 (참여일시용)
               const dateStr = e.createdAt ? new Date(e.createdAt).toLocaleString() : '';
-              const combined = `${e.nickname}(${e.targetTime}),`; 
+              const combined = `${e.nickname}(${e.targetTime})|`; 
               
               // 데이터 한 줄 추가
               csv += `"${e.raceTitle}","${e.nickname}","${combined}","${e.targetTime}","${dateStr}"\n`;
