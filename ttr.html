@@ -23,8 +23,9 @@
 
   <!-- 로딩 상태 표시 -->
   <div id="loading-state" class="fixed inset-0 flex items-center justify-center bg-orange-50 z-50">
-    <div class="text-orange-500 font-medium flex items-center gap-2">
-      <i data-lucide="refresh-cw" class="spin"></i> 🧡 데이터 보안 확인 중...
+    <div class="text-orange-500 font-black flex items-center gap-2 text-lg">
+      <i data-lucide="refresh-cw" class="spin w-5 h-5"></i>
+      <span>🏁 레이스 목록 입장 중 🏃‍♂️🏃‍♂️🏃‍♂️</span>
     </div>
   </div>
 
@@ -325,38 +326,69 @@
               <span class="text-lg">⚡</span>
               <span>이미 <strong>${entry.targetTime}초</strong>로 참여 중이에요. 수정할까요?</span>
             </div>` : ''}
-            
-            <div class="space-y-5">
-              <div>
-                <label class="block text-xs font-black text-slate-400 mb-2 ml-2 uppercase">닉네임</label>
-                <div class="flex flex-col gap-2">
+
+
+
+            <div class="space-y-6">
+              <div class="flex flex-col gap-3">
+                <div class="flex flex-col gap-3 p-4 bg-orange-50/50 border border-orange-100 rounded-[1.5rem]">
                   <input 
                     type="text" 
                     id="input-nickname" 
                     value="${nick}" 
-                    placeholder="닉네임" 
-                    class="w-full p-5 bg-orange-50/30 border border-orange-100 rounded-[1.5rem] outline-none font-bold text-lg" 
+                    placeholder="닉네임 입력" 
+                    class="w-full p-5 bg-white border border-orange-100 rounded-[1.2rem] outline-none font-bold text-lg focus:ring-2 focus:ring-orange-300 transition-all" 
                   />
-                  
                   <button 
                     onclick="app.render()" 
-                    class="w-full p-4 bg-orange-500 text-white rounded-[1.5rem] font-bold text-base active:bg-orange-600 transition-colors"
+                    class="w-full py-3.5 bg-orange-300 hover:bg-orange-400 text-white rounded-[1.2rem] font-black text-lg transition-all shadow-sm flex justify-center items-center gap-1"
                   >
-                    닉네임 입력 완료
+                    ① 닉네임 체크 ✅
                   </button>
                 </div>
               </div>
+
               <div>
                 <label class="block text-xs font-black text-slate-400 mb-2 ml-2 uppercase">목표 시간 (초)</label>
-                <input type="number" id="input-target-time" step="0.01" placeholder="00.00" class="w-full p-5 bg-orange-50/30 border border-orange-100 rounded-[1.5rem] outline-none font-mono font-black text-2xl" />
+                <input 
+                  type="number" 
+                  id="input-target-time" 
+                  step="0.01" 
+                  value="${entry ? entry.targetTime : ''}" 
+                  placeholder="00.00" 
+                  class="w-full p-5 bg-orange-50/30 border border-orange-100 rounded-[1.5rem] outline-none font-mono font-black text-2xl text-orange-600 placeholder:text-orange-200 focus:ring-2 focus:ring-orange-300 transition-all" 
+                />
               </div>
-              <div class="flex flex-col sm:flex-row gap-3 pt-4">
-                ${entry ? `<button onclick="app.openCancel()" class="flex-1 py-5 bg-rose-50 text-rose-600 font-black rounded-2xl">참여 취소</button>` : ''}
-                <button onclick="app.submitEntry()" id="btn-submit" class="flex-[2] py-5 bg-orange-500 text-white font-black rounded-2xl shadow-lg hover:bg-orange-600 transition-all">
-                  ${entry ? '정보 수정' : '참여 완료'}
-                </button>
+
+              <div class="flex flex-col gap-3 pt-2">
+                <div class="flex flex-col sm:flex-row gap-3">
+                  <button 
+                    onclick="app.submitEntry()" 
+                    id="btn-submit" 
+                    class="${entry ? 'flex-[2]' : 'w-full'} py-3.5 bg-orange-500 text-white font-black rounded-[1.5rem] shadow-lg hover:bg-orange-600 active:scale-[0.95] transition-all text-lg flex justify-center items-center gap-1"
+                  >
+                    <span>② ${entry ? '참여 정보 수정' : '참여하기'}</span>
+                  </button>
+
+                  ${entry ? `
+                    <button 
+                      onclick="app.openCancel()" 
+                      class="flex-1 py-3.5 bg-slate-100 text-slate-500 font-black rounded-[1.5rem] hover:bg-rose-50 hover:text-rose-600 transition-all text-lg flex justify-center items-center gap-1"
+                    >
+                      ❌ 참여 취소
+                    </button>
+                  ` : ''}
+                </div>
+
+
+
               </div>
+              
             </div>
+
+
+
+
           </div>
         `;
       }
@@ -382,7 +414,12 @@
       document.getElementById('view-admin-panel').innerHTML = `
         <div class="flex justify-between items-center bg-white p-6 rounded-3xl border">
           <h2 class="text-2xl font-black text-slate-800">관리자 대시보드</h2>
-          <button onclick="app.logout()" class="px-4 py-2 bg-rose-50 text-rose-600 rounded-xl font-bold">종료</button>
+          <button 
+            onclick="app.logout()" 
+            class="px-5 py-2.5 bg-rose-100 hover:bg-rose-200 text-rose-700 rounded-xl font-black transition-colors flex items-center gap-2 border border-rose-200"
+          >
+            <span>🚪 로그아웃</span>
+          </button>
         </div>
 
         <div class="bg-white p-8 rounded-[2.5rem] border space-y-6">
