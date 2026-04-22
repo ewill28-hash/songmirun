@@ -55,7 +55,7 @@
 
     <!-- Modals -->
     <div id="modal-overlay" class="hidden fixed inset-0 z-[100] bg-orange-950/40 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-white rounded-[2rem] w-full max-w-sm shadow-2xl overflow-hidden" id="modal-box">
+        <div class="bg-white rounded-[2rem] w-full max-sm shadow-2xl overflow-hidden" id="modal-box">
             <div class="p-6">
                 <h3 id="modal-title" class="text-lg font-bold text-slate-900 mb-2"></h3>
                 <div id="modal-content" class="mb-4">
@@ -74,15 +74,18 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // Firebase 구성 로직 수정 (보안 규칙 준수)
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-            apiKey: "", 
+            apiKey: "AIzaSyD1pj4uw9LyUUTtWn_a28ABN0BC-0zkynY",
             authDomain: "tele-486906.firebaseapp.com",
             projectId: "tele-486906",
             storageBucket: "tele-486906.firebasestorage.app",
             messagingSenderId: "780009385301",
             appId: "1:780009385301:web:4163b27573a0b5e72e13dc"
         };
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'tournament-cloud-v1';
+        
+        // __app_id가 제공되지 않을 경우 fallback 처리
+        const currentAppId = typeof __app_id !== 'undefined' ? __app_id : 'SamTe-QrnjqH7vDCtdAB94IL2H';
 
         let app, auth, db;
         let user = null;
@@ -90,17 +93,18 @@
         let competitions = [];
         let activeComp = null;
 
-        const getCompCollection = () => collection(db, 'artifacts', appId, 'public', 'data', 'competitions');
-        const getCompDoc = (id) => doc(db, 'artifacts', appId, 'public', 'data', 'competitions', id);
+        // 필수 경로 규칙 준수: /artifacts/{appId}/public/data/{collectionName}
+        const getCompCollection = () => collection(db, 'artifacts', currentAppId, 'public', 'data', 'competitions');
+        const getCompDoc = (id) => doc(db, 'artifacts', currentAppId, 'public', 'data', 'competitions', id);
 
         async function initApp() {
             try {
-                // 1. Initialize Firebase
+                // 1. Firebase 서비스 초기화
                 app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
                 db = getFirestore(app);
                 
-                // 2. Set up Auth Listener BEFORE signing in
+                // 2. 인증 상태 리스너 등록
                 onAuthStateChanged(auth, (u) => {
                     user = u;
                     if (user) {
@@ -109,11 +113,12 @@
                             statusEl.innerText = "Online 🟢";
                             statusEl.classList.remove('hidden');
                         }
+                        // 인증이 완료된 후에만 Firestore 구독 시작 (Rule 3 준수)
                         subscribeToCompetitions();
                     }
                 });
 
-                // 3. Perform Sign-in
+                // 3. 인증 실행
                 await initAuth();
                 
             } catch (e) {
@@ -121,12 +126,13 @@
                 const textEl = document.getElementById('loading-text');
                 const subEl = document.getElementById('loading-subtext');
                 if(textEl) textEl.innerText = "설정 오류 발생";
-                if(subEl) subEl.innerText = "Firebase 설정 정보를 확인해주세요.";
+                if(subEl) subEl.innerText = "Firebase 구성을 다시 확인해주세요.";
             }
         }
 
         async function initAuth() {
             try {
+                // Custom Token 우선순위 (Rule 3 준수)
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
@@ -135,12 +141,15 @@
             } catch (e) { 
                 console.error("Auth Error", e); 
                 const textEl = document.getElementById('loading-text');
-                if(textEl) textEl.innerText = "인증 오류 발생";
+                if(textEl) textEl.innerText = "인증 실패";
             }
         }
 
         function subscribeToCompetitions() {
+            // 인증 가드 (Rule 3 준수)
             if (!user || !db) return;
+
+            // onSnapshot 에러 핸들러 추가 필수
             onSnapshot(getCompCollection(), (snapshot) => {
                 competitions = snapshot.docs.map(d => {
                     const data = d.data();
@@ -152,11 +161,11 @@
                 activeComp = competitions.find(c => c.isActive) || null;
                 render();
             }, (err) => {
-                console.error("Firestore Listen Error", err);
+                console.error("Firestore Listen Error:", err);
                 const textEl = document.getElementById('loading-text');
                 const subEl = document.getElementById('loading-subtext');
-                if(textEl) textEl.innerText = "데이터 연결 실패";
-                if(subEl) subEl.innerText = "권한 설정(Rules)을 확인해주세요.";
+                if(textEl) textEl.innerText = "권한 부족 (Permission Denied)";
+                if(subEl) subEl.innerText = "보안 규칙에 어긋나는 경로 접근입니다.";
             });
         }
 
@@ -284,7 +293,7 @@
                 else if (isLoser) cls += `bg-gray-50 text-gray-300 opacity-40`;
                 else cls += `bg-white text-slate-700 cursor-pointer hover:bg-orange-50 active:ring-2 active:ring-orange-300`;
 
-                const clickHandler = player && !match.winner 
+                const clickHandler = player && !match.winner && !isAdmin
                     ? `onclick="event.stopPropagation(); window.selectWinner(${rIdx}, ${mIdx}, '${player.replace(/'/g, "\\'")}')"` 
                     : '';
 
@@ -303,7 +312,7 @@
                         ${renderSlot(match.p1, 1)}
                         ${renderSlot(match.p2, 2)}
                     </div>
-                    ${match.winner ? `
+                    ${match.winner && !isAdmin ? `
                         <button onclick="event.stopPropagation(); window.undoWinner(${rIdx}, ${mIdx})" class="no-export absolute -right-2 -top-2 w-7 h-7 bg-white text-orange-500 rounded-full shadow-lg border-2 border-orange-100 flex items-center justify-center hover:bg-orange-50 z-20">
                             <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
                         </button>
@@ -364,7 +373,7 @@
         };
 
         window.selectWinner = async (rIdx, mIdx, player) => {
-            if (!activeComp) return;
+            if (!activeComp || !user) return;
             const newRounds = JSON.parse(JSON.stringify(activeComp.rounds));
             newRounds[rIdx][mIdx].winner = player;
             let finalWinner = activeComp.finalWinner;
@@ -373,11 +382,16 @@
                 if (mIdx % 2 === 0) newRounds[rIdx + 1][nextMIdx].p1 = player;
                 else newRounds[rIdx + 1][nextMIdx].p2 = player;
             } else finalWinner = player;
-            await updateDoc(getCompDoc(activeComp.id), { rounds: JSON.stringify(newRounds), finalWinner });
+            
+            try {
+                await updateDoc(getCompDoc(activeComp.id), { rounds: JSON.stringify(newRounds), finalWinner });
+            } catch(e) {
+                console.error("Winner Selection Error:", e);
+            }
         };
 
         window.undoWinner = async (rIdx, mIdx) => {
-            if (!activeComp) return;
+            if (!activeComp || !user) return;
             const winner = activeComp.rounds[rIdx][mIdx].winner;
             const newRounds = JSON.parse(JSON.stringify(activeComp.rounds));
             newRounds[rIdx][mIdx].winner = null;
@@ -390,13 +404,17 @@
                 else break;
                 cm = Math.floor(cm / 2); cr++;
             }
-            await updateDoc(getCompDoc(activeComp.id), { rounds: JSON.stringify(newRounds), finalWinner: activeComp.finalWinner === winner ? null : activeComp.finalWinner });
+            try {
+                await updateDoc(getCompDoc(activeComp.id), { rounds: JSON.stringify(newRounds), finalWinner: activeComp.finalWinner === winner ? null : activeComp.finalWinner });
+            } catch(e) {
+                console.error("Undo Error:", e);
+            }
         };
 
         window.createCompetition = () => {
             showModal("새 경기 생성 🏆", `<input type="text" id="comp-title-input" class="w-full p-4 bg-orange-50 rounded-xl border-2 border-transparent focus:border-orange-400 outline-none font-bold" placeholder="경기 제목 입력">`, async () => {
                 const title = document.getElementById('comp-title-input').value.trim();
-                if (!title) return false;
+                if (!title || !user) return false;
                 const id = "comp_" + Date.now();
                 await setDoc(getCompDoc(id), { title, date: new Date().toLocaleDateString(), isActive: false, participants: [], rounds: "[]", finalWinner: null });
                 return true;
@@ -404,6 +422,7 @@
         };
 
         window.toggleActive = async (id) => {
+            if (!user) return;
             const batch = competitions.map(c => updateDoc(getCompDoc(c.id), { isActive: c.id === id ? !c.isActive : false }));
             await Promise.all(batch);
         };
@@ -416,12 +435,19 @@
             `, async () => {
                 const textarea = document.getElementById('p-list');
                 const names = textarea.value.split('\n').map(n => n.trim()).filter(n => n);
-                if (names.length < 2) return false;
+                if (names.length < 2 || !user) return false;
                 const rounds = generateRounds(names);
                 await updateDoc(getCompDoc(id), { participants: names, rounds: JSON.stringify(rounds), finalWinner: null });
                 return true;
             });
         };
+
+        window.deleteComp = async (id) => {
+            if (!user) return;
+            if (confirm("정말로 이 대회를 삭제하시겠습니까?")) {
+                await deleteDoc(getCompDoc(id));
+            }
+        }
 
         window.fillSampleData = () => { document.getElementById('p-list').value = ["강백호", "서태웅", "채치수", "송태섭", "정대만", "권준호", "이한나"].join('\n'); };
 
@@ -445,7 +471,9 @@
             document.getElementById('modal-title').innerText = title;
             document.getElementById('modal-content').innerHTML = contentHtml;
             overlay.classList.remove('hidden');
-            document.getElementById('modal-confirm').onclick = async () => { if (await onConfirm()) overlay.classList.add('hidden'); };
+            document.getElementById('modal-confirm').onclick = async () => {
+                if (await onConfirm()) overlay.classList.add('hidden');
+            };
             document.getElementById('modal-cancel').onclick = () => overlay.classList.add('hidden');
             if (window.lucide) lucide.createIcons();
         }
@@ -489,7 +517,7 @@
 
         window.logoutAdmin = () => { isAdmin = false; render(); };
         
-        // Final Execution
+        // 초기화 실행
         initApp();
     </script>
 </body>
