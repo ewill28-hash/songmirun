@@ -34,14 +34,21 @@
                 <h1 class="text-sm md:text-base font-black text-slate-800 uppercase tracking-tighter">
                     <span class="text-orange-500">vs대진표</span> 🍊
                 </h1>
+
+                <button onclick="location.href='./ttr.html'"
+                            class="flex items-center gap-1.5 px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded-full transition-all transform active:scale-95 shadow-sm shadow-orange-200">
+                        <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+                        <span class="text-xs font-bold">참가화면</span>
+                    </button>
+                                    
             </div>
             <div id="header-actions" class="flex items-center gap-1">
                 <div id="auth-status" class="hidden text-[10px] font-bold text-orange-400 bg-orange-50 px-2 py-1 rounded-full uppercase">Connecting...</div>
                 <button id="admin-btn" class="p-1 text-slate-400 hover:text-orange-500 transition-colors">
-                    <i data-lucide="settings" class="w-5 h-5"></i>
+                    <i data-lucide="wrench" class="w-4 h-4"></i>
                 </button>
                 <button id="oper-btn" class="p-1 text-slate-400 hover:text-orange-500 transition-colors">
-                    <i data-lucide="settings" class="w-5 h-5"></i>
+                    <i data-lucide="settings" class="w-4 h-4"></i>
                 </button>
                                 
             </div>
@@ -475,13 +482,25 @@
             const comp = competitions.find(c => c.id === id);
             showModal("명단 수정", `
                 <div class="mb-2 text-right"><button onclick="window.fillSampleData()" class="text-[10px] bg-slate-200 px-2 py-1 rounded">예시 채우기</button></div>
-                <textarea id="p-list" class="w-full h-48 p-4 bg-slate-50 border rounded-xl outline-none text-sm font-semibold" placeholder="한 줄에 한 명씩 이름을 입력하세요">${comp.participants.join('\n')}</textarea>
+                <textarea id="p-list" class="w-full h-48 p-4 bg-slate-50 border rounded-xl outline-none text-sm font-semibold" placeholder="콤마, 줄바꿈, 세미콜론을 모두 구분자로 사용">${comp.participants.join('\n')}</textarea>
             `, async () => {
                 const textarea = document.getElementById('p-list');
-                const names = textarea.value.split('\n').map(n => n.trim()).filter(n => n);
+
+                // 정규표현식 /[,\n;]/ 를 사용하여 콤마, 줄바꿈, 세미콜론을 모두 구분자로 사용합니다.
+                const names = textarea.value
+                    .split(/[,\n;]/) 
+                    .map(n => n.trim()) // 앞뒤 공백 제거
+                    .filter(n => n);    // 빈 문자열 제거
+
                 if (names.length < 2 || !user) return false;
+
                 const rounds = generateRounds(names);
-                await updateDoc(getCompDoc(id), { participants: names, rounds: JSON.stringify(rounds), finalWinner: null });
+                await updateDoc(getCompDoc(id), { 
+                    participants: names, 
+                    rounds: JSON.stringify(rounds), 
+                    finalWinner: null 
+                });
+
                 return true;
             });
         };
