@@ -21,9 +21,10 @@
 </head>
 <body class="bg-orange-50 text-slate-900 font-sans min-h-screen">
 
+  <!-- 로딩 상태 표시 -->
   <div id="loading-state" class="fixed inset-0 flex items-center justify-center bg-orange-50 z-50">
     <div class="text-orange-500 font-medium flex items-center gap-2">
-      <i data-lucide="refresh-cw" class="spin"></i> 🧡 데이터 불러오는 중...
+      <i data-lucide="refresh-cw" class="spin"></i> 🧡 데이터 보안 확인 중...
     </div>
   </div>
 
@@ -36,7 +37,7 @@
           </div>
           <div class="space-y-1">
             <h1 class="text-3xl font-black tracking-tighter text-slate-500 flex items-center gap-2">
-              송/마/레 
+              송.마.레 
               <span class="text-2xl">-</span>              
               <span class="text-orange-600">송미런 마가렛 레이스</span>
             </h1>
@@ -61,7 +62,7 @@
 
   <div id="toast-container" class="fixed bottom-4 right-4 z-[60] flex flex-col gap-2"></div>
 
-  <!-- 레이스 정보 수정 모달 -->
+  <!-- 레이스 수정 모달 -->
   <div id="modal-edit-race" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden animate-fade-in">
     <div class="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-in-up">
       <div class="p-8">
@@ -72,22 +73,22 @@
         <div class="space-y-4">
           <div>
             <label class="block text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider ml-1">레이스 제목</label>
-            <input type="text" id="edit-race-title" class="w-full px-5 py-4 bg-orange-50/50 border border-orange-100 rounded-2xl focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 outline-none font-bold text-lg transition-all" />
+            <input type="text" id="edit-race-title" class="w-full px-5 py-4 bg-orange-50/50 border border-orange-100 rounded-2xl outline-none font-bold text-lg" />
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider ml-1">개최 날짜</label>
-            <input type="date" id="edit-race-date" class="w-full px-5 py-4 bg-orange-50/50 border border-orange-100 rounded-2xl focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 outline-none font-bold text-lg transition-all" />
+            <input type="date" id="edit-race-date" class="w-full px-5 py-4 bg-orange-50/50 border border-orange-100 rounded-2xl outline-none font-bold text-lg" />
           </div>
         </div>
       </div>
       <div class="flex p-4 gap-3 bg-slate-50">
-        <button onclick="app.closeModal('edit-race')" class="flex-1 px-6 py-4 text-slate-500 font-bold hover:bg-white rounded-2xl transition-all">취소</button>
-        <button id="btn-confirm-edit-race" class="flex-1 px-6 py-4 bg-orange-500 text-white font-bold hover:bg-orange-600 rounded-2xl shadow-lg shadow-orange-200 transition-all">수정 완료 ✨</button>
+        <button onclick="app.closeModal('edit-race')" class="flex-1 px-6 py-4 text-slate-500 font-bold">취소</button>
+        <button id="btn-confirm-edit-race" class="flex-1 px-6 py-4 bg-orange-500 text-white font-bold rounded-2xl shadow-lg">수정 완료 ✨</button>
       </div>
     </div>
   </div>
 
-  <!-- 참여자 정보 수정 모달 -->
+  <!-- 참여자 수정 모달 -->
   <div id="modal-edit-entry" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden animate-fade-in">
     <div class="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-in-up">
       <div class="p-8">
@@ -98,21 +99,22 @@
         <div class="space-y-4">
           <div>
             <label class="block text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider ml-1">닉네임</label>
-            <input type="text" id="edit-entry-nickname" class="w-full px-5 py-4 bg-orange-50/50 border border-orange-100 rounded-2xl focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 outline-none font-bold text-lg transition-all" />
+            <input type="text" id="edit-entry-nickname" class="w-full px-5 py-4 bg-orange-50/50 border border-orange-100 rounded-2xl outline-none font-bold text-lg" />
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider ml-1">목표 시간 (초)</label>
-            <input type="number" step="0.01" id="edit-entry-time" class="w-full px-5 py-4 bg-orange-50/50 border border-orange-100 rounded-2xl focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 outline-none font-bold text-lg transition-all" />
+            <input type="number" step="0.01" id="edit-entry-time" class="w-full px-5 py-4 bg-orange-50/50 border border-orange-100 rounded-2xl outline-none font-bold text-lg" />
           </div>
         </div>
       </div>
       <div class="flex p-4 gap-3 bg-slate-50">
-        <button onclick="app.closeModal('edit-entry')" class="flex-1 px-6 py-4 text-slate-500 font-bold hover:bg-white rounded-2xl transition-all">취소</button>
-        <button id="btn-confirm-edit-entry" class="flex-1 px-6 py-4 bg-orange-500 text-white font-bold hover:bg-orange-600 rounded-2xl shadow-lg shadow-orange-200 transition-all">수정 완료 ✨</button>
+        <button onclick="app.closeModal('edit-entry')" class="flex-1 px-6 py-4 text-slate-500 font-bold">취소</button>
+        <button id="btn-confirm-edit-entry" class="flex-1 px-6 py-4 bg-orange-500 text-white font-bold rounded-2xl shadow-lg">수정 완료 ✨</button>
       </div>
     </div>
   </div>
 
+  <!-- 취소 확인 모달 -->
   <div id="modal-cancel" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden animate-fade-in">
     <div class="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-in-up">
       <div class="p-8 text-center">
@@ -121,12 +123,13 @@
         <p class="text-slate-500">등록된 레이스 기록이 영구적으로 삭제됩니다.</p>
       </div>
       <div class="flex p-4 gap-3 bg-slate-50">
-        <button onclick="app.closeModal('cancel')" class="flex-1 px-6 py-4 text-slate-500 font-bold hover:bg-white rounded-2xl">아니오</button>
-        <button id="btn-confirm-cancel" class="flex-1 px-6 py-4 bg-rose-500 text-white font-bold hover:bg-rose-600 rounded-2xl shadow-lg shadow-rose-200 transition-all">네, 취소할게요</button>
+        <button onclick="app.closeModal('cancel')" class="flex-1 px-6 py-4 text-slate-500 font-bold">아니오</button>
+        <button id="btn-confirm-cancel" class="flex-1 px-6 py-4 bg-rose-500 text-white font-bold rounded-2xl shadow-lg">네, 취소할게요</button>
       </div>
     </div>
   </div>
 
+  <!-- 삭제 확인 모달 -->
   <div id="modal-delete-race" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden animate-fade-in">
     <div class="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-in-up">
       <div class="p-8 text-center">
@@ -136,21 +139,22 @@
       </div>
       <div class="flex p-4 gap-3 bg-slate-50">
         <button onclick="app.closeModal('delete-race')" class="flex-1 px-6 py-4 text-slate-500 font-bold">취소</button>
-        <button id="btn-confirm-delete-race" class="flex-1 px-6 py-4 bg-rose-600 text-white font-bold hover:bg-rose-700 rounded-2xl shadow-lg shadow-rose-200">삭제 확정</button>
+        <button id="btn-confirm-delete-race" class="flex-1 px-6 py-4 bg-rose-600 text-white font-bold rounded-2xl shadow-lg">삭제 확정</button>
       </div>
     </div>
   </div>
 
+  <!-- 시딩 모달 -->
   <div id="modal-seed" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden animate-fade-in">
     <div class="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-in-up">
       <div class="p-8">
         <h3 class="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-2">데이터 생성 🧪</h3>
-        <label class="block text-xs font-bold text-slate-400 mb-2 ml-1">몇 명의 데이터를 만들까요?</label>
-        <input type="number" id="seed-count-input" value="10" max="50" class="w-full px-5 py-4 bg-slate-50 border rounded-2xl outline-none focus:ring-4 focus:ring-indigo-500/10" />
+        <label class="block text-xs font-bold text-slate-400 mb-2 ml-1">생성할 데이터 개수</label>
+        <input type="number" id="seed-count-input" value="10" max="50" class="w-full px-5 py-4 bg-slate-50 border rounded-2xl outline-none" />
       </div>
       <div class="flex p-4 gap-3 bg-slate-50">
         <button onclick="app.closeModal('seed')" class="flex-1 px-6 py-4 text-slate-500 font-bold">취소</button>
-        <button id="btn-confirm-seed" class="flex-1 px-6 py-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg shadow-indigo-200">데이터 생성</button>
+        <button id="btn-confirm-seed" class="flex-1 px-6 py-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg">데이터 생성</button>
       </div>
     </div>
   </div>
@@ -158,9 +162,9 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, onSnapshot, writeBatch, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    // --- 환경 변수 처리 ---
+    // --- Firebase 설정 로드 ---
     const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
       apiKey: "AIzaSyD1pj4uw9LyUUTtWn_a28ABN0BC-0zkynY",
       authDomain: "tele-486906.firebaseapp.com",
@@ -175,6 +179,7 @@
     const auth = getAuth(firebaseApp);
     const db = getFirestore(firebaseApp);
 
+    // --- 상태 관리 ---
     const state = {
       user: null,
       isAdmin: false,
@@ -183,15 +188,16 @@
       entries: [],
       selectedRace: null,
       filterRaceId: 'all',
-      isSubmitting: false,
       targetRaceForSeed: null,
       targetRaceForDelete: null,
       targetRaceForEdit: null,
       targetEntryForEdit: null
     };
 
+    // --- 유틸리티 함수 ---
     const showToast = (msg, type = 'success') => {
-      const toast = document.createElement('div');
+      const toast = document.getElementById('toast-container') ? document.createElement('div') : null;
+      if (!toast) return;
       toast.className = `px-5 py-4 rounded-2xl shadow-2xl flex items-center gap-3 font-bold text-sm animate-in-up border ${type === 'error' ? 'bg-white border-rose-100 text-rose-600' : 'bg-white border-orange-100 text-orange-600'}`;
       toast.innerHTML = `<span class="flex items-center justify-center w-6 h-6 rounded-full ${type === 'error' ? 'bg-rose-100' : 'bg-orange-100'}">${type === 'error' ? '❌' : '✅'}</span> ${msg}`;
       document.getElementById('toast-container').appendChild(toast);
@@ -206,51 +212,58 @@
       lucide.createIcons();
     };
 
+    // --- 데이터 동기화 리스너 ---
     let unsubRaces, unsubEntries;
+    const startRealtimeSync = () => {
+      if (!auth.currentUser) return;
 
-    const setupListeners = () => {
-      if (!state.user) return;
       if (unsubRaces) unsubRaces();
       if (unsubEntries) unsubEntries();
 
-      unsubRaces = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'races'), (snap) => {
+      const racesRef = collection(db, 'artifacts', appId, 'public', 'data', 'races');
+      const entriesRef = collection(db, 'artifacts', appId, 'public', 'data', 'entries');
+
+      unsubRaces = onSnapshot(racesRef, (snap) => {
         state.races = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         render();
-      }, (error) => console.error("Races listener error:", error));
+      }, (error) => {
+        console.error("Races listener error:", error);
+      });
 
-      unsubEntries = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'entries'), (snap) => {
+      unsubEntries = onSnapshot(entriesRef, (snap) => {
         state.entries = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         render();
-      }, (error) => console.error("Entries listener error:", error));
+      }, (error) => {
+        console.error("Entries listener error:", error);
+      });
     };
 
-    const initAuth = async () => {
+    // --- 인증 프로세스 (필수) ---
+    const initializeAuth = async () => {
       try {
-        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-          try {
-            await signInWithCustomToken(auth, __initial_auth_token);
-          } catch (tokenErr) {
-            await signInAnonymously(auth);
-          }
+        const token = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        if (token) {
+          await signInWithCustomToken(auth, token);
         } else {
           await signInAnonymously(auth);
         }
       } catch (err) {
-        showToast("인증 초기화 실패", "error");
+        console.error("Auth init error:", err);
       }
     };
 
-    onAuthStateChanged(auth, (u) => {
-      state.user = u;
-      if (u) {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        state.user = user;
         document.getElementById('loading-state').classList.add('hidden');
         document.getElementById('main-app').classList.remove('hidden');
-        setupListeners();
+        startRealtimeSync();
       } else {
-        initAuth();
+        initializeAuth();
       }
     });
 
+    // --- UI 렌더링 ---
     const render = () => {
       const userView = document.getElementById('view-user');
       const authView = document.getElementById('view-admin-auth');
@@ -273,35 +286,42 @@
         container.innerHTML = `
           <div class="flex items-center gap-2 px-2 mb-4">
             <span class="text-xl">🏁</span>
-            <h2 class="text-lg font-black text-slate-700 uppercase tracking-tight">레이스 선택</h2>
+            <h2 class="text-lg font-black text-slate-700 uppercase">레이스 목록</h2>
           </div>
           <div class="grid gap-4">` + 
-          (activeRaces.length ? activeRaces.map(r => `
-            <button onclick="app.selectRace('${r.id}')" class="bg-white p-7 rounded-[2rem] border border-orange-100 flex justify-between items-center hover:scale-[1.02] hover:shadow-xl hover:shadow-orange-100/50 transition-all active:scale-95 text-left">
+          (activeRaces.length ? activeRaces.map(r => {
+            // 해당 레이스의 참가 인원수 계산
+            const count = state.entries.filter(e => e.raceId === r.id).length;
+            return `
+            <button onclick="app.selectRace('${r.id}')" class="bg-white p-7 rounded-[2rem] border border-orange-100 flex justify-between items-center hover:scale-[1.01] transition-all text-left group">
               <div>
-                <h3 class="font-black text-2xl text-slate-800 mb-1">${r.title}</h3>
+                <div class="flex items-center gap-3 mb-1">
+                  <h3 class="font-black text-2xl text-slate-800">${r.title}</h3>
+                  <span class="bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-xs font-black shadow-sm group-hover:bg-orange-500 group-hover:text-white transition-colors">
+                    ${count}명 참여 중
+                  </span>
+                </div>
                 <div class="flex items-center gap-1.5 text-slate-400 font-medium">
                   <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
                   <span>${r.date}</span>
                 </div>
               </div>
-              <div class="bg-orange-50 p-3 rounded-2xl text-orange-400 group-hover:bg-orange-500 group-hover:text-white transition-colors">
+              <div class="bg-orange-50 p-3 rounded-2xl text-orange-400 group-hover:bg-orange-100 group-hover:text-orange-600 transition-all">
                 <i data-lucide="chevron-right" class="w-6 h-6"></i>
               </div>
             </button>
-          `).join('') : `<div class="text-center py-16 bg-white rounded-[2.5rem] border-2 border-dashed border-orange-100 text-slate-400 font-bold">😴 아직 열린 레이스가 없습니다.</div>`) + `</div>`;
+          `;}).join('') : `<div class="text-center py-20 bg-white rounded-[2.5rem] border border-dashed border-orange-100 text-slate-400 font-bold">열린 레이스가 없습니다.</div>`) + `</div>`;
       } else {
-        const nickname = document.getElementById('input-nickname')?.value || "";
-        const entry = state.entries.find(e => e.raceId === state.selectedRace.id && e.nickname === nickname);
+        const nick = document.getElementById('input-nickname')?.value || "";
+        const entry = state.entries.find(e => e.raceId === state.selectedRace.id && e.nickname === nick);
         container.innerHTML = `
-          <div class="bg-white p-8 md:p-12 rounded-[3rem] shadow-2xl shadow-orange-100 border border-orange-50 animate-in-up overflow-hidden relative">
-            <div class="absolute top-0 right-0 p-8 opacity-10 pointer-events-none text-8xl">🏃</div>
-            <button onclick="app.back()" class="text-orange-500 flex items-center gap-1.5 font-bold mb-8 hover:bg-orange-50 w-fit px-4 py-2 rounded-xl transition-all">
-              <i data-lucide="arrow-left" class="w-4 h-4"></i> 뒤로가기
+          <div class="bg-white p-8 md:p-12 rounded-[3rem] shadow-2xl border border-orange-50 animate-in-up">
+            <button onclick="app.back()" class="text-orange-500 flex items-center gap-1.5 font-bold mb-8 hover:bg-orange-50 px-4 py-2 rounded-xl transition-all">
+              <i data-lucide="arrow-left" class="w-4 h-4"></i> 돌아가기
             </button>
             <div class="mb-10">
-              <h2 class="text-4xl font-black text-slate-800 mb-2 leading-tight">${state.selectedRace.title}</h2>
-              <p class="text-orange-400 font-bold flex items-center gap-1.5"><i data-lucide="map-pin" class="w-4 h-4"></i> ${state.selectedRace.date}</p>
+              <h2 class="text-3xl font-black text-slate-800 mb-2 leading-tight">${state.selectedRace.title}</h2>
+              <p class="text-orange-400 font-bold flex items-center gap-1.5"><i data-lucide="calendar" class="w-4 h-4"></i> ${state.selectedRace.date}</p>
             </div>
             
             ${entry ? `<div class="mb-8 p-5 bg-orange-50 rounded-2xl text-orange-700 text-sm font-bold flex items-center gap-3 border border-orange-100 animate-fade-in">
@@ -310,18 +330,18 @@
             </div>` : ''}
             
             <div class="space-y-5">
-              <div class="group">
-                <label class="block text-xs font-black text-slate-400 mb-2 ml-2 uppercase tracking-widest">사용자 닉네임</label>
-                <input type="text" id="input-nickname" value="${nickname}" placeholder="닉네임을 입력하세요" oninput="app.render()" class="w-full p-5 bg-orange-50/30 border border-orange-100 rounded-[1.5rem] outline-none focus:ring-4 ring-orange-500/10 focus:border-orange-500 font-bold text-lg transition-all" />
+              <div>
+                <label class="block text-xs font-black text-slate-400 mb-2 ml-2 uppercase">닉네임</label>
+                <input type="text" id="input-nickname" value="${nick}" placeholder="이름 또는 닉네임" oninput="app.render()" class="w-full p-5 bg-orange-50/30 border border-orange-100 rounded-[1.5rem] outline-none font-bold text-lg" />
               </div>
-              <div class="group">
-                <label class="block text-xs font-black text-slate-400 mb-2 ml-2 uppercase tracking-widest">목표 시간 (초)</label>
-                <input type="number" id="input-target-time" step="0.01" placeholder="00.00" class="w-full p-5 bg-orange-50/30 border border-orange-100 rounded-[1.5rem] outline-none focus:ring-4 ring-orange-500/10 focus:border-orange-500 font-mono font-black text-2xl transition-all" />
+              <div>
+                <label class="block text-xs font-black text-slate-400 mb-2 ml-2 uppercase">목표 시간 (초)</label>
+                <input type="number" id="input-target-time" step="0.01" placeholder="00.00" class="w-full p-5 bg-orange-50/30 border border-orange-100 rounded-[1.5rem] outline-none font-mono font-black text-2xl" />
               </div>
               <div class="flex flex-col sm:flex-row gap-3 pt-4">
-                ${entry ? `<button onclick="app.openCancel()" class="flex-1 py-5 bg-rose-50 text-rose-600 font-black rounded-2xl hover:bg-rose-100 transition-all">참여 취소 ✖</button>` : ''}
-                <button onclick="app.submitEntry()" id="btn-submit" class="flex-[2] py-5 bg-orange-500 text-white font-black rounded-2xl shadow-lg shadow-orange-200 hover:bg-orange-600 active:scale-95 transition-all">
-                  ${entry ? '정보 수정하기 ✨' : '레이스 참여하기 🚀'}
+                ${entry ? `<button onclick="app.openCancel()" class="flex-1 py-5 bg-rose-50 text-rose-600 font-black rounded-2xl">참여 취소</button>` : ''}
+                <button onclick="app.submitEntry()" id="btn-submit" class="flex-[2] py-5 bg-orange-500 text-white font-black rounded-2xl shadow-lg hover:bg-orange-600 transition-all">
+                  ${entry ? '정보 수정' : '참여 완료'}
                 </button>
               </div>
             </div>
@@ -332,15 +352,12 @@
 
     const renderAdminAuth = () => {
       document.getElementById('view-admin-auth').innerHTML = `
-        <div class="max-w-sm mx-auto bg-white p-10 rounded-[2.5rem] shadow-2xl border border-orange-50">
-          <div class="w-16 h-16 bg-orange-100 text-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <i data-lucide="shield-check" class="w-8 h-8"></i>
-          </div>
-          <h2 class="text-2xl font-black mb-6 text-center text-slate-800">관리자 인증 🔒</h2>
-          <input type="password" id="admin-pw" placeholder="Passcode" class="w-full p-5 bg-slate-50 border border-slate-100 rounded-2xl mb-6 outline-none focus:ring-4 ring-orange-500/10 text-center font-black text-2xl tracking-widest" />
+        <div class="max-w-sm mx-auto bg-white p-10 rounded-[2.5rem] shadow-2xl">
+          <h2 class="text-2xl font-black mb-6 text-center text-slate-800">관리자 패스코드 🔑</h2>
+          <input type="password" id="admin-pw" class="w-full p-5 bg-slate-50 border rounded-2xl mb-6 text-center font-black text-2xl tracking-widest outline-none" />
           <div class="flex gap-3">
-            <button onclick="app.setView('user')" class="flex-1 py-4 bg-slate-100 rounded-2xl font-bold text-slate-500">닫기</button>
-            <button onclick="app.login()" class="flex-1 py-4 bg-orange-500 text-white rounded-2xl font-bold shadow-lg shadow-orange-100">입장하기</button>
+            <button onclick="app.setView('user')" class="flex-1 py-4 bg-slate-100 rounded-2xl font-bold">닫기</button>
+            <button onclick="app.login()" class="flex-1 py-4 bg-orange-500 text-white rounded-2xl font-bold">확인</button>
           </div>
         </div>
       `;
@@ -351,90 +368,59 @@
       const filtered = state.filterRaceId === 'all' ? state.entries : state.entries.filter(e => e.raceId === state.filterRaceId);
       
       document.getElementById('view-admin-panel').innerHTML = `
-        <div class="flex justify-between items-center bg-white p-6 rounded-3xl border border-orange-100">
-          <h2 class="text-2xl font-black text-slate-800 flex items-center gap-2">🛠 관리자 모드</h2>
-          <button onclick="app.logout()" class="px-4 py-2 bg-rose-50 text-rose-600 rounded-xl text-sm font-bold">로그아웃 👋</button>
+        <div class="flex justify-between items-center bg-white p-6 rounded-3xl border">
+          <h2 class="text-2xl font-black text-slate-800">관리자 대시보드</h2>
+          <button onclick="app.logout()" class="px-4 py-2 bg-rose-50 text-rose-600 rounded-xl font-bold">종료</button>
         </div>
 
-        <div class="bg-white p-8 rounded-[2.5rem] border border-orange-100 shadow-sm space-y-6">
-          <h3 class="font-black text-lg flex items-center gap-2 text-slate-700 uppercase tracking-tight">➕ 새로운 레이스 개설</h3>
+        <div class="bg-white p-8 rounded-[2.5rem] border space-y-6">
+          <h3 class="font-black text-lg text-slate-700">새 레이스 만들기</h3>
           <div class="flex flex-col md:flex-row gap-3">
-            <input id="new-r-t" placeholder="레이스 제목" class="flex-1 px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-4 ring-orange-500/10 font-bold" />
-            <input type="date" id="new-r-d" value="${today}" class="px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold" />
-            <button onclick="app.addRace()" class="px-8 py-4 bg-orange-500 text-white font-black rounded-2xl shadow-lg shadow-orange-100 whitespace-nowrap">개설하기</button>
+            <input id="new-r-t" placeholder="레이스명" class="flex-1 px-5 py-4 bg-slate-50 border rounded-2xl font-bold" />
+            <input type="date" id="new-r-d" value="${today}" class="px-5 py-4 bg-slate-50 border rounded-2xl font-bold" />
+            <button onclick="app.addRace()" class="px-8 py-4 bg-orange-500 text-white font-black rounded-2xl shadow-lg">생성</button>
           </div>
         </div>
 
         <div class="grid gap-3">${state.races.map(r => `
-          <div class="bg-white p-5 border border-orange-50 rounded-[1.5rem] flex flex-wrap justify-between items-center shadow-sm hover:shadow-md transition-all">
+          <div class="bg-white p-5 border rounded-[1.5rem] flex flex-wrap justify-between items-center shadow-sm">
             <div>
               <p class="font-black text-slate-800 text-lg">${r.title}</p>
-              <p class="text-xs text-slate-400 font-bold uppercase tracking-widest">${r.date}</p>
+              <p class="text-xs text-slate-400 font-bold">${r.date}</p>
             </div>
             <div class="flex items-center gap-2 mt-2 sm:mt-0">
-              <button title="레이스 정보 수정" onclick="app.openEditRace('${r.id}')" class="w-10 h-10 flex items-center justify-center text-orange-500 bg-orange-50 rounded-xl hover:bg-orange-100 transition-colors">
-                <i data-lucide="edit" class="w-5 h-5"></i>
-              </button>
-              <button title="샘플 생성" onclick="app.openSeed('${r.id}')" class="w-10 h-10 flex items-center justify-center text-indigo-500 bg-indigo-50 rounded-xl hover:bg-indigo-100 transition-colors">
-                <i data-lucide="beaker" class="w-5 h-5"></i>
-              </button>
-              <button onclick="app.toggleRace('${r.id}',${r.isActive})" class="px-5 py-2.5 rounded-xl text-xs font-black tracking-tight uppercase transition-all ${r.isActive ? 'bg-orange-500 text-white shadow-lg shadow-orange-100' : 'bg-slate-100 text-slate-400'}">
-                ${r.isActive ? 'ON 활성' : 'OFF 비활성'}
-              </button>
-              <button onclick="app.openDelRace('${r.id}')" class="w-10 h-10 flex items-center justify-center text-rose-400 bg-rose-50 rounded-xl hover:bg-rose-100 transition-colors">
-                <i data-lucide="trash-2" class="w-5 h-5"></i>
-              </button>
+              <button onclick="app.openEditRace('${r.id}')" class="w-10 h-10 flex items-center justify-center text-orange-500 bg-orange-50 rounded-xl"><i data-lucide="edit" class="w-5 h-5"></i></button>
+              <button onclick="app.openSeed('${r.id}')" class="w-10 h-10 flex items-center justify-center text-indigo-500 bg-indigo-50 rounded-xl"><i data-lucide="beaker" class="w-5 h-5"></i></button>
+              <button onclick="app.toggleRace('${r.id}',${r.isActive})" class="px-5 py-2.5 rounded-xl text-xs font-black ${r.isActive ? 'bg-orange-500 text-white' : 'bg-slate-100 text-slate-400'}">${r.isActive ? 'ON' : 'OFF'}</button>
+              <button onclick="app.openDelRace('${r.id}')" class="w-10 h-10 flex items-center justify-center text-rose-400 bg-rose-50 rounded-xl"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
             </div>
           </div>`).join('')}
         </div>
 
-        <div class="bg-white rounded-[2.5rem] border border-orange-100 shadow-xl overflow-hidden">
-          <div class="p-6 md:p-8 bg-orange-50/50 border-b border-orange-100 flex flex-wrap justify-between items-center gap-4">
-            <div class="flex flex-wrap items-center gap-4">
-              <h3 class="font-black text-xl text-slate-800">참여자 관리 📋</h3>
-              <div class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-orange-100 shadow-sm">
-                <span class="text-xs font-black text-orange-500">${filtered.length}명</span>
-                <select onchange="app.setFilter(this.value)" class="text-xs font-bold text-slate-600 bg-transparent outline-none">
-                  <option value="all">전체 레이스</option>
-                  ${state.races.map(r => `<option value="${r.id}" ${state.filterRaceId === r.id ? 'selected' : ''}>${r.title}</option>`).join('')}
-                </select>
-              </div>
+        <div class="bg-white rounded-[2.5rem] border overflow-hidden">
+          <div class="p-6 md:p-8 bg-slate-50/50 border-b flex flex-wrap justify-between items-center gap-4">
+            <h3 class="font-black text-xl">참여자 데이터</h3>
+            <div class="flex gap-2">
+              <button onclick="app.downloadCSV()" class="px-4 py-2 bg-slate-200 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-300 transition-colors">CSV 다운로드</button>
+              <select onchange="app.setFilter(this.value)" class="text-xs font-bold border px-3 py-1.5 rounded-xl outline-none">
+                <option value="all">모든 레이스</option>
+                ${state.races.map(r => `<option value="${r.id}" ${state.filterRaceId === r.id ? 'selected' : ''}>${r.title}</option>`).join('')}
+              </select>
             </div>
-            <button onclick="app.downloadCSV()" class="flex items-center gap-2 px-6 py-3.5 bg-slate-800 text-white text-sm font-black rounded-[1.25rem] hover:bg-slate-900 transition-all shadow-lg">
-              <i data-lucide="file-down" class="w-4 h-4 text-orange-400"></i> CSV 엑셀 다운로드
-            </button>
           </div>
           <div class="overflow-x-auto">
             <table class="w-full text-sm">
-              <thead>
-                <tr class="bg-slate-50 text-[11px] text-slate-400 font-black uppercase tracking-widest border-b border-orange-50">
-                  <th class="p-6 text-left">레이스</th>
-                  <th class="p-6 text-left">닉네임</th>
-                  <th class="p-6 text-left">목표시간</th>
-                  <th class="p-6 text-right">도구</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-orange-50">
+              <tbody class="divide-y">
                 ${filtered.length ? filtered.map(e => `
-                <tr class="hover:bg-orange-50/30 transition-colors">
-                  <td class="p-6">
-                    <span class="px-2 py-1 bg-white border border-orange-100 rounded text-[10px] font-bold text-orange-500">${e.raceTitle || 'Unknown'}</span>
-                  </td>
+                <tr class="hover:bg-slate-50/50">
+                  <td class="p-6 text-xs text-orange-500 font-bold">${e.raceTitle || '-'}</td>
                   <td class="p-6 font-black text-slate-700">${e.nickname}</td>
-                  <td class="p-6">
-                    <span class="text-orange-600 font-mono font-black text-lg">${e.targetTime}</span>
-                    <span class="text-[10px] text-slate-300 font-bold uppercase ml-0.5">sec</span>
-                  </td>
+                  <td class="p-6 font-mono font-black text-lg text-orange-600">${e.targetTime}s</td>
                   <td class="p-6 text-right">
-                    <div class="flex justify-end gap-2">
-                      <button onclick="app.openEditEntry('${e.id}')" class="w-9 h-9 flex items-center justify-center text-slate-300 hover:text-orange-500 hover:bg-orange-50 rounded-xl transition-all"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
-                      <button onclick="app.delEntry('${e.id}')" class="w-9 h-9 flex items-center justify-center text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                    </div>
+                    <button onclick="app.openEditEntry('${e.id}')" class="text-slate-300 hover:text-orange-500 mx-2"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
+                    <button onclick="app.delEntry('${e.id}')" class="text-slate-300 hover:text-rose-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                   </td>
-                </tr>`).join('') : `
-                <tr>
-                  <td colspan="4" class="p-20 text-center text-slate-300 font-bold italic">텅 비어있네요.. 👻</td>
-                </tr>`}
+                </tr>`).join('') : `<tr><td colspan="4" class="p-10 text-center text-slate-300">데이터가 없습니다.</td></tr>`}
               </tbody>
             </table>
           </div>
@@ -442,82 +428,84 @@
       `;
     };
 
+    // --- 이벤트 핸들러 ---
     window.app = {
       render: () => render(),
       setView: (v) => { state.view = v; render(); },
       back: () => { state.selectedRace = null; render(); },
       selectRace: (id) => { state.selectedRace = state.races.find(r => r.id === id); render(); },
-      login: () => { if (document.getElementById('admin-pw').value === '33') { state.isAdmin = true; app.setView('admin_panel'); } else showToast("비밀번호가 틀렸습니다. 다시 확인해주세요!", "error"); },
+      login: () => { if (document.getElementById('admin-pw').value === '33') { state.isAdmin = true; app.setView('admin_panel'); } else showToast("틀린 코드입니다.", "error"); },
       logout: () => { state.isAdmin = false; app.setView('user'); },
       setFilter: (id) => { state.filterRaceId = id; render(); },
 
       downloadCSV: () => {
-        const filtered = state.filterRaceId === 'all' ? state.entries : state.entries.filter(e => e.raceId === state.filterRaceId);
-        if (!filtered.length) return showToast("다운로드할 데이터가 없습니다.", "error");
+          // 1. 데이터 필터링
+          const filtered = state.filterRaceId === 'all' 
+              ? state.entries 
+              : state.entries.filter(e => e.raceId === state.filterRaceId);
 
-        let csvContent = "\uFEFF";
-        csvContent += "레이스,닉네임,목표시간(초),닉네임(목표시간),참여일시\n";
-        
-        filtered.forEach(e => {
-          const combined = `${e.nickname}(${e.targetTime})`;
-          csvContent += `"${e.raceTitle}","${e.nickname}","${e.targetTime}","${combined}","${e.createdAt || ''}"\n`;
-        });
+          if (!filtered.length) return showToast("데이터가 없습니다.", "error");
 
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        const filename = state.filterRaceId === 'all' ? '전체_레이스_참여자.csv' : `${state.races.find(r=>r.id===state.filterRaceId)?.title}_참여자.csv`;
-        
-        link.setAttribute("href", url);
-        link.setAttribute("download", filename);
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        showToast("CSV 파일이 생성되었습니다! 📁");
+          // 2. 동적 파일명 설정
+          const filename = state.filterRaceId === 'all' 
+              ? '전체_레이스_참여자.csv' 
+              : `${state.races.find(r => r.id === state.filterRaceId)?.title || '레이스'}_참여자.csv`;
+
+          // 3. CSV 헤더 및 내용 생성
+          // 헤더 순서: 레이스, 닉네임, 닉네임(목표시간), 목표시간, 참여일시 (코드 순서에 맞게 조정)
+          let csv = "\uFEFF레이스,닉네임,닉네임(목표시간),목표시간,참여일시\n";
+          
+          filtered.forEach(e => {
+              // e.timestamp 등을 활용해 날짜 형식 변환 (참여일시용)
+              const dateStr = e.createdAt ? new Date(e.createdAt).toLocaleString() : '';
+              const combined = `${e.nickname}(${e.targetTime})`; 
+              
+              // 데이터 한 줄 추가
+              csv += `"${e.raceTitle}","${e.nickname}","${combined}","${e.targetTime}","${dateStr}"\n`;
+          });
+
+          // 4. 파일 다운로드 실행
+          const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          link.download = filename; // 동적으로 생성된 파일명 적용
+          link.click();
+          
+          // 메모리 해제
+          URL.revokeObjectURL(link.href);
       },
-
       submitEntry: async () => {
-        if (!state.user) return;
+        if (!auth.currentUser) return;
         const nick = document.getElementById('input-nickname').value.trim();
-        const timeInput = document.getElementById('input-target-time').value;
-        const time = parseFloat(timeInput);
-        if (!nick || isNaN(time) || time <= 0) return showToast("닉네임과 목표 시간을 확인해주세요.", "error");
+        const time = parseFloat(document.getElementById('input-target-time').value);
+        if (!nick || isNaN(time)) return showToast("정확한 값을 입력하세요.", "error");
         
         const existing = state.entries.find(e => e.raceId === state.selectedRace.id && e.nickname === nick);
-
         toggleBtnLoading('btn-submit', true);
         try {
           if (existing) {
             await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'entries', existing.id), { targetTime: time });
           } else {
             await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'entries'), { 
-              raceId: state.selectedRace.id, 
-              raceTitle: state.selectedRace.title, 
-              nickname: nick, 
-              targetTime: time, 
-              createdAt: new Date().toLocaleString('ko-KR')
+              raceId: state.selectedRace.id, raceTitle: state.selectedRace.title, nickname: nick, targetTime: time, createdAt: new Date().toISOString()
             });
           }
-          showToast("참여 완료! 레이스에서 만나요 🏁");
+          showToast("참여 성공!");
           app.back();
-        } catch(e) { showToast("저장 중에 문제가 발생했어요.", "error"); } finally { toggleBtnLoading('btn-submit', false, existing ? '정보 수정하기 ✨' : '레이스 참여하기 🚀'); }
+        } catch(e) { showToast("저장 권한 부족", "error"); } finally { toggleBtnLoading('btn-submit', false, "참여 완료"); }
       },
 
       addRace: async () => {
-        if (!state.user) return;
+        if (!auth.currentUser) return;
         const t = document.getElementById('new-r-t').value.trim();
         const d = document.getElementById('new-r-d').value;
-        if (!t || !d) return showToast("모든 빈칸을 채워주세요.", "error");
+        if (!t || !d) return showToast("내용을 입력하세요.", "error");
         await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'races'), { title: t, date: d, isActive: true });
-        showToast("새로운 레이스가 시작되었습니다! ✨");
+        showToast("레이스 생성됨");
         document.getElementById('new-r-t').value = "";
       },
 
-      toggleRace: async (id, s) => { 
-        if (!state.user) return;
-        await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'races', id), { isActive: !s }); 
-      },
+      toggleRace: async (id, s) => { if (!auth.currentUser) return; await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'races', id), { isActive: !s }); },
 
       openEditRace: (id) => {
         const r = state.races.find(race => race.id === id);
@@ -530,44 +518,25 @@
       },
 
       confirmEditRace: async () => {
-        if (!state.user || !state.targetRaceForEdit) return;
+        if (!auth.currentUser || !state.targetRaceForEdit) return;
         const newTitle = document.getElementById('edit-race-title').value.trim();
         const newDate = document.getElementById('edit-race-date').value;
-
-        if (!newTitle || !newDate) return showToast("정보를 모두 입력해주세요.", "error");
-
         toggleBtnLoading('btn-confirm-edit-race', true);
         try {
           const batch = writeBatch(db);
-          // 1. 레이스 정보 업데이트
-          batch.update(doc(db, 'artifacts', appId, 'public', 'data', 'races', state.targetRaceForEdit.id), {
-            title: newTitle,
-            date: newDate
-          });
-
-          // 2. 해당 레이스에 속한 모든 엔트리의 raceTitle 업데이트 (선택 사항이지만 데이터 일관성 위해 권장)
+          batch.update(doc(db, 'artifacts', appId, 'public', 'data', 'races', state.targetRaceForEdit.id), { title: newTitle, date: newDate });
           state.entries.filter(e => e.raceId === state.targetRaceForEdit.id).forEach(e => {
-            batch.update(doc(db, 'artifacts', appId, 'public', 'data', 'entries', e.id), {
-              raceTitle: newTitle
-            });
+            batch.update(doc(db, 'artifacts', appId, 'public', 'data', 'entries', e.id), { raceTitle: newTitle });
           });
-
           await batch.commit();
-          showToast("레이스 정보가 수정되었습니다.");
+          showToast("수정되었습니다.");
           app.closeModal('edit-race');
-        } catch(e) {
-          showToast("수정에 실패했습니다.", "error");
-        } finally {
-          toggleBtnLoading('btn-confirm-edit-race', false, "수정 완료 ✨");
-        }
+        } catch(e) { showToast("수정 권한 부족", "error"); } finally { toggleBtnLoading('btn-confirm-edit-race', false, "수정 완료"); }
       },
 
       delEntry: async (id) => { 
-        if (!state.user) return;
-        if(confirm("이 기록을 삭제하시겠습니까?")) {
-          await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'entries', id));
-          showToast("참여 기록이 삭제되었습니다.");
-        }
+        if (!auth.currentUser) return;
+        if(confirm("기록을 삭제할까요?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'entries', id));
       },
 
       openEditEntry: (id) => {
@@ -581,29 +550,25 @@
       },
 
       confirmEditEntry: async () => {
-        if (!state.user || !state.targetEntryForEdit) return;
+        if (!auth.currentUser || !state.targetEntryForEdit) return;
         const n = document.getElementById('edit-entry-nickname').value.trim();
         const t = parseFloat(document.getElementById('edit-entry-time').value);
-        if (!n || isNaN(t)) return showToast("입력값을 확인해주세요.", "error");
-
         toggleBtnLoading('btn-confirm-edit-entry', true);
         try {
-          await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'entries', state.targetEntryForEdit.id), { 
-            nickname: n, 
-            targetTime: t 
-          });
-          showToast("정보가 업데이트되었습니다.");
+          await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'entries', state.targetEntryForEdit.id), { nickname: n, targetTime: t });
+          showToast("참여자 수정 완료");
           app.closeModal('edit-entry');
-        } catch(e) { showToast("수정 실패.. 다시 시도해주세요.", "error"); } finally { toggleBtnLoading('btn-confirm-edit-entry', false, "수정 완료 ✨"); }
+        } catch(e) { showToast("수정 권한 부족", "error"); } finally { toggleBtnLoading('btn-confirm-edit-entry', false, "수정 완료"); }
       },
 
       openDelRace: (id) => { 
         state.targetRaceForDelete = state.races.find(r => r.id === id); 
-        document.getElementById('modal-delete-race-name').innerText = "🧨 레이스명: " + state.targetRaceForDelete?.title; 
+        document.getElementById('modal-delete-race-name').innerText = state.targetRaceForDelete?.title; 
         app.showModal('delete-race'); 
       },
+
       confirmDelRace: async () => {
-        if (!state.user || !state.targetRaceForDelete) return;
+        if (!auth.currentUser || !state.targetRaceForDelete) return;
         const batch = writeBatch(db);
         state.entries.filter(e => e.raceId === state.targetRaceForDelete.id).forEach(e => {
             batch.delete(doc(db, 'artifacts', appId, 'public', 'data', 'entries', e.id));
@@ -611,48 +576,37 @@
         batch.delete(doc(db, 'artifacts', appId, 'public', 'data', 'races', state.targetRaceForDelete.id));
         await batch.commit();
         app.closeModal('delete-race');
-        showToast("레이스가 폭파(?)되었습니다.");
+        showToast("삭제 완료");
       },
 
       openSeed: (id) => { state.targetRaceForSeed = state.races.find(r => r.id === id); app.showModal('seed'); },
       confirmSeed: async () => {
-        if (!state.user || !state.targetRaceForSeed) return;
+        if (!auth.currentUser || !state.targetRaceForSeed) return;
         const count = parseInt(document.getElementById('seed-count-input').value);
         const batch = writeBatch(db);
-        const emojis = ["🏃", "👟", "🔥", "💨", "🦁", "🐼", "🚀", "⚡"];
         for (let i = 0; i < count; i++) {
-          const emoji = emojis[Math.floor(Math.random() * emojis.length)];
           const ref = doc(collection(db, 'artifacts', appId, 'public', 'data', 'entries'));
           batch.set(ref, { 
-            raceId: state.targetRaceForSeed.id, 
-            raceTitle: state.targetRaceForSeed.title, 
-            nickname: emoji + " 러너_" + Math.floor(Math.random()*9000 + 1000), 
-            targetTime: parseFloat((Math.random()*10+15).toFixed(2)), 
-            createdAt: new Date().toLocaleString('ko-KR'),
-            isSample: true 
+            raceId: state.targetRaceForSeed.id, raceTitle: state.targetRaceForSeed.title, 
+            nickname: "Tester_" + Math.floor(Math.random()*1000), targetTime: parseFloat((Math.random()*10+20).toFixed(2)), 
+            createdAt: new Date().toISOString()
           });
         }
         await batch.commit();
         app.closeModal('seed');
-        showToast("실험용 데이터가 생성되었습니다 🧪");
+        showToast("시드 데이터 생성");
       },
 
       openCancel: () => app.showModal('cancel'),
       confirmCancel: async () => {
-        if (!state.user) return;
+        if (!auth.currentUser) return;
         const nick = document.getElementById('input-nickname').value.trim();
         const entry = state.entries.find(e => e.raceId === state.selectedRace.id && e.nickname === nick);
         if(entry) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'entries', entry.id)); 
-        app.closeModal('cancel'); 
-        app.back(); 
-        showToast("참여가 취소되었습니다.");
+        app.closeModal('cancel'); app.back(); showToast("취소됨");
       },
 
-      showModal: (m) => {
-        const modal = document.getElementById(`modal-${m}`);
-        modal.classList.remove('hidden');
-        lucide.createIcons();
-      },
+      showModal: (m) => document.getElementById(`modal-${m}`).classList.remove('hidden'),
       closeModal: (m) => document.getElementById(`modal-${m}`).classList.add('hidden')
     };
 
@@ -662,7 +616,6 @@
     document.getElementById('btn-confirm-cancel').onclick = () => app.confirmCancel();
     document.getElementById('btn-confirm-delete-race').onclick = () => app.confirmDelRace();
     document.getElementById('btn-confirm-seed').onclick = () => app.confirmSeed();
-
   </script>
 </body>
 </html>
