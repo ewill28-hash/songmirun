@@ -398,7 +398,7 @@ const renderUser = () => {
 
     if (nick && state.hasChecked) {
         statusMessage = `
-            <div class="mb-4 p-3 ${entry ? 'bg-orange-50 text-orange-700' : 'bg-blue-50 text-blue-700'} rounded-2xl text-sm font-bold flex items-center gap-3 border ${entry ? 'border-orange-100' : 'border-blue-100'} animate-fade-in">
+            <div class="mb-2 p-1 ${entry ? 'bg-orange-50 text-orange-700' : 'bg-blue-50 text-blue-700'} rounded-2xl text-sm font-bold flex items-center gap-2 border ${entry ? 'border-orange-100' : 'border-blue-100'} animate-fade-in">
                 <span class="text-lg">${entry ? '⚡' : '✨'}</span>
                 <span>${entry ? `이미 <strong>${entry.targetTime}초</strong>로 참여 중이에요. 수정할까요?` : '목표 시간을 입력 후 참여하기!'}</span>
             </div>`;
