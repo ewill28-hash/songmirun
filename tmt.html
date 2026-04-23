@@ -404,6 +404,8 @@
             link.click();
         };
 
+
+
 window.downloadImage = async () => {
     const container = document.getElementById('export-target'); 
     
@@ -420,23 +422,33 @@ window.downloadImage = async () => {
     noExportElements.forEach(el => el.style.display = 'none');
 
     try {
+        // 1. 전체 크기 계산 시 여유 공간 정의
+        const extraWidth = 500; 
+        const fullWidth = container.scrollWidth + extraWidth; // 실제 너비에 500px 추가
+        const fullHeight = container.scrollHeight;
+
         const canvas = await html2canvas(container, {
             backgroundColor: "#ffffff",
             scale: 2, 
             useCORS: true, 
             logging: false,
-            // [핵심 2] 캔버스와 가상 윈도우의 크기를 실제 콘텐츠 크기로 강제 지정
+            
+            // [보완] 캡처할 캔버스의 가로 크기를 500px 늘림
             width: fullWidth,
             height: fullHeight,
             windowWidth: fullWidth,
             windowHeight: fullHeight,
+            
             onclone: (clonedDoc) => {
                 const clonedContainer = clonedDoc.getElementById('export-target');
                 if(clonedContainer) {
-                    // [핵심 3] 복제된 DOM의 크기도 강제로 펼쳐줌
+                    // [보완] 복제된 요소의 너비도 늘려줘야 배경이 잘리지 않습니다.
                     clonedContainer.style.width = fullWidth + 'px';
                     clonedContainer.style.height = fullHeight + 'px';
-                    clonedContainer.style.overflow = 'visible'; // 스크롤바 숨기고 전체 표시
+                    clonedContainer.style.overflow = 'visible';
+                    
+                    // 만약 오른쪽이 아닌 좌우로 여백을 나누고 싶다면 아래처럼 패딩을 줄 수도 있습니다.
+                    // clonedContainer.style.paddingRight = extraWidth + 'px';
                 }
 
                 const style = clonedDoc.createElement('style');
@@ -449,7 +461,6 @@ window.downloadImage = async () => {
                 clonedDoc.head.appendChild(style);
             }
         });
-
         const link = document.createElement('a');
         link.download = `대진표_${new Date().getTime()}.png`;
         link.href = canvas.toDataURL("image/png");
@@ -476,41 +487,47 @@ window.captureScreenshot = async () => {
 
     await document.fonts.ready;
 
-    // [핵심 1] 전체 크기 계산
-    const fullWidth = target.scrollWidth;
-    const fullHeight = target.scrollHeight;
-
     setTimeout(() => {
+        // 1. 전체 크기 계산 시 여유 공간 정의
+        const extraWidth = 500; 
+        const fullWidth = target.scrollWidth + extraWidth; // 실제 너비에 500px 추가
+        const fullHeight = target.scrollHeight;
+
         html2canvas(target, {
             backgroundColor: "#fffaf5",
             scale: 2,
             useCORS: true,
             logging: false,
-            // [핵심 2] 캔버스 및 가상 윈도우 크기 지정
+            
+            // [보완] 캡처할 캔버스의 가로 크기를 500px 늘림
             width: fullWidth,
             height: fullHeight,
             windowWidth: fullWidth,
             windowHeight: fullHeight,
+            
             onclone: (clonedDoc) => {
                 const ct = clonedDoc.getElementById('export-target');
                 if(ct) {
-                    // 패딩 여유분을 추가할 경우 전체 높이/너비에도 패딩만큼 더해줘야 안 잘림
-                    ct.style.padding = "40px";
-                    ct.style.width = (fullWidth + 80) + 'px';  // 좌우 패딩 40px * 2
-                    ct.style.height = (fullHeight + 80) + 'px'; // 상하 패딩 40px * 2
+                    // [보완] 복제된 요소의 너비도 늘려줘야 배경이 잘리지 않습니다.
+                    ct.style.width = fullWidth + 'px';
+                    ct.style.height = fullHeight + 'px';
                     ct.style.overflow = 'visible';
+                    
+                    // 만약 오른쪽이 아닌 좌우로 여백을 나누고 싶다면 아래처럼 패딩을 줄 수도 있습니다.
+                    // ct.style.paddingRight = extraWidth + 'px';
                 }
 
                 const style = clonedDoc.createElement('style');
                 style.innerHTML = `
                     #export-target * {
-                        line-height: 1.2 !important;
+                        line-height: 1.2 !important; 
                         overflow: visible !important;
                     }
                 `;
                 clonedDoc.head.appendChild(style);
             }
         }).then(canvas => {
+
             const link = document.createElement('a');
             link.download = `${activeComp.title || '대진표'}_대진표.png`;
             link.href = canvas.toDataURL('image/png', 1.0);
@@ -523,6 +540,7 @@ window.captureScreenshot = async () => {
         });
     }, 500); 
 };
+
 
         window.selectWinner = async (rIdx, mIdx, player) => {
             if (!isOper || !activeComp || !user) return;
