@@ -1,0 +1,802 @@
+
+
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TTR</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @keyframes slideInUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .animate-in-up { animation: slideInUp 0.3s ease-out forwards; }
+    .animate-fade-in { animation: fadeIn 0.2s ease-out forwards; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spin { animation: spin 1s linear infinite; }
+    
+    .bg-orange-gradient {
+      background: linear-gradient(135deg, #ffedd5 0%, #fffaf5 100%);
+    }
+  </style>
+</head>
+<body class="bg-orange-50 text-slate-900 font-sans min-h-screen">
+
+  <!-- 로딩 상태 표시 -->
+  <div id="loading-state" class="fixed inset-0 flex items-center justify-center bg-orange-50 z-50">
+    <div class="text-orange-500 font-black flex items-center gap-2 text-lg">
+      <i data-lucide="refresh-cw" class="spin w-5 h-5"></i>
+      <span>🏁 레이스 목록 입장 중 🏃‍♂️🏃‍♂️🏃‍♂️</span>
+    </div>
+  </div>
+
+  <div id="main-app" class="p-4 md:p-8 hidden">
+    <div class="max-w-4xl mx-auto">
+      <header class="flex justify-between items-center mb-8 bg-white p-6 rounded-3xl shadow-sm border border-orange-100">
+        <div class="flex items-center gap-3">
+          <div class="bg-orange-500 p-2.5 rounded-2xl text-white shadow-orange-200 shadow-lg">
+            <i data-lucide="timer" class="w-6 h-6"></i>
+          </div>
+          <div class="space-y-1 text-center sm:text-left">
+            <div class="text-xl font-extrabold tracking-tight text-orange-600">
+              송미런 마가렛 레이스
+            </div>
+            <p class="text-sm font-bold tracking-tight text-slate-400 flex items-center justify-center sm:justify-start gap-1">
+              <span class="inline-block animate-pulse text-blue-500">⚡</span>
+              Target Time Race 🌼
+            </p>
+          </div>
+
+        </div>
+        <button id="admin-toggle-btn" class="p-3 rounded-2xl bg-orange-50 text-orange-600 hover:bg-orange-100 transition-all border border-orange-100">
+          <i data-lucide="settings" class="w-5 h-5"></i>
+        </button>
+      </header>
+
+      <div id="view-user" class="space-y-6"></div>
+      <div id="view-admin-auth" class="hidden"></div>
+      <div id="view-admin-panel" class="hidden space-y-8 pb-20 animate-fade-in"></div>
+    </div>
+  </div>
+
+  <div id="toast-container" class="fixed bottom-4 right-4 z-[60] flex flex-col gap-2"></div>
+
+  <!-- 레이스 수정 모달 -->
+  <div id="modal-edit-race" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden animate-fade-in">
+    <div class="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-in-up">
+      <div class="p-8">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="bg-orange-100 text-orange-600 p-2 rounded-xl"><i data-lucide="edit" class="w-5 h-5"></i></div>
+          <h3 class="text-xl font-bold text-slate-900">레이스 정보 수정 🏁</h3>
+        </div>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider ml-1">레이스 제목</label>
+            <input type="text" id="edit-race-title" class="w-full px-5 py-4 bg-orange-50/50 border border-orange-100 rounded-2xl outline-none font-bold text-lg" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider ml-1">개최 날짜</label>
+            <input type="date" id="edit-race-date" class="w-full px-5 py-4 bg-orange-50/50 border border-orange-100 rounded-2xl outline-none font-bold text-lg" />
+          </div>
+        </div>
+      </div>
+      <div class="flex p-4 gap-3 bg-slate-50">
+        <button onclick="app.closeModal('edit-race')" class="flex-1 px-6 py-4 text-slate-500 font-bold">취소</button>
+        <button id="btn-confirm-edit-race" class="flex-1 px-6 py-4 bg-orange-500 text-white font-bold rounded-2xl shadow-lg">수정 완료 ✨</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- 모달: 참여자 목록 -->
+<div id="modal-participants" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4 animate-fade-in">
+    <div class="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl flex flex-col max-h-[70vh] overflow-hidden border border-white/20">
+        
+        <div class="relative p-6 pb-4 shrink-0 bg-gradient-to-br from-orange-50 to-transparent">
+            <div class="flex justify-between items-start">
+                <div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-2xl">🏃‍♂️</span>
+                        <h3 class="text-xl font-black text-slate-800 tracking-tight">참여자 명단</h3>
+                    </div>
+                    <p id="participant-race-name" class="text-[11px] font-bold text-orange-500 bg-orange-100/50 px-2 py-0.5 rounded-md inline-block">
+                        </p>
+                </div>
+                <button onclick="app.closeModal('participants')" class="p-2 bg-white hover:bg-rose-50 text-slate-400 hover:text-rose-500 rounded-2xl shadow-sm transition-all active:scale-90">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="overflow-y-auto px-3 pb-3 scroll-hide">
+            <table class="w-full">
+                <thead class="sticky top-0 bg-white z-10">
+                    <tr class="text-[10px] uppercase tracking-wider text-slate-400 border-b border-slate-100">
+                        <th class="py-2 font-semibold w-10 text-center">#</th>
+                        <th class="py-2 font-semibold text-left">닉네임</th>
+                        <th class="py-2 font-semibold text-right text-orange-400">⏱ 목표</th>
+                    </tr>
+                </thead>
+                <tbody id="participant-list-body" class="divide-y divide-slate-50">
+                    </tbody>
+            </table>
+
+            <div id="participant-empty" class="hidden py-16 text-center">
+                <div class="text-4xl mb-2">👻</div>
+                <p class="text-sm text-slate-400 font-medium">아직 참여자가 없어요!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+  <!-- 참여자 수정 모달 -->
+  <div id="modal-edit-entry" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden animate-fade-in">
+    <div class="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-in-up">
+      <div class="p-8">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="bg-orange-100 text-orange-600 p-2 rounded-xl"><i data-lucide="edit-3" class="w-5 h-5"></i></div>
+          <h3 class="text-xl font-bold text-slate-900">참여자 정보 수정 📝</h3>
+        </div>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider ml-1">닉네임</label>
+            <input type="text" id="edit-entry-nickname" class="w-full px-5 py-4 bg-orange-50/50 border border-orange-100 rounded-2xl outline-none font-bold text-lg" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider ml-1">목표 시간 (초)</label>
+            <input type="number" step="0.01" id="edit-entry-time" class="w-full px-5 py-4 bg-orange-50/50 border border-orange-100 rounded-2xl outline-none font-bold text-lg" />
+          </div>
+        </div>
+      </div>
+      <div class="flex p-4 gap-3 bg-slate-50">
+        <button onclick="app.closeModal('edit-entry')" class="flex-1 px-6 py-4 text-slate-500 font-bold">취소</button>
+        <button id="btn-confirm-edit-entry" class="flex-1 px-6 py-4 bg-orange-500 text-white font-bold rounded-2xl shadow-lg">수정 완료 ✨</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 취소 확인 모달 -->
+  <div id="modal-cancel" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden animate-fade-in">
+    <div class="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-in-up">
+      <div class="p-8 text-center">
+        <div class="mx-auto w-20 h-20 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mb-6"><i data-lucide="user-x" class="w-10 h-10"></i></div>
+        <h3 class="text-2xl font-bold text-slate-900 mb-2">참여를 취소할까요? 😢</h3>
+        <p class="text-slate-500">등록된 레이스 기록이 영구적으로 삭제됩니다.</p>
+      </div>
+      <div class="flex p-4 gap-3 bg-slate-50">
+        <button onclick="app.closeModal('cancel')" class="flex-1 px-6 py-4 text-slate-500 font-bold">아니오</button>
+        <button id="btn-confirm-cancel" class="flex-1 px-6 py-4 bg-rose-500 text-white font-bold rounded-2xl shadow-lg">네, 취소할게요</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 삭제 확인 모달 -->
+  <div id="modal-delete-race" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden animate-fade-in">
+    <div class="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-in-up">
+      <div class="p-8 text-center">
+        <div class="mx-auto w-20 h-20 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mb-6"><i data-lucide="trash-2" class="w-10 h-10"></i></div>
+        <h3 class="text-2xl font-bold text-slate-900 mb-2">레이스 삭제 🧨</h3>
+        <p class="text-slate-500 mb-4" id="modal-delete-race-name"></p>
+      </div>
+      <div class="flex p-4 gap-3 bg-slate-50">
+        <button onclick="app.closeModal('delete-race')" class="flex-1 px-6 py-4 text-slate-500 font-bold">취소</button>
+        <button id="btn-confirm-delete-race" class="flex-1 px-6 py-4 bg-rose-600 text-white font-bold rounded-2xl shadow-lg">삭제 확정</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 시딩 모달 -->
+  <div id="modal-seed" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden animate-fade-in">
+    <div class="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-in-up">
+      <div class="p-8">
+        <h3 class="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-2">데이터 생성 🧪</h3>
+        <label class="block text-xs font-bold text-slate-400 mb-2 ml-1">생성할 데이터 개수</label>
+        <input type="number" id="seed-count-input" value="10" max="50" class="w-full px-5 py-4 bg-slate-50 border rounded-2xl outline-none" />
+      </div>
+      <div class="flex p-4 gap-3 bg-slate-50">
+        <button onclick="app.closeModal('seed')" class="flex-1 px-6 py-4 text-slate-500 font-bold">취소</button>
+        <button id="btn-confirm-seed" class="flex-1 px-6 py-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg">데이터 생성</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // --- Firebase 설정 로드 ---
+    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+      apiKey: "AIzaSyD1pj4uw9LyUUTtWn_a28ABN0BC-0zkynY",
+      authDomain: "tele-486906.firebaseapp.com",
+      projectId: "tele-486906",
+      storageBucket: "tele-486906.firebasestorage.app",
+      messagingSenderId: "780009385301",
+      appId: "1:780009385301:web:4163b27573a0b5e72e13dc"
+    };
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'race-app-v1';
+
+    const firebaseApp = initializeApp(firebaseConfig);
+    const auth = getAuth(firebaseApp);
+    const db = getFirestore(firebaseApp);
+
+    // --- 상태 관리 ---
+    const state = {
+      user: null,
+      isAdmin: false,
+      view: 'user',
+      races: [],
+      entries: [],
+      selectedRace: null,
+      filterRaceId: 'all',
+      targetRaceForSeed: null,
+      targetRaceForDelete: null,
+      targetRaceForEdit: null,
+      targetEntryForEdit: null
+    };
+
+    // --- 유틸리티 함수 ---
+    const showToast = (msg, type = 'success') => {
+      const toast = document.getElementById('toast-container') ? document.createElement('div') : null;
+      if (!toast) return;
+      toast.className = `px-5 py-4 rounded-2xl shadow-2xl flex items-center gap-3 font-bold text-sm animate-in-up border ${type === 'error' ? 'bg-white border-rose-100 text-rose-600' : 'bg-white border-orange-100 text-orange-600'}`;
+      toast.innerHTML = `<span class="flex items-center justify-center w-6 h-6 rounded-full ${type === 'error' ? 'bg-rose-100' : 'bg-orange-100'}">${type === 'error' ? '❌' : '✅'}</span> ${msg}`;
+      document.getElementById('toast-container').appendChild(toast);
+      setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateY(10px)'; setTimeout(() => toast.remove(), 300); }, 3000);
+    };
+
+    const toggleBtnLoading = (id, loading, text) => {
+      const btn = document.getElementById(id);
+      if (!btn) return;
+      btn.disabled = loading;
+      btn.innerHTML = loading ? `<i data-lucide="refresh-cw" class="w-4 h-4 spin"></i>` : text;
+      lucide.createIcons();
+    };
+
+    // --- 데이터 동기화 리스너 ---
+    let unsubRaces, unsubEntries;
+    const startRealtimeSync = () => {
+      if (!auth.currentUser) return;
+
+      if (unsubRaces) unsubRaces();
+      if (unsubEntries) unsubEntries();
+
+      const racesRef = collection(db, 'artifacts', appId, 'public', 'data', 'races');
+      const entriesRef = collection(db, 'artifacts', appId, 'public', 'data', 'entries');
+
+      unsubRaces = onSnapshot(racesRef, (snap) => {
+        state.races = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        render();
+      }, (error) => {
+        console.error("Races listener error:", error);
+      });
+
+      unsubEntries = onSnapshot(entriesRef, (snap) => {
+        state.entries = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        render();
+      }, (error) => {
+        console.error("Entries listener error:", error);
+      });
+    };
+
+    // --- 인증 프로세스 (필수) ---
+    const initializeAuth = async () => {
+      try {
+        const token = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        if (token) {
+          await signInWithCustomToken(auth, token);
+        } else {
+          await signInAnonymously(auth);
+        }
+      } catch (err) {
+        console.error("Auth init error:", err);
+      }
+    };
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        state.user = user;
+        document.getElementById('loading-state').classList.add('hidden');
+        document.getElementById('main-app').classList.remove('hidden');
+        startRealtimeSync();
+      } else {
+        initializeAuth();
+      }
+    });
+
+
+
+
+
+    // --- UI 렌더링 ---
+    const render = () => {
+      const userView = document.getElementById('view-user');
+      const authView = document.getElementById('view-admin-auth');
+      const panelView = document.getElementById('view-admin-panel');
+
+      userView.classList.toggle('hidden', state.view !== 'user');
+      authView.classList.toggle('hidden', state.view !== 'admin_auth');
+      panelView.classList.toggle('hidden', state.view !== 'admin_panel');
+
+      if (state.view === 'user') renderUser();
+      if (state.view === 'admin_auth') renderAdminAuth();
+      if (state.view === 'admin_panel') renderAdminPanel();
+      lucide.createIcons();
+    };
+
+const renderUser = () => {
+  const container = document.getElementById('view-user');
+  if (!state.selectedRace) {
+    const activeRaces = state.races.filter(r => r.isActive);
+    
+    // [보완] 레이스 목록 시작
+    container.innerHTML = `
+        <div class="px-2 mb-4">
+            <div class="flex items-center gap-2 mb-3">
+                <span class="text-xl">🏁</span>
+                <h2 class="text-lg font-black text-slate-700 uppercase">레이스 목록</h2>
+            </div>
+            <button onclick="location.href='./tmt.html'" 
+                    class="w-full flex items-center justify-center gap-2 px-3 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl transition-all transform active:scale-[0.98] shadow-sm shadow-orange-200">
+                <i data-lucide="log-in" class="w-5 h-5"></i>
+                <span class="text-sm font-bold">대진표 바로가기</span>
+            </button>
+        </div>
+
+        <div class="grid gap-4">` + 
+        (activeRaces.length ? activeRaces.map(r => {
+            const raceEntries = state.entries.filter(e => e.raceId === r.id);
+            const count = raceEntries.length;
+
+            return `
+                <div class="group bg-white p-6 rounded-[2rem] border-2 border-orange-200 shadow-md hover:shadow-lg hover:border-orange-400 transition-all relative overflow-hidden">
+                    
+                    <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-orange-500"></div>
+
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex-1 cursor-pointer" onclick="app.selectRace('${r.id}')">
+                            <h3 class="text-xl font-extrabold text-slate-800 leading-tight group-hover:text-orange-600 transition-colors">${r.title}</h3>
+                            <div class="flex items-center gap-1.5 mt-1.5">
+                                <i data-lucide="calendar" class="w-3 h-3 text-slate-400"></i>
+                                <p class="text-xs text-slate-500 font-medium">${r.date || '상시 개최'}</p>
+                            </div>
+                        </div>
+                        <div class="p-2 bg-orange-50 text-orange-500 rounded-full cursor-pointer hover:bg-orange-500 hover:text-white transition-all" onclick="app.openJoin('${r.id}')">
+                            <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-4 border-t-2 border-orange-100">
+                        <button onclick="app.openParticipants('${r.id}')" 
+                                class="text-xs font-black text-orange-600 flex items-center gap-1.5 bg-orange-50 px-4 py-2 rounded-full border border-orange-200 hover:bg-orange-500 hover:text-white transition-all shadow-sm">
+                            <i data-lucide="users" class="w-4 h-4"></i>
+                            <span>${count}명 참여 중</span>
+                        </button>
+                        
+                        <div class="flex -space-x-2">
+                            ${raceEntries.slice(0, 3).map((_, i) => `<div class="w-7 h-7 rounded-full border-2 border-white bg-orange-${200 + (i*100)} shadow-sm"></div>`).join('')}
+                            ${raceEntries.length > 3 ? `<div class="w-7 h-7 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-[10px] font-black text-slate-500 shadow-sm">+${raceEntries.length - 3}</div>` : ''}
+                        </div>
+                    </div>
+                </div> 
+            `;
+        }).join('') : `<div class="text-center py-20 bg-white rounded-[2.5rem] border-2 border-dashed border-orange-200 text-slate-400 font-bold">열린 레이스가 없습니다.</div>`) + 
+        `</div>`;
+
+  } else {
+    // --- 상세 페이지 부분 ---
+    //const nick = document.getElementById('input-nickname')?.value || "";
+
+    const nick = document.getElementById('input-nickname')?.value 
+                || localStorage.getItem('songmirun_nickname') 
+                || "";
+
+    const entry = state.entries.find(e => e.raceId === state.selectedRace.id && e.nickname === nick);
+    let statusMessage = '';
+
+    if (nick && state.hasChecked) {
+        statusMessage = `
+            <div class="mb-4 p-3 ${entry ? 'bg-orange-50 text-orange-700' : 'bg-blue-50 text-blue-700'} rounded-2xl text-sm font-bold flex items-center gap-3 border ${entry ? 'border-orange-100' : 'border-blue-100'} animate-fade-in">
+                <span class="text-lg">${entry ? '⚡' : '✨'}</span>
+                <span>${entry ? `이미 <strong>${entry.targetTime}초</strong>로 참여 중이에요. 수정할까요?` : '목표 시간을 입력 후 참여하기!'}</span>
+            </div>`;
+    }
+
+    container.innerHTML = `
+      <div class="bg-white p-8 md:p-12 rounded-[3rem] shadow-2xl border border-orange-50 animate-in-up">
+        <button onclick="app.back()" class="text-orange-500 flex items-center gap-1.5 font-bold mb-8 hover:bg-orange-50 px-4 py-2 rounded-xl transition-all">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i> 돌아가기
+        </button>
+        
+        <div class="mb-10">
+          <h2 class="text-3xl font-black text-slate-800 mb-2 leading-tight">${state.selectedRace.title}</h2>
+          <p class="text-orange-400 font-bold flex items-center gap-1.5"><i data-lucide="calendar" class="w-4 h-4"></i> ${state.selectedRace.date}</p>
+        </div>
+        ${statusMessage}
+        <div class="space-y-6">
+          <div class="p-4 bg-orange-50/50 border border-orange-100 rounded-[1.5rem] flex flex-col gap-3">
+              <input type="text" id="input-nickname" value="${nick}" placeholder="닉네임 입력" 
+                     class="w-full p-5 bg-white border border-orange-100 rounded-[1.2rem] outline-none font-bold text-lg focus:ring-2 focus:ring-orange-300 transition-all" />
+              <button onclick="app.checkNickname()" class="w-full py-3.5 bg-orange-300 hover:bg-orange-400 text-white rounded-[1.2rem] font-black text-lg transition-all shadow-sm flex justify-center items-center gap-1">
+                ① 닉네임 체크 ✅
+              </button>
+          </div>
+
+          <div>
+            <label class="block text-xs font-black text-slate-400 mb-2 ml-2 uppercase">목표 시간 (초) : 소수 둘째자리 (10~20초)</label>
+            <input type="number" id="input-target-time" step="0.01" value="${entry ? entry.targetTime : ''}" placeholder="00.00" 
+                   class="w-full p-5 bg-orange-50/30 border border-orange-100 rounded-[1.5rem] outline-none font-mono font-black text-2xl text-orange-600 placeholder:text-orange-200 focus:ring-2 focus:ring-orange-300 transition-all" />
+          </div>
+
+          <div class="flex flex-col gap-3 pt-2">
+            <div class="flex flex-col sm:flex-row gap-3">
+              <button onclick="app.submitEntry()" id="btn-submit" 
+                      class="${entry ? 'flex-[2]' : 'w-full'} py-3.5 bg-orange-500 text-white font-black rounded-[1.5rem] shadow-lg hover:bg-orange-600 active:scale-[0.95] transition-all text-lg flex justify-center items-center gap-1">
+                ② ${entry ? '참여 정보 수정' : '참여하기🏃‍♂️'}
+              </button>
+              ${entry ? `
+                <button onclick="app.openCancel()" class="flex-1 py-3.5 bg-slate-100 text-slate-500 font-black rounded-[1.5rem] hover:bg-rose-50 hover:text-rose-600 transition-all text-lg flex justify-center items-center gap-1">
+                  ❌ 삭제
+                </button>` : ''}
+            </div>
+            
+            <button onclick="app.back()" class="w-full py-3.5 bg-slate-300 hover:bg-slate-400 text-white rounded-[1.2rem] font-black text-lg transition-all shadow-sm flex justify-center items-center gap-1">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i> 돌아가기
+            </button>
+          </div>
+        </div>
+      </div> `;
+  }
+  if (window.lucide) lucide.createIcons(); // 아이콘 새로고침
+};
+
+
+    const renderAdminAuth = () => {
+      document.getElementById('view-admin-auth').innerHTML = `
+        <div class="max-w-sm mx-auto bg-white p-10 rounded-[2.5rem] shadow-2xl">
+          <h2 class="text-2xl font-black mb-6 text-center text-slate-800">관리자 패스코드 🔑</h2>
+          <input type="password" id="admin-pw" class="w-full p-5 bg-slate-50 border rounded-2xl mb-6 text-center font-black text-2xl tracking-widest outline-none" />
+          <div class="flex gap-3">
+            <button onclick="app.setView('user')" class="flex-1 py-4 bg-slate-100 rounded-2xl font-bold">닫기</button>
+            <button onclick="app.login()" class="flex-1 py-4 bg-orange-500 text-white rounded-2xl font-bold">확인</button>
+          </div>
+        </div>
+      `;
+    };
+
+    const renderAdminPanel = () => {
+      const today = new Date().toISOString().split('T')[0];
+      const filtered = state.filterRaceId === 'all' ? state.entries : state.entries.filter(e => e.raceId === state.filterRaceId);
+      
+      document.getElementById('view-admin-panel').innerHTML = `
+        <div class="flex justify-between items-center bg-white p-6 rounded-3xl border">
+          <h2 class="text-2xl font-black text-slate-800">관리자 대시보드</h2>
+          <button 
+            onclick="app.logout()" 
+            class="px-5 py-2.5 bg-rose-100 hover:bg-rose-200 text-rose-700 rounded-xl font-black transition-colors flex items-center gap-2 border border-rose-200"
+          >
+            <span>🚪 로그아웃</span>
+          </button>
+        </div>
+
+        <div class="bg-white p-8 rounded-[2.5rem] border space-y-6">
+          <h3 class="font-black text-lg text-slate-700">새 레이스 만들기</h3>
+          <div class="flex flex-col md:flex-row gap-3">
+            <input id="new-r-t" placeholder="레이스명" class="flex-1 px-5 py-4 bg-slate-50 border rounded-2xl font-bold" />
+            <input type="date" id="new-r-d" value="${today}" class="px-5 py-4 bg-slate-50 border rounded-2xl font-bold" />
+            <button onclick="app.addRace()" class="px-8 py-4 bg-orange-500 text-white font-black rounded-2xl shadow-lg">생성</button>
+          </div>
+        </div>
+
+        <div class="grid gap-3">${state.races.map(r => `
+          <div class="bg-white p-5 border rounded-[1.5rem] flex flex-wrap justify-between items-center shadow-sm">
+            <div>
+              <p class="font-black text-slate-800 text-lg">${r.title}</p>
+              <p class="text-xs text-slate-400 font-bold">${r.date}</p>
+            </div>
+            <div class="flex items-center gap-2 mt-2 sm:mt-0">
+              <button onclick="app.openEditRace('${r.id}')" class="w-10 h-10 flex items-center justify-center text-orange-500 bg-orange-50 rounded-xl"><i data-lucide="edit" class="w-5 h-5"></i></button>
+              <button onclick="app.openSeed('${r.id}')" class="w-10 h-10 flex items-center justify-center text-indigo-500 bg-indigo-50 rounded-xl"><i data-lucide="beaker" class="w-5 h-5"></i></button>
+              <button onclick="app.toggleRace('${r.id}',${r.isActive})" class="px-5 py-2.5 rounded-xl text-xs font-black ${r.isActive ? 'bg-orange-500 text-white' : 'bg-slate-100 text-slate-400'}">${r.isActive ? 'ON' : 'OFF'}</button>
+              <button onclick="app.openDelRace('${r.id}')" class="w-10 h-10 flex items-center justify-center text-rose-400 bg-rose-50 rounded-xl"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+            </div>
+          </div>`).join('')}
+        </div>
+
+        <div class="bg-white rounded-[2.5rem] border overflow-hidden">
+          <div class="p-6 md:p-8 bg-slate-50/50 border-b flex flex-wrap justify-between items-center gap-4">
+            <h3 class="font-black text-xl">참여자 데이터</h3>
+            <div class="flex gap-2">
+              <button onclick="app.downloadCSV()" class="px-4 py-2 bg-slate-200 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-300 transition-colors">CSV 다운로드</button>
+              <select onchange="app.setFilter(this.value)" class="text-xs font-bold border px-3 py-1.5 rounded-xl outline-none">
+                <option value="all">모든 레이스</option>
+                ${state.races.map(r => `<option value="${r.id}" ${state.filterRaceId === r.id ? 'selected' : ''}>${r.title}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <tbody class="divide-y">
+                ${filtered.length ? filtered.map(e => `
+                <tr class="hover:bg-slate-50/50">
+                  <td class="p-6 text-xs text-orange-500 font-bold">${e.raceTitle || '-'}</td>
+                  <td class="p-6 font-black text-slate-700">${e.nickname}</td>
+                  <td class="p-6 font-mono font-black text-lg text-orange-600">${e.targetTime}s</td>
+                  <td class="p-6 text-right">
+                    <button onclick="app.openEditEntry('${e.id}')" class="text-slate-300 hover:text-orange-500 mx-2"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
+                    <button onclick="app.delEntry('${e.id}')" class="text-slate-300 hover:text-rose-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </td>
+                </tr>`).join('') : `<tr><td colspan="4" class="p-10 text-center text-slate-300">데이터가 없습니다.</td></tr>`}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    };
+
+    // --- 이벤트 핸들러 ---
+    window.app = {
+      render: () => render(),
+      setView: (v) => { state.view = v; render(); },
+      back: () => { state.selectedRace = null; render(); },
+      selectRace: (id) => { state.selectedRace = state.races.find(r => r.id === id); render(); },
+      login: () => { if (document.getElementById('admin-pw').value === '333') { state.isAdmin = true; app.setView('admin_panel'); } else showToast("틀린 코드입니다.", "error"); },
+      logout: () => { state.isAdmin = false; app.setView('user'); },
+      setFilter: (id) => { state.filterRaceId = id; render(); },
+
+
+// 2. 참여자 모달 열기 (문법 수정됨)
+    openParticipants: (raceId) => {
+        const race = state.races.find(r => r.id === raceId);
+        const raceNameElement = document.getElementById('participant-race-name');
+        if (raceNameElement) {
+            raceNameElement.innerText = race ? race.title : '알 수 없는 대회';
+        }
+
+        const participants = state.entries
+            .filter(e => e.raceId === raceId)
+            .sort((a, b) => a.nickname.localeCompare(b.nickname, 'ko'));
+
+        const listBody = document.getElementById('participant-list-body');
+        const emptyMsg = document.getElementById('participant-empty');
+
+        if (participants.length > 0) {
+            emptyMsg.classList.add('hidden');
+            listBody.innerHTML = participants.map((e, index) => `
+                <tr class="hover:bg-orange-50/30 transition-colors">
+                    <td class="py-1 text-center text-[10px] font-bold text-slate-300 font-mono">${index + 1}</td>
+                    <td class="py-1">
+                        <span class="text-[11px] font-bold text-slate-700">${e.nickname}</span>
+                    </td>
+                    <td class="py-1 text-right">
+                        <span class="text-[10px] font-black text-slate-600 font-mono">${e.targetTime}</span>
+                        <span class="text-[9px] text-slate-400 ml-0.5">s</span>
+                    </td>
+                </tr>
+            `).join('');
+        } else {
+            listBody.innerHTML = '';
+            emptyMsg.classList.remove('hidden');
+        }
+
+        const modal = document.getElementById('modal-participants');
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+        if (window.lucide) lucide.createIcons();
+    },
+
+    // 3. 모달 닫기 추가
+    closeModal: (id) => {
+        const modal = document.getElementById(`modal-${id}`);
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+    },
+
+
+        checkNickname: function() {
+            const nickInput = document.getElementById('input-nickname');
+            const nickValue = nickInput ? nickInput.value.trim() : "";
+
+            if (!nickValue) {
+                alert("닉네임을 입력해주세요!");
+                return;
+            }
+
+            // 상태 업데이트
+            state.currentNickname = nickValue;
+            state.hasChecked = true;
+
+            // 다시 렌더링
+            this.render(); // app.render()와 같음
+        },
+        
+
+      downloadCSV: () => {
+          // 1. 데이터 필터링
+          const filtered = state.filterRaceId === 'all' 
+              ? state.entries 
+              : state.entries.filter(e => e.raceId === state.filterRaceId);
+
+          if (!filtered.length) return showToast("데이터가 없습니다.", "error");
+
+          // 2. 동적 파일명 설정
+          const filename = state.filterRaceId === 'all' 
+              ? '전체_레이스_참여자.csv' 
+              : `${state.races.find(r => r.id === state.filterRaceId)?.title || '레이스'}_참여자.csv`;
+
+          // 3. CSV 헤더 및 내용 생성
+          // 헤더 순서: 레이스, 닉네임, 닉네임(목표시간), 목표시간, 참여일시 (코드 순서에 맞게 조정)
+          let csv = "\uFEFF레이스,닉네임,닉네임(목표시간),목표시간,참여일시\n";
+          
+          filtered.forEach(e => {
+              // e.timestamp 등을 활용해 날짜 형식 변환 (참여일시용)
+              const dateStr = e.createdAt ? new Date(e.createdAt).toLocaleString() : '';
+              const combined = `${e.nickname}(${e.targetTime});`; 
+              
+              // 데이터 한 줄 추가
+              csv += `"${e.raceTitle}","${e.nickname}","${combined}","${e.targetTime}","${dateStr}"\n`;
+          });
+
+          // 4. 파일 다운로드 실행
+          const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          link.download = filename; // 동적으로 생성된 파일명 적용
+          link.click();
+          
+          // 메모리 해제
+          URL.revokeObjectURL(link.href);
+      },
+      submitEntry: async () => {
+        if (!auth.currentUser) return;
+        const nick = document.getElementById('input-nickname').value.trim();
+        const time = parseFloat(document.getElementById('input-target-time').value);
+        if (!nick?.trim() || isNaN(time) || time < 9 || time > 21) {
+          return showToast("10~20초 사이의 정확한 시간을 입력하세요.", "error");
+        }
+        
+        const existing = state.entries.find(e => e.raceId === state.selectedRace.id && e.nickname === nick);
+        toggleBtnLoading('btn-submit', true);
+        try {
+          if (existing) {
+            await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'entries', existing.id), { targetTime: time });
+          } else {
+            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'entries'), { 
+              raceId: state.selectedRace.id, raceTitle: state.selectedRace.title, nickname: nick, targetTime: time, createdAt: new Date().toISOString()
+            });
+          }
+          showToast("참여 성공!");
+          app.back();
+        } catch(e) { showToast("저장 권한 부족", "error"); } finally { toggleBtnLoading('btn-submit', false, "참여 완료"); }
+      },
+
+      addRace: async () => {
+        if (!auth.currentUser) return;
+        const t = document.getElementById('new-r-t').value.trim();
+        const d = document.getElementById('new-r-d').value;
+        if (!t || !d) return showToast("내용을 입력하세요.", "error");
+        await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'races'), { title: t, date: d, isActive: true });
+        showToast("레이스 생성됨");
+        document.getElementById('new-r-t').value = "";
+      },
+
+      toggleRace: async (id, s) => { if (!auth.currentUser) return; await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'races', id), { isActive: !s }); },
+
+      openEditRace: (id) => {
+        const r = state.races.find(race => race.id === id);
+        if (r) {
+          state.targetRaceForEdit = r;
+          document.getElementById('edit-race-title').value = r.title;
+          document.getElementById('edit-race-date').value = r.date;
+          app.showModal('edit-race');
+        }
+      },
+
+      confirmEditRace: async () => {
+        if (!auth.currentUser || !state.targetRaceForEdit) return;
+        const newTitle = document.getElementById('edit-race-title').value.trim();
+        const newDate = document.getElementById('edit-race-date').value;
+        toggleBtnLoading('btn-confirm-edit-race', true);
+        try {
+          const batch = writeBatch(db);
+          batch.update(doc(db, 'artifacts', appId, 'public', 'data', 'races', state.targetRaceForEdit.id), { title: newTitle, date: newDate });
+          state.entries.filter(e => e.raceId === state.targetRaceForEdit.id).forEach(e => {
+            batch.update(doc(db, 'artifacts', appId, 'public', 'data', 'entries', e.id), { raceTitle: newTitle });
+          });
+          await batch.commit();
+          showToast("수정되었습니다.");
+          app.closeModal('edit-race');
+        } catch(e) { showToast("수정 권한 부족", "error"); } finally { toggleBtnLoading('btn-confirm-edit-race', false, "수정 완료"); }
+      },
+
+      delEntry: async (id) => { 
+        if (!auth.currentUser) return;
+        if(confirm("기록을 삭제할까요?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'entries', id));
+      },
+
+      openEditEntry: (id) => {
+        const e = state.entries.find(entry => entry.id === id);
+        if (e) {
+          state.targetEntryForEdit = e;
+          document.getElementById('edit-entry-nickname').value = e.nickname;
+          document.getElementById('edit-entry-time').value = e.targetTime;
+          app.showModal('edit-entry');
+        }
+      },
+
+      confirmEditEntry: async () => {
+        if (!auth.currentUser || !state.targetEntryForEdit) return;
+        const n = document.getElementById('edit-entry-nickname').value.trim();
+        const t = parseFloat(document.getElementById('edit-entry-time').value);
+        toggleBtnLoading('btn-confirm-edit-entry', true);
+        try {
+          await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'entries', state.targetEntryForEdit.id), { nickname: n, targetTime: t });
+          showToast("참여자 수정 완료");
+          app.closeModal('edit-entry');
+        } catch(e) { showToast("수정 권한 부족", "error"); } finally { toggleBtnLoading('btn-confirm-edit-entry', false, "수정 완료"); }
+      },
+
+      openDelRace: (id) => { 
+        state.targetRaceForDelete = state.races.find(r => r.id === id); 
+        document.getElementById('modal-delete-race-name').innerText = state.targetRaceForDelete?.title; 
+        app.showModal('delete-race'); 
+      },
+
+      confirmDelRace: async () => {
+        if (!auth.currentUser || !state.targetRaceForDelete) return;
+        const batch = writeBatch(db);
+        state.entries.filter(e => e.raceId === state.targetRaceForDelete.id).forEach(e => {
+            batch.delete(doc(db, 'artifacts', appId, 'public', 'data', 'entries', e.id));
+        });
+        batch.delete(doc(db, 'artifacts', appId, 'public', 'data', 'races', state.targetRaceForDelete.id));
+        await batch.commit();
+        app.closeModal('delete-race');
+        showToast("삭제 완료");
+      },
+
+      openSeed: (id) => { state.targetRaceForSeed = state.races.find(r => r.id === id); app.showModal('seed'); },
+      confirmSeed: async () => {
+        if (!auth.currentUser || !state.targetRaceForSeed) return;
+        const count = parseInt(document.getElementById('seed-count-input').value);
+        const batch = writeBatch(db);
+        for (let i = 0; i < count; i++) {
+          const ref = doc(collection(db, 'artifacts', appId, 'public', 'data', 'entries'));
+          batch.set(ref, { 
+            raceId: state.targetRaceForSeed.id, raceTitle: state.targetRaceForSeed.title, 
+            nickname: "Runner" + Math.floor(Math.random()*1000), targetTime: parseFloat((Math.random()*10+20).toFixed(2)), 
+            createdAt: new Date().toISOString()
+          });
+        }
+        await batch.commit();
+        app.closeModal('seed');
+        showToast("시드 데이터 생성");
+      },
+
+      openCancel: () => app.showModal('cancel'),
+      confirmCancel: async () => {
+        if (!auth.currentUser) return;
+        const nick = document.getElementById('input-nickname').value.trim();
+        const entry = state.entries.find(e => e.raceId === state.selectedRace.id && e.nickname === nick);
+        if(entry) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'entries', entry.id)); 
+        app.closeModal('cancel'); app.back(); showToast("취소됨");
+      },
+
+      showModal: (m) => document.getElementById(`modal-${m}`).classList.remove('hidden'),
+      closeModal: (m) => document.getElementById(`modal-${m}`).classList.add('hidden')
+    };
+
+    document.getElementById('admin-toggle-btn').onclick = () => app.setView(state.isAdmin ? 'admin_panel' : 'admin_auth');
+    document.getElementById('btn-confirm-edit-race').onclick = () => app.confirmEditRace();
+    document.getElementById('btn-confirm-edit-entry').onclick = () => app.confirmEditEntry();
+    document.getElementById('btn-confirm-cancel').onclick = () => app.confirmCancel();
+    document.getElementById('btn-confirm-delete-race').onclick = () => app.confirmDelRace();
+    document.getElementById('btn-confirm-seed').onclick = () => app.confirmSeed();
+  </script>
+</body>
+</html>
