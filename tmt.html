@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -9,6 +10,8 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
         :root { --primary: #f97316; --bg-main: #fffaf5; }
@@ -23,6 +26,17 @@
         .no-export { data-html2canvas-ignore: true; }
         .capturing .match-card span { line-height: 1.6 !important; display: inline-block !important; vertical-align: middle; }
     </style>
+    <style>
+    @keyframes winner-glow {
+        0%, 100% { box-shadow: 0 0 20px rgba(255, 138, 0, 0.2); border-color: #f97316; }
+        50% { box-shadow: 0 0 50px rgba(255, 138, 0, 0.5); border-color: #fbbf24; }
+    }
+
+    .winner-glow {
+        animation: winner-glow 2s infinite ease-in-out;
+    }
+    </style>
+
 </head>
 <body class="custom-scroll select-none">
 
@@ -34,7 +48,7 @@
                     <i data-lucide="cloud" class="text-white w-4 h-4"></i>
                 </div>
                 <h1 class="text-sm md:text-base font-black text-slate-800 uppercase tracking-tighter">
-                    <span class="text-orange-500">vs대진표</span> 🍊
+                    <span class="text-orange-500">vs 대진표</span> 🍊
                 </h1>
 
                 <button onclick="location.href='./ttr.html'"
@@ -47,10 +61,10 @@
             <div id="header-actions" class="flex items-center gap-1">
                 <div id="auth-status" class="hidden text-[10px] font-bold text-orange-400 bg-orange-50 px-2 py-1 rounded-full uppercase">Connecting...</div>
                 <button id="admin-btn" class="p-1 text-slate-400 hover:text-orange-500 transition-colors">
-                    <i data-lucide="wrench" class="w-4 h-4"></i>
+                    <i data-lucide="settings" class="w-4 h-4"></i>
                 </button>
                 <button id="oper-btn" class="p-1 text-slate-400 hover:text-orange-500 transition-colors">
-                    <i data-lucide="settings" class="w-4 h-4"></i>
+                    <i data-lucide="wrench" class="w-4 h-4"></i>
                 </button>
                                 
             </div>
@@ -278,7 +292,7 @@
             }
 
             let roundsHtml = activeComp.rounds.map((round, rIdx) => {
-                const label = rIdx === activeComp.rounds.length - 1 ? '🏆 결승' : (rIdx === activeComp.rounds.length - 2 ? '🔥 준결승' : `RD ${rIdx + 1}`);
+                const label = rIdx === activeComp.rounds.length - 1 ? `🏆 결승 - ${activeComp.title}` : (rIdx === activeComp.rounds.length - 2 ? '🔥 준결승' : `RD ${rIdx + 1}`);
                 return `
                 <div class="flex flex-col min-w-[180px] md:min-w-[240px]">
                     <div class="round-header-sticky mb-2 text-center">
@@ -323,11 +337,56 @@
                     </div>
                 </div>`;
             
-            setTimeout(() => drawConnectors(), 100);
+                // 렌더링 완료 후 실행되는 구간
+                setTimeout(() => {
+                    // 1. 기존 커넥터 그리기 로직
+                    drawConnectors();
+                    
+                    // 2. 루사이드 아이콘 새로고침 (아이콘 안 보일 때 대비)
+                    if (window.lucide) lucide.createIcons();
 
-//<button id="capture-btn" onclick="window.captureScreenshot(event)" class="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 text-orange-600 rounded-lg text-xs font-bold hover:bg-orange-100 transition-all">
-    //<i data-lucide="camera" class="w-3.5 h-3.5"></i> 이미지2
-//</button>
+                    // 3. 우승자가 있으면 꽃가루 발사! 🎊
+                    if (activeComp.finalWinner && typeof confetti === 'function') {
+
+                            const duration = 3 * 1000; // 3초 동안 발사
+                            const animationEnd = Date.now() + duration;
+                            const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 }; // zIndex를 높여서 모달 위에서도 보이게 설정
+
+                            function randomInRange(min, max) {
+                                return Math.random() * (max - min) + min;
+                            }
+
+                            const interval = setInterval(function() {
+                                const timeLeft = animationEnd - Date.now();
+
+                                if (timeLeft <= 0) {
+                                    return clearInterval(interval);
+                                }
+
+                                const particleCount = 50 * (timeLeft / duration);
+                                
+                                // 왼쪽에서 쏘기
+                                confetti({
+                                    ...defaults,
+                                    particleCount,
+                                    origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
+                                    colors: ['#ff8a00', '#ffcc00', '#ffffff'] // 오렌지 테마 색상
+                                });
+                                // 오른쪽에서 쏘기
+                                confetti({
+                                    ...defaults,
+                                    particleCount,
+                                    origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
+                                    colors: ['#ff8a00', '#ffcc00', '#ffffff']
+                                });
+                            }, 250);
+                            
+                    }
+                }, 100);
+
+                //<button id="capture-btn" onclick="window.captureScreenshot(event)" class="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 text-orange-600 rounded-lg text-xs font-bold hover:bg-orange-100 transition-all">
+                    //<i data-lucide="camera" class="w-3.5 h-3.5"></i> 이미지2
+                //</button>
 
         }
 
@@ -342,7 +401,7 @@
                 let cls = `h-12 md:h-14 flex items-center px-4 transition-all relative `;
                 if (isEmpty) cls += `bg-orange-50/20 text-orange-200`;
                 else if (isWinner) cls += `bg-orange-500 text-white font-black z-10 shadow-md scale-[1.05] rounded-lg`;
-                else if (isLoser) cls += `bg-gray-50 text-gray-300 opacity-40`;
+                else if (isLoser) cls += `bg-gray-50 text-orange-400 `;
                 else cls += `bg-white text-slate-700 cursor-pointer hover:bg-orange-50 active:ring-2 active:ring-orange-300`;
 
                 const clickHandler = isOper && player && !match.winner && !isAdmin
@@ -352,7 +411,7 @@
                 return `
                     <div ${clickHandler} class="${cls}">
                         <span class="text-[10px] font-black w-6 opacity-30 no-export">${numDisplay}</span>
-                        <span class="truncate flex-1 text-xs md:text-sm font-bold">${player || (isBye && slotNum === 2 ? '부전승 👉' : '-')}</span>
+                        <span class="truncate flex-1 text-xs md:text-sm font-bold">${player || (isBye && slotNum === 2 ? '부전승 🍀' : '-')}</span>
                         ${isWinner ? '<i data-lucide="check-circle-2" class="w-4 h-4 ml-1.5"></i>' : ''}
                     </div>
                 `;
@@ -373,7 +432,7 @@
             `;
         }
 
-
+ 
         window.showNameToast = (name) => {
             let toast = document.getElementById('name-toast');
             if (!toast) {
@@ -711,7 +770,7 @@
             if (isAdmin) { isAdmin = false; render(); return; }
             showModal("관리자 인증 🔒", `<input type="password" id="admin-pw" class="w-full p-4 bg-orange-50 rounded-xl text-center font-bold" placeholder="암호 입력">`, () => {
                 const pwInput = document.getElementById('admin-pw');
-                if (pwInput && pwInput.value === "333") { isAdmin = true; render(); return true; }
+                if (pwInput && pwInput.value === "3") { isAdmin = true; render(); return true; }
                 return false;
             });
         };
@@ -727,7 +786,7 @@
             // 운영자 인증 모달 표시
             showModal("운영자 인증 🔑", `<input type="password" id="oper-pw" class="w-full p-4 bg-blue-50 rounded-xl text-center font-bold" placeholder="운영자 암호 입력">`, () => {
                 const pwInput = document.getElementById('oper-pw');
-                if (pwInput && pwInput.value === "333") { 
+                if (pwInput && pwInput.value === "3") { 
                     isOper = true; 
                     render(); // 화면 갱신
                     return true; // 모달 닫기
@@ -739,7 +798,11 @@
         };
                 
         window.logoutAdmin = () => { isAdmin = false; render(); };
-        
+
+
+
+
+
         // 초기화 실행
         initApp();
     </script>
