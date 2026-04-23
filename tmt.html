@@ -306,7 +306,7 @@
                     <h2 class="font-black text-orange-600 text-lg">🏆 ${activeComp.title}</h2>
                     <div class="flex items-center gap-2">
                         <button onclick="window.downloadCSV()" class="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 text-orange-600 rounded-lg text-xs font-bold hover:bg-orange-100 transition-all">
-                            <i data-lucide="file-text" class="w-3.5 h-3.5"></i> CSV 저장
+                            <i data-lucide="file-text" class="w-3.5 h-3.5"></i> CSV
                         </button>
                         
                         <button onclick="window.downloadImage()" class="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 text-orange-600 rounded-lg text-xs font-bold hover:bg-orange-100 transition-all">
@@ -464,7 +464,9 @@
                     }
                 });
                 const link = document.createElement('a');
-                link.download = `대진표_${new Date().getTime()}.png`;
+                //link.download = `대진표_${new Date().getTime()}.png`;
+                link.download = `${activeComp.title || '대진표'}_대진표_${new Date().getTime()}.png`;
+
                 link.href = canvas.toDataURL("image/png");
                 link.click();
             } catch (err) {
