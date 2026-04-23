@@ -387,7 +387,12 @@ const renderUser = () => {
 
   } else {
     // --- 상세 페이지 부분 ---
-    const nick = document.getElementById('input-nickname')?.value || "";
+    //const nick = document.getElementById('input-nickname')?.value || "";
+
+    const nick = document.getElementById('input-nickname')?.value 
+                || localStorage.getItem('songmirun_nickname') 
+                || "";
+
     const entry = state.entries.find(e => e.raceId === state.selectedRace.id && e.nickname === nick);
     let statusMessage = '';
 
@@ -409,9 +414,7 @@ const renderUser = () => {
           <h2 class="text-3xl font-black text-slate-800 mb-2 leading-tight">${state.selectedRace.title}</h2>
           <p class="text-orange-400 font-bold flex items-center gap-1.5"><i data-lucide="calendar" class="w-4 h-4"></i> ${state.selectedRace.date}</p>
         </div>
-
         ${statusMessage}
-
         <div class="space-y-6">
           <div class="p-4 bg-orange-50/50 border border-orange-100 rounded-[1.5rem] flex flex-col gap-3">
               <input type="text" id="input-nickname" value="${nick}" placeholder="닉네임 입력" 
