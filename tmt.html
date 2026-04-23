@@ -285,110 +285,131 @@
             `;
         }
 
-        function renderBracketView(container) {
-            if (!activeComp || !activeComp.rounds || activeComp.rounds.length === 0) {
-                container.innerHTML = `<div class="flex items-center justify-center h-full"><p class="text-orange-300 font-bold">대진표 대기 중...</p></div>`;
-                return;
-            }
+function renderBracketView(container) {
+    if (!activeComp || !activeComp.rounds || activeComp.rounds.length === 0) {
+        container.innerHTML = `<div class="flex items-center justify-center h-full"><p class="text-orange-300 font-bold">대진표 대기 중...</p></div>`;
+        return;
+    }
 
-            let roundsHtml = activeComp.rounds.map((round, rIdx) => {
-                const label = rIdx === activeComp.rounds.length - 1 ? `🏆 결승 - ${activeComp.title}` : (rIdx === activeComp.rounds.length - 2 ? '🔥 준결승' : `RD ${rIdx + 1}`);
-                return `
-                <div class="flex flex-col min-w-[180px] md:min-w-[240px]">
-                    <div class="round-header-sticky mb-2 text-center">
-                        <span class="inline-block px-4 py-1.5 bg-white border border-orange-200 shadow-sm text-orange-600 text-[10px] font-black uppercase rounded-full">${label}</span>
-                    </div>
-                    <div class="flex flex-col justify-around flex-1 gap-8 py-6">
-                        ${round.map((match, mIdx) => renderMatchCard(match, rIdx, mIdx)).join('')}
-                    </div>
-                </div>`;
-            }).join('');
+    // 1. 라운드 HTML 생성
+    let roundsHtml = activeComp.rounds.map((round, rIdx) => {
+        const label = rIdx === activeComp.rounds.length - 1 ? `🏆 결승 - ${activeComp.title}` : (rIdx === activeComp.rounds.length - 2 ? '🔥 준결승' : `RD ${rIdx + 1}`);
+        return `
+        <div class="flex flex-col min-w-[180px] md:min-w-[240px]">
+            <div class="round-header-sticky mb-2 text-center">
+                <span class="inline-block px-4 py-1.5 bg-white border border-orange-200 shadow-sm text-orange-600 text-[10px] font-black uppercase rounded-full">${label}</span>
+            </div>
+            <div class="flex flex-col justify-around flex-1 gap-8 py-6">
+                ${round.map((match, mIdx) => renderMatchCard(match, rIdx, mIdx)).join('')}
+            </div>
+        </div>`;
+    }).join('');
 
-            const winnerHtml = activeComp.finalWinner ? `
-                <div class="flex flex-col justify-center items-center px-10">
-                    <div class="text-center p-10 bg-white rounded-[3rem] shadow-2xl border-4 border-orange-400 winner-glow relative">
-                        <div class="absolute -top-10 left-1/2 -translate-x-1/2 w-20 h-20 bg-orange-500 rounded-full flex items-center justify-center shadow-xl border-4 border-white">
-                            <i data-lucide="crown" class="text-white w-10 h-10"></i>
-                        </div>
-                        <h3 class="mt-4 text-orange-600 font-black tracking-widest uppercase text-[10px] mb-2">Champion 🎉</h3>
-                        <p class="text-3xl md:text-5xl font-black text-slate-900 mb-2 truncate max-w-[200px]">${activeComp.finalWinner}</p>
-                    </div>
-                </div>` : '';
-
-            container.innerHTML = `
-                <div class="p-4 md:p-8 flex items-center justify-between mb-2 bg-white border-b border-orange-50 sticky left-0 z-40 no-export">
-                    <h2 class="font-black text-orange-600 text-lg">🏆 ${activeComp.title}</h2>
-                    <div class="flex items-center gap-2">
-                        <button onclick="window.downloadCSV()" class="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 text-orange-600 rounded-lg text-xs font-bold hover:bg-orange-100 transition-all">
-                            <i data-lucide="file-text" class="w-3.5 h-3.5"></i> CSV
-                        </button>
-                        
-                        <button onclick="window.downloadImage()" class="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 text-orange-600 rounded-lg text-xs font-bold hover:bg-orange-100 transition-all">
-                            <i data-lucide="image" class="w-3.5 h-3.5"></i> 이미지
-                        </button>
-
-
-                    </div>
+    // 2. 대진표 내 우승자 카드 (기존 유지)
+    const winnerHtml = activeComp.finalWinner ? `
+        <div class="flex flex-col justify-center items-center px-10">
+            <div class="text-center p-10 bg-white rounded-[3rem] shadow-2xl border-4 border-orange-400 winner-glow relative">
+                <div class="absolute -top-10 left-1/2 -translate-x-1/2 w-20 h-20 bg-orange-500 rounded-full flex items-center justify-center shadow-xl border-4 border-white">
+                    <i data-lucide="crown" class="text-white w-10 h-10"></i>
                 </div>
-                <div id="export-target" class="bg-[#fffaf5]">
-                    <div id="bracket-area" class="relative p-6 md:p-12 min-w-max flex items-stretch gap-12 md:gap-24">
-                        ${roundsHtml}
-                        ${winnerHtml}
-                    </div>
-                </div>`;
-            
-                // 렌더링 완료 후 실행되는 구간
-                setTimeout(() => {
-                    // 1. 기존 커넥터 그리기 로직
-                    drawConnectors();
+                <h3 class="mt-4 text-orange-600 font-black tracking-widest uppercase text-[10px] mb-2">Champion 🎉</h3>
+                <p class="text-3xl md:text-5xl font-black text-slate-900 mb-2 truncate max-w-[200px]">${activeComp.finalWinner}</p>
+            </div>
+        </div>` : '';
+
+         // 3. [추가] 화면 중앙 우승 팝업 모달
+        const winnerModalHtml = activeComp.finalWinner ? `
+            <div id="winner-modal" class="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in no-export">
+                <div class="bg-white rounded-[3.5rem] p-10 shadow-[0_0_100px_rgba(251,146,60,0.5)] border-4 border-orange-400 text-center relative max-w-sm w-full animate-in-up">
                     
-                    // 2. 루사이드 아이콘 새로고침 (아이콘 안 보일 때 대비)
-                    if (window.lucide) lucide.createIcons();
+                    <button onclick="this.closest('#winner-modal').remove()" class="absolute top-6 right-6 p-2 bg-slate-100 rounded-full text-slate-400 hover:bg-orange-100 hover:text-orange-600 transition-all">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                    
+                    <div class="mb-8 inline-flex items-center justify-center w-24 h-24 bg-gradient-to-tr from-orange-600 to-yellow-400 rounded-full shadow-lg border-4 border-white animate-bounce">
+                        <i data-lucide="crown" class="text-white w-12 h-12"></i>
+                    </div>
+                    
+                    <div class="space-y-5 mb-10">
+                        <div class="flex flex-col items-center gap-2">
+                            <span class="px-4 py-1.5 bg-orange-50 text-orange-600 text-[10px] font-black rounded-full border border-orange-100 tracking-wider uppercase shadow-sm">
+                                ${activeComp.title}
+                            </span>
+                            <div class="flex items-center gap-1 text-slate-400 font-bold text-[10px]">
+                                <i data-lucide="calendar" class="w-3 h-3"></i>
+                                <span>${activeComp.date || 'EVENT DATE'}</span>
+                            </div>
+                        </div>
 
-                    // 3. 우승자가 있으면 꽃가루 발사! 🎊
-                    if (activeComp.finalWinner && typeof confetti === 'function') {
+                        <div class="relative py-2">
+                            <h2 class="text-orange-500 font-black tracking-[0.2em] text-[10px] uppercase mb-3">Grand Champion</h2>
+                            <div class="absolute inset-0 bg-orange-100/30 blur-2xl rounded-full"></div>
+                            <p class="relative text-5xl font-black text-slate-900 leading-tight tracking-tight break-words drop-shadow-sm">
+                                ${activeComp.finalWinner}
+                            </p>
+                        </div>
+                        
+                        <p class="text-slate-500 font-medium text-xs">명예로운 우승을 진심으로 축하합니다!</p>
+                    </div>
 
-                            const duration = 3 * 1000; // 3초 동안 발사
-                            const animationEnd = Date.now() + duration;
-                            const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 }; // zIndex를 높여서 모달 위에서도 보이게 설정
+                    <button onclick="this.closest('#winner-modal').remove()" class="w-full py-5 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-black rounded-[2rem] shadow-xl shadow-orange-200 transition-all active:scale-95 text-lg">
+                        축하합니다! 🎉
+                    </button>
+                </div>
+            </div>` : '';
 
-                            function randomInRange(min, max) {
-                                return Math.random() * (max - min) + min;
-                            }
+    // 4. 전체 렌더링 (대진표 + 모달)
+    container.innerHTML = `
+        <div class="p-4 md:p-8 flex items-center justify-between mb-2 bg-white border-b border-orange-50 sticky left-0 z-40 no-export">
+            <h2 class="font-black text-orange-600 text-lg">🏆 ${activeComp.title}</h2>
+            <div class="flex items-center gap-2">
+                <button onclick="window.downloadCSV()" class="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 text-orange-600 rounded-lg text-xs font-bold hover:bg-orange-100 transition-all">
+                    <i data-lucide="file-text" class="w-3.5 h-3.5"></i> CSV
+                </button>
+                <button onclick="window.downloadImage()" class="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 text-orange-600 rounded-lg text-xs font-bold hover:bg-orange-100 transition-all">
+                    <i data-lucide="image" class="w-3.5 h-3.5"></i> 이미지
+                </button>
+            </div>
+        </div>
+        <div id="export-target" class="bg-[#fffaf5]">
+            <div id="bracket-area" class="relative p-6 md:p-12 min-w-max flex items-stretch gap-12 md:gap-24">
+                ${roundsHtml}
+                ${winnerHtml}
+            </div>
+        </div>
+        ${winnerModalHtml} 
+    `;
 
-                            const interval = setInterval(function() {
-                                const timeLeft = animationEnd - Date.now();
+    //<button id="capture-btn" onclick="window.captureScreenshot(event)" class="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 text-orange-600 rounded-lg text-xs font-bold hover:bg-orange-100 transition-all">
+    //<i data-lucide="camera" class="w-3.5 h-3.5"></i> 이미지2
+    //</button>
 
-                                if (timeLeft <= 0) {
-                                    return clearInterval(interval);
-                                }
+    // 5. 실행 로직
+    setTimeout(() => {
+        drawConnectors();
+        if (window.lucide) lucide.createIcons();
 
-                                const particleCount = 50 * (timeLeft / duration);
-                                
-                                // 왼쪽에서 쏘기
-                                confetti({
-                                    ...defaults,
-                                    particleCount,
-                                    origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
-                                    colors: ['#ff8a00', '#ffcc00', '#ffffff'] // 오렌지 테마 색상
-                                });
-                                // 오른쪽에서 쏘기
-                                confetti({
-                                    ...defaults,
-                                    particleCount,
-                                    origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
-                                    colors: ['#ff8a00', '#ffcc00', '#ffffff']
-                                });
-                            }, 250);
-                            
-                    }
-                }, 100);
+        // 꽃가루 발사
+        if (activeComp.finalWinner && typeof confetti === 'function') {
+            const duration = 3 * 1000;
+            const animationEnd = Date.now() + duration;
+            const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 10001 }; // 모달보다 위
 
-                //<button id="capture-btn" onclick="window.captureScreenshot(event)" class="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 text-orange-600 rounded-lg text-xs font-bold hover:bg-orange-100 transition-all">
-                    //<i data-lucide="camera" class="w-3.5 h-3.5"></i> 이미지2
-                //</button>
+            const interval = setInterval(function() {
+                const timeLeft = animationEnd - Date.now();
+                if (timeLeft <= 0) return clearInterval(interval);
 
+                const particleCount = 50 * (timeLeft / duration);
+                confetti({
+                    ...defaults,
+                    particleCount,
+                    origin: { x: Math.random(), y: Math.random() - 0.2 },
+                    colors: ['#ff8a00', '#ffcc00', '#ffffff']
+                });
+            }, 250);
         }
+    }, 100);
+}
 
         function renderMatchCard(match, rIdx, mIdx) {
             const isBye = match.p1 && !match.p2 && rIdx === 0;
