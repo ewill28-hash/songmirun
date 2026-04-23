@@ -304,20 +304,20 @@
             container.innerHTML = `
                 <div class="p-4 md:p-8 flex items-center justify-between mb-2 bg-white border-b border-orange-50 sticky left-0 z-40 no-export">
                     <h2 class="font-black text-orange-600 text-lg">🏆 ${activeComp.title}</h2>
-<div class="flex items-center gap-2">
-    <button onclick="window.downloadCSV()" class="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 text-orange-600 rounded-lg text-xs font-bold hover:bg-orange-100 transition-all">
-        <i data-lucide="file-text" class="w-3.5 h-3.5"></i> CSV 저장
-    </button>
-    
-    <button onclick="window.downloadImage()" class="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-xs font-bold hover:bg-blue-100 transition-all">
-        <i data-lucide="image" class="w-3.5 h-3.5"></i> 이미지1
-    </button>
+                    <div class="flex items-center gap-2">
+                        <button onclick="window.downloadCSV()" class="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 text-orange-600 rounded-lg text-xs font-bold hover:bg-orange-100 transition-all">
+                            <i data-lucide="file-text" class="w-3.5 h-3.5"></i> CSV 저장
+                        </button>
+                        
+                        <button onclick="window.downloadImage()" class="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 text-orange-600 rounded-lg text-xs font-bold hover:bg-orange-100 transition-all">
+                            <i data-lucide="image" class="w-3.5 h-3.5"></i> 이미지1
+                        </button>
 
-    <button id="capture-btn" onclick="window.captureScreenshot(event)" class="flex items-center gap-1.5 px-3 py-1.5 bg-orange-500 text-white rounded-lg text-xs font-bold hover:bg-orange-600 transition-all shadow-md">
-        <i data-lucide="camera" class="w-3.5 h-3.5"></i> 이미지2
-    </button>
+                        <button id="capture-btn" onclick="window.captureScreenshot(event)" class="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 text-orange-600 rounded-lg text-xs font-bold hover:bg-orange-100 transition-all">
+                            <i data-lucide="camera" class="w-3.5 h-3.5"></i> 이미지2
+                        </button>
 
-</div>
+                    </div>
                 </div>
                 <div id="export-target" class="bg-[#fffaf5]">
                     <div id="bracket-area" class="relative p-6 md:p-12 min-w-max flex items-stretch gap-12 md:gap-24">
@@ -405,41 +405,52 @@
         };
 
 
-window.downloadImage = async () => {
-    // 1. 저장할 영역 선택 (대진표 전체를 감싸는 ID로 수정하세요)
-    //const container = document.getElementById('tournament-display'); 
-    const container = document.getElementById('export-target'); 
-    
-    if (!container) return alert("저장할 대진표를 찾을 수 없습니다.");
+        window.downloadImage = async () => {
+            const container = document.getElementById('export-target'); 
+            
+            if (!container) return alert("저장할 대진표를 찾을 수 없습니다.");
 
-    // 2. 버튼 등 저장 시 제외할 요소 숨기기 (클래스명에 'no-export'가 있는 요소)
-    const noExportElements = container.querySelectorAll('.no-export');
-    noExportElements.forEach(el => el.style.display = 'none');
+            // [핵심 1] 폰트가 완전히 로드될 때까지 대기
+            await document.fonts.ready;
 
-    try {
-        const canvas = await html2canvas(container, {
-            backgroundColor: "#ffffff", // 배경을 흰색으로 고정
-            scale: 2, // 고해상도로 저장 (모바일에서 깨짐 방지)
-            useCORS: true, // 외부 이미지 허용
-            logging: false
-        });
+            const noExportElements = container.querySelectorAll('.no-export');
+            noExportElements.forEach(el => el.style.display = 'none');
 
-        // 3. 이미지 다운로드 링크 생성
-        const link = document.createElement('a');
-        link.download = `대진표_${new Date().getTime()}.png`;
-        link.href = canvas.toDataURL("image/png");
-        link.click();
-    } catch (err) {
-        console.error("이미지 저장 실패:", err);
-        alert("이미지 생성 중 오류가 발생했습니다.");
-    } finally {
-        // 4. 숨겼던 요소 다시 표시
-        noExportElements.forEach(el => el.style.display = '');
-    }
-};
+            try {
+                const canvas = await html2canvas(container, {
+                    backgroundColor: "#ffffff",
+                    scale: 2, 
+                    useCORS: true, 
+                    logging: false,
+                    // [핵심 2] 캡쳐할 때만 복제된 DOM에 임시 CSS 적용
+                    onclone: (clonedDoc) => {
+                        const style = clonedDoc.createElement('style');
+                        style.innerHTML = `
+                            /* 텍스트 잘림을 방지하기 위해 line-height를 넉넉하게 주고 overflow를 풀어줍니다 */
+                            #export-target * {
+                                line-height: 1.2 !important; 
+                                overflow: visible !important;
+                            }
+                            /* 만약 특정 클래스의 텍스트가 계속 잘린다면 아래처럼 패딩을 강제로 줍니다 */
+                            /* .이름이들어가는클래스명 { padding-bottom: 2px !important; } */
+                        `;
+                        clonedDoc.head.appendChild(style);
+                    }
+                });
 
+                const link = document.createElement('a');
+                link.download = `대진표_${new Date().getTime()}.png`;
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+            } catch (err) {
+                console.error("이미지 저장 실패:", err);
+                alert("이미지 생성 중 오류가 발생했습니다.");
+            } finally {
+                noExportElements.forEach(el => el.style.display = '');
+            }
+        };
 
-        window.captureScreenshot = () => {
+        window.captureScreenshot = async () => { // async 추가
             const btn = document.getElementById('capture-btn');
             const target = document.getElementById('export-target');
             if (!target || !btn) return;
@@ -448,6 +459,9 @@ window.downloadImage = async () => {
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> 생성 중...';
             lucide.createIcons();
+
+            // [핵심 1] 폰트 로드 대기
+            await document.fonts.ready;
 
             setTimeout(() => {
                 html2canvas(target, {
@@ -458,10 +472,20 @@ window.downloadImage = async () => {
                     onclone: (clonedDoc) => {
                         const ct = clonedDoc.getElementById('export-target');
                         if(ct) ct.style.padding = "40px";
+
+                        // [핵심 2] 캡쳐용 임시 스타일 주입
+                        const style = clonedDoc.createElement('style');
+                        style.innerHTML = `
+                            #export-target * {
+                                line-height: 1.2 !important;
+                                overflow: visible !important;
+                            }
+                        `;
+                        clonedDoc.head.appendChild(style);
                     }
                 }).then(canvas => {
                     const link = document.createElement('a');
-                    link.download = `${activeComp.title}_대진표.png`;
+                    link.download = `${activeComp.title || '대진표'}_대진표.png`;
                     link.href = canvas.toDataURL('image/png', 1.0);
                     link.click();
                 }).catch(err => console.error("Capture Error", err))
@@ -470,7 +494,7 @@ window.downloadImage = async () => {
                     btn.innerHTML = originalText;
                     lucide.createIcons();
                 });
-            }, 500);
+            }, 500); // 폰트 로드 후 UI가 완전히 렌더링될 시간을 넉넉히 줍니다.
         };
 
         window.selectWinner = async (rIdx, mIdx, player) => {
