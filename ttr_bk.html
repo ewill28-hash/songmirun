@@ -363,7 +363,7 @@ const renderUser = () => {
                                 <p class="text-xs text-slate-500 font-medium">${r.date || '상시 개최'}</p>
                             </div>
                         </div>
-                        <div class="p-2 bg-orange-50 text-orange-500 rounded-full cursor-pointer hover:bg-orange-500 hover:text-white transition-all" onclick="app.openJoin('${r.id}')">
+                        <div class="p-2 bg-orange-50 text-orange-500 rounded-full cursor-pointer hover:bg-orange-500 hover:text-white transition-all" onclick="app.selectRace('${r.id}')">
                             <i data-lucide="chevron-right" class="w-5 h-5"></i>
                         </div>
                     </div>
@@ -398,28 +398,25 @@ const renderUser = () => {
 
     if (nick && state.hasChecked) {
         statusMessage = `
-            <div class="mb-4 p-3 ${entry ? 'bg-orange-50 text-orange-700' : 'bg-blue-50 text-blue-700'} rounded-2xl text-sm font-bold flex items-center gap-3 border ${entry ? 'border-orange-100' : 'border-blue-100'} animate-fade-in">
+            <div class="mb-2 p-1 ${entry ? 'bg-orange-50 text-orange-700' : 'bg-blue-50 text-blue-700'} rounded-2xl text-sm font-bold flex items-center gap-2 border ${entry ? 'border-orange-100' : 'border-blue-100'} animate-fade-in">
                 <span class="text-lg">${entry ? '⚡' : '✨'}</span>
                 <span>${entry ? `이미 <strong>${entry.targetTime}초</strong>로 참여 중이에요. 수정할까요?` : '목표 시간을 입력 후 참여하기!'}</span>
             </div>`;
     }
 
     container.innerHTML = `
-      <div class="bg-white p-8 md:p-12 rounded-[3rem] shadow-2xl border border-orange-50 animate-in-up">
-        <button onclick="app.back()" class="text-orange-500 flex items-center gap-1.5 font-bold mb-8 hover:bg-orange-50 px-4 py-2 rounded-xl transition-all">
-          <i data-lucide="arrow-left" class="w-4 h-4"></i> 돌아가기
-        </button>
+      <div class="bg-white p-4 md:p-6 rounded-[3rem] shadow-2xl border border-orange-50 animate-in-up">
         
-        <div class="mb-10">
+        <div class="mb-3">
           <h2 class="text-3xl font-black text-slate-800 mb-2 leading-tight">${state.selectedRace.title}</h2>
           <p class="text-orange-400 font-bold flex items-center gap-1.5"><i data-lucide="calendar" class="w-4 h-4"></i> ${state.selectedRace.date}</p>
         </div>
         ${statusMessage}
-        <div class="space-y-6">
+        <div class="space-y-2">
           <div class="p-4 bg-orange-50/50 border border-orange-100 rounded-[1.5rem] flex flex-col gap-3">
               <input type="text" id="input-nickname" value="${nick}" placeholder="닉네임 입력" 
                      class="w-full p-5 bg-white border border-orange-100 rounded-[1.2rem] outline-none font-bold text-lg focus:ring-2 focus:ring-orange-300 transition-all" />
-              <button onclick="app.checkNickname()" class="w-full py-3.5 bg-orange-300 hover:bg-orange-400 text-white rounded-[1.2rem] font-black text-lg transition-all shadow-sm flex justify-center items-center gap-1">
+              <button onclick="app.checkNickname()" class="w-full py-1.5 bg-orange-300 hover:bg-orange-400 text-white rounded-[1.2rem] font-black text-lg transition-all shadow-sm flex justify-center items-center gap-1">
                 ① 닉네임 체크 ✅
               </button>
           </div>
@@ -430,19 +427,19 @@ const renderUser = () => {
                    class="w-full p-5 bg-orange-50/30 border border-orange-100 rounded-[1.5rem] outline-none font-mono font-black text-2xl text-orange-600 placeholder:text-orange-200 focus:ring-2 focus:ring-orange-300 transition-all" />
           </div>
 
-          <div class="flex flex-col gap-3 pt-2">
+          <div class="flex flex-col gap-1 pt-2">
             <div class="flex flex-col sm:flex-row gap-3">
               <button onclick="app.submitEntry()" id="btn-submit" 
-                      class="${entry ? 'flex-[2]' : 'w-full'} py-3.5 bg-orange-500 text-white font-black rounded-[1.5rem] shadow-lg hover:bg-orange-600 active:scale-[0.95] transition-all text-lg flex justify-center items-center gap-1">
+                      class="${entry ? 'flex-[2]' : 'w-full'} py-1.5 bg-orange-500 text-white font-black rounded-[1.5rem] shadow-lg hover:bg-orange-600 active:scale-[0.95] transition-all text-lg flex justify-center items-center gap-1">
                 ② ${entry ? '참여 정보 수정' : '참여하기🏃‍♂️'}
               </button>
               ${entry ? `
-                <button onclick="app.openCancel()" class="flex-1 py-3.5 bg-slate-100 text-slate-500 font-black rounded-[1.5rem] hover:bg-rose-50 hover:text-rose-600 transition-all text-lg flex justify-center items-center gap-1">
+                <button onclick="app.openCancel()" class="flex-1 py-1.5 bg-slate-100 text-slate-500 font-black rounded-[1.5rem] hover:bg-rose-50 hover:text-rose-600 transition-all text-lg flex justify-center items-center gap-1">
                   ❌ 삭제
                 </button>` : ''}
             </div>
             
-            <button onclick="app.back()" class="w-full py-3.5 bg-slate-300 hover:bg-slate-400 text-white rounded-[1.2rem] font-black text-lg transition-all shadow-sm flex justify-center items-center gap-1">
+            <button onclick="app.back()" class="w-full py-1.5 bg-slate-300 hover:bg-slate-400 text-white rounded-[1.2rem] font-black text-lg transition-all shadow-sm flex justify-center items-center gap-1">
                 <i data-lucide="arrow-left" class="w-4 h-4"></i> 돌아가기
             </button>
           </div>
