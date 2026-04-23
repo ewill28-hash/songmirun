@@ -262,6 +262,7 @@
       }
     });
 
+
     // --- UI 렌더링 ---
     const render = () => {
       const userView = document.getElementById('view-user');
@@ -320,7 +321,29 @@
           `;}).join('') : `<div class="text-center py-20 bg-white rounded-[2.5rem] border border-dashed border-orange-100 text-slate-400 font-bold">열린 레이스가 없습니다.</div>`) + `</div>`;
       } else {
         const nick = document.getElementById('input-nickname')?.value || "";
+
         const entry = state.entries.find(e => e.raceId === state.selectedRace.id && e.nickname === nick);
+
+        // 2. 메시지 영역 생성 로직
+        let statusMessage = '';
+
+        if (nick && state.hasChecked) {
+            if (entry) {
+                statusMessage = `
+                    <div class="mb-2 p-3 bg-orange-50 rounded-2xl text-orange-700 text-sm font-bold flex items-center gap-3 border border-orange-100 animate-fade-in">
+                        <span class="text-lg">⚡</span>
+                        <span>이미 <strong>${entry.targetTime}초</strong>로 참여 중이에요. 수정할까요?</span>
+                    </div>`;
+            } else {
+                statusMessage = `
+                    <div class="mb-2 p-3 bg-orange-50 rounded-2xl text-orange-700 text-sm font-bold flex items-center gap-3 border border-orange-100 animate-fade-in">
+                        <span class="text-lg">✨</span>
+                        <span>목표 시간을 입력 후 참여하기!</span>
+                    </div>`;
+            }
+        }
+
+
         container.innerHTML = `
           <div class="bg-white p-8 md:p-12 rounded-[3rem] shadow-2xl border border-orange-50 animate-in-up">
             <button onclick="app.back()" class="text-orange-500 flex items-center gap-1.5 font-bold mb-8 hover:bg-orange-50 px-4 py-2 rounded-xl transition-all">
@@ -330,12 +353,7 @@
               <h2 class="text-3xl font-black text-slate-800 mb-2 leading-tight">${state.selectedRace.title}</h2>
               <p class="text-orange-400 font-bold flex items-center gap-1.5"><i data-lucide="calendar" class="w-4 h-4"></i> ${state.selectedRace.date}</p>
             </div>
-            
-            ${entry ? `<div class="mb-8 p-5 bg-orange-50 rounded-2xl text-orange-700 text-sm font-bold flex items-center gap-3 border border-orange-100 animate-fade-in">
-              <span class="text-lg">⚡</span>
-              <span>이미 <strong>${entry.targetTime}초</strong>로 참여 중이에요. 수정할까요?</span>
-            </div>` : ''}
-
+            ${statusMessage}
 
 
             <div class="space-y-6">
@@ -349,7 +367,7 @@
                     class="w-full p-5 bg-white border border-orange-100 rounded-[1.2rem] outline-none font-bold text-lg focus:ring-2 focus:ring-orange-300 transition-all" 
                   />
                   <button 
-                    onclick="app.render()" 
+                    onclick="app.checkNickname()"
                     class="w-full py-3.5 bg-orange-300 hover:bg-orange-400 text-white rounded-[1.2rem] font-black text-lg transition-all shadow-sm flex justify-center items-center gap-1"
                   >
                     ① 닉네임 체크 ✅
@@ -358,7 +376,7 @@
               </div>
 
               <div>
-                <label class="block text-xs font-black text-slate-400 mb-2 ml-2 uppercase">목표 시간 (초) : 소수 둘째자리</label>
+                <label class="block text-xs font-black text-slate-400 mb-2 ml-2 uppercase">목표 시간 (초) : 소수 둘째자리 (10~20초) </label>
                 <input 
                   type="number" 
                   id="input-target-time" 
@@ -412,6 +430,7 @@
         `;
       }
     };
+
 
     const renderAdminAuth = () => {
       document.getElementById('view-admin-auth').innerHTML = `
@@ -502,9 +521,30 @@
       setView: (v) => { state.view = v; render(); },
       back: () => { state.selectedRace = null; render(); },
       selectRace: (id) => { state.selectedRace = state.races.find(r => r.id === id); render(); },
-      login: () => { if (document.getElementById('admin-pw').value === '33') { state.isAdmin = true; app.setView('admin_panel'); } else showToast("틀린 코드입니다.", "error"); },
+      login: () => { if (document.getElementById('admin-pw').value === '333') { state.isAdmin = true; app.setView('admin_panel'); } else showToast("틀린 코드입니다.", "error"); },
       logout: () => { state.isAdmin = false; app.setView('user'); },
       setFilter: (id) => { state.filterRaceId = id; render(); },
+
+
+
+
+        checkNickname: function() {
+            const nickInput = document.getElementById('input-nickname');
+            const nickValue = nickInput ? nickInput.value.trim() : "";
+
+            if (!nickValue) {
+                alert("닉네임을 입력해주세요!");
+                return;
+            }
+
+            // 상태 업데이트
+            state.currentNickname = nickValue;
+            state.hasChecked = true;
+
+            // 다시 렌더링
+            this.render(); // app.render()와 같음
+        },
+        
 
       downloadCSV: () => {
           // 1. 데이터 필터링
@@ -546,8 +586,8 @@
         if (!auth.currentUser) return;
         const nick = document.getElementById('input-nickname').value.trim();
         const time = parseFloat(document.getElementById('input-target-time').value);
-        if (!nick?.trim() || isNaN(time) || time < 5 || time > 60) {
-          return showToast("5~60초 사이의 정확한 시간을 입력하세요.", "error");
+        if (!nick?.trim() || isNaN(time) || time < 9 || time > 21) {
+          return showToast("10~20초 사이의 정확한 시간을 입력하세요.", "error");
         }
         
         const existing = state.entries.find(e => e.raceId === state.selectedRace.id && e.nickname === nick);
