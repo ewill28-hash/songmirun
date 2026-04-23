@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -42,7 +43,7 @@
             </div>
             <p class="text-sm font-bold tracking-tight text-slate-400 flex items-center justify-center sm:justify-start gap-1">
               <span class="inline-block animate-pulse text-blue-500">⚡</span>
-              Time Target Race 🌼
+              Target Time Race 🌼
             </p>
           </div>
 
@@ -282,20 +283,18 @@
       if (!state.selectedRace) {
         const activeRaces = state.races.filter(r => r.isActive);
         container.innerHTML = `
-          <div class="flex items-center gap-2 px-2 mb-4">
+        <div class="px-2 mb-4">
+        <div class="flex items-center gap-2 mb-3">
             <span class="text-xl">🏁</span>
             <h2 class="text-lg font-black text-slate-700 uppercase">레이스 목록</h2>
-            
+        </div>
 
-            <button onclick="location.href='./tmt.html'" 
-                    class="flex items-center gap-1.5 px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded-full transition-all transform active:scale-95 shadow-sm shadow-orange-200">
-                <i data-lucide="log-in" class="w-3.5 h-3.5"></i>
-                <span class="text-xs font-bold">대진표</span>
-            </button>
-
-
-
-          </div>
+        <button onclick="location.href='./tmt.html'" 
+                class="w-full flex items-center justify-center gap-2 px-3 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl transition-all transform active:scale-[0.98] shadow-sm shadow-orange-200">
+            <i data-lucide="log-in" class="w-5 h-5"></i>
+            <span class="text-sm font-bold">대진표 바로가기</span>
+        </button>
+        </div>
           <div class="grid gap-4">` + 
           (activeRaces.length ? activeRaces.map(r => {
             // 해당 레이스의 참가 인원수 계산
