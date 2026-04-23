@@ -313,9 +313,6 @@
                             <i data-lucide="image" class="w-3.5 h-3.5"></i> 이미지1
                         </button>
 
-                        <button id="capture-btn" onclick="window.captureScreenshot(event)" class="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 text-orange-600 rounded-lg text-xs font-bold hover:bg-orange-100 transition-all">
-                            <i data-lucide="camera" class="w-3.5 h-3.5"></i> 이미지2
-                        </button>
 
                     </div>
                 </div>
@@ -327,6 +324,11 @@
                 </div>`;
             
             setTimeout(() => drawConnectors(), 100);
+
+//<button id="capture-btn" onclick="window.captureScreenshot(event)" class="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 text-orange-600 rounded-lg text-xs font-bold hover:bg-orange-100 transition-all">
+    //<i data-lucide="camera" class="w-3.5 h-3.5"></i> 이미지2
+//</button>
+
         }
 
         function renderMatchCard(match, rIdx, mIdx) {
@@ -406,140 +408,140 @@
 
 
 
-window.downloadImage = async () => {
-    const container = document.getElementById('export-target'); 
-    
-    if (!container) return alert("저장할 대진표를 찾을 수 없습니다.");
-
-    // 1. 폰트 로드 대기
-    await document.fonts.ready;
-
-    // [핵심 1] 화면에 보이지 않는 스크롤 영역까지 포함한 실제 전체 크기 계산
-    const fullWidth = container.scrollWidth;
-    const fullHeight = container.scrollHeight;
-
-    const noExportElements = container.querySelectorAll('.no-export');
-    noExportElements.forEach(el => el.style.display = 'none');
-
-    try {
-        // 1. 전체 크기 계산 시 여유 공간 정의
-        const extraWidth = 500; 
-        const fullWidth = container.scrollWidth + extraWidth; // 실제 너비에 500px 추가
-        const fullHeight = container.scrollHeight;
-
-        const canvas = await html2canvas(container, {
-            backgroundColor: "#ffffff",
-            scale: 2, 
-            useCORS: true, 
-            logging: false,
+        window.downloadImage = async () => {
+            const container = document.getElementById('export-target'); 
             
-            // [보완] 캡처할 캔버스의 가로 크기를 500px 늘림
-            width: fullWidth,
-            height: fullHeight,
-            windowWidth: fullWidth,
-            windowHeight: fullHeight,
-            
-            onclone: (clonedDoc) => {
-                const clonedContainer = clonedDoc.getElementById('export-target');
-                if(clonedContainer) {
-                    // [보완] 복제된 요소의 너비도 늘려줘야 배경이 잘리지 않습니다.
-                    clonedContainer.style.width = fullWidth + 'px';
-                    clonedContainer.style.height = fullHeight + 'px';
-                    clonedContainer.style.overflow = 'visible';
+            if (!container) return alert("저장할 대진표를 찾을 수 없습니다.");
+
+            // 1. 폰트 로드 대기
+            await document.fonts.ready;
+
+            // [핵심 1] 화면에 보이지 않는 스크롤 영역까지 포함한 실제 전체 크기 계산
+            const fullWidth = container.scrollWidth;
+            const fullHeight = container.scrollHeight;
+
+            const noExportElements = container.querySelectorAll('.no-export');
+            noExportElements.forEach(el => el.style.display = 'none');
+
+            try {
+                // 1. 전체 크기 계산 시 여유 공간 정의
+                const extraWidth = 600; 
+                const fullWidth = container.scrollWidth + extraWidth; // 실제 너비에 500px 추가
+                const fullHeight = container.scrollHeight;
+
+                const canvas = await html2canvas(container, {
+                    backgroundColor: "#ffffff",
+                    scale: 2, 
+                    useCORS: true, 
+                    logging: false,
                     
-                    // 만약 오른쪽이 아닌 좌우로 여백을 나누고 싶다면 아래처럼 패딩을 줄 수도 있습니다.
-                    // clonedContainer.style.paddingRight = extraWidth + 'px';
-                }
-
-                const style = clonedDoc.createElement('style');
-                style.innerHTML = `
-                    #export-target * {
-                        line-height: 1.2 !important; 
-                        overflow: visible !important;
-                    }
-                `;
-                clonedDoc.head.appendChild(style);
-            }
-        });
-        const link = document.createElement('a');
-        link.download = `대진표_${new Date().getTime()}.png`;
-        link.href = canvas.toDataURL("image/png");
-        link.click();
-    } catch (err) {
-        console.error("이미지 저장 실패:", err);
-        alert("이미지 생성 중 오류가 발생했습니다.");
-    } finally {
-        noExportElements.forEach(el => el.style.display = '');
-    }
-};
-
-
-
-window.captureScreenshot = async () => { 
-    const btn = document.getElementById('capture-btn');
-    const target = document.getElementById('export-target');
-    if (!target || !btn) return;
-
-    document.body.classList.add('capturing');
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> 생성 중...';
-    lucide.createIcons();
-
-    await document.fonts.ready;
-
-    setTimeout(() => {
-        // 1. 전체 크기 계산 시 여유 공간 정의
-        const extraWidth = 500; 
-        const fullWidth = target.scrollWidth + extraWidth; // 실제 너비에 500px 추가
-        const fullHeight = target.scrollHeight;
-
-        html2canvas(target, {
-            backgroundColor: "#fffaf5",
-            scale: 2,
-            useCORS: true,
-            logging: false,
-            
-            // [보완] 캡처할 캔버스의 가로 크기를 500px 늘림
-            width: fullWidth,
-            height: fullHeight,
-            windowWidth: fullWidth,
-            windowHeight: fullHeight,
-            
-            onclone: (clonedDoc) => {
-                const ct = clonedDoc.getElementById('export-target');
-                if(ct) {
-                    // [보완] 복제된 요소의 너비도 늘려줘야 배경이 잘리지 않습니다.
-                    ct.style.width = fullWidth + 'px';
-                    ct.style.height = fullHeight + 'px';
-                    ct.style.overflow = 'visible';
+                    // [보완] 캡처할 캔버스의 가로 크기를 500px 늘림
+                    width: fullWidth,
+                    height: fullHeight,
+                    windowWidth: fullWidth,
+                    windowHeight: fullHeight,
                     
-                    // 만약 오른쪽이 아닌 좌우로 여백을 나누고 싶다면 아래처럼 패딩을 줄 수도 있습니다.
-                    // ct.style.paddingRight = extraWidth + 'px';
-                }
+                    onclone: (clonedDoc) => {
+                        const clonedContainer = clonedDoc.getElementById('export-target');
+                        if(clonedContainer) {
+                            // [보완] 복제된 요소의 너비도 늘려줘야 배경이 잘리지 않습니다.
+                            clonedContainer.style.width = fullWidth + 'px';
+                            clonedContainer.style.height = fullHeight + 'px';
+                            clonedContainer.style.overflow = 'visible';
+                            
+                            // 만약 오른쪽이 아닌 좌우로 여백을 나누고 싶다면 아래처럼 패딩을 줄 수도 있습니다.
+                            // clonedContainer.style.paddingRight = extraWidth + 'px';
+                        }
 
-                const style = clonedDoc.createElement('style');
-                style.innerHTML = `
-                    #export-target * {
-                        line-height: 1.2 !important; 
-                        overflow: visible !important;
+                        const style = clonedDoc.createElement('style');
+                        style.innerHTML = `
+                            #export-target * {
+                                line-height: 1.2 !important; 
+                                overflow: visible !important;
+                            }
+                        `;
+                        clonedDoc.head.appendChild(style);
                     }
-                `;
-                clonedDoc.head.appendChild(style);
+                });
+                const link = document.createElement('a');
+                link.download = `대진표_${new Date().getTime()}.png`;
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+            } catch (err) {
+                console.error("이미지 저장 실패:", err);
+                alert("이미지 생성 중 오류가 발생했습니다.");
+            } finally {
+                noExportElements.forEach(el => el.style.display = '');
             }
-        }).then(canvas => {
+        };
 
-            const link = document.createElement('a');
-            link.download = `${activeComp.title || '대진표'}_대진표.png`;
-            link.href = canvas.toDataURL('image/png', 1.0);
-            link.click();
-        }).catch(err => console.error("Capture Error", err))
-        .finally(() => {
-            document.body.classList.remove('capturing');
-            btn.innerHTML = originalText;
+
+
+        window.captureScreenshot = async () => { 
+            const btn = document.getElementById('capture-btn');
+            const target = document.getElementById('export-target');
+            if (!target || !btn) return;
+
+            document.body.classList.add('capturing');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> 생성 중...';
             lucide.createIcons();
-        });
-    }, 500); 
-};
+
+            await document.fonts.ready;
+
+            setTimeout(() => {
+                // 1. 전체 크기 계산 시 여유 공간 정의
+                const extraWidth = 600; 
+                const fullWidth = target.scrollWidth + extraWidth; // 실제 너비에 600 추가
+                const fullHeight = target.scrollHeight;
+
+                html2canvas(target, {
+                    backgroundColor: "#fffaf5",
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    
+                    // [보완] 캡처할 캔버스의 가로 크기를 500px 늘림
+                    width: fullWidth,
+                    height: fullHeight,
+                    windowWidth: fullWidth,
+                    windowHeight: fullHeight,
+                    
+                    onclone: (clonedDoc) => {
+                        const ct = clonedDoc.getElementById('export-target');
+                        if(ct) {
+                            // [보완] 복제된 요소의 너비도 늘려줘야 배경이 잘리지 않습니다.
+                            ct.style.width = fullWidth + 'px';
+                            ct.style.height = fullHeight + 'px';
+                            ct.style.overflow = 'visible';
+                            
+                            // 만약 오른쪽이 아닌 좌우로 여백을 나누고 싶다면 아래처럼 패딩을 줄 수도 있습니다.
+                            // ct.style.paddingRight = extraWidth + 'px';
+                        }
+
+                        const style = clonedDoc.createElement('style');
+                        style.innerHTML = `
+                            #export-target * {
+                                line-height: 1.2 !important; 
+                                overflow: visible !important;
+                            }
+                        `;
+                        clonedDoc.head.appendChild(style);
+                    }
+                }).then(canvas => {
+
+                    const link = document.createElement('a');
+                    link.download = `${activeComp.title || '대진표'}_대진표.png`;
+                    link.href = canvas.toDataURL('image/png', 1.0);
+                    link.click();
+                }).catch(err => console.error("Capture Error", err))
+                .finally(() => {
+                    document.body.classList.remove('capturing');
+                    btn.innerHTML = originalText;
+                    lucide.createIcons();
+                });
+            }, 500); 
+        };
 
 
         window.selectWinner = async (rIdx, mIdx, player) => {
