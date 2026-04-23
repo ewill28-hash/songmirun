@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -86,6 +87,48 @@
       </div>
     </div>
   </div>
+
+
+  <!-- 모달: 참여자 목록 -->
+<div id="modal-participants" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4 animate-fade-in">
+    <div class="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl flex flex-col max-h-[70vh] overflow-hidden border border-white/20">
+        
+        <div class="relative p-6 pb-4 shrink-0 bg-gradient-to-br from-orange-50 to-transparent">
+            <div class="flex justify-between items-start">
+                <div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-2xl">🏃‍♂️</span>
+                        <h3 class="text-xl font-black text-slate-800 tracking-tight">참여자 명단</h3>
+                    </div>
+                    <p id="participant-race-name" class="text-[11px] font-bold text-orange-500 bg-orange-100/50 px-2 py-0.5 rounded-md inline-block">
+                        </p>
+                </div>
+                <button onclick="app.closeModal('participants')" class="p-2 bg-white hover:bg-rose-50 text-slate-400 hover:text-rose-500 rounded-2xl shadow-sm transition-all active:scale-90">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="overflow-y-auto px-3 pb-3 scroll-hide">
+            <table class="w-full">
+                <thead class="sticky top-0 bg-white z-10">
+                    <tr class="text-[10px] uppercase tracking-wider text-slate-400 border-b border-slate-100">
+                        <th class="py-2 font-semibold w-10 text-center">#</th>
+                        <th class="py-2 font-semibold text-left">닉네임</th>
+                        <th class="py-2 font-semibold text-right text-orange-400">⏱ 목표</th>
+                    </tr>
+                </thead>
+                <tbody id="participant-list-body" class="divide-y divide-slate-50">
+                    </tbody>
+            </table>
+
+            <div id="participant-empty" class="hidden py-16 text-center">
+                <div class="text-4xl mb-2">👻</div>
+                <p class="text-sm text-slate-400 font-medium">아직 참여자가 없어요!</p>
+            </div>
+        </div>
+    </div>
+</div>
 
   <!-- 참여자 수정 모달 -->
   <div id="modal-edit-entry" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden animate-fade-in">
@@ -263,6 +306,9 @@
     });
 
 
+
+
+
     // --- UI 렌더링 ---
     const render = () => {
       const userView = document.getElementById('view-user');
@@ -299,25 +345,33 @@
           <div class="grid gap-4">` + 
           (activeRaces.length ? activeRaces.map(r => {
             // 해당 레이스의 참가 인원수 계산
-            const count = state.entries.filter(e => e.raceId === r.id).length;
+            const count         = state.entries.filter(e => e.raceId === r.id).length;
+            const raceEntries   = state.entries.filter(e => e.raceId === r.id);
+
             return `
-            <button onclick="app.selectRace('${r.id}')" class="bg-white p-7 rounded-[2rem] border border-orange-100 flex justify-between items-center hover:scale-[1.01] transition-all text-left group">
-              <div>
-                <div class="flex items-center gap-3 mb-1">
-                  <h3 class="font-black text-2xl text-slate-800">${r.title}</h3>
-                  <span class="bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-xs font-black shadow-sm group-hover:bg-orange-500 group-hover:text-white transition-colors">
-                    ${count}명 참여 중
-                  </span>
+  
+                <div class="flex justify-between items-start mb-3">
+                <div class="flex-1 cursor-pointer" onclick="app.selectRace('${r.id}')">
+                    <h3 class="text-lg font-bold text-slate-800 leading-tight">${r.title}</h3>
+                    <p class="text-xs text-slate-500 mt-1 line-clamp-1">${r.date || '🏆'}</p>
                 </div>
-                <div class="flex items-center gap-1.5 text-slate-400 font-medium">
-                  <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
-                  <span>${r.date}</span>
+                <div class="p-2 text-orange-400 cursor-pointer" onclick="app.openJoin('${r.id}')">
+                    <i data-lucide="chevron-right" class="w-5 h-5"></i>
                 </div>
-              </div>
-              <div class="bg-orange-50 p-3 rounded-2xl text-orange-400 group-hover:bg-orange-100 group-hover:text-orange-600 transition-all">
-                <i data-lucide="chevron-right" class="w-6 h-6"></i>
-              </div>
-            </button>
+                </div>
+                <div class="flex items-center justify-between pt-3 border-t border-orange-100/50">
+                <button onclick="app.openParticipants('${r.id}')" class="text-xs font-bold text-orange-600 flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-full border border-orange-100 hover:bg-orange-500 hover:text-white transition-colors">
+                    <i data-lucide="users" class="w-3.5 h-3.5"></i>
+                    <span>${count}명 참여 중</span>
+                </button>
+                <div class="flex -space-x-2">
+                    ${raceEntries.slice(0, 3).map((_, i) => `<div class="w-6 h-6 rounded-full border-2 border-white bg-orange-${200 + (i*100)}"></div>`).join('')}
+                    ${raceEntries.length > 3 ? `<div class="w-6 h-6 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-[8px] font-bold text-slate-400">+${raceEntries.length - 3}</div>` : ''}
+                </div>
+                </div>
+
+
+
           `;}).join('') : `<div class="text-center py-20 bg-white rounded-[2.5rem] border border-dashed border-orange-100 text-slate-400 font-bold">열린 레이스가 없습니다.</div>`) + `</div>`;
       } else {
         const nick = document.getElementById('input-nickname')?.value || "";
@@ -526,6 +580,56 @@
       setFilter: (id) => { state.filterRaceId = id; render(); },
 
 
+// 2. 참여자 모달 열기 (문법 수정됨)
+    openParticipants: (raceId) => {
+        const race = state.races.find(r => r.id === raceId);
+        const raceNameElement = document.getElementById('participant-race-name');
+        if (raceNameElement) {
+            raceNameElement.innerText = race ? race.title : '알 수 없는 대회';
+        }
+
+        const participants = state.entries
+            .filter(e => e.raceId === raceId)
+            .sort((a, b) => a.nickname.localeCompare(b.nickname, 'ko'));
+
+        const listBody = document.getElementById('participant-list-body');
+        const emptyMsg = document.getElementById('participant-empty');
+
+        if (participants.length > 0) {
+            emptyMsg.classList.add('hidden');
+            listBody.innerHTML = participants.map((e, index) => `
+                <tr class="hover:bg-orange-50/30 transition-colors">
+                    <td class="py-1 text-center text-[10px] font-bold text-slate-300 font-mono">${index + 1}</td>
+                    <td class="py-1">
+                        <span class="text-[11px] font-bold text-slate-700">${e.nickname}</span>
+                    </td>
+                    <td class="py-1 text-right">
+                        <span class="text-[10px] font-black text-slate-600 font-mono">${e.targetTime}</span>
+                        <span class="text-[9px] text-slate-400 ml-0.5">s</span>
+                    </td>
+                </tr>
+            `).join('');
+        } else {
+            listBody.innerHTML = '';
+            emptyMsg.classList.remove('hidden');
+        }
+
+        const modal = document.getElementById('modal-participants');
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+        if (window.lucide) lucide.createIcons();
+    },
+
+    // 3. 모달 닫기 추가
+    closeModal: (id) => {
+        const modal = document.getElementById(`modal-${id}`);
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+    },
 
 
         checkNickname: function() {
