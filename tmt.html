@@ -482,7 +482,8 @@ function renderBracketView(container) {
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.download = `${activeComp.title}_결과.csv`;
+            //link.download = `${activeComp.title}_결과.csv`;
+            link.download = `${activeComp.title || '대진표'}_대진결과_${new Date().getTime()}.csv`;
             link.click();
         };
 
@@ -545,7 +546,7 @@ function renderBracketView(container) {
                 });
                 const link = document.createElement('a');
                 //link.download = `대진표_${new Date().getTime()}.png`;
-                link.download = `${activeComp.title || '대진표'}_대진표_${new Date().getTime()}.png`;
+                link.download = `${activeComp.title || '대진표'}_대진결과_${new Date().getTime()}.png`;
 
                 link.href = canvas.toDataURL("image/png");
                 link.click();
