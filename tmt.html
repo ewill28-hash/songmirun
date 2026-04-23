@@ -40,7 +40,7 @@
                 <button onclick="location.href='./ttr.html'"
                             class="flex items-center gap-1.5 px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded-full transition-all transform active:scale-95 shadow-sm shadow-orange-200">
                         <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
-                        <span class="text-xs font-bold">참가화면</span>
+                        <span class="text-xs font-bold">참가 화면</span>
                     </button>
                                     
             </div>
@@ -404,98 +404,125 @@
             link.click();
         };
 
+window.downloadImage = async () => {
+    const container = document.getElementById('export-target'); 
+    
+    if (!container) return alert("저장할 대진표를 찾을 수 없습니다.");
 
-        window.downloadImage = async () => {
-            const container = document.getElementById('export-target'); 
-            
-            if (!container) return alert("저장할 대진표를 찾을 수 없습니다.");
+    // 1. 폰트 로드 대기
+    await document.fonts.ready;
 
-            // [핵심 1] 폰트가 완전히 로드될 때까지 대기
-            await document.fonts.ready;
+    // [핵심 1] 화면에 보이지 않는 스크롤 영역까지 포함한 실제 전체 크기 계산
+    const fullWidth = container.scrollWidth;
+    const fullHeight = container.scrollHeight;
 
-            const noExportElements = container.querySelectorAll('.no-export');
-            noExportElements.forEach(el => el.style.display = 'none');
+    const noExportElements = container.querySelectorAll('.no-export');
+    noExportElements.forEach(el => el.style.display = 'none');
 
-            try {
-                const canvas = await html2canvas(container, {
-                    backgroundColor: "#ffffff",
-                    scale: 2, 
-                    useCORS: true, 
-                    logging: false,
-                    // [핵심 2] 캡쳐할 때만 복제된 DOM에 임시 CSS 적용
-                    onclone: (clonedDoc) => {
-                        const style = clonedDoc.createElement('style');
-                        style.innerHTML = `
-                            /* 텍스트 잘림을 방지하기 위해 line-height를 넉넉하게 주고 overflow를 풀어줍니다 */
-                            #export-target * {
-                                line-height: 1.2 !important; 
-                                overflow: visible !important;
-                            }
-                            /* 만약 특정 클래스의 텍스트가 계속 잘린다면 아래처럼 패딩을 강제로 줍니다 */
-                            /* .이름이들어가는클래스명 { padding-bottom: 2px !important; } */
-                        `;
-                        clonedDoc.head.appendChild(style);
+    try {
+        const canvas = await html2canvas(container, {
+            backgroundColor: "#ffffff",
+            scale: 2, 
+            useCORS: true, 
+            logging: false,
+            // [핵심 2] 캔버스와 가상 윈도우의 크기를 실제 콘텐츠 크기로 강제 지정
+            width: fullWidth,
+            height: fullHeight,
+            windowWidth: fullWidth,
+            windowHeight: fullHeight,
+            onclone: (clonedDoc) => {
+                const clonedContainer = clonedDoc.getElementById('export-target');
+                if(clonedContainer) {
+                    // [핵심 3] 복제된 DOM의 크기도 강제로 펼쳐줌
+                    clonedContainer.style.width = fullWidth + 'px';
+                    clonedContainer.style.height = fullHeight + 'px';
+                    clonedContainer.style.overflow = 'visible'; // 스크롤바 숨기고 전체 표시
+                }
+
+                const style = clonedDoc.createElement('style');
+                style.innerHTML = `
+                    #export-target * {
+                        line-height: 1.2 !important; 
+                        overflow: visible !important;
                     }
-                });
-
-                const link = document.createElement('a');
-                link.download = `대진표_${new Date().getTime()}.png`;
-                link.href = canvas.toDataURL("image/png");
-                link.click();
-            } catch (err) {
-                console.error("이미지 저장 실패:", err);
-                alert("이미지 생성 중 오류가 발생했습니다.");
-            } finally {
-                noExportElements.forEach(el => el.style.display = '');
+                `;
+                clonedDoc.head.appendChild(style);
             }
-        };
+        });
 
-        window.captureScreenshot = async () => { // async 추가
-            const btn = document.getElementById('capture-btn');
-            const target = document.getElementById('export-target');
-            if (!target || !btn) return;
+        const link = document.createElement('a');
+        link.download = `대진표_${new Date().getTime()}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+    } catch (err) {
+        console.error("이미지 저장 실패:", err);
+        alert("이미지 생성 중 오류가 발생했습니다.");
+    } finally {
+        noExportElements.forEach(el => el.style.display = '');
+    }
+};
 
-            document.body.classList.add('capturing');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> 생성 중...';
-            lucide.createIcons();
 
-            // [핵심 1] 폰트 로드 대기
-            await document.fonts.ready;
 
-            setTimeout(() => {
-                html2canvas(target, {
-                    backgroundColor: "#fffaf5",
-                    scale: 2,
-                    useCORS: true,
-                    logging: false,
-                    onclone: (clonedDoc) => {
-                        const ct = clonedDoc.getElementById('export-target');
-                        if(ct) ct.style.padding = "40px";
+window.captureScreenshot = async () => { 
+    const btn = document.getElementById('capture-btn');
+    const target = document.getElementById('export-target');
+    if (!target || !btn) return;
 
-                        // [핵심 2] 캡쳐용 임시 스타일 주입
-                        const style = clonedDoc.createElement('style');
-                        style.innerHTML = `
-                            #export-target * {
-                                line-height: 1.2 !important;
-                                overflow: visible !important;
-                            }
-                        `;
-                        clonedDoc.head.appendChild(style);
+    document.body.classList.add('capturing');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> 생성 중...';
+    lucide.createIcons();
+
+    await document.fonts.ready;
+
+    // [핵심 1] 전체 크기 계산
+    const fullWidth = target.scrollWidth;
+    const fullHeight = target.scrollHeight;
+
+    setTimeout(() => {
+        html2canvas(target, {
+            backgroundColor: "#fffaf5",
+            scale: 2,
+            useCORS: true,
+            logging: false,
+            // [핵심 2] 캔버스 및 가상 윈도우 크기 지정
+            width: fullWidth,
+            height: fullHeight,
+            windowWidth: fullWidth,
+            windowHeight: fullHeight,
+            onclone: (clonedDoc) => {
+                const ct = clonedDoc.getElementById('export-target');
+                if(ct) {
+                    // 패딩 여유분을 추가할 경우 전체 높이/너비에도 패딩만큼 더해줘야 안 잘림
+                    ct.style.padding = "40px";
+                    ct.style.width = (fullWidth + 80) + 'px';  // 좌우 패딩 40px * 2
+                    ct.style.height = (fullHeight + 80) + 'px'; // 상하 패딩 40px * 2
+                    ct.style.overflow = 'visible';
+                }
+
+                const style = clonedDoc.createElement('style');
+                style.innerHTML = `
+                    #export-target * {
+                        line-height: 1.2 !important;
+                        overflow: visible !important;
                     }
-                }).then(canvas => {
-                    const link = document.createElement('a');
-                    link.download = `${activeComp.title || '대진표'}_대진표.png`;
-                    link.href = canvas.toDataURL('image/png', 1.0);
-                    link.click();
-                }).catch(err => console.error("Capture Error", err))
-                .finally(() => {
-                    document.body.classList.remove('capturing');
-                    btn.innerHTML = originalText;
-                    lucide.createIcons();
-                });
-            }, 500); // 폰트 로드 후 UI가 완전히 렌더링될 시간을 넉넉히 줍니다.
-        };
+                `;
+                clonedDoc.head.appendChild(style);
+            }
+        }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = `${activeComp.title || '대진표'}_대진표.png`;
+            link.href = canvas.toDataURL('image/png', 1.0);
+            link.click();
+        }).catch(err => console.error("Capture Error", err))
+        .finally(() => {
+            document.body.classList.remove('capturing');
+            btn.innerHTML = originalText;
+            lucide.createIcons();
+        });
+    }, 500); 
+};
 
         window.selectWinner = async (rIdx, mIdx, player) => {
             if (!isOper || !activeComp || !user) return;
