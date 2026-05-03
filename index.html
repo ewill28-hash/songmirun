@@ -628,11 +628,11 @@
                                     </button>
                                     <button onclick="window.setTeamFilter2('흑수저')" id="filter2-ts" 
                                             class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all inactive flex items-center justify-center gap-1">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-[#3b82f6]"></span>팀:흑수저
+                                        <span class="w-1.5 h-1.5 rounded-full bg-[#212529 ]"></span>팀:흑수저
                                     </button>
                                     <button onclick="window.setTeamFilter2('백수저')" id="filter2-th" 
                                             class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all inactive flex items-center justify-center gap-1">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-[#f87171]"></span>팀:백수저
+                                        <span class="w-1.5 h-1.5 rounded-full bg-[#ED2939]"></span>팀:백수저
                                     </button>
                                     <button onclick="window.setTeamFilter2('이봉주')" id="filter2-tl" 
                                             class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all inactive flex items-center justify-center gap-1">
@@ -736,11 +736,11 @@
                                     </button>
                                     <button onclick="window.setTeamFilter('흑수저')" id="filter-ts" 
                                             class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all inactive flex items-center justify-center gap-1">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-[#3b82f6]"></span>팀:흑수저
+                                        <span class="w-1.5 h-1.5 rounded-full bg-[#212529 ]"></span>팀:흑수저
                                     </button>
                                     <button onclick="window.setTeamFilter('백수저')" id="filter-th" 
                                             class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all inactive flex items-center justify-center gap-1">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-[#f87171]"></span>팀:백수저
+                                        <span class="w-1.5 h-1.5 rounded-full bg-[#ED2939]"></span>팀:백수저
                                     </button>
                                     <button onclick="window.setTeamFilter('이봉주')" id="filter-tl" 
                                             class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all inactive flex items-center justify-center gap-1">
@@ -1945,8 +1945,8 @@
 
 
         const TEAM_COLORS = { 
-            '백수저': '#f87171', 
-            '흑수저': '#3b82f6', 
+            '백수저': '#ED2939', 
+            '흑수저': '#212529 ', 
             '이봉주': '#22c55e', 
             '홀가분': '#facc15'     
         };
@@ -2069,7 +2069,7 @@
 
                 labels = ['내 기록', `${myTeamName} 평균`];
                 dataPoints = [getVal(myStats), teamAvg];
-                colors = [TEAM_COLORS[myTeamName] || '#3b82f6', '#e2e8f0'];
+                colors = [TEAM_COLORS[myTeamName] || '#212529 ', '#e2e8f0'];
 
             } else {
                 // 전체 팀 비교 모드
@@ -2758,7 +2758,7 @@
 
             const paceData = paceRaw.map(p => p.dist > 0 ? (p.time / p.dist).toFixed(2) : 0);
             const labels = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
-            const themeColor = selectedGender === '여성' ? '#f472b6' : (selectedGender === '남성' ? '#3b82f6' : '#22c55e');
+            const themeColor = selectedGender === '여성' ? '#f472b6' : (selectedGender === '남성' ? '#212529 ' : '#22c55e');
 
             const createChart = (id, type, label, data, color, options = {}) => {
                 const ctx = document.getElementById(id);
