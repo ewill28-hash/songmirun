@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -632,7 +633,7 @@
                                     </button>
                                     <button onclick="window.setTeamFilter2('흑수저')" id="filter2-ts" 
                                             class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all inactive flex items-center justify-center gap-1">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-[#212529 ]"></span>팀:흑수저
+                                        <span class="w-1.5 h-1.5 rounded-full bg-[#212529]"></span>팀:흑수저
                                     </button>
 
                                     <button onclick="window.setTeamFilter2('홀가분')" id="filter2-tl" 
@@ -741,7 +742,7 @@
                                     </button>
                                     <button onclick="window.setTeamFilter('흑수저')" id="filter-ts" 
                                             class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all inactive flex items-center justify-center gap-1">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-[#212529 ]"></span>팀:흑수저
+                                        <span class="w-1.5 h-1.5 rounded-full bg-[#212529]"></span>팀:흑수저
                                     </button>
 
                                     <button onclick="window.setTeamFilter('홀가분')" id="filter-tl" 
@@ -1913,7 +1914,10 @@
                             <div class="h-2 bg-slate-200/60 rounded-full overflow-hidden">
                                 <div class="h-full transition-all duration-1000 ease-out" 
                                     style="width: ${percent}%; background-color: ${data.color}; 
-                                    ${targetId.includes('gender') ? 'background: repeating-linear-gradient(45deg, rgba(255,255,255,0.1) 0px, rgba(255,255,255,0.1) 6px, transparent 6px, transparent 12px), ' + data.color : ''}">
+                                    ${targetId.includes('gender') 
+                                        ? `background: repeating-linear-gradient(90deg, rgba(255,255,255,0.5) 0px, rgba(255,255,255,0.5) 6px, transparent 6px, transparent 12px), ${data.color};` 
+                                        : `background: repeating-linear-gradient(45deg, rgba(255,255,255,0.5) 0px, rgba(255,255,255,0.5) 6px, transparent 6px, transparent 12px), ${data.color};`
+                                    }">
                                 </div>
                             </div>
                         </div>`;
@@ -1949,7 +1953,7 @@
 
         const TEAM_COLORS = { 
             '백수저': '#ED2939', 
-            '흑수저': '#212529 ', 
+            '흑수저': '#808080 ', 
             '이봉주': '#22c55e', 
             '홀가분': '#facc15'     
         };
