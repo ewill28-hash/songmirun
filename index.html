@@ -2988,7 +2988,7 @@
             };
 
             const pointRank = Object.entries(userAgg).map(([name, obj]) => {
-                const pointVal = (obj.distance * 1) + (obj.duration/60 *10) + (obj.count * 0.1);
+                const pointVal = (obj.distance * 1) + (obj.duration/60 *10) * 0.5 + (obj.count * 0.1);
                 const timeStr = formatTimeHMS(obj.duration);
 
                 return { 
