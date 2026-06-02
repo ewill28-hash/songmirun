@@ -4716,7 +4716,7 @@
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
     // 3일보다 더 과거라면 (예: 오늘이 4일인데 1일(차이 3일)은 가능, 31일(차이 4일)은 불가능)
-    if (diffDays > 3) {
+    if (diffDays > 2) {
         showModal("⚠️ 최근 3일간의 기록 입력이 가능합니다.\n\n 과거 데이터 입력은 모임장에게 문의해주세요 💡", "alert");
         dateInput.value = ""; // 잘못된 날짜 입력값 초기화 (선택사항)
         return; // 이후 정기런 요일 체크를 하지 않고 함수 종료
