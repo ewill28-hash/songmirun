@@ -4703,6 +4703,25 @@
 
                 if (!selectedDateValue) return;
 
+
+// 1. 날짜 유효성 체크 (최근 3일 이내인지 확인)
+    const selectedDate = new Date(selectedDateValue);
+    selectedDate.setHours(0, 0, 0, 0); // 시간 조건 초기화
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // 오늘 날짜 시간 조건 초기화
+
+    // 두 날짜의 차이 계산 (밀리초 -> 일 단위 변환)
+    const diffTime = today - selectedDate;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    // 3일보다 더 과거라면 (예: 오늘이 4일인데 1일(차이 3일)은 가능, 31일(차이 4일)은 불가능)
+    if (diffDays > 3) {
+        showModal("⚠️ 최근 3일간의 기록 입력이 가능합니다.\n\n 과거 데이터 입력은 모임장에게 문의해주세요 💡", "alert");
+        return; // 이후 정기런 요일 체크를 하지 않고 함수 종료
+    }
+                
+                
                 const date = new Date(selectedDateValue);
                 const isMonday = date.getDay() === 1;
 
