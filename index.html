@@ -627,18 +627,17 @@
                                             class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all active flex items-center justify-center gap-1">
                                         전체
                                     </button>
-                                    <button onclick="window.setTeamFilter2('백수저')" id="filter2-th" 
+                                    <button onclick="window.setTeamFilter2('개토원양')" id="filter2-ts" 
                                             class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all inactive flex items-center justify-center gap-1">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-[#ED2939]"></span>팀:백수저
+                                        <span class="w-1.5 h-1.5 rounded-full bg-[#3b82f6]"></span>개토원양
                                     </button>
-                                    <button onclick="window.setTeamFilter2('흑수저')" id="filter2-ts" 
+                                    <button onclick="window.setTeamFilter2('돼지뱀말')" id="filter2-th" 
                                             class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all inactive flex items-center justify-center gap-1">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-[#212529]"></span>팀:흑수저
+                                        <span class="w-1.5 h-1.5 rounded-full bg-[#f87171]"></span>돼지뱀말
                                     </button>
-
-                                    <button onclick="window.setTeamFilter2('홀가분')" id="filter2-tl" 
+                                    <button onclick="window.setTeamFilter2('호랑용소')" id="filter2-tl" 
                                             class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all inactive flex items-center justify-center gap-1">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-[#22c55e]"></span>팀:홀가분
+                                        <span class="w-1.5 h-1.5 rounded-full bg-[#22c55e]"></span>호랑용소
                                     </button>
                                 </div>
                             </section>
@@ -736,18 +735,17 @@
                                             class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all active flex items-center justify-center gap-1">
                                         전체
                                     </button>
-                                    <button onclick="window.setTeamFilter('백수저')" id="filter-th" 
+                                    <button onclick="window.setTeamFilter('개토원양')" id="filter-ts" 
                                             class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all inactive flex items-center justify-center gap-1">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-[#ED2939]"></span>팀:백수저
+                                        <span class="w-1.5 h-1.5 rounded-full bg-[#3b82f6]"></span>개토원양
                                     </button>
-                                    <button onclick="window.setTeamFilter('흑수저')" id="filter-ts" 
+                                    <button onclick="window.setTeamFilter('돼지뱀말')" id="filter-th" 
                                             class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all inactive flex items-center justify-center gap-1">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-[#212529]"></span>팀:흑수저
+                                        <span class="w-1.5 h-1.5 rounded-full bg-[#f87171]"></span>돼지뱀말
                                     </button>
-
-                                    <button onclick="window.setTeamFilter('홀가분')" id="filter-tl" 
+                                    <button onclick="window.setTeamFilter('호랑용소')" id="filter-tl" 
                                             class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all inactive flex items-center justify-center gap-1">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-[#22c55e]"></span>팀:홀가분
+                                        <span class="w-1.5 h-1.5 rounded-full bg-[#22c55e]"></span>호랑용소
                                     </button>
                                 </div>
                             </div>
@@ -831,8 +829,9 @@
                                 <label class="text-[10px] text-gray-400 font-bold block mb-1">소속팀 (team)</label>
                                 <select id="mem-team" class="w-full bg-white border border-green-100 p-3 rounded-xl text-sm font-bold outline-none">
                                     <option value="">선택</option>
-                                    <option value="백수저">백수저</option>
-                                    <option value="흑수저">흑수저</option>
+                                    <option value="개토원양">개토원양</option>
+                                    <option value="돼지뱀말">돼지뱀말</option>
+                                    <option value="호랑용소">호랑용소</option>
                                     <option value="홀가분">홀가분</option>
                                 </select>
                             </div>
@@ -1161,9 +1160,6 @@
                         <select id="prof-new-team" disabled
                                         class="w-full bg-white border-2 border-brand-100 p-4 rounded-2xl text-sm font-bold outline-none focus:ring-2 ring-brand-400 shadow-sm transition-all appearance-none cursor-pointer">
                                     <option value="" >팀 선택</option>
-                                    <option value="백수저">팀:백수저</option>
-                                    <option value="흑수저">팀:흑수저</option>
-
                                     <option value="홀가분">팀:홀가분</option>
                                 </select>
                     </div>
@@ -1443,7 +1439,7 @@
             selectedTeam = team;
             ['filter-tall', 'filter-ts', 'filter-th', 'filter-tl'].forEach(id => {
                 const el = document.getElementById(id);
-                const isActive = (id === 'filter-tall' && team === '전체') || (id === 'filter-ts' && team === '흑수저') || (id === 'filter-th' && team === '백수저')|| (id === 'filter-tl' && team === '홀가분');
+                const isActive = (id === 'filter-tall' && team === '전체') || (id === 'filter-ts' && team === '개토원양') || (id === 'filter-th' && team === '돼지뱀말')|| (id === 'filter-tl' && team === '호랑용소');
                 el.classList.toggle('active', isActive);
                 el.classList.toggle('inactive', !isActive);
             });
@@ -1454,7 +1450,7 @@
             selectedTeam2 = team;
             ['filter2-tall', 'filter2-ts', 'filter2-th', 'filter2-tl'].forEach(id => {
                 const el = document.getElementById(id);
-                const isActive = (id === 'filter2-tall' && team === '전체') || (id === 'filter2-ts' && team === '흑수저') || (id === 'filter2-th' && team === '백수저')|| (id === 'filter2-tl' && team === '홀가분');
+                const isActive = (id === 'filter2-tall' && team === '전체') || (id === 'filter2-ts' && team === '개토원양') || (id === 'filter2-th' && team === '돼지뱀말')|| (id === 'filter2-tl' && team === '호랑용소');
                 el.classList.toggle('active', isActive);
                 el.classList.toggle('inactive', !isActive);
             });
@@ -1954,9 +1950,9 @@
 
 
         const TEAM_COLORS = { 
-            '백수저': '#ED2939', 
-            '흑수저': '#212529', 
-            '이봉주': '#22c55e', 
+            '개토원양': '#ED2939', 
+            '돼지뱀말': '#212529', 
+            '호랑용소': '#22c55e', 
             '홀가분': '#facc15'     
         };
 
