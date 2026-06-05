@@ -2925,9 +2925,14 @@
 
             const drawRankList = (elementId, data, unit, isTimeFormat = false) => {
                 const container = document.getElementById(elementId);
-                const sorted = data.slice(0, 5);
+                
+                // [추가] 닉네임(item.name)에 '@'가 포함된 사용자는 랭킹에서 제외
+                const filteredData = data.filter(item => !item.name.includes('@'));
+                
+                // 필터링된 데이터에서 상위 5개만 추출
+                const sorted = filteredData.slice(0, 5);
                 const maxVal = sorted.length > 0 ? Number(sorted[0].valRaw || sorted[0].val) : 1;
-
+            
                 const isDistanceRank = elementId.includes('dist');
 
                 container.innerHTML = sorted.map((item, i) => {
