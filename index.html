@@ -1889,7 +1889,7 @@
                     const lastDay = new Date(todayForCheck.getFullYear(), todayForCheck.getMonth() + 1, 0).getDate();
                     
                     // 오늘 날짜가 (월말 - 1) 이상인 경우 (즉, 월말-1일과 월말 본 당일 모두 포함)
-                    const isEndOfMonthRange = todayForCheck.getDate() >= (lastDay - 25);
+                    //const isEndOfMonthRange = todayForCheck.getDate() >= (lastDay - 25);
                                         
                     return `
                         <div class="space-y-1 bg-slate-50 p-1 rounded-xl mb-2"> 
@@ -1905,7 +1905,7 @@
                                     <span 
                                         class="badge-stat ${currentMetric === 'score' ? 'highlight' : ''} ${(titlePrefix === '팀' && isSlowRun) ? 'cursor-pointer hover:underline' : ''}" 
                                         ${(titlePrefix === '팀' && isSlowRun) ? `onclick="showTeamMembers('${data.name}', 'tp2')"` : ''}>
-                                        ${(isSlowRun || titlePrefix !== '팀' || isEndOfMonthOrYesterday) ? `${data.score.toFixed(1)} pt` : 'X pt'}
+                                        ${(isSlowRun || titlePrefix !== '팀' ) ? `${data.score.toFixed(1)} pt` : 'X pt'}
                                         
                                     </span>
                                     <span class="badge-stat ${currentMetric==='dist'?'highlight':''}">${data.dist.toFixed(1)}km</span>
