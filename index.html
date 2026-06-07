@@ -4338,8 +4338,8 @@
                 if(!date || dist <= 0 || totalMin <= 0) return showModal("💡필수 항목(날짜, 거리, 시간)을 입력해주세요✅", "alert");
 
                 const pace = totalMin / dist;
-                if (pace < 3.0) return showModal("잠시만요! ⚡ 페이스가 너무 빠릅니다. 기록을 확인해주세요.", "alert");
-                if (pace > 20) return showModal("러닝 시간을 잘 입력하셨나요? 🐢", "alert");
+                if (pace < 3.0) return showModal("엘리트 선수급! ⚡ 페이스가 너무 빠릅니다. 기록을 확인해주세요.", "alert");
+                if (pace > 15) return showModal("슬로우런 응원합니다. 시간을 잘 입력하셨나요? 🐢", "alert");
                 
                 if(bpm !== 0 && (bpm < 70 || bpm > 220)) return showModal("⚡인간의 심박수가 아님 \n\n심박수 범위를 확인해주세요.", "alert");
                 if(cadence !== 0 && (cadence < 100 || cadence > 250)) return showModal("케이던스 범위를 확인해주세요.", "alert");
