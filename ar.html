@@ -1,0 +1,1055 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>실시간 데이터 기반 팀별 누적 Pt 순위</title>
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+
+        /* 2열 대시보드 레이아웃 */
+        .dashboard-wrapper {
+            display: flex;
+            gap: 25px;
+            width: 100%;
+            max-width: 1300px;
+            align-items: stretch;
+        }
+
+        /* 메인 시각화 카드 */
+        .container {
+            flex: 2;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* 사이드바 CSV 입력창 */
+        .sidebar {
+            flex: 1;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 1.8rem;
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #1a202c;
+        }
+
+        .sidebar h2 {
+            font-size: 1.3rem;
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #2d3748;
+            border-bottom: 2px solid #edf2f7;
+            padding-bottom: 8px;
+        }
+
+        p {
+            text-align: center;
+            font-size: 1rem;
+            color: #666;
+            margin-top: 0;
+            margin-bottom: 25px;
+        }
+
+        #current-date {
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        /* 동적 높이를 가지는 차트 컨테이너 */
+        .chart-container {
+            position: relative;
+            margin-top: 20px;
+            width: 100%;
+            transition: height 0.5s ease;
+        }
+
+        /* Absolute 배치를 통한 스왑 애니메이션 */
+        .bar-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: absolute;
+            left: 0;
+            right: 0;
+            width: 100%;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .team-label {
+            width: 100px;
+            font-weight: bold;
+            text-align: right;
+            font-size: 0.95rem;
+            color: #4a5568;
+            flex-shrink: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .bar-wrapper {
+            flex-grow: 1;
+            height: 40px;
+            position: relative;
+        }
+
+        .bar {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 40px;
+            border-radius: 20px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            padding-right: 15px;
+            justify-content: flex-end;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.08);
+            min-width: 80px;
+        }
+
+        .distance-label {
+            font-size: 0.9rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        /* 타임라인 레이아웃 */
+        .timeline-container {
+            margin-top: 40px;
+            padding: 15px 10px;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            position: relative;
+        }
+
+        .timeline-dates {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            z-index: 2;
+            gap: 5px;
+        }
+
+        .timeline-date-item {
+            font-size: 0.75rem;
+            color: #718096;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            flex: 1;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .timeline-date-item:hover {
+            color: #007bff;
+        }
+
+        .timeline-date-item.active {
+            color: #007bff;
+            font-weight: bold;
+            transform: scale(1.05);
+        }
+
+        .timeline-track {
+            position: relative;
+            width: 100%;
+            height: 25px;
+            margin-top: 8px;
+        }
+
+        .timeline-arrow {
+            position: absolute;
+            left: 0;
+            top: 0;
+            font-size: 1.2rem;
+            color: #007bff;
+            transform: translateX(-50%);
+            transition: left 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            filter: drop-shadow(0 2px 4px rgba(0, 123, 255, 0.2));
+            pointer-events: none;
+        }
+
+        /* 컨트롤 패널 */
+        .controls {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        button {
+            padding: 10px 18px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background-color: white;
+            color: #4a5568;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        button:hover {
+            background-color: #f7fafc;
+            border-color: #cbd5e0;
+        }
+
+        button.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        #restart-btn {
+            background-color: #2d3748;
+            color: white;
+            border: none;
+        }
+
+        #restart-btn:hover {
+            background-color: #1a202c;
+        }
+
+        #restart-btn:disabled {
+            background-color: #cbd5e0;
+            color: #a0aec0;
+            cursor: not-allowed;
+        }
+
+        #download-btn {
+            background-color: #6366f1;
+            color: white;
+            border: none;
+        }
+
+        #download-btn:hover {
+            background-color: #4f46e5;
+        }
+
+        /* CSV 입력 텍스트영역 */
+        .csv-textarea {
+            width: 100%;
+            flex-grow: 1;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.85rem;
+            padding: 12px;
+            border: 1px solid #cbd5e0;
+            border-radius: 8px;
+            resize: none;
+            background-color: #f7fafc;
+            color: #2d3748;
+            outline: none;
+            box-sizing: border-box;
+            line-height: 1.4;
+        }
+
+        .csv-textarea:focus {
+            border-color: #007bff;
+            background-color: white;
+        }
+
+        .apply-btn {
+            background-color: #48bb78;
+            color: white;
+            border: none;
+            margin-top: 15px;
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .apply-btn:hover {
+            background-color: #38a169;
+        }
+
+        /* 모달 디자인 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-card {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .modal-desc {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .progress-container {
+            width: 100%;
+            background-color: #f1f5f9;
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background-color: #6366f1;
+            transition: width 0.1s linear;
+        }
+
+        .progress-text {
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #6366f1;
+        }
+
+        /* 반응형 모바일 대응 */
+        @media (max-width: 968px) {
+            .dashboard-wrapper {
+                flex-direction: column;
+            }
+            body {
+                overflow-y: auto;
+                height: auto;
+            }
+            .container, .sidebar {
+                flex: none;
+                width: 100%;
+            }
+            .csv-textarea {
+                height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="dashboard-wrapper">
+    <!-- 왼쪽: 메인 차트 대시보드 -->
+    <div class="container">
+        <h1>일자별 순위 변동 애니메이션</h1>
+        <p><span id="current-date">-</span></p>
+        
+        <div class="chart-container" id="chart-container">
+            <!-- 바(Bar)들이 동적으로 생성되는 컨테이너 -->
+        </div>
+
+        <div class="timeline-container">
+            <div class="timeline-dates" id="timeline-dates">
+                <!-- 날짜 요소들이 자바스크립트로 자동 구성됨 -->
+            </div>
+            <div class="timeline-track">
+                <div class="timeline-arrow" id="timeline-arrow">👟</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="restart-btn" onclick="restartAnimation()">다시 보기</button>
+            <button id="slow-btn" onclick="setSpeed(2000, 'slow-btn')">느리게</button>
+            <button id="normal-btn" onclick="setSpeed(1500, 'normal-btn')">보통</button>
+            <button id="fast-btn" onclick="setSpeed(1000, 'fast-btn')">빠르게</button>
+            <button id="download-btn" onclick="startVideoRecording()">🎥 동영상 다운로드</button>
+        </div>
+    </div>
+
+    <!-- 오른쪽: CSV 데이터 입력기 -->
+    <div class="sidebar">
+        <h2>데이터 편집기 (CSV)</h2>
+        <p style="text-align: left; font-size: 0.85rem; margin-bottom: 15px;">
+            아래에 새 데이터를 줄바꿈하여 입력한 후 '데이터 적용' 버튼을 누르세요.
+        </p>
+        <textarea id="csv-input" class="csv-textarea" placeholder="rdate,team,cumulative_distance 형식으로 입력하세요."></textarea>
+        <button class="apply-btn" onclick="handleDataApply()">데이터 적용</button>
+    </div>
+</div>
+
+<!-- 비디오 변환 대기 오버레이 모달 -->
+<div id="recording-modal" class="modal-overlay">
+    <div class="modal-card">
+        <div class="modal-title">동영상 파일 생성 중</div>
+        <div class="modal-desc">순위 변동 애니메이션을 고화질(HD 720p) 비디오 형식으로 내보내고 있습니다. 잠시만 기다려주세요.</div>
+        <div class="progress-container">
+            <div id="recording-progress-bar" class="progress-bar"></div>
+        </div>
+        <div id="recording-progress-text" class="progress-text">0% 완료</div>
+    </div>
+</div>
+
+<script>
+    // 기본 프리셋 데이터셋 (Textarea 로드용)
+    const defaultCSV = `rdate,team,cumulative_distance
+2026-06-01,개토원양,157.6
+2026-06-01,돼쥐뱀말,139.1
+2026-06-01,호랑용소,136.5
+2026-06-02,개토원양,281.8
+2026-06-02,돼쥐뱀말,198.8
+2026-06-02,호랑용소,290.7
+`;
+
+    // 시스템 상태 관리 변수
+    let data = [];
+    let dates = [];
+    let teams = [];
+    let teamColors = {};
+    let dateRankings = [];
+    
+    let currentDateIndex = 0;
+    let animationInterval;
+    let animationSpeed = 1500; // 기본 재생 속도
+    
+    // 색상 팔레트 (새로운 팀 출현 시 대비용 확장 색상셋)
+    const colorPalette = [
+        "#4299e1", // Blue
+        "#f56565", // Red
+        "#48bb78", // Green
+        "#ed64a6", // Pink
+        "#ecc94b", // Yellow
+        "#9f7aea", // Purple
+        "#ed8936", // Orange
+        "#38b2ac"  // Teal
+    ];
+
+    const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+
+    const chartContainer = document.getElementById('chart-container');
+    const dateLabel = document.getElementById('current-date');
+    const timelineDatesContainer = document.getElementById('timeline-dates');
+    const timelineArrow = document.getElementById('timeline-arrow');
+
+    // 날짜 문자열을 전달받아 요일 구하는 함수
+    function getDayOfWeek(dateString) {
+        const date = new Date(dateString);
+        return isNaN(date.getTime()) ? "" : `(${dayNames[date.getDay()]})`;
+    }
+
+    // CSV 파일 파싱 가드 유틸리티
+    function parseCSV(csvText) {
+        const lines = csvText.trim().split('\n');
+        if (lines.length <= 1) return null;
+
+        // 헤더 가용 체크
+        const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+        const rdateIdx = headers.indexOf('rdate');
+        const teamIdx = headers.indexOf('team');
+        const distIdx = headers.indexOf('cumulative_distance');
+
+        if (rdateIdx === -1 || teamIdx === -1 || distIdx === -1) {
+            alert("헤더 명칭이 올바르지 않습니다.\n필수 포함 항목: rdate, team, cumulative_distance");
+            return null;
+        }
+
+        const parsedList = [];
+        for (let i = 1; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+            const cols = line.split(',').map(c => c.trim());
+            if (cols.length <= Math.max(rdateIdx, teamIdx, distIdx)) continue;
+
+            parsedList.push({
+                rdate: cols[rdateIdx],
+                team: cols[teamIdx],
+                cumulative_distance: parseFloat(cols[distIdx]) || 0
+            });
+        }
+        return parsedList;
+    }
+
+    // 시스템 리로드 및 도메인 데이터 완전 동적 배정
+    function buildDashboard(csvData) {
+        // 인터벌 중지
+        clearInterval(animationInterval);
+
+        data = csvData;
+        dates = [...new Set(data.map(item => item.rdate))].sort();
+        teams = [...new Set(data.map(item => item.team))];
+
+        // 1. 차트 영역의 유동 높이 설정
+        chartContainer.style.height = `${teams.length * 60}px`;
+
+        // 2. 동적 팀 색상 맵핑
+        teamColors = {};
+        teams.forEach((team, idx) => {
+            teamColors[team] = colorPalette[idx % colorPalette.length];
+        });
+
+        // 3. 차트 바 요소 파괴 후 재구성
+        chartContainer.innerHTML = '';
+        teams.forEach((team, idx) => {
+            const barGroup = document.createElement('div');
+            barGroup.className = 'bar-group';
+            barGroup.id = `bar-group-${team}`;
+            barGroup.style.transform = `translateY(${idx * 60}px)`;
+
+            const label = document.createElement('div');
+            label.className = 'team-label';
+            label.innerText = team;
+            label.title = team;
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'bar-wrapper';
+
+            const bar = document.createElement('div');
+            bar.className = 'bar';
+            bar.style.backgroundColor = teamColors[team];
+            bar.style.width = '0%';
+
+            const distanceLabel = document.createElement('span');
+            distanceLabel.className = 'distance-label';
+            distanceLabel.id = `distance-${team}`;
+            distanceLabel.innerText = '0 pt';
+
+            bar.appendChild(distanceLabel);
+            wrapper.appendChild(bar);
+            barGroup.appendChild(label);
+            barGroup.appendChild(wrapper);
+            chartContainer.appendChild(barGroup);
+        });
+
+        // 4. 타임라인 목록 파괴 후 재구성
+        timelineDatesContainer.innerHTML = '';
+        dates.forEach((dateString, idx) => {
+            const dateItem = document.createElement('div');
+            dateItem.className = 'timeline-date-item';
+            dateItem.id = `date-item-${idx}`;
+            const shortDate = dateString.substring(5); // "06-01"
+            dateItem.innerText = `${shortDate} ${getDayOfWeek(dateString)}`;
+            
+            dateItem.onclick = () => {
+                jumpToDate(idx);
+            };
+            timelineDatesContainer.appendChild(dateItem);
+        });
+
+        // 5. 비디오 내보내기용 일자별 랭킹 사전 가상화 구축
+        dateRankings = dates.map(date => {
+            const dayData = data.filter(item => item.rdate === date);
+            const sorted = [...dayData].sort((a, b) => b.cumulative_distance - a.cumulative_distance);
+            
+            const ranks = {};
+            sorted.forEach((item, idx) => {
+                ranks[item.team] = idx;
+            });
+
+            const distances = {};
+            dayData.forEach(item => {
+                distances[item.team] = item.cumulative_distance;
+            });
+
+            return { date, ranks, distances };
+        });
+
+        // 트랜지션 타임 조율 복원
+        setSpeed(animationSpeed);
+        
+        // 데이터 상태 완전 리셋 및 시작
+        currentDateIndex = 0;
+        restartAnimation();
+    }
+
+    // 우측 에디터에서 '데이터 적용'을 눌렀을 때의 콜백
+    function handleDataApply() {
+        const rawCSV = document.getElementById('csv-input').value;
+        const parsed = parseCSV(rawCSV);
+        if (parsed && parsed.length > 0) {
+            buildDashboard(parsed);
+        } else {
+            alert("파싱된 데이터가 없습니다. CSV 구조를 다시 검토해주세요.");
+        }
+    }
+
+    // 메인 정렬 갱신 로직
+    function updateChart() {
+        if (dates.length === 0) return;
+        const currentDate = dates[currentDateIndex];
+        dateLabel.innerText = `${currentDate} ${getDayOfWeek(currentDate)}`;
+
+        updateTimelineUI();
+
+        const currentData = data
+            .filter(item => item.rdate === currentDate)
+            .sort((a, b) => b.cumulative_distance - a.cumulative_distance);
+
+        const maxDistance = Math.max(...data.map(item => item.cumulative_distance), 1);
+
+        currentData.forEach((item, index) => {
+            const team = item.team;
+            const barGroup = document.getElementById(`bar-group-${team}`);
+            if (barGroup) {
+                const bar = barGroup.querySelector('.bar');
+                const distanceLabel = document.getElementById(`distance-${team}`);
+
+                const widthPercentage = (item.cumulative_distance / maxDistance) * 100;
+                bar.style.width = `${widthPercentage}%`;
+                distanceLabel.innerText = `${item.cumulative_distance.toFixed(2)} pt`;
+
+                const yOffset = index * 60;
+                barGroup.style.transform = `translateY(${yOffset}px)`;
+            }
+        });
+
+        currentDateIndex++;
+
+        if (currentDateIndex >= dates.length) {
+            clearInterval(animationInterval);
+            document.getElementById('restart-btn').disabled = false;
+        }
+    }
+
+    function updateTimelineUI() {
+        document.querySelectorAll('.timeline-date-item').forEach(item => {
+            item.classList.remove('active');
+        });
+
+        const activeItem = document.getElementById(`date-item-${currentDateIndex}`);
+        if (activeItem) {
+            activeItem.classList.add('active');
+
+            const offsetLeft = activeItem.offsetLeft;
+            const width = activeItem.offsetWidth;
+            const targetX = offsetLeft + (width / 2);
+
+            timelineArrow.style.left = `${targetX}px`;
+        }
+    }
+
+    function jumpToDate(index) {
+        clearInterval(animationInterval);
+        currentDateIndex = index;
+        updateChart();
+        document.getElementById('restart-btn').disabled = false;
+    }
+
+    function startAnimation() {
+        document.getElementById('restart-btn').disabled = true;
+        currentDateIndex = 0;
+        updateChart();
+        animationInterval = setInterval(updateChart, animationSpeed);
+    }
+
+    function restartAnimation() {
+        clearInterval(animationInterval);
+        
+        const barGroups = document.querySelectorAll('.bar-group');
+        barGroups.forEach(bg => bg.style.transition = 'none');
+        const bars = document.querySelectorAll('.bar');
+        bars.forEach(b => b.style.transition = 'none');
+        timelineArrow.style.transition = 'none';
+
+        currentDateIndex = 0;
+        updateChart();
+
+        void document.documentElement.offsetHeight;
+
+        barGroups.forEach(bg => bg.style.transition = `transform ${animationSpeed/1000}s cubic-bezier(0.4, 0, 0.2, 1)`);
+        bars.forEach(b => b.style.transition = `width ${animationSpeed/1000}s cubic-bezier(0.4, 0, 0.2, 1)`);
+        timelineArrow.style.transition = `left ${animationSpeed/1000}s cubic-bezier(0.4, 0, 0.2, 1)`;
+        
+        startAnimation();
+    }
+
+    function setSpeed(speed, buttonId) {
+        animationSpeed = speed;
+        
+        const barGroups = document.querySelectorAll('.bar-group');
+        barGroups.forEach(bg => bg.style.transition = `transform ${speed/1000}s cubic-bezier(0.4, 0, 0.2, 1)`);
+        const bars = document.querySelectorAll('.bar');
+        bars.forEach(b => b.style.transition = `width ${speed/1000}s cubic-bezier(0.4, 0, 0.2, 1)`);
+        timelineArrow.style.transition = `left ${speed/1000}s cubic-bezier(0.4, 0, 0.2, 1)`;
+
+        document.querySelectorAll('.controls button').forEach(btn => btn.classList.remove('active'));
+        if (buttonId) {
+            document.getElementById(buttonId).classList.add('active');
+        } else {
+            // 초기속도 기본 클래스 할당
+            if (speed === 2000) document.getElementById('slow-btn').classList.add('active');
+            else if (speed === 1500) document.getElementById('normal-btn').classList.add('active');
+            else if (speed === 1000) document.getElementById('fast-btn').classList.add('active');
+        }
+
+        if (currentDateIndex > 0 && currentDateIndex < dates.length) {
+            clearInterval(animationInterval);
+            animationInterval = setInterval(updateChart, animationSpeed);
+        }
+    }
+
+    // ==========================================
+    //   동영상 다운로드 (Canvas 녹화) 관련 로직
+    // ==========================================
+    let recordCanvas, recordCtx, mediaRecorder, recordedChunks;
+
+    function startVideoRecording() {
+        if (dates.length === 0) return;
+        clearInterval(animationInterval);
+
+        recordCanvas = document.createElement('canvas');
+        recordCanvas.width = 1280;
+        recordCanvas.height = 720;
+        recordCtx = recordCanvas.getContext('2d');
+
+        const modal = document.getElementById('recording-modal');
+        const progressBar = document.getElementById('recording-progress-bar');
+        const progressText = document.getElementById('recording-progress-text');
+        modal.style.display = 'flex';
+        progressBar.style.width = '0%';
+        progressText.innerText = '0% 완료';
+
+        const stream = recordCanvas.captureStream(30);
+        
+        let options = { mimeType: 'video/webm; codecs=vp9' };
+        if (!MediaRecorder.isTypeSupported(options.mimeType)) options = { mimeType: 'video/webm' };
+        if (!MediaRecorder.isTypeSupported(options.mimeType)) options = { mimeType: '' };
+
+        recordedChunks = [];
+        try {
+            mediaRecorder = new MediaRecorder(stream, options);
+        } catch (e) {
+            alert('이 브라우저에서는 동영상 생성 기능이 지원되지 않습니다.');
+            modal.style.display = 'none';
+            return;
+        }
+
+        mediaRecorder.ondataavailable = (event) => {
+            if (event.data && event.data.size > 0) {
+                recordedChunks.push(event.data);
+            }
+        };
+
+        mediaRecorder.onstop = () => {
+            const blob = new Blob(recordedChunks, { type: 'video/webm' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `팀별_누적_Point_순위_${new Date().toISOString().slice(0, 10)}.webm`;
+            a.click();
+            
+            modal.style.display = 'none';
+            restartAnimation();
+        };
+
+        mediaRecorder.start();
+
+        let startTime = null;
+        
+        // 시간 배정: 일자별로 1초씩 동적 할당 (dates.length - 1개의 간격), 마지막 일자는 3초 고정
+        const transitionDuration = (dates.length - 1) * 1500;
+        const pauseDuration = 4500;
+        const totalDuration = transitionDuration + pauseDuration;
+
+        function animateRecord(timestamp) {
+            if (!startTime) startTime = timestamp;
+            const elapsed = timestamp - startTime;
+            const progress = Math.min(elapsed / totalDuration, 1);
+
+            progressBar.style.width = `${(progress * 100).toFixed(0)}%`;
+            progressText.innerText = `${(progress * 100).toFixed(0)}% 완료`;
+
+            let t;
+            let isFinalPause = false;
+            let pauseProgress = 0;
+
+            if (elapsed < transitionDuration) {
+                // 일자 간격에 맞추어 정확하게 초당 1일씩 트랜지션 처리
+                t = (elapsed / transitionDuration) * (dates.length - 1);
+            } else {
+                // 마지막 최종일에 고정 및 강조 연출
+                t = dates.length - 1;
+                isFinalPause = true;
+                pauseProgress = Math.min((elapsed - transitionDuration) / pauseDuration, 1);
+            }
+            
+            drawRecordFrame(t, isFinalPause, pauseProgress);
+
+            if (progress < 1) {
+                requestAnimationFrame(animateRecord);
+            } else {
+                setTimeout(() => {
+                    mediaRecorder.stop();
+                }, 500);
+            }
+        }
+
+        requestAnimationFrame(animateRecord);
+    }
+
+    function drawRecordFrame(t, isFinalPause = false, pauseProgress = 0) {
+        const ctx = recordCtx;
+        const width = recordCanvas.width;
+        const height = recordCanvas.height;
+
+        // 배경색
+        ctx.fillStyle = '#f4f4f9';
+        ctx.fillRect(0, 0, width, height);
+
+        // 메인 화이트보드 카드 영역
+        ctx.save();
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.05)';
+        ctx.shadowBlur = 20;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 8;
+        ctx.fillStyle = '#ffffff';
+        drawRoundedRect(ctx, 100, 50, 1080, 620, 20);
+        ctx.fill();
+        ctx.restore();
+
+        // 제목
+        ctx.fillStyle = '#1a202c';
+        ctx.font = "bold 34px 'Noto Sans KR', sans-serif";
+        ctx.textAlign = 'center';
+        ctx.fillText("팀별 누적 Pt 순위", 640, 115);
+
+        const idx = Math.min(Math.floor(t), dates.length - 1);
+        const nextIdx = Math.min(idx + 1, dates.length - 1);
+        const factor = t - idx;
+        const currentDateStr = dates[idx] || "";
+
+        // 서브 안내 정보 영역
+        ctx.textAlign = 'center';
+        if (isFinalPause) {
+            // 마지막 3초 동안 타이틀 강조 문구로 변경
+            ctx.fillStyle = '#eab308';
+            ctx.font = "bold 22px 'Noto Sans KR', sans-serif";
+            ctx.fillText("🎉 최종 순위 확정! 축하합니다! 🎉", 640, 165);
+        } else {
+            ctx.fillStyle = '#666666';
+            ctx.font = "20px 'Noto Sans KR', sans-serif";
+            ctx.fillText("순위 변동 애니메이션. 현재 날짜: ", 530, 165);
+            
+            ctx.fillStyle = '#007bff';
+            ctx.font = "bold 20px 'Noto Sans KR', sans-serif";
+            ctx.textAlign = 'left';
+            ctx.fillText(`${currentDateStr} ${getDayOfWeek(currentDateStr)}`, 735, 165);
+        }
+
+        // 팀별 데이터 렌더링 시작
+        const currentRankState = dateRankings[idx];
+        const nextRankState = dateRankings[nextIdx];
+        const maxDistance = Math.max(...data.map(item => item.cumulative_distance), 1);
+
+        // 동적으로 차트 간격 조절 (팀이 많아질 경우 대응)
+        const barSpacing = Math.min(85, Math.floor(300 / teams.length));
+        const barStartY = 380 - (teams.length * barSpacing) / 2;
+
+        // 최종 우승 팀 검출
+        const finalRankState = dateRankings[dates.length - 1];
+        let winningTeam = "";
+        if (finalRankState) {
+            winningTeam = Object.keys(finalRankState.ranks).find(team => finalRankState.ranks[team] === 0) || "";
+        }
+
+        teams.forEach(team => {
+            if (!currentRankState || !nextRankState) return;
+            const d1 = currentRankState.distances[team] || 0;
+            const d2 = nextRankState.distances[team] || 0;
+            const dist = d1 + (d2 - d1) * factor;
+
+            const r1 = currentRankState.ranks[team] !== undefined ? currentRankState.ranks[team] : 0;
+            const r2 = nextRankState.ranks[team] !== undefined ? nextRankState.ranks[team] : 0;
+            const rank = r1 + (r2 - r1) * factor;
+
+            const yPos = barStartY + rank * barSpacing;
+            const isWinner = team === winningTeam;
+
+            // 팀명 출력
+            ctx.fillStyle = '#4a5568';
+            ctx.font = "bold 20px 'Noto Sans KR', sans-serif";
+            ctx.textAlign = 'right';
+            ctx.fillText(team, 260, yPos + 30);
+
+            // 게이지 백그라운드 바
+            ctx.fillStyle = '#edf2f7';
+            drawRoundedRect(ctx, 280, yPos + 4, 720, 36, 18);
+            ctx.fill();
+
+            // 1위 팀 골든 아우라 이펙트 (마지막 3초 동안 활성화)
+            if (isFinalPause && isWinner) {
+                ctx.save();
+                const pulse = Math.sin(pauseProgress * Math.PI * 4); // 바운스 아우라 연산
+                const glowOpacity = 0.5 + 0.3 * pulse;
+                ctx.shadowColor = '#eab308';
+                ctx.shadowBlur = 15 + 10 * pulse;
+                ctx.strokeStyle = `rgba(234, 179, 8, ${glowOpacity})`;
+                ctx.lineWidth = 5;
+                drawRoundedRect(ctx, 276, yPos, Math.max((dist / maxDistance) * 720, 85) + 8, 44, 22);
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            // 액티브 채워짐 게이지 바
+            ctx.fillStyle = teamColors[team] || '#666';
+            const barWidth = Math.max((dist / maxDistance) * 720, 85);
+            drawRoundedRect(ctx, 280, yPos + 4, barWidth, 36, 18);
+            ctx.fill();
+
+            // 스코어 텍스트
+            ctx.fillStyle = '#ffffff';
+            ctx.font = "bold 16px 'Noto Sans KR', sans-serif";
+            ctx.textAlign = 'right';
+            ctx.fillText(`${dist.toFixed(2)} pt`, 280 + barWidth - 15, yPos + 27);
+
+            // 우승 팀 전용 트로피 바운싱 표기 (마지막 3초 동안 활성화)
+            if (isFinalPause && isWinner) {
+                ctx.save();
+                ctx.fillStyle = '#ca8a04';
+                ctx.font = "bold 18px 'Noto Sans KR', sans-serif";
+                ctx.textAlign = 'left';
+                // 상하로 튀어오르는 트로피 애니메이션
+                const bounceY = Math.sin(pauseProgress * Math.PI * 6) * 4;
+                ctx.fillText("🏆 CHAMPION!", 280 + barWidth + 15, yPos + 27 + bounceY);
+                ctx.restore();
+            }
+        });
+
+        // 5. 우승 꽃가루 연출 (마지막 3초간 화면 전체에 흩뿌려짐)
+        if (isFinalPause) {
+            ctx.save();
+            const colors = ['#f56565', '#4299e1', '#48bb78', '#ecc94b', '#9f7aea', '#ed8936'];
+            for (let i = 0; i < 35; i++) {
+                const seedX = Math.sin(i * 12.3) * 0.5 + 0.5;
+                const seedY = Math.cos(i * 7.9) * 0.5 + 0.5;
+                const fallSpeed = 80 + (i % 6) * 40;
+                
+                const startX = 120 + seedX * 1040;
+                const startY = 60;
+                // pauseProgress에 기반하여 세로 하강 연산
+                const currentY = startY + (pauseProgress * fallSpeed * 3) % 520;
+                
+                ctx.fillStyle = colors[i % colors.length];
+                const size = 6 + (i % 5);
+                const angle = pauseProgress * Math.PI * 2 * (i % 2 === 0 ? 1 : -1);
+                
+                ctx.save();
+                ctx.translate(startX, currentY);
+                ctx.rotate(angle);
+                ctx.fillRect(-size/2, -size/2, size, size);
+                ctx.restore();
+            }
+            ctx.restore();
+        }
+
+        // 하단 타임라인 바
+        const timelineY = 535;
+        const timelineStartX = 280;
+        const timelineEndX = 1000;
+        const timelineWidth = timelineEndX - timelineStartX;
+        const stepWidth = timelineWidth / Math.max(dates.length - 1, 1);
+
+        ctx.strokeStyle = '#e2e8f0';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(timelineStartX, timelineY);
+        ctx.lineTo(timelineEndX, timelineY);
+        ctx.stroke();
+
+        dates.forEach((dateStr, dIdx) => {
+            const nodeX = timelineStartX + dIdx * stepWidth;
+            const isPassed = dIdx <= idx;
+            const isActive = dIdx === idx;
+
+            ctx.fillStyle = isActive ? '#007bff' : (isPassed ? '#90cdf4' : '#cbd5e0');
+            ctx.beginPath();
+            ctx.arc(nodeX, timelineY, 8, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = isActive ? '#007bff' : '#718096';
+            ctx.font = isActive ? "bold 15px 'Noto Sans KR', sans-serif" : "13px 'Noto Sans KR', sans-serif";
+            ctx.textAlign = 'center';
+            const shortDateStr = dateStr.substring(5);
+            ctx.fillText(`${shortDateStr} ${getDayOfWeek(dateStr)}`, nodeX, timelineY + 32);
+        });
+
+        const arrowX = timelineStartX + t * stepWidth;
+        ctx.fillStyle = '#007bff';
+        ctx.beginPath();
+        ctx.moveTo(arrowX, timelineY - 12);
+        ctx.lineTo(arrowX - 8, timelineY - 24);
+        ctx.lineTo(arrowX + 8, timelineY - 24);
+        ctx.closePath();
+        ctx.fill();
+    }
+
+    function drawRoundedRect(ctx, x, y, width, height, radius) {
+        if (width < 2 * radius) radius = width / 2;
+        if (height < 2 * radius) radius = height / 2;
+
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.lineTo(x + width - radius, y);
+        ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+        ctx.lineTo(x + width, y + height - radius);
+        ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+        ctx.lineTo(x + radius, y + height);
+        ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+        ctx.lineTo(x, y + radius);
+        ctx.quadraticCurveTo(x, y, x + radius, y);
+        ctx.closePath();
+    }
+
+    // 문서 초기화 루틴
+    window.addEventListener('load', () => {
+        // 프리셋 데이터 로드
+        document.getElementById('csv-input').value = defaultCSV;
+        const initialData = parseCSV(defaultCSV);
+        if (initialData) {
+            buildDashboard(initialData);
+        }
+    });
+
+</script>
+
+</body>
+</html>
