@@ -594,14 +594,14 @@
                                     </div>
 
                                     <button onclick="openSeqWeekRunModal()" 
-                                            class="text-[11px] font-bold bg-purple-400 text-white px-4 py-2 rounded-xl transition-all hover:bg-purple-600 hover:shadow-md active:scale-95 flex items-center gap-2">
-                                            🔥매주 연속 러너
+                                            class="text-[11px] font-bold bg-purple-400 text-white px-2 py-2 rounded-xl transition-all hover:bg-purple-600 hover:shadow-md active:scale-95 flex items-center gap-2">
+                                            🔥매주연속러너
                                     </button>
 
 
                                     <button onclick="openDistributionModal()" 
-                                            class="text-[11px] font-bold bg-sky-400 text-white px-4 py-2 rounded-xl transition-all hover:bg-sky-600 hover:shadow-md active:scale-95 flex items-center gap-2">
-                                             🌼 꽃 등급 분포
+                                            class="text-[11px] font-bold bg-sky-400 text-white px-2 py-2 rounded-xl transition-all hover:bg-sky-600 hover:shadow-md active:scale-95 flex items-center gap-2">
+                                             🌼 꽃등급분포
                                     </button>
 
                                 </div>
@@ -1712,7 +1712,8 @@
                 const teamData = teams[teamName];
                 // 정의된 팀 컬러 가져오기 (없으면 기본값 설정)
                 const themeColor = TEAM_COLORS[teamName] || '#facc15';
-
+                const validMembers = Array.from(teamData.members).filter(name => !name.includes('@'));
+                
                 titleEl.innerHTML = `
                     <div class="flex items-center gap-2 px-3 py-1.5 rounded-full inline-flex" 
                         style="background-color: ${themeColor}20; border: 1px solid ${themeColor}40;">
@@ -1728,7 +1729,7 @@
                 summaryEl.innerHTML = `
                     <div class="flex justify-between items-center text-[11px] text-slate-500 font-bold bg-slate-50 px-2 py-1 rounded-md">
                         <span>총 인원</span> 
-                        <span class="text-[13px] font-extrabold" style="color: ${themeColor}">${teamData.members.size}명</span>
+                        <span class="text-[13px] font-extrabold" style="color: ${themeColor}">${validMembers.length}명</span>
                     </div>
                     <div class="flex justify-between items-center text-[11px] text-slate-500 font-bold bg-slate-50 px-2 py-1 rounded-md">
                     😈 지나친 승부욕은 🚑오케이재활의원에서 환영합니다!!!
@@ -1768,8 +1769,9 @@
                 });
 
                 // 3. 멤버별 상세 데이터 추출 (기존 filtered 배열 활용)
-                const sortedMembers = Array.from(teamData.members).sort();
-
+                //const sortedMembers = Array.from(teamData.members).sort();
+                const sortedMembers = validMembers.sort();
+                
                 listEl.innerHTML = sortedMembers.map((name, index) => {
                 // [이번 달] 데이터 필터링 및 합산
                     const memberLogs = filtered.filter(l => l.user_name === name);
@@ -1889,7 +1891,7 @@
                     const lastDay = new Date(todayForCheck.getFullYear(), todayForCheck.getMonth() + 1, 0).getDate();
                     
                     // 오늘 날짜가 (월말 - 1) 이상인 경우 (즉, 월말-1일과 월말 본 당일 모두 포함)
-                    const isEndOfMonthRange = todayForCheck.getDate() >= (lastDay - 25);
+                    const isEndOfMonthRange = todayForCheck.getDate() >= (lastDay - 1);
                                         
                     return `
                         <div class="space-y-1 bg-slate-50 p-1 rounded-xl mb-2"> 
@@ -2771,7 +2773,7 @@
 
             const paceData = paceRaw.map(p => p.dist > 0 ? (p.time / p.dist).toFixed(2) : 0);
             const labels = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
-            const themeColor = selectedGender === '여성' ? '#f472b6' : (selectedGender === '남성' ? '#212529 ' : '#22c55e');
+            const themeColor = selectedGender === '여성' ? '#f472b6' : (selectedGender === '남성' ? '#60a5fa ' : '#22c55e');
 
             const createChart = (id, type, label, data, color, options = {}) => {
                 const ctx = document.getElementById(id);
@@ -4338,8 +4340,8 @@
                 if(!date || dist <= 0 || totalMin <= 0) return showModal("💡필수 항목(날짜, 거리, 시간)을 입력해주세요✅", "alert");
 
                 const pace = totalMin / dist;
-                if (pace < 3.0) return showModal("잠시만요! ⚡ 페이스가 너무 빠릅니다. 기록을 확인해주세요.", "alert");
-                if (pace > 20) return showModal("러닝 시간을 잘 입력하셨나요? 🐢", "alert");
+                if (pace < 3.0) return showModal("엘리트 선수급! ⚡ 페이스가 너무 빠릅니다. 기록을 확인해주세요.", "alert");
+                if (pace > 15) return showModal("슬로우런 응원합니다. 시간을 잘 입력하셨나요? 🐢", "alert");
                 
                 if(bpm !== 0 && (bpm < 70 || bpm > 220)) return showModal("⚡인간의 심박수가 아님 \n\n심박수 범위를 확인해주세요.", "alert");
                 if(cadence !== 0 && (cadence < 100 || cadence > 250)) return showModal("케이던스 범위를 확인해주세요.", "alert");
