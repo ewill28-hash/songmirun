@@ -1712,7 +1712,8 @@
                 const teamData = teams[teamName];
                 // 정의된 팀 컬러 가져오기 (없으면 기본값 설정)
                 const themeColor = TEAM_COLORS[teamName] || '#facc15';
-
+                const validMembers = Array.from(teamData.members).filter(name => !name.includes('@'));
+                
                 titleEl.innerHTML = `
                     <div class="flex items-center gap-2 px-3 py-1.5 rounded-full inline-flex" 
                         style="background-color: ${themeColor}20; border: 1px solid ${themeColor}40;">
@@ -1728,7 +1729,7 @@
                 summaryEl.innerHTML = `
                     <div class="flex justify-between items-center text-[11px] text-slate-500 font-bold bg-slate-50 px-2 py-1 rounded-md">
                         <span>총 인원</span> 
-                        <span class="text-[13px] font-extrabold" style="color: ${themeColor}">${teamData.members.size}명</span>
+                        <span class="text-[13px] font-extrabold" style="color: ${themeColor}">${validMembers.length}명</span>
                     </div>
                     <div class="flex justify-between items-center text-[11px] text-slate-500 font-bold bg-slate-50 px-2 py-1 rounded-md">
                     😈 지나친 승부욕은 🚑오케이재활의원에서 환영합니다!!!
@@ -1768,8 +1769,9 @@
                 });
 
                 // 3. 멤버별 상세 데이터 추출 (기존 filtered 배열 활용)
-                const sortedMembers = Array.from(teamData.members).sort();
-
+                //const sortedMembers = Array.from(teamData.members).sort();
+                const sortedMembers = validMembers.sort();
+                
                 listEl.innerHTML = sortedMembers.map((name, index) => {
                 // [이번 달] 데이터 필터링 및 합산
                     const memberLogs = filtered.filter(l => l.user_name === name);
