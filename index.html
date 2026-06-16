@@ -3221,7 +3221,8 @@
 
             // 횟수 점수 계산 (기존 로직 유지)
             let scoreCount = 0;
-            if (count >= 30) scoreCount = 40;
+            if (count >= 35) scoreCount = 40;
+            else if (count >= 30) scoreCount = 39;
             else if (count >= 20) scoreCount = 37;
             else if (count >= 18) scoreCount = 35;
             else if (count >= 16) scoreCount = 30;
@@ -3235,7 +3236,8 @@
             // 거리 점수 계산 (최근 31일 합산)
             const dist = recentLogs.reduce((sum, l) => sum + Number(l.distance || 0), 0);
             let scoreDist = 0;
-            if (dist >= 300) scoreDist = 40;
+            if (dist >= 500) scoreDist = 40;
+            else if (dist >= 300) scoreDist = 39;
             else if (dist >= 200) scoreDist = 38;
             else if (dist >= 150) scoreDist = 35;
             else if (dist >= 100) scoreDist = 30;
@@ -3276,7 +3278,13 @@
             
             const thresholds = [
                 { 
-                    threshold: 100, 
+                    threshold: 100, // 예시 기준 점수 (원하는 숫자로 변경하세요)
+                    name: '🌤️ 하늘', 
+                    color: 'bg-sky-50 text-sky-600 border border-sky-200 shadow-sm font-semibold' 
+                    // 맑은 하늘을 닮은 은은한 하늘색 배경에 청량한 포인트
+                },
+                { 
+                    threshold: 98, 
                     name: '🍃 바람', 
                     color: 'bg-white text-blue-600 border border-blue-200 shadow-sm' 
                     // 깨끗한 공기 같은 흰색 배경에 푸른색 포인트
@@ -3403,12 +3411,13 @@
             --------------------------------
             💰 총합 점수: ${grade.details.totalScore}점
             --------------------------------
-            🌱 새싹➞🌷꽃봉➞🌼활짝➞🌺열정➞🏵️만개➞❔
+            🌱새싹➞🌷꽃봉➞🌼활짝➞🌺열정
+                  ➞🏵️만개➞🍃바람➞❔
             --------------------------------
            
             ${grade.nextGrade 
                 ? `✨ 다음 등급 [${grade.nextGrade.name}]까지 ${grade.nextGrade.remaining}점 남았습니다!`
-                : `👑 최고 등급 달성!`}`;
+                : `👑 최고 등급 달성 [🌤️하늘] !`}`;
 
 
            gradeBadge.onclick = (e) => {
@@ -3581,6 +3590,12 @@
                     const thresholds = [
                         { 
                             threshold: 100, 
+                            name: '🌤️ 하늘', 
+                            color: 'bg-white text-sky-600 border border-sky-200 shadow-sm font-semibold' 
+                            // 맑은 하늘을 닮은 은은한 하늘색 배경에 청량한 포인트
+                        },
+                        { 
+                            threshold: 98, 
                             name: '🍃 바람', 
                             color: 'bg-white text-blue-600 border border-blue-200 shadow-sm' 
                             // 깨끗한 공기 같은 흰색 배경에 푸른색 포인트
