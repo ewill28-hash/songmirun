@@ -3411,12 +3411,13 @@
             --------------------------------
             💰 총합 점수: ${grade.details.totalScore}점
             --------------------------------
-            🌱 새싹➞🌷꽃봉➞🌼활짝➞🌺열정➞🏵️만개➞🍃바람➞❔
+            🌱새싹➞🌷꽃봉➞🌼활짝➞🌺열정
+                  ➞🏵️만개➞🍃바람➞❔
             --------------------------------
            
             ${grade.nextGrade 
                 ? `✨ 다음 등급 [${grade.nextGrade.name}]까지 ${grade.nextGrade.remaining}점 남았습니다!`
-                : `👑 최고 등급 달성!`}`;
+                : `👑 최고 등급 달성 [🌤️하늘] !`}`;
 
 
            gradeBadge.onclick = (e) => {
@@ -3590,7 +3591,7 @@
                         { 
                             threshold: 100, 
                             name: '🌤️ 하늘', 
-                            color: 'bg-sky-50 text-sky-600 border border-sky-200 shadow-sm font-semibold' 
+                            color: 'bg-white text-sky-600 border border-sky-200 shadow-sm font-semibold' 
                             // 맑은 하늘을 닮은 은은한 하늘색 배경에 청량한 포인트
                         },
                         { 
