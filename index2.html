@@ -464,7 +464,7 @@
                     <button id="btn-save-log" class="w-full bg-brand-600 text-white font-black py-4 rounded-2xl shadow-lg shadow-brand-200 active:scale-[0.98] transition-all hover:bg-brand-700 text-lg flex items-center justify-center gap-2">
                             ☑ 기록 저장하기
                             <div id="pace-display" class="animate-pulse text-[15px] font-black font-mono text-white-800 font-semibold tracking-tighter">
-                                [Pace:0'00"] [0pt]
+                                [Pace:0'00"]
                             </div>  
                     </button>
                 </section>
@@ -4643,7 +4643,7 @@
                         finalSec = 0;
                     }
 
-                    paceDisplay.innerText = `[Pace : ${finalMin}'${finalSec.toString().padStart(2, '0')}"]`;
+                    paceDisplay.innerText = `[Pace : ${finalMin}'${finalSec.toString().padStart(2, '0')}"] [99pt]`;
                     paceDisplay.classList.add('text-rose-200', 'font-mono', 'font-semibold', 'tracking-tighter');
                     paceDisplay.classList.add('animate-pulse');
                     const fastPulse = 'animate-[pulse_0.5s_cubic-bezier(0.4,0,0.6,1)_infinite]';
@@ -4656,7 +4656,7 @@
 
                     //showToast(`Pace : ${finalMin}'${finalSec.toString().padStart(2, '0')}"`);
                 } else {
-                    paceDisplay.innerText = "[Pace:0'00"]";
+                    paceDisplay.innerText = `[Pace:0'00"] [0pt]`;
                     paceDisplay.classList.add('text-white-300', 'font-mono', 'font-semibold', 'tracking-tighter');
 
                 }
