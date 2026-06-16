@@ -375,7 +375,7 @@
                         </div>
                         
                         <div class="col-span-1">
-                            <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1">러닝 날짜</label>
+                            <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1">러닝 날짜(최근3일~)</label>
                             <input type="date" id="in-date" class="w-full bg-rose-50 border-2 border-rose-100 p-3.5 rounded-2xl text-sm outline-none font-bold shadow-sm text-rose-900">
                         </div>
                         
@@ -464,7 +464,7 @@
                     <button id="btn-save-log" class="w-full bg-brand-600 text-white font-black py-4 rounded-2xl shadow-lg shadow-brand-200 active:scale-[0.98] transition-all hover:bg-brand-700 text-lg flex items-center justify-center gap-2">
                             ☑ 기록 저장하기
                             <div id="pace-display" class="animate-pulse text-[15px] font-black font-mono text-white-800 font-semibold tracking-tighter">
-                                [Pace : 0'00"]
+                                [Pace:0'00"] [0pt]
                             </div>  
                     </button>
                 </section>
@@ -594,14 +594,14 @@
                                     </div>
 
                                     <button onclick="openSeqWeekRunModal()" 
-                                            class="text-[11px] font-bold bg-purple-400 text-white px-4 py-2 rounded-xl transition-all hover:bg-purple-600 hover:shadow-md active:scale-95 flex items-center gap-2">
-                                            🔥매주 연속 러너
+                                            class="text-[11px] font-bold bg-purple-400 text-white px-2 py-2 rounded-xl transition-all hover:bg-purple-600 hover:shadow-md active:scale-95 flex items-center gap-2">
+                                            🔥매주연속러너
                                     </button>
 
 
                                     <button onclick="openDistributionModal()" 
-                                            class="text-[11px] font-bold bg-sky-400 text-white px-4 py-2 rounded-xl transition-all hover:bg-sky-600 hover:shadow-md active:scale-95 flex items-center gap-2">
-                                             🌼 꽃 등급 분포
+                                            class="text-[11px] font-bold bg-sky-400 text-white px-2 py-2 rounded-xl transition-all hover:bg-sky-600 hover:shadow-md active:scale-95 flex items-center gap-2">
+                                             🌼 꽃등급분포
                                     </button>
 
                                 </div>
@@ -627,18 +627,17 @@
                                             class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all active flex items-center justify-center gap-1">
                                         전체
                                     </button>
-                                    <button onclick="window.setTeamFilter2('백수저')" id="filter2-th" 
+                                    <button onclick="window.setTeamFilter2('개토원양')" id="filter2-ts" 
                                             class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all inactive flex items-center justify-center gap-1">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-[#ED2939]"></span>팀:백수저
+                                        <span class="w-1.5 h-1.5 rounded-full bg-[#3b82f6]"></span>개토원양
                                     </button>
-                                    <button onclick="window.setTeamFilter2('흑수저')" id="filter2-ts" 
+                                    <button onclick="window.setTeamFilter2('돼쥐뱀말')" id="filter2-th" 
                                             class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all inactive flex items-center justify-center gap-1">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-[#212529]"></span>팀:흑수저
+                                        <span class="w-1.5 h-1.5 rounded-full bg-[#f87171]"></span>돼쥐뱀말
                                     </button>
-
-                                    <button onclick="window.setTeamFilter2('홀가분')" id="filter2-tl" 
+                                    <button onclick="window.setTeamFilter2('호랑용소')" id="filter2-tl" 
                                             class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all inactive flex items-center justify-center gap-1">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-[#22c55e]"></span>팀:홀가분
+                                        <span class="w-1.5 h-1.5 rounded-full bg-[#22c55e]"></span>호랑용소
                                     </button>
                                 </div>
                             </section>
@@ -736,18 +735,17 @@
                                             class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all active flex items-center justify-center gap-1">
                                         전체
                                     </button>
-                                    <button onclick="window.setTeamFilter('백수저')" id="filter-th" 
+                                    <button onclick="window.setTeamFilter('개토원양')" id="filter-ts" 
                                             class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all inactive flex items-center justify-center gap-1">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-[#ED2939]"></span>팀:백수저
+                                        <span class="w-1.5 h-1.5 rounded-full bg-[#3b82f6]"></span>개토원양
                                     </button>
-                                    <button onclick="window.setTeamFilter('흑수저')" id="filter-ts" 
+                                    <button onclick="window.setTeamFilter('돼쥐뱀말')" id="filter-th" 
                                             class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all inactive flex items-center justify-center gap-1">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-[#212529]"></span>팀:흑수저
+                                        <span class="w-1.5 h-1.5 rounded-full bg-[#f87171]"></span>돼쥐뱀말
                                     </button>
-
-                                    <button onclick="window.setTeamFilter('홀가분')" id="filter-tl" 
+                                    <button onclick="window.setTeamFilter('호랑용소')" id="filter-tl" 
                                             class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all inactive flex items-center justify-center gap-1">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-[#22c55e]"></span>팀:홀가분
+                                        <span class="w-1.5 h-1.5 rounded-full bg-[#22c55e]"></span>호랑용소
                                     </button>
                                 </div>
                             </div>
@@ -831,8 +829,9 @@
                                 <label class="text-[10px] text-gray-400 font-bold block mb-1">소속팀 (team)</label>
                                 <select id="mem-team" class="w-full bg-white border border-green-100 p-3 rounded-xl text-sm font-bold outline-none">
                                     <option value="">선택</option>
-                                    <option value="백수저">백수저</option>
-                                    <option value="흑수저">흑수저</option>
+                                    <option value="개토원양">개토원양</option>
+                                    <option value="돼쥐뱀말">돼쥐뱀말</option>
+                                    <option value="호랑용소">호랑용소</option>
                                     <option value="홀가분">홀가분</option>
                                 </select>
                             </div>
@@ -1161,9 +1160,6 @@
                         <select id="prof-new-team" disabled
                                         class="w-full bg-white border-2 border-brand-100 p-4 rounded-2xl text-sm font-bold outline-none focus:ring-2 ring-brand-400 shadow-sm transition-all appearance-none cursor-pointer">
                                     <option value="" >팀 선택</option>
-                                    <option value="백수저">팀:백수저</option>
-                                    <option value="흑수저">팀:흑수저</option>
-
                                     <option value="홀가분">팀:홀가분</option>
                                 </select>
                     </div>
@@ -1443,7 +1439,7 @@
             selectedTeam = team;
             ['filter-tall', 'filter-ts', 'filter-th', 'filter-tl'].forEach(id => {
                 const el = document.getElementById(id);
-                const isActive = (id === 'filter-tall' && team === '전체') || (id === 'filter-ts' && team === '흑수저') || (id === 'filter-th' && team === '백수저')|| (id === 'filter-tl' && team === '홀가분');
+                const isActive = (id === 'filter-tall' && team === '전체') || (id === 'filter-ts' && team === '개토원양') || (id === 'filter-th' && team === '돼쥐뱀말')|| (id === 'filter-tl' && team === '호랑용소');
                 el.classList.toggle('active', isActive);
                 el.classList.toggle('inactive', !isActive);
             });
@@ -1454,7 +1450,7 @@
             selectedTeam2 = team;
             ['filter2-tall', 'filter2-ts', 'filter2-th', 'filter2-tl'].forEach(id => {
                 const el = document.getElementById(id);
-                const isActive = (id === 'filter2-tall' && team === '전체') || (id === 'filter2-ts' && team === '흑수저') || (id === 'filter2-th' && team === '백수저')|| (id === 'filter2-tl' && team === '홀가분');
+                const isActive = (id === 'filter2-tall' && team === '전체') || (id === 'filter2-ts' && team === '개토원양') || (id === 'filter2-th' && team === '돼쥐뱀말')|| (id === 'filter2-tl' && team === '호랑용소');
                 el.classList.toggle('active', isActive);
                 el.classList.toggle('inactive', !isActive);
             });
@@ -1716,7 +1712,8 @@
                 const teamData = teams[teamName];
                 // 정의된 팀 컬러 가져오기 (없으면 기본값 설정)
                 const themeColor = TEAM_COLORS[teamName] || '#facc15';
-
+                const validMembers = Array.from(teamData.members).filter(name => !name.includes('@'));
+                
                 titleEl.innerHTML = `
                     <div class="flex items-center gap-2 px-3 py-1.5 rounded-full inline-flex" 
                         style="background-color: ${themeColor}20; border: 1px solid ${themeColor}40;">
@@ -1732,7 +1729,7 @@
                 summaryEl.innerHTML = `
                     <div class="flex justify-between items-center text-[11px] text-slate-500 font-bold bg-slate-50 px-2 py-1 rounded-md">
                         <span>총 인원</span> 
-                        <span class="text-[13px] font-extrabold" style="color: ${themeColor}">${teamData.members.size}명</span>
+                        <span class="text-[13px] font-extrabold" style="color: ${themeColor}">${validMembers.length}명</span>
                     </div>
                     <div class="flex justify-between items-center text-[11px] text-slate-500 font-bold bg-slate-50 px-2 py-1 rounded-md">
                     😈 지나친 승부욕은 🚑오케이재활의원에서 환영합니다!!!
@@ -1772,8 +1769,9 @@
                 });
 
                 // 3. 멤버별 상세 데이터 추출 (기존 filtered 배열 활용)
-                const sortedMembers = Array.from(teamData.members).sort();
-
+                //const sortedMembers = Array.from(teamData.members).sort();
+                const sortedMembers = validMembers.sort();
+                
                 listEl.innerHTML = sortedMembers.map((name, index) => {
                 // [이번 달] 데이터 필터링 및 합산
                     const memberLogs = filtered.filter(l => l.user_name === name);
@@ -1889,6 +1887,12 @@
                     const timeStr = `${hms.h > 0 ? hms.h + ':' : ''}${String(hms.m).padStart(2, '0')}:${String(hms.s).padStart(2, '0')}`;
                     const percent = (data[currentMetric] / maxVal) * 100;
 
+                    const todayForCheck = new Date();
+                    const lastDay = new Date(todayForCheck.getFullYear(), todayForCheck.getMonth() + 1, 0).getDate();
+                    
+                    // 오늘 날짜가 (월말 - 1) 이상인 경우 (즉, 월말-1일과 월말 본 당일 모두 포함)
+                    const isEndOfMonthRange = todayForCheck.getDate() >= (lastDay - 1);
+                                        
                     return `
                         <div class="space-y-1 bg-slate-50 p-1 rounded-xl mb-2"> 
                             <div class="flex justify-between items-center">
@@ -1903,7 +1907,8 @@
                                     <span 
                                         class="badge-stat ${currentMetric === 'score' ? 'highlight' : ''} ${(titlePrefix === '팀' && isSlowRun) ? 'cursor-pointer hover:underline' : ''}" 
                                         ${(titlePrefix === '팀' && isSlowRun) ? `onclick="showTeamMembers('${data.name}', 'tp2')"` : ''}>
-                                        ${(isSlowRun || titlePrefix !== '팀') ? `${data.score.toFixed(1)} pt` : 'X pt'}
+                                        ${(isSlowRun || titlePrefix !== '팀' || isEndOfMonthRange) ? `${data.score.toFixed(1)} pt` : 'X pt'}
+                                        
                                     </span>
                                     <span class="badge-stat ${currentMetric==='dist'?'highlight':''}">${data.dist.toFixed(1)}km</span>
                                     <span class="badge-stat ${currentMetric==='time'?'highlight':''}">${timeStr.split(':')[0]}h</span>
@@ -1912,13 +1917,13 @@
                             </div>
                             <div class="h-2 bg-slate-200/60 rounded-full overflow-hidden">
                                 <div class="transition-all duration-1000 ease-out" 
-                                    style="height: 10px; width: ${percent}%; background-color: ${data.color}; 
+                                    style="height: ${targetId.includes('gender') ? '5px' : '10px'}; width: ${percent}%; background-color: ${data.color}; 
                                     /* 흰색 라인이 명확히 보이도록 안쪽(inset)으로 겹쳐서 처리 */
                                     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.2);
                                     border: 1px solid #FFFFFF; 
                                     ${targetId.includes('gender') 
                                         ? `background: repeating-linear-gradient(135deg, rgba(255,255,255,0.5) 0px, rgba(255,255,255,0.5) 6px, transparent 6px, transparent 12px), ${data.color};` 
-                                        : `background: repeating-linear-gradient(45deg, rgba(255,255,255,0.5) 0px, rgba(255,255,255,0.5) 6px, transparent 6px, transparent 12px), ${data.color};`
+                                        : `background: ${data.color};`
                                     }">
                                 </div>
                             </div>
@@ -1953,10 +1958,11 @@
         };
 
 
+        
         const TEAM_COLORS = { 
-            '백수저': '#ED2939', 
-            '흑수저': '#212529', 
-            '이봉주': '#22c55e', 
+            '개토원양': '#3b82f6', 
+            '돼쥐뱀말': '#f87171', 
+            '호랑용소': '#22c55e', 
             '홀가분': '#facc15'     
         };
 
@@ -2767,7 +2773,7 @@
 
             const paceData = paceRaw.map(p => p.dist > 0 ? (p.time / p.dist).toFixed(2) : 0);
             const labels = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
-            const themeColor = selectedGender === '여성' ? '#f472b6' : (selectedGender === '남성' ? '#212529 ' : '#22c55e');
+            const themeColor = selectedGender === '여성' ? '#f472b6' : (selectedGender === '남성' ? '#60a5fa ' : '#22c55e');
 
             const createChart = (id, type, label, data, color, options = {}) => {
                 const ctx = document.getElementById(id);
@@ -2928,9 +2934,14 @@
 
             const drawRankList = (elementId, data, unit, isTimeFormat = false) => {
                 const container = document.getElementById(elementId);
-                const sorted = data.slice(0, 5);
+                
+                // [추가] 닉네임(item.name)에 '@'가 포함된 사용자는 랭킹에서 제외
+                const filteredData = data.filter(item => !item.name.includes('@'));
+                
+                // 필터링된 데이터에서 상위 5개만 추출
+                const sorted = filteredData.slice(0, 5);
                 const maxVal = sorted.length > 0 ? Number(sorted[0].valRaw || sorted[0].val) : 1;
-
+            
                 const isDistanceRank = elementId.includes('dist');
 
                 container.innerHTML = sorted.map((item, i) => {
@@ -4329,8 +4340,8 @@
                 if(!date || dist <= 0 || totalMin <= 0) return showModal("💡필수 항목(날짜, 거리, 시간)을 입력해주세요✅", "alert");
 
                 const pace = totalMin / dist;
-                if (pace < 3.0) return showModal("잠시만요! ⚡ 페이스가 너무 빠릅니다. 기록을 확인해주세요.", "alert");
-                if (pace > 20) return showModal("러닝 시간을 잘 입력하셨나요? 🐢", "alert");
+                if (pace < 3.0) return showModal("엘리트 선수급! ⚡ 페이스가 너무 빠릅니다. 기록을 확인해주세요.", "alert");
+                if (pace > 15) return showModal("슬로우런 응원합니다. 시간을 잘 입력하셨나요? 🐢", "alert");
                 
                 if(bpm !== 0 && (bpm < 70 || bpm > 220)) return showModal("⚡인간의 심박수가 아님 \n\n심박수 범위를 확인해주세요.", "alert");
                 if(cadence !== 0 && (cadence < 100 || cadence > 250)) return showModal("케이던스 범위를 확인해주세요.", "alert");
@@ -4614,7 +4625,10 @@
 
                 // 총 시간을 초 단위로 변환
                 const totalSeconds = (h * 3600) + (m * 60) + s;
+                const totalHours = totalSeconds / 3600;
+                const pt = (dist + (totalHours * 5) + 0.1).toFixed(0);
 
+                
                 // 유효성 검사: 거리와 시간이 모두 0보다 커야 함
                 if (dist > 0 && totalSeconds > 0) {
                     // 1km당 소요되는 초(seconds) 계산
@@ -4632,7 +4646,7 @@
                         finalSec = 0;
                     }
 
-                    paceDisplay.innerText = `[Pace : ${finalMin}'${finalSec.toString().padStart(2, '0')}"]`;
+                    paceDisplay.innerText = `[Pace:${finalMin}'${finalSec.toString().padStart(2, '0')}"] [${pt}pt]`;
                     paceDisplay.classList.add('text-rose-200', 'font-mono', 'font-semibold', 'tracking-tighter');
                     paceDisplay.classList.add('animate-pulse');
                     const fastPulse = 'animate-[pulse_0.5s_cubic-bezier(0.4,0,0.6,1)_infinite]';
@@ -4645,7 +4659,7 @@
 
                     //showToast(`Pace : ${finalMin}'${finalSec.toString().padStart(2, '0')}"`);
                 } else {
-                    paceDisplay.innerText = "[Pace : 0'00\"]";
+                    paceDisplay.innerText = `[Pace:0'00"] [?pt]`;
                     paceDisplay.classList.add('text-white-300', 'font-mono', 'font-semibold', 'tracking-tighter');
 
                 }
@@ -4703,6 +4717,26 @@
 
                 if (!selectedDateValue) return;
 
+
+// 1. 날짜 유효성 체크 (최근 3일 이내인지 확인)
+    const selectedDate = new Date(selectedDateValue);
+    selectedDate.setHours(0, 0, 0, 0); // 시간 조건 초기화
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // 오늘 날짜 시간 조건 초기화
+
+    // 두 날짜의 차이 계산 (밀리초 -> 일 단위 변환)
+    const diffTime = today - selectedDate;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    // 3일보다 더 과거라면 (예: 오늘이 4일인데 1일(차이 3일)은 가능, 31일(차이 4일)은 불가능)
+    if (diffDays > 2) {
+        showModal("⚠️ 최근 3일간의 기록 입력이 가능합니다.\n\n 과거 데이터 입력은 모임장에게 문의해주세요 💡", "alert");
+        dateInput.value = ""; // 잘못된 날짜 입력값 초기화 (선택사항)
+        return; // 이후 정기런 요일 체크를 하지 않고 함수 종료
+    }
+                
+                
                 const date = new Date(selectedDateValue);
                 const isMonday = date.getDay() === 1;
 
