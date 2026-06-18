@@ -2834,89 +2834,87 @@
         };
 
 
-
-        window.openSeqDayRunModal = () => {
-            const data = window.getSeqDayData();
-            
-            const modalHtml = `
-                <div id="seq-day-modal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in zoom-in-95 duration-300">
-                    <div class="bg-white w-full max-w-sm rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden border border-white/20">
-                        
-                        <div class="p-5 bg-gradient-to-r from-violet-600 via-fuchsia-500 to-pink-500 flex justify-between items-center relative overflow-hidden">
-                            <div class="absolute top-0 right-0 opacity-10 transform translate-x-4 -translate-y-4">
-                                <i class="fa-solid fa-trophy text-7xl text-white"></i>
-                            </div>
-                            <div class="flex items-center gap-2.5 relative z-10">
-                                <span class="text-2xl">🏆</span>
-                                <div>
-                                    <h3 class="font-black text-base text-white leading-none">CONTINUOUS RUNNER</h3>
-                                    <p class="text-[10px] text-white/80 mt-1 font-medium">매일 멈추지 않는 전설들</p>
-                                </div>
-                            </div>
-                            <button onclick="document.getElementById('seq-day-modal').remove()" 
-                                    class="w-8 h-8 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/40 text-white transition-all backdrop-blur-sm">
-                                <i class="fa-solid fa-xmark text-sm"></i>
-                            </button>
-                        </div>
-                        
-                        <div class="max-h-[400px] overflow-y-auto custom-scrollbar px-4 py-2 bg-slate-50/50">
-                            <table class="w-full text-left border-separate border-spacing-y-1">
-                                <tbody>
-                                    ${data.map((user, i) => {
-                                        // 모든 항목에 동일한 보라색 테마 적용
-                                        const bgClass = 'bg-white border-violet-50';
-                                        
-                                        return `
-                                        <tr class="${bgClass} border rounded-xl shadow-sm transition-all hover:bg-violet-50/30">
-                                            <td class="py-2 pl-4 rounded-l-xl w-10">
-                                                <span class="text-[11px] font-black text-violet-400">
-                                                    ${i + 1}
-                                                </span>
-                                            </td>
-                                            
-                                            <td class="py-2 cursor-pointer group" onclick="window.showRunnerDetail2('${user.name}', '${user.days_list}')"> 
-                                                <div class="flex flex-col">
-                                                    <span class="text-[12px] font-bold text-gray-700 leading-tight group-hover:text-violet-600 transition-colors">
-                                                        ${user.name} <i class="fa-solid fa-magnifying-glass text-[8px] opacity-0 group-hover:opacity-100 transition-opacity"></i>
-                                                    </span>
-                                                    <span class="text-[8px] text-gray-400 font-medium tracking-tighter">${user.start_date}부터 매일 꾸준 🏃‍♀️</span>
-                                                </div>
-                                            </td>
-                                                                                
-                                            <td class="py-2 pr-3 text-right rounded-r-xl" onclick="window.showRunnerDetail2('${user.name}', '${user.days_list}')">
-                                                <div class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 shadow-sm">
-                                                    <span class="text-white text-[10px] font-black">${user.total_active_days}일</span>
-                                                    <span class="text-[9px]">🔥</span>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        `;
-                                    }).join('')}
-                                </tbody>
-                            </table>
-                            ${data.length === 0 ? `
-                                <div class="py-16 text-center">
-                                    <div class="text-4xl mb-3">🏃💨</div>
-                                    <div class="text-gray-400 text-xs font-bold">전설이 되어보세요!</div>
-                                </div>
-                            ` : ''}
-                        </div>
-
-                        <div class="p-4 bg-white border-t border-gray-100">
-                            <div class="flex items-start gap-2 p-3 bg-violet-50 rounded-xl">
-                                <span class="text-xs">💡</span>
-                                <p class="text-[10px] text-violet-600 leading-tight font-medium">
-                                    활동 일차는 <span class="text-red-600 font-black">현재 시점</span>부터 과거로 중단 없이 이어진 기록을 집계됩니다. 계속 달려보세요!
-                                </p>
-                            </div>
+window.openSeqDayRunModal = () => {
+    const data = window.getSeqDayData();
+    
+    const modalHtml = `
+        <div id="seq-day-modal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in zoom-in-95 duration-300">
+            <div class="bg-white w-full max-w-sm rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden border border-white/20">
+                
+                <div class="p-5 bg-gradient-to-r from-orange-600 via-amber-500 to-yellow-500 flex justify-between items-center relative overflow-hidden">
+                    <div class="absolute top-0 right-0 opacity-10 transform translate-x-4 -translate-y-4">
+                        <i class="fa-solid fa-trophy text-7xl text-white"></i>
+                    </div>
+                    <div class="flex items-center gap-2.5 relative z-10">
+                        <span class="text-2xl">🏆</span>
+                        <div>
+                            <h3 class="font-black text-base text-white leading-none">CONTINUOUS RUNNER</h3>
+                            <p class="text-[10px] text-white/80 mt-1 font-medium">매일 멈추지 않는 러너들</p>
                         </div>
                     </div>
+                    <button onclick="document.getElementById('seq-day-modal').remove()" 
+                            class="w-8 h-8 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/40 text-white transition-all backdrop-blur-sm">
+                        <i class="fa-solid fa-xmark text-sm"></i>
+                    </button>
                 </div>
-            `;
-            
-            document.body.insertAdjacentHTML('beforeend', modalHtml);
-        };
+                
+                <div class="max-h-[400px] overflow-y-auto custom-scrollbar px-4 py-2 bg-slate-50/50">
+                    <table class="w-full text-left border-separate border-spacing-y-1">
+                        <tbody>
+                            ${data.map((user, i) => {
+                                // 오렌지색 테마 반영
+                                const bgClass = 'bg-white border-orange-50';
+                                
+                                return `
+                                <tr class="${bgClass} border rounded-xl shadow-sm transition-all hover:bg-orange-50/30">
+                                    <td class="py-2 pl-4 rounded-l-xl w-10">
+                                        <span class="text-[11px] font-black text-orange-400">
+                                            ${i + 1}
+                                        </span>
+                                    </td>
+                                    
+                                    <td class="py-2 cursor-pointer group" onclick="window.showRunnerDetail2('${user.name}', '${user.days_list}')"> 
+                                        <div class="flex flex-col">
+                                            <span class="text-[12px] font-bold text-gray-700 leading-tight group-hover:text-orange-600 transition-colors">
+                                                ${user.name} <i class="fa-solid fa-magnifying-glass text-[8px] opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                                            </span>
+                                            <span class="text-[8px] text-gray-400 font-medium tracking-tighter">${user.start_date}부터 매일 꾸준 🏃‍♀️</span>
+                                        </div>
+                                    </td>
+                                                                                
+                                    <td class="py-2 pr-3 text-right rounded-r-xl" onclick="window.showRunnerDetail2('${user.name}', '${user.days_list}')">
+                                        <div class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 shadow-sm">
+                                            <span class="text-white text-[10px] font-black">${user.total_active_days}일</span>
+                                            <span class="text-[9px]">🔥</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                    ${data.length === 0 ? `
+                        <div class="py-16 text-center">
+                            <div class="text-4xl mb-3">🏃💨</div>
+                            <div class="text-gray-400 text-xs font-bold">전설이 되어보세요!</div>
+                        </div>
+                    ` : ''}
+                </div>
 
+                <div class="p-4 bg-white border-t border-gray-100">
+                    <div class="flex items-start gap-2 p-3 bg-orange-50 rounded-xl">
+                        <span class="text-xs">💡</span>
+                        <p class="text-[10px] text-orange-600 leading-tight font-medium">
+                            <span class="text-red-600 font-black">현재 시점</span>부터 과거로 중단 없이 이어진 기록을 집계됩니다. 계속 달려보세요!
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+};
 
         
         const renderAllCharts = () => {
