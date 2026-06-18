@@ -135,7 +135,6 @@
             border-color: #22c55e;
         }
 
-
         .btn-gradient {
             background: linear-gradient(135deg, #22c55e, #16a34a);
             color: white;
@@ -201,7 +200,6 @@
         box-shadow: 0 2px 4px rgba(34, 197, 94, 0.1);
     }
 
-    /* [입력 폼] */
     .form-input {
         width: 100%;
         background-color: #f8fafc;
@@ -530,9 +528,6 @@
                         </h1>
                     </div>
                     <div id="team-list-gender" class="space-y-2 px-1"></div>
-
-
-
                 </section>
 
                 <section class="glass-carda p-5 bg-white rounded-3xl shadow-sm border border-emerald-50">
@@ -592,7 +587,6 @@
                                         </div>
                                         <h2 class="font-black text-lg text-gray-800 italic tracking-tighter">명예의 전당</h2>
                                     </div>
-
                                     <button onclick="openSeqWeekRunModal()" 
                                             class="text-[11px] font-bold bg-purple-400 text-white px-2 py-2 rounded-xl transition-all hover:bg-purple-600 hover:shadow-md active:scale-95 flex items-center gap-2">
                                             🔥매주연속러너
@@ -601,7 +595,6 @@
                                             class="text-[11px] font-bold bg-sky-400 text-white px-2 py-2 rounded-xl transition-all hover:bg-sky-600 hover:shadow-md active:scale-95 flex items-center gap-2">
                                              🌼 꽃등급분포
                                     </button>
-
                                 </div>
 
                                 <div class="flex gap-2">
@@ -700,8 +693,6 @@
                 </section>
 
 
-
-                
 <!-- Section: Statistics -->
             <div id="section-stats" class="hidden space-y-5">
                 <section class="glass-card bg-white p-4 rounded-[2.5rem] border border-brand-100 shadow-sm sticky top-20 z-10">
@@ -803,7 +794,7 @@
                 </div>
             </div>
 
-<!-- Section: Members (Only Admin) -->
+<!-- Section: Members -->
             <div id="section-members" class="hidden space-y-6">
                 <section class="bg-brand-50 p-6 rounded-[2.5rem] border-2 border-brand-200 shadow-xl shadow-brand-100/50">
                     <h2 id="mem-form-title" class="font-black text-sm mb-6 flex items-center gap-2 text-gray-800">
@@ -926,9 +917,6 @@
             </div>
         </main>
     </div>
-
-
-
 
     <!-- Statistics Modal -->
     <div id="stats-modal" class="fixed inset-0 z-[100] hidden modal-overlay flex items-center justify-center p-2">
@@ -1236,7 +1224,6 @@
         </div>
     </div>
 
-
         <!-- 멤버 명단 모달 (초슬림 버전) -->
     <div id="member-modal_tm" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md transition-opacity" onclick="closeModal_tm()"></div>
@@ -1319,9 +1306,6 @@
         let lastMonthDate = new Date();
         lastMonthDate.setMonth(now.getMonth() - 1);
         const lastMonthStr = `${lastMonthDate.getFullYear()}-${(lastMonthDate.getMonth() + 1).toString().padStart(2, '0')}`;
-
-
-
 
         // 전역 변수 유지
          let crewMembersList = []; // 전체 리스트용
@@ -1456,7 +1440,6 @@
         };
 
 
-
         const renderLogs = () => {
             const list = document.getElementById('log-list');
             if (!list) return;
@@ -1574,7 +1557,6 @@
             </div>
         `;
 
-
         window.setTypeFilter = (type) => {
             selectedType = type;
             ['type-all', 'type-j', 'type-b', 'type-d', 'type-o'].forEach(id => {
@@ -1637,8 +1619,6 @@
         //let dataScope = 'avg'; 
         let dataScope = 'total'; 
 
-
-
         window.updateUI_Team = () => {
         // 1. 데이터 필터링
             const filtered = allLogs.filter(l => {
@@ -1676,7 +1656,6 @@
                     // 종합점수 계산: 거리 * 1 + 횟수 * 1 (한 번 뛸 때마다 1점 + 거리당 1점)
                     obj[key].score = obj[key].dist * 1 + (obj[key].time / 60*10).toFixed(1) * 0.5 + obj[key].count * 0.1;
 
-
                 };
 
                 aggregate(teams, teamName, TEAM_COLORS[teamName] || '#facc15');
@@ -1690,8 +1669,6 @@
                     myStats.score = myStats.dist * 1 + (myStats.time /60*10).toFixed(1) * 0.5 + myStats.count * 0.1;
                 }
             });
-
-
 
             window.showTeamMembers = (teamName, type) => {
                 const modal = document.getElementById('member-modal_tm');
@@ -1954,9 +1931,7 @@
 
             renderChart(teams, myStats);
         };
-
-
-        
+     
         const TEAM_COLORS = { 
             '개토원양': '#3b82f6', 
             '돼쥐뱀말': '#f87171', 
@@ -2193,7 +2168,7 @@
             { name: "보고타(콜롬비아)", code: "BOG", dist: 14850, emoji: "☕" }, // 14500 -> 14850 소폭 조정
             { name: "리마(페루)", code: "LIM", dist: 16300, emoji: "🦙" },
             { name: "상파울루(브라질)", code: "GRU", dist: 18350, emoji: "⚽" }, // 18400 -> 18350
-            { name: "부에노스아이레스(반바퀴)", code: "EZE", dist: 19400, emoji: "💃" }, 
+            { name: "부엔(반바퀴)", code: "EZE", dist: 19400, emoji: "💃" }, 
             { name: "지구 한바퀴(완주!)", code: "ICN", dist: 40075, emoji: "🌍" }
         ];
 
@@ -2390,9 +2365,6 @@
             document.body.classList.add('modal-active');
         };
         
-
-
-
         let globalYearlyStats = {};
         window.closeModal = () => {
             document.getElementById('challenge-modal').classList.add('hidden');
