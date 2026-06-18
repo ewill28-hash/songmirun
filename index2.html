@@ -595,10 +595,12 @@
 
                                     <button onclick="openSeqWeekRunModal()" 
                                             class="text-[11px] font-bold bg-purple-400 text-white px-2 py-2 rounded-xl transition-all hover:bg-purple-600 hover:shadow-md active:scale-95 flex items-center gap-2">
-                                            🔥매주연속러너
+                                            🔥매주
                                     </button>
-
-
+                                    <button onclick="openSeqDayRunModal()" 
+                                            class="text-[11px] font-bold bg-purple-400 text-white px-2 py-2 rounded-xl transition-all hover:bg-purple-600 hover:shadow-md active:scale-95 flex items-center gap-2">
+                                            🔥매일
+                                    </button>
                                     <button onclick="openDistributionModal()" 
                                             class="text-[11px] font-bold bg-sky-400 text-white px-2 py-2 rounded-xl transition-all hover:bg-sky-600 hover:shadow-md active:scale-95 flex items-center gap-2">
                                              🌼 꽃등급분포
@@ -2438,6 +2440,95 @@
             updateUI_Team();
         };
 
+
+
+// 시작점 제약 없음 (최근 1일 빠져도 보임)
+window.getSeqDayData = () => {
+    const selectedYear = parseInt(document.getElementById('year-select').value);
+    const startYear = selectedYear - 2;
+    const endYear = selectedYear;
+    
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    const userDays = {}; // 주(Week)에서 일(Day) 데이터 구조로 변경
+
+    allLogs.forEach(log => {
+        if (!log.user_name || !log.run_date) return;
+        
+        const runDateObj = new Date(log.run_date);
+        if (runDateObj.getFullYear() < startYear || runDateObj.getFullYear() > endYear) return;
+
+        const logDay = new Date(runDateObj.getFullYear(), runDateObj.getMonth(), runDateObj.getDate());
+        
+        // 1. 나누기 7을 제거하여 '며칠 전(daysAgo)'인지 직접 계산
+        const diffDays = Math.floor((today - logDay) / (1000 * 60 * 60 * 24));
+        const daysAgo = diffDays; 
+
+        if (daysAgo < 0) return;
+
+        if (!userDays[log.user_name]) {
+            userDays[log.user_name] = new Set();
+        }
+        userDays[log.user_name].add(daysAgo); // 몇 일 전에 뛰었는지 기록
+    });
+
+    const allCalculatedUsers = Object.entries(userDays).map(([name, daysSet]) => {
+        const sortedDays = Array.from(daysSet).sort((a, b) => a - b);
+        
+        // 2. 가장 최근에 활동한 일(daysAgo가 가장 작은 값)부터 시작
+        const startPoint = sortedDays[0]; 
+        
+        if (startPoint === undefined) {
+            return { name, total_active_days: 0, days_list: "", start_date: "" };
+        }
+
+        let consecutiveDays = [];
+        let currentExpected = startPoint;
+
+        for (let i = 0; i < sortedDays.length; i++) {
+            if (sortedDays[i] === currentExpected) {
+                consecutiveDays.push(sortedDays[i]);
+                currentExpected++; // 다음 연속일 (하루 더 과거로)
+            } else if (sortedDays[i] > currentExpected) {
+                break; // 하루라도 연속이 끊기면 중단
+            }
+        }
+
+        // 3. 가장 과거의 '연속일'을 날짜 객체로 역산하여 시작일 계산
+        const oldestDayIdx = consecutiveDays[consecutiveDays.length - 1];
+        const oldestDateObj = new Date(today.getTime() - (oldestDayIdx * 24 * 60 * 60 * 1000));
+        
+        // YYYY-MM-DD 형식으로 변환 (기존 log.run_date 포맷에 맞춤)
+        const start_date = oldestDateObj.toISOString().split('T')[0];
+
+        return {
+            name,
+            total_active_days: consecutiveDays.length,
+            days_list: consecutiveDays.join(', '),
+            start_date: start_date
+        };
+    }).filter(user => user.total_active_days > 0);
+
+    if (allCalculatedUsers.length === 0) return [];
+
+    // --- 필터링 로직: Max 값 기준 상위 그룹 추출 ---
+    const maxActiveDays = Math.max(...allCalculatedUsers.map(u => u.total_active_days));
+    
+    // 4. 일 단위 필터링 범위 설정 (예: 최고 기록에서 30일 이내 차이나는 러너만)
+    // 기존 주 단위(-10)에서 일 단위(-30) 등으로 적절히 변경해야 합니다.
+    const minRange = Math.max(1, maxActiveDays - 30); 
+
+    return allCalculatedUsers
+        .filter(user => user.total_active_days >= minRange)
+        .sort((a, b) => {
+            if (b.total_active_days !== a.total_active_days) {
+                return b.total_active_days - a.total_active_days;
+            }
+            return a.name.localeCompare(b.name);
+        });
+};
+        
         //시작점 제약 있음 (최근 1주 빠지면 목록에서 제외 - 현재 사용안함)
         window.getSeqWeekData2 = () => {
             const selectedYear = parseInt(document.getElementById('year-select').value);
@@ -2729,6 +2820,91 @@
         };
 
 
+
+        window.openSeqDayRunModal = () => {
+            const data = window.getSeqDayData();
+            
+            const modalHtml = `
+                <div id="seq-day-modal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in zoom-in-95 duration-300">
+                    <div class="bg-white w-full max-w-sm rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden border border-white/20">
+                        
+                        <div class="p-5 bg-gradient-to-r from-violet-600 via-fuchsia-500 to-pink-500 flex justify-between items-center relative overflow-hidden">
+                            <div class="absolute top-0 right-0 opacity-10 transform translate-x-4 -translate-y-4">
+                                <i class="fa-solid fa-trophy text-7xl text-white"></i>
+                            </div>
+                            <div class="flex items-center gap-2.5 relative z-10">
+                                <span class="text-2xl">🏆</span>
+                                <div>
+                                    <h3 class="font-black text-base text-white leading-none">CONTINUOUS RUNNER</h3>
+                                    <p class="text-[10px] text-white/80 mt-1 font-medium">매일 멈추지 않는 전설들</p>
+                                </div>
+                            </div>
+                            <button onclick="document.getElementById('seq-day-modal').remove()" 
+                                    class="w-8 h-8 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/40 text-white transition-all backdrop-blur-sm">
+                                <i class="fa-solid fa-xmark text-sm"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="max-h-[400px] overflow-y-auto custom-scrollbar px-4 py-2 bg-slate-50/50">
+                            <table class="w-full text-left border-separate border-spacing-y-1">
+                                <tbody>
+                                    ${data.map((user, i) => {
+                                        // 모든 항목에 동일한 보라색 테마 적용
+                                        const bgClass = 'bg-white border-violet-50';
+                                        
+                                        return `
+                                        <tr class="${bgClass} border rounded-xl shadow-sm transition-all hover:bg-violet-50/30">
+                                            <td class="py-2 pl-4 rounded-l-xl w-10">
+                                                <span class="text-[11px] font-black text-violet-400">
+                                                    ${i + 1}
+                                                </span>
+                                            </td>
+                                            
+                                            <td class="py-2 cursor-pointer group" onclick="window.showRunnerDetail('${user.name}', '${user.days_list}')"> 
+                                                <div class="flex flex-col">
+                                                    <span class="text-[12px] font-bold text-gray-700 leading-tight group-hover:text-violet-600 transition-colors">
+                                                        ${user.name} <i class="fa-solid fa-magnifying-glass text-[8px] opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                                                    </span>
+                                                    <span class="text-[8px] text-gray-400 font-medium tracking-tighter">${user.start_date}부터 매일 꾸준 🏃‍♀️</span>
+                                                </div>
+                                            </td>
+                                                                                
+                                            <td class="py-2 pr-3 text-right rounded-r-xl" onclick="window.showRunnerDetail('${user.name}', '${user.days_list}')">
+                                                <div class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 shadow-sm">
+                                                    <span class="text-white text-[10px] font-black">${user.total_active_days}일</span>
+                                                    <span class="text-[9px]">🔥</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        `;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                            ${data.length === 0 ? `
+                                <div class="py-16 text-center">
+                                    <div class="text-4xl mb-3">🏃💨</div>
+                                    <div class="text-gray-400 text-xs font-bold">전설이 되어보세요!</div>
+                                </div>
+                            ` : ''}
+                        </div>
+
+                        <div class="p-4 bg-white border-t border-gray-100">
+                            <div class="flex items-start gap-2 p-3 bg-violet-50 rounded-xl">
+                                <span class="text-xs">💡</span>
+                                <p class="text-[10px] text-violet-600 leading-tight font-medium">
+                                    활동 일차는 <span class="text-red-600 font-black">현재 시점</span>부터 과거로 중단 없이 이어진 기록을 집계됩니다. 계속 달려보세요!
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        };
+
+
+        
         const renderAllCharts = () => {
             if (document.getElementById('section-stats').classList.contains('hidden')) return;
             const distData = Array(12).fill(0);
