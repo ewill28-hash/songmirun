@@ -2517,8 +2517,10 @@ window.getSeqDayData = () => {
     
     // 4. 일 단위 필터링 범위 설정 (예: 최고 기록에서 30일 이내 차이나는 러너만)
     // 기존 주 단위(-10)에서 일 단위(-30) 등으로 적절히 변경해야 합니다.
-    const minRange = Math.max(1, maxActiveDays - 1); 
+    //const minRange = Math.max(1, maxActiveDays - 1); 
+    const minRange = 1;
 
+    
     return allCalculatedUsers
         .filter(user => user.total_active_days >= minRange)
         .sort((a, b) => {
