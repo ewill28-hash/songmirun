@@ -2517,7 +2517,7 @@ window.getSeqDayData = () => {
     
     // 4. 일 단위 필터링 범위 설정 (예: 최고 기록에서 30일 이내 차이나는 러너만)
     // 기존 주 단위(-10)에서 일 단위(-30) 등으로 적절히 변경해야 합니다.
-    const minRange = Math.max(1, maxActiveDays - 30); 
+    const minRange = Math.max(1, maxActiveDays - 8); 
 
     return allCalculatedUsers
         .filter(user => user.total_active_days >= minRange)
@@ -2737,6 +2737,42 @@ window.getSeqDayData = () => {
             document.body.insertAdjacentHTML('beforeend', detailModalHtml);
         };
 
+
+        
+        window.showRunnerDetail2 = (name, daysList) => {
+            const detailModalHtml = `
+                <div id="runner-detail-modal2" class="fixed inset-0 z-[110] flex items-center justify-center p-6 bg-black/40 backdrop-blur-[2px] animate-in fade-in duration-150">
+                    <div class="bg-white w-full max-w-[260px] rounded-2xl shadow-xl overflow-hidden border border-violet-100 transform animate-in zoom-in-95 duration-200">
+                        <div class="p-3 bg-violet-50 border-b border-violet-100 flex justify-between items-center">
+                            <span class="text-[11px] font-black text-violet-700">${name}님의 기록</span>
+                            <button onclick="document.getElementById('runner-detail-modal2').remove()" class="text-gray-400 hover:text-gray-600">
+                                <i class="fa-solid fa-xmark text-xs"></i>
+                            </button>
+                        </div>
+                        <div class="p-4">
+                            <p class="text-[10px] text-gray-500 mb-2 font-medium">연속 활동 일차 상세 (Dayss Ago)</p>
+                            <div class="flex flex-wrap gap-1">
+                                ${daysList.split(', ').map(day => `
+                                    <span class="px-2 py-0.5 bg-violet-100 text-violet-600 rounded text-[10px] font-bold border border-violet-200">
+                                        ${day}일전
+                                    </span>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div class="p-2 text-center bg-gray-50">
+                            <button onclick="document.getElementById('runner-detail-modal2').remove()" 
+                                    class="text-[10px] font-bold text-gray-400 hover:text-violet-500 transition-colors">
+                                닫기
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', detailModalHtml);
+        };
+
+
+        
         window.openSeqWeekRunModal = () => {
             const data = window.getSeqWeekData();
             
@@ -2860,7 +2896,7 @@ window.getSeqDayData = () => {
                                                 </span>
                                             </td>
                                             
-                                            <td class="py-2 cursor-pointer group" onclick="window.showRunnerDetail('${user.name}', '${user.days_list}')"> 
+                                            <td class="py-2 cursor-pointer group" onclick="window.showRunnerDetail2('${user.name}', '${user.days_list}')"> 
                                                 <div class="flex flex-col">
                                                     <span class="text-[12px] font-bold text-gray-700 leading-tight group-hover:text-violet-600 transition-colors">
                                                         ${user.name} <i class="fa-solid fa-magnifying-glass text-[8px] opacity-0 group-hover:opacity-100 transition-opacity"></i>
@@ -2869,7 +2905,7 @@ window.getSeqDayData = () => {
                                                 </div>
                                             </td>
                                                                                 
-                                            <td class="py-2 pr-3 text-right rounded-r-xl" onclick="window.showRunnerDetail('${user.name}', '${user.days_list}')">
+                                            <td class="py-2 pr-3 text-right rounded-r-xl" onclick="window.showRunnerDetail2('${user.name}', '${user.days_list}')">
                                                 <div class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 shadow-sm">
                                                     <span class="text-white text-[10px] font-black">${user.total_active_days}일</span>
                                                     <span class="text-[9px]">🔥</span>
