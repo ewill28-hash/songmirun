@@ -2441,96 +2441,97 @@
         };
 
 
-
-// 시작점 제약 없음 (최근 1일 빠져도 보임)
-window.getSeqDayData = () => {
-    const selectedYear = parseInt(document.getElementById('year-select').value);
-    const startYear = selectedYear - 2;
-    const endYear = selectedYear;
-    
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    
-    const userDays = {}; // 주(Week)에서 일(Day) 데이터 구조로 변경
-
-    allLogs.forEach(log => {
-        if (!log.user_name || !log.run_date) return;
         
-        const runDateObj = new Date(log.run_date);
-        if (runDateObj.getFullYear() < startYear || runDateObj.getFullYear() > endYear) return;
-
-        const logDay = new Date(runDateObj.getFullYear(), runDateObj.getMonth(), runDateObj.getDate());
+        // 시작점 제약 없음 (최근 1일 빠져도 보임)
+        window.getSeqDayData = () => {
+            const selectedYear = parseInt(document.getElementById('year-select').value);
+            const startYear = selectedYear - 2;
+            const endYear = selectedYear;
+            
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            
+            const userDays = {}; // 주(Week)에서 일(Day) 데이터 구조로 변경
         
-        // 1. 나누기 7을 제거하여 '며칠 전(daysAgo)'인지 직접 계산
-        const diffDays = Math.floor((today - logDay) / (1000 * 60 * 60 * 24));
-        const daysAgo = diffDays; 
-
-        if (daysAgo < 0) return;
-
-        if (!userDays[log.user_name]) {
-            userDays[log.user_name] = new Set();
-        }
-        userDays[log.user_name].add(daysAgo); // 몇 일 전에 뛰었는지 기록
-    });
-
-    const allCalculatedUsers = Object.entries(userDays).map(([name, daysSet]) => {
-        const sortedDays = Array.from(daysSet).sort((a, b) => a - b);
+            allLogs.forEach(log => {
+                if (!log.user_name || !log.run_date) return;
+                
+                const runDateObj = new Date(log.run_date);
+                if (runDateObj.getFullYear() < startYear || runDateObj.getFullYear() > endYear) return;
         
-        // 2. 가장 최근에 활동한 일(daysAgo가 가장 작은 값)부터 시작
-        const startPoint = sortedDays[0]; 
+                const logDay = new Date(runDateObj.getFullYear(), runDateObj.getMonth(), runDateObj.getDate());
+                
+                // 1. 나누기 7을 제거하여 '며칠 전(daysAgo)'인지 직접 계산
+                const diffDays = Math.floor((today - logDay) / (1000 * 60 * 60 * 24));
+                const daysAgo = diffDays; 
         
-        if (startPoint === undefined) {
-            return { name, total_active_days: 0, days_list: "", start_date: "" };
-        }
-
-        let consecutiveDays = [];
-        let currentExpected = startPoint;
-
-        for (let i = 0; i < sortedDays.length; i++) {
-            if (sortedDays[i] === currentExpected) {
-                consecutiveDays.push(sortedDays[i]);
-                currentExpected++; // 다음 연속일 (하루 더 과거로)
-            } else if (sortedDays[i] > currentExpected) {
-                break; // 하루라도 연속이 끊기면 중단
-            }
-        }
-
-        // 3. 가장 과거의 '연속일'을 날짜 객체로 역산하여 시작일 계산
-        const oldestDayIdx = consecutiveDays[consecutiveDays.length - 1];
-        const oldestDateObj = new Date(today.getTime() - (oldestDayIdx * 24 * 60 * 60 * 1000));
+                if (daysAgo < 0) return;
         
-        // YYYY-MM-DD 형식으로 변환 (기존 log.run_date 포맷에 맞춤)
-        const start_date = oldestDateObj.toISOString().split('T')[0];
-
-        return {
-            name,
-            total_active_days: consecutiveDays.length,
-            days_list: consecutiveDays.join(', '),
-            start_date: start_date
+                if (!userDays[log.user_name]) {
+                    userDays[log.user_name] = new Set();
+                }
+                userDays[log.user_name].add(daysAgo); // 몇 일 전에 뛰었는지 기록
+            });
+        
+            const allCalculatedUsers = Object.entries(userDays).map(([name, daysSet]) => {
+                const sortedDays = Array.from(daysSet).sort((a, b) => a - b);
+                
+                // 2. 가장 최근에 활동한 일(daysAgo가 가장 작은 값)부터 시작
+                const startPoint = sortedDays[0]; 
+                
+                if (startPoint === undefined) {
+                    return { name, total_active_days: 0, days_list: "", start_date: "" };
+                }
+        
+                let consecutiveDays = [];
+                let currentExpected = startPoint;
+        
+                for (let i = 0; i < sortedDays.length; i++) {
+                    if (sortedDays[i] === currentExpected) {
+                        consecutiveDays.push(sortedDays[i]);
+                        currentExpected++; // 다음 연속일 (하루 더 과거로)
+                    } else if (sortedDays[i] > currentExpected) {
+                        break; // 하루라도 연속이 끊기면 중단
+                    }
+                }
+        
+                // 3. 가장 과거의 '연속일'을 날짜 객체로 역산하여 시작일 계산
+                const oldestDayIdx = consecutiveDays[consecutiveDays.length - 1];
+                const oldestDateObj = new Date(today.getTime() - (oldestDayIdx * 24 * 60 * 60 * 1000));
+                
+                // YYYY-MM-DD 형식으로 변환 (기존 log.run_date 포맷에 맞춤)
+                const start_date = oldestDateObj.toISOString().split('T')[0];
+        
+                return {
+                    name,
+                    total_active_days: consecutiveDays.length,
+                    days_list: consecutiveDays.join(', '),
+                    start_date: start_date
+                };
+            }).filter(user => user.total_active_days > 0);
+        
+            if (allCalculatedUsers.length === 0) return [];
+        
+            // --- 필터링 로직: Max 값 기준 상위 그룹 추출 ---
+            const maxActiveDays = Math.max(...allCalculatedUsers.map(u => u.total_active_days));
+            
+            // 4. 일 단위 필터링 범위 설정 (예: 최고 기록에서 30일 이내 차이나는 러너만)
+            // 기존 주 단위(-10)에서 일 단위(-30) 등으로 적절히 변경해야 합니다.
+            //const minRange = Math.max(1, maxActiveDays - 1); 
+            const minRange = 1;
+        
+            
+        return allCalculatedUsers
+                .filter(user => user.total_active_days >= minRange)
+                .sort((a, b) => {
+                    if (b.total_active_days !== a.total_active_days) {
+                        return b.total_active_days - a.total_active_days; // 1순위: 연속일수 내림차순
+                    }
+                    return a.name.localeCompare(b.name); // 2순위: 이름 가나다순 오름차순
+                })
+                .slice(0, 7); // ⭐ 핵심: 동일 기록이 많아도 무조건 앞에서부터 7개만 추출
         };
-    }).filter(user => user.total_active_days > 0);
-
-    if (allCalculatedUsers.length === 0) return [];
-
-    // --- 필터링 로직: Max 값 기준 상위 그룹 추출 ---
-    const maxActiveDays = Math.max(...allCalculatedUsers.map(u => u.total_active_days));
-    
-    // 4. 일 단위 필터링 범위 설정 (예: 최고 기록에서 30일 이내 차이나는 러너만)
-    // 기존 주 단위(-10)에서 일 단위(-30) 등으로 적절히 변경해야 합니다.
-    //const minRange = Math.max(1, maxActiveDays - 1); 
-    const minRange = 1;
-
-    
-    return allCalculatedUsers
-        .filter(user => user.total_active_days >= minRange)
-        .sort((a, b) => {
-            if (b.total_active_days !== a.total_active_days) {
-                return b.total_active_days - a.total_active_days;
-            }
-            return a.name.localeCompare(b.name);
-        });
-};
-        
+                
         //시작점 제약 있음 (최근 1주 빠지면 목록에서 제외 - 현재 사용안함)
         window.getSeqWeekData2 = () => {
             const selectedYear = parseInt(document.getElementById('year-select').value);
