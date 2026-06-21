@@ -3133,7 +3133,7 @@ window.openSeqDayRunModal = () => {
                 const isDistanceRank = elementId.includes('dist');
 
                 container.innerHTML = sorted.map((item, i) => {
-                    const isTop3 = i < 3;
+                    const isTop3 = i < 0;
                     
                     // 거리 랭킹 1~3위일 때만 적용할 스타일 (필터: 블러)
                     // group-hover:filter-none -> 마우스 올리면 블러 해제
