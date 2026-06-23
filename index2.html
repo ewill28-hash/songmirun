@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -135,7 +136,6 @@
             border-color: #22c55e;
         }
 
-
         .btn-gradient {
             background: linear-gradient(135deg, #22c55e, #16a34a);
             color: white;
@@ -201,7 +201,6 @@
         box-shadow: 0 2px 4px rgba(34, 197, 94, 0.1);
     }
 
-    /* [입력 폼] */
     .form-input {
         width: 100%;
         background-color: #f8fafc;
@@ -530,9 +529,6 @@
                         </h1>
                     </div>
                     <div id="team-list-gender" class="space-y-2 px-1"></div>
-
-
-
                 </section>
 
                 <section class="glass-carda p-5 bg-white rounded-3xl shadow-sm border border-emerald-50">
@@ -592,7 +588,6 @@
                                         </div>
                                         <h2 class="font-black text-lg text-gray-800 italic tracking-tighter">명예의 전당</h2>
                                     </div>
-
                                     <button onclick="openSeqWeekRunModal()" 
                                             class="text-[11px] font-bold bg-purple-400 text-white px-2 py-2 rounded-xl transition-all hover:bg-purple-600 hover:shadow-md active:scale-95 flex items-center gap-2">
                                             🔥매주연속러너
@@ -601,7 +596,6 @@
                                             class="text-[11px] font-bold bg-sky-400 text-white px-2 py-2 rounded-xl transition-all hover:bg-sky-600 hover:shadow-md active:scale-95 flex items-center gap-2">
                                              🌼 꽃등급분포
                                     </button>
-
                                 </div>
 
                                 <div class="flex gap-2">
@@ -661,14 +655,14 @@
                             <div class="rank-card">
                                 <div class="rank-header">
                                     <i class="fa-solid fa-clock text-orange-500"></i>
-                                    <span class="text-xs font-black text-gray-700">누적 시간 TOP 5</span>
+                                    <span onclick="openSeqDay2RunModal()" class="text-xs font-black text-gray-700">누적 시간 TOP 5</span>
                                 </div>
                                 <div id="rank-time-list" class="divide-y divide-gray-50"></div>
                             </div>
                             <div class="rank-card">
                                 <div class="rank-header">
                                     <i class="fa-solid fa-running text-purple-500"></i>
-                                    <span onclick="openSeqDayRunModal()" class="text-xs font-black text-gray-700">러닝 횟수 TOP 5</span>
+                                    <span onclick="openSeqDayRunModal()" class="text-xs font-black text-gray-700">🐐 러닝 횟수 TOP 5</span>
                                 </div>
                                 <div id="rank-count-list" class="divide-y divide-gray-50"></div>
                             </div>
@@ -700,8 +694,6 @@
                 </section>
 
 
-
-                
 <!-- Section: Statistics -->
             <div id="section-stats" class="hidden space-y-5">
                 <section class="glass-card bg-white p-4 rounded-[2.5rem] border border-brand-100 shadow-sm sticky top-20 z-10">
@@ -803,7 +795,7 @@
                 </div>
             </div>
 
-<!-- Section: Members (Only Admin) -->
+<!-- Section: Members -->
             <div id="section-members" class="hidden space-y-6">
                 <section class="bg-brand-50 p-6 rounded-[2.5rem] border-2 border-brand-200 shadow-xl shadow-brand-100/50">
                     <h2 id="mem-form-title" class="font-black text-sm mb-6 flex items-center gap-2 text-gray-800">
@@ -926,9 +918,6 @@
             </div>
         </main>
     </div>
-
-
-
 
     <!-- Statistics Modal -->
     <div id="stats-modal" class="fixed inset-0 z-[100] hidden modal-overlay flex items-center justify-center p-2">
@@ -1236,7 +1225,6 @@
         </div>
     </div>
 
-
         <!-- 멤버 명단 모달 (초슬림 버전) -->
     <div id="member-modal_tm" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md transition-opacity" onclick="closeModal_tm()"></div>
@@ -1319,9 +1307,6 @@
         let lastMonthDate = new Date();
         lastMonthDate.setMonth(now.getMonth() - 1);
         const lastMonthStr = `${lastMonthDate.getFullYear()}-${(lastMonthDate.getMonth() + 1).toString().padStart(2, '0')}`;
-
-
-
 
         // 전역 변수 유지
          let crewMembersList = []; // 전체 리스트용
@@ -1456,7 +1441,6 @@
         };
 
 
-
         const renderLogs = () => {
             const list = document.getElementById('log-list');
             if (!list) return;
@@ -1574,7 +1558,6 @@
             </div>
         `;
 
-
         window.setTypeFilter = (type) => {
             selectedType = type;
             ['type-all', 'type-j', 'type-b', 'type-d', 'type-o'].forEach(id => {
@@ -1637,8 +1620,6 @@
         //let dataScope = 'avg'; 
         let dataScope = 'total'; 
 
-
-
         window.updateUI_Team = () => {
         // 1. 데이터 필터링
             const filtered = allLogs.filter(l => {
@@ -1676,7 +1657,6 @@
                     // 종합점수 계산: 거리 * 1 + 횟수 * 1 (한 번 뛸 때마다 1점 + 거리당 1점)
                     obj[key].score = obj[key].dist * 1 + (obj[key].time / 60*10).toFixed(1) * 0.5 + obj[key].count * 0.1;
 
-
                 };
 
                 aggregate(teams, teamName, TEAM_COLORS[teamName] || '#facc15');
@@ -1690,8 +1670,6 @@
                     myStats.score = myStats.dist * 1 + (myStats.time /60*10).toFixed(1) * 0.5 + myStats.count * 0.1;
                 }
             });
-
-
 
             window.showTeamMembers = (teamName, type) => {
                 const modal = document.getElementById('member-modal_tm');
@@ -1954,9 +1932,7 @@
 
             renderChart(teams, myStats);
         };
-
-
-        
+     
         const TEAM_COLORS = { 
             '개토원양': '#3b82f6', 
             '돼쥐뱀말': '#f87171', 
@@ -2193,7 +2169,7 @@
             { name: "보고타(콜롬비아)", code: "BOG", dist: 14850, emoji: "☕" }, // 14500 -> 14850 소폭 조정
             { name: "리마(페루)", code: "LIM", dist: 16300, emoji: "🦙" },
             { name: "상파울루(브라질)", code: "GRU", dist: 18350, emoji: "⚽" }, // 18400 -> 18350
-            { name: "부에노스아이레스(반바퀴)", code: "EZE", dist: 19400, emoji: "💃" }, 
+            { name: "부엔(반바퀴)", code: "EZE", dist: 19400, emoji: "💃" }, 
             { name: "지구 한바퀴(완주!)", code: "ICN", dist: 40075, emoji: "🌍" }
         ];
 
@@ -2390,9 +2366,6 @@
             document.body.classList.add('modal-active');
         };
         
-
-
-
         let globalYearlyStats = {};
         window.closeModal = () => {
             document.getElementById('challenge-modal').classList.add('hidden');
@@ -2436,7 +2409,102 @@
             updateUI_Team();
         };
 
+        // 시작점 제약 없음 (연도 내 가장 긴 연속일 기준)
+        window.getSeqDay2Data = () => {
+            const selectedYear = parseInt(document.getElementById('year-select').value);
+            const startYear = selectedYear - 2;
+            const endYear = selectedYear;
+            
+            const userDays = {}; 
 
+            allLogs.forEach(log => {
+                if (!log.user_name || !log.run_date) return;
+                
+                const runDateObj = new Date(log.run_date);
+                if (runDateObj.getFullYear() < startYear || runDateObj.getFullYear() > endYear) return;
+
+                // 시간 정보를 제외하고 날짜(YYYY-MM-DD) 문자열 형태로 저장하여 중복 제거
+                const dateStr = log.run_date.split('T')[0]; 
+                
+                if (!userDays[log.user_name]) {
+                    userDays[log.user_name] = new Set();
+                }
+                userDays[log.user_name].add(dateStr); 
+            });
+
+            const allCalculatedUsers = Object.entries(userDays).map(([name, dateSet]) => {
+                // 1. 날짜 문자열을 정렬 (오름차순: 과거 -> 최근)
+                const sortedDates = Array.from(dateSet).sort();
+                
+                if (sortedDates.length === 0) {
+                    return { name, total_active_days: 0, days_list: "", start_date: "" };
+                }
+
+                let maxStreak = 0;           // 가장 긴 연속 일수
+                let maxStreakStartDate = ""; // 가장 긴 연속 구간의 시작일
+                let maxStreakDaysList = [];  // 가장 긴 연속 구간의 일수 리스트 (옵션)
+
+                let currentStreak = 1;
+                let currentStartDate = sortedDates[0];
+                let currentDaysList = [sortedDates[0]];
+
+                // 2. 루프를 돌며 가장 긴 연속 구간(Max Streak) 찾기
+                for (let i = 1; i < sortedDates.length; i++) {
+                    const prevDate = new Date(sortedDates[i - 1]);
+                    const currDate = new Date(sortedDates[i]);
+                    
+                    // 두 날짜의 차이 계산 (밀리초 -> 일 단위)
+                    const diffTime = currDate - prevDate;
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                    if (diffDays === 1) {
+                        // 하루 차이면 연속 중
+                        currentStreak++;
+                        currentDaysList.push(sortedDates[i]);
+                    } else {
+                        // 연속이 끊겼다면 기존 streak이 최대치인지 확인 후 갱신
+                        if (currentStreak > maxStreak) {
+                            maxStreak = currentStreak;
+                            maxStreakStartDate = currentStartDate;
+                            maxStreakDaysList = [...currentDaysList];
+                        }
+                        // 새로운 연속 구간 시작 리셋
+                        currentStreak = 1;
+                        currentStartDate = sortedDates[i];
+                        currentDaysList = [sortedDates[i]];
+                    }
+                }
+
+                // 마지막 구간이 가장 길게 끝났을 경우를 위해 한 번 더 갱신
+                if (currentStreak > maxStreak) {
+                    maxStreak = currentStreak;
+                    maxStreakStartDate = currentStartDate;
+                    maxStreakDaysList = [...currentDaysList];
+                }
+
+                return {
+                    name,
+                    total_active_days: maxStreak,
+                    // days_list 포맷은 기존 코드 스타일 유지 (필요에 따라 인덱스 번호 등으로 가공 가능)
+                    days_list: maxStreakDaysList.join(', '), 
+                    start_date: maxStreakStartDate // 해당 연속 구간의 시작일 (YYYY-MM-DD)
+                };
+            }).filter(user => user.total_active_days > 0);
+
+            if (allCalculatedUsers.length === 0) return [];
+
+            const minRange = 1;
+
+            return allCalculatedUsers
+                .filter(user => user.total_active_days >= minRange)
+                .sort((a, b) => {
+                    if (b.total_active_days !== a.total_active_days) {
+                        return b.total_active_days - a.total_active_days; // 1순위: 연속일수 내림차순
+                    }
+                    return a.name.localeCompare(b.name); // 2순위: 이름 가나다순 오름차순
+                })
+                .slice(0, 7); // 상위 7명 추출
+        };
         
         // 시작점 제약 없음 (최근 1일 빠져도 보임)
         window.getSeqDayData = () => {
@@ -2862,7 +2930,6 @@
         };
 
 
-
         window.openSeqDayRunModal = () => {
             const data = window.getSeqDayData();
             
@@ -2870,7 +2937,7 @@
                 <div id="seq-day-modal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in zoom-in-95 duration-300">
                     <div class="bg-white w-full max-w-sm rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden border border-white/20">
                         
-                        <div class="p-5 bg-gradient-to-r from-violet-600 via-fuchsia-500 to-pink-500 flex justify-between items-center relative overflow-hidden">
+                        <div class="p-5 bg-gradient-to-r from-orange-600 via-amber-500 to-yellow-500 flex justify-between items-center relative overflow-hidden">
                             <div class="absolute top-0 right-0 opacity-10 transform translate-x-4 -translate-y-4">
                                 <i class="fa-solid fa-trophy text-7xl text-white"></i>
                             </div>
@@ -2878,7 +2945,7 @@
                                 <span class="text-2xl">🏆</span>
                                 <div>
                                     <h3 class="font-black text-base text-white leading-none">CONTINUOUS RUNNER</h3>
-                                    <p class="text-[10px] text-white/80 mt-1 font-medium">매일 멈추지 않는 전설들</p>
+                                    <p class="text-[10px] text-white/80 mt-1 font-medium">매일 멈추지 않는 러너들</p>
                                 </div>
                             </div>
                             <button onclick="document.getElementById('seq-day-modal').remove()" 
@@ -2891,28 +2958,28 @@
                             <table class="w-full text-left border-separate border-spacing-y-1">
                                 <tbody>
                                     ${data.map((user, i) => {
-                                        // 모든 항목에 동일한 보라색 테마 적용
-                                        const bgClass = 'bg-white border-violet-50';
+                                        // 오렌지색 테마 반영
+                                        const bgClass = 'bg-white border-orange-50';
                                         
                                         return `
-                                        <tr class="${bgClass} border rounded-xl shadow-sm transition-all hover:bg-violet-50/30">
+                                        <tr class="${bgClass} border rounded-xl shadow-sm transition-all hover:bg-orange-50/30">
                                             <td class="py-2 pl-4 rounded-l-xl w-10">
-                                                <span class="text-[11px] font-black text-violet-400">
+                                                <span class="text-[11px] font-black text-orange-400">
                                                     ${i + 1}
                                                 </span>
                                             </td>
                                             
                                             <td class="py-2 cursor-pointer group" onclick="window.showRunnerDetail2('${user.name}', '${user.days_list}')"> 
                                                 <div class="flex flex-col">
-                                                    <span class="text-[12px] font-bold text-gray-700 leading-tight group-hover:text-violet-600 transition-colors">
+                                                    <span class="text-[12px] font-bold text-gray-700 leading-tight group-hover:text-orange-600 transition-colors">
                                                         ${user.name} <i class="fa-solid fa-magnifying-glass text-[8px] opacity-0 group-hover:opacity-100 transition-opacity"></i>
                                                     </span>
                                                     <span class="text-[8px] text-gray-400 font-medium tracking-tighter">${user.start_date}부터 매일 꾸준 🏃‍♀️</span>
                                                 </div>
                                             </td>
-                                                                                
+                                                                                        
                                             <td class="py-2 pr-3 text-right rounded-r-xl" onclick="window.showRunnerDetail2('${user.name}', '${user.days_list}')">
-                                                <div class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 shadow-sm">
+                                                <div class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 shadow-sm">
                                                     <span class="text-white text-[10px] font-black">${user.total_active_days}일</span>
                                                     <span class="text-[9px]">🔥</span>
                                                 </div>
@@ -2931,10 +2998,93 @@
                         </div>
 
                         <div class="p-4 bg-white border-t border-gray-100">
-                            <div class="flex items-start gap-2 p-3 bg-violet-50 rounded-xl">
+                            <div class="flex items-start gap-2 p-3 bg-orange-50 rounded-xl">
                                 <span class="text-xs">💡</span>
-                                <p class="text-[10px] text-violet-600 leading-tight font-medium">
-                                    활동 일차는 <span class="text-red-600 font-black">현재 시점</span>부터 과거로 중단 없이 이어진 기록을 집계됩니다. 계속 달려보세요!
+                                <p class="text-[10px] text-orange-600 leading-tight font-medium">
+                                    <span class="text-red-600 font-black">현재 시점</span>부터 과거로 중단 없이 이어진 기록을 집계됩니다. 계속 달려보세요!
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        };
+
+        
+        window.openSeqDay2RunModal = () => {
+            const data = window.getSeqDay2Data();
+            
+            const modalHtml = `
+                <div id="seq-day-modal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in zoom-in-95 duration-300">
+                    <div class="bg-white w-full max-w-sm rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden border border-white/20">
+                        
+                        <div class="p-5 bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-500 flex justify-between items-center relative overflow-hidden">
+                            <div class="absolute top-0 right-0 opacity-10 transform translate-x-4 -translate-y-4">
+                                <i class="fa-solid fa-trophy text-7xl text-white"></i>
+                            </div>
+                            <div class="flex items-center gap-2.5 relative z-10">
+                                <span class="text-2xl">💎</span>
+                                <div>
+                                    <h3 class="font-black text-base text-white leading-none">CONTINUOUS RUNNER</h3>
+                                    <p class="text-[10px] text-white/80 mt-1 font-medium">매일 멈추지 않는 러너들</p>
+                                </div>
+                            </div>
+                            <button onclick="document.getElementById('seq-day-modal').remove()" 
+                                    class="w-8 h-8 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/40 text-white transition-all backdrop-blur-sm">
+                                <i class="fa-solid fa-xmark text-sm"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="max-h-[400px] overflow-y-auto custom-scrollbar px-4 py-2 bg-slate-50/50">
+                            <table class="w-full text-left border-separate border-spacing-y-1">
+                                <tbody>
+                                    ${data.map((user, i) => {
+                                        // 하늘색 테마 반영 (배경 및 호버 효과 변경)
+                                        const bgClass = 'bg-white border-sky-50';
+                                        
+                                        return `
+                                        <tr class="${bgClass} border rounded-xl shadow-sm transition-all hover:bg-sky-50/40">
+                                            <td class="py-2 pl-4 rounded-l-xl w-10">
+                                                <span class="text-[11px] font-black text-sky-500">
+                                                    ${i + 1}
+                                                </span>
+                                            </td>
+                                            
+                                            <td class="py-2 cursor-pointer group" onclick="window.showRunnerDetail2('${user.name}', '${user.days_list}')"> 
+                                                <div class="flex flex-col">
+                                                    <span class="text-[12px] font-bold text-gray-700 leading-tight group-hover:text-blue-600 transition-colors">
+                                                        ${user.name} <i class="fa-solid fa-magnifying-glass text-[8px] opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                                                    </span>
+                                                    <span class="text-[8px] text-gray-400 font-medium tracking-tighter">${user.start_date}부터 매일 꾸준 👟</span>
+                                                </div>
+                                            </td>
+                                                                                                                        
+                                            <td class="py-2 pr-3 text-right rounded-r-xl" onclick="window.showRunnerDetail2('${user.name}', '${user.days_list}')">
+                                                <div class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-sky-500 to-blue-500 shadow-sm">
+                                                    <span class="text-white text-[10px] font-black">${user.total_active_days}일</span>
+                                                    <span class="text-[9px]">⚡</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        `;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                            ${data.length === 0 ? `
+                                <div class="py-16 text-center">
+                                    <div class="text-4xl mb-3">👟✨</div>
+                                    <div class="text-gray-400 text-xs font-bold">첫 번째 전설이 되어보세요!</div>
+                                </div>
+                            ` : ''}
+                        </div>
+
+                        <div class="p-4 bg-white border-t border-gray-100">
+                            <div class="flex items-start gap-2 p-3 bg-sky-50 rounded-xl">
+                                <span class="text-xs">💡</span>
+                                <p class="text-[10px] text-sky-700 leading-tight font-medium">
+                                    <span class="text-blue-600 font-black">현재 시점</span>부터 과거로 중단 없이 이어진 기록이 집계됩니다. 계속 달려보세요!
                                 </p>
                             </div>
                         </div>
@@ -2946,7 +3096,6 @@
         };
 
 
-        
         const renderAllCharts = () => {
             if (document.getElementById('section-stats').classList.contains('hidden')) return;
             const distData = Array(12).fill(0);
@@ -3163,7 +3312,7 @@
                 const isDistanceRank = elementId.includes('dist');
 
                 container.innerHTML = sorted.map((item, i) => {
-                    const isTop3 = i < 3;
+                    const isTop3 = i < 0;
                     
                     // 거리 랭킹 1~3위일 때만 적용할 스타일 (필터: 블러)
                     // group-hover:filter-none -> 마우스 올리면 블러 해제
