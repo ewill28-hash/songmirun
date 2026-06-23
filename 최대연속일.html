@@ -1,0 +1,96 @@
+// 시작점 제약 없음 (연도 내 가장 긴 연속일 기준)
+window.getSeqDayData = () => {
+    const selectedYear = parseInt(document.getElementById('year-select').value);
+    const startYear = selectedYear - 2;
+    const endYear = selectedYear;
+    
+    const userDays = {}; 
+
+    allLogs.forEach(log => {
+        if (!log.user_name || !log.run_date) return;
+        
+        const runDateObj = new Date(log.run_date);
+        if (runDateObj.getFullYear() < startYear || runDateObj.getFullYear() > endYear) return;
+
+        // 시간 정보를 제외하고 날짜(YYYY-MM-DD) 문자열 형태로 저장하여 중복 제거
+        const dateStr = log.run_date.split('T')[0]; 
+        
+        if (!userDays[log.user_name]) {
+            userDays[log.user_name] = new Set();
+        }
+        userDays[log.user_name].add(dateStr); 
+    });
+
+    const allCalculatedUsers = Object.entries(userDays).map(([name, dateSet]) => {
+        // 1. 날짜 문자열을 정렬 (오름차순: 과거 -> 최근)
+        const sortedDates = Array.from(dateSet).sort();
+        
+        if (sortedDates.length === 0) {
+            return { name, total_active_days: 0, days_list: "", start_date: "" };
+        }
+
+        let maxStreak = 0;           // 가장 긴 연속 일수
+        let maxStreakStartDate = ""; // 가장 긴 연속 구간의 시작일
+        let maxStreakDaysList = [];  // 가장 긴 연속 구간의 일수 리스트 (옵션)
+
+        let currentStreak = 1;
+        let currentStartDate = sortedDates[0];
+        let currentDaysList = [sortedDates[0]];
+
+        // 2. 루프를 돌며 가장 긴 연속 구간(Max Streak) 찾기
+        for (let i = 1; i < sortedDates.length; i++) {
+            const prevDate = new Date(sortedDates[i - 1]);
+            const currDate = new Date(sortedDates[i]);
+            
+            // 두 날짜의 차이 계산 (밀리초 -> 일 단위)
+            const diffTime = currDate - prevDate;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays === 1) {
+                // 하루 차이면 연속 중
+                currentStreak++;
+                currentDaysList.push(sortedDates[i]);
+            } else {
+                // 연속이 끊겼다면 기존 streak이 최대치인지 확인 후 갱신
+                if (currentStreak > maxStreak) {
+                    maxStreak = currentStreak;
+                    maxStreakStartDate = currentStartDate;
+                    maxStreakDaysList = [...currentDaysList];
+                }
+                // 새로운 연속 구간 시작 리셋
+                currentStreak = 1;
+                currentStartDate = sortedDates[i];
+                currentDaysList = [sortedDates[i]];
+            }
+        }
+
+        // 마지막 구간이 가장 길게 끝났을 경우를 위해 한 번 더 갱신
+        if (currentStreak > maxStreak) {
+            maxStreak = currentStreak;
+            maxStreakStartDate = currentStartDate;
+            maxStreakDaysList = [...currentDaysList];
+        }
+
+        return {
+            name,
+            total_active_days: maxStreak,
+            // days_list 포맷은 기존 코드 스타일 유지 (필요에 따라 인덱스 번호 등으로 가공 가능)
+            days_list: maxStreakDaysList.join(', '), 
+            start_date: maxStreakStartDate // 해당 연속 구간의 시작일 (YYYY-MM-DD)
+        };
+    }).filter(user => user.total_active_days > 0);
+
+    if (allCalculatedUsers.length === 0) return [];
+
+    const minRange = 1;
+
+    return allCalculatedUsers
+        .filter(user => user.total_active_days >= minRange)
+        .sort((a, b) => {
+            if (b.total_active_days !== a.total_active_days) {
+                return b.total_active_days - a.total_active_days; // 1순위: 연속일수 내림차순
+            }
+            return a.name.localeCompare(b.name); // 2순위: 이름 가나다순 오름차순
+        })
+        .slice(0, 7); // 상위 7명 추출
+};
