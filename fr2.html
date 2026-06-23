@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Songmirun - Flower Grade </title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase JS Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module">
+
+        const SUPABASE_URL = 'https://bwzvgqcfydznuwugyyio.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ3enZncWNmeWR6bnV3dWd5eWlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzNzU2MjcsImV4cCI6MjA4ODk1MTYyN30.SqQJ7w-SsPnm1wN03USOaR6_Fdn0JBzLn8tPhFYJWj8';
+        
+        const { createClient } = supabase;
+        const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        const userListElement = document.getElementById('user-list');
+        const loadingElement = document.getElementById('loading');
+        const countElement = document.getElementById('user-count');
+        
+        const totalDistanceElement = document.getElementById('total-stats-distance');
+        const totalCountElement = document.getElementById('total-stats-count');
+        const gradeStatsContainer = document.getElementById('grade-stats-container');
+        
+        const yearSelect = document.getElementById('year-filter');
+        const monthSelect = document.getElementById('month-filter');
+        const sortSelect = document.getElementById('sort-filter');
+
+        // 모달 관련 요소
+        const graphBtn = document.getElementById('graph-btn');
+        const distModal = document.getElementById('dist-modal');
+        const closeModal = document.getElementById('close-modal');
+        const modalContent = document.getElementById('modal-content');
+        const modalTotalCount = document.getElementById('modal-total-count');
+
+        // 거리커플 모달 관련 요소
+        const coupleBtn = document.getElementById('couple-btn');
+        const coupleModal = document.getElementById('couple-modal');
+        const closeCoupleModal = document.getElementById('close-couple-modal');
+        const coupleModalContent = document.getElementById('couple-modal-content');
+        const coupleModalTitle = document.getElementById('couple-modal-title');
+
+        // 시간커플 모달 관련 요소
+        const timeCoupleBtn = document.getElementById('time-couple-btn');
+        const timeCoupleModal = document.getElementById('time-couple-modal');
+        const closeTimeCoupleModal = document.getElementById('close-time-couple-modal');
+        const timeCoupleModalContent = document.getElementById('time-couple-modal-content');
+        const timeCoupleModalTitle = document.getElementById('time-couple-modal-title');
+        
+        let allLogs = []; 
+        let allMembers = [];
+        let currentSortedData = [];
+        let currentGradeFilter = null;
+        let lastGradeDistribution = {}; // 모달용 데이터 저장
+
+        // --- 등급 기준 정의 ---
+        const thresholds = [
+            { id: 'wind', threshold: 100, name: '🌤️ 하늘', color: 'bg-white text-blue-600 border border-blue-200', bar: 'bg-blue-400', labelColor: 'bg-blue-50 text-blue-600 border-blue-100' },
+            { id: 'wind', threshold: 99, name: '🍃 바람', color: 'bg-white text-blue-400 border border-blue-200', bar: 'bg-blue-200', labelColor: 'bg-blue-50 text-blue-600 border-blue-100' },
+            { id: 'full', threshold: 90, name: '🏵️ 만개', color: 'bg-purple-500 text-white', bar: 'bg-purple-500', labelColor: 'bg-purple-500 text-white' },
+            { id: 'passion', threshold: 70, name: '🌺 열정', color: 'bg-orange-500 text-white', bar: 'bg-orange-500', labelColor: 'bg-orange-500 text-white' },
+            { id: 'bloom', threshold: 50, name: '🌼 활짝', color: 'bg-blue-500 text-white', bar: 'bg-blue-500', labelColor: 'bg-blue-500 text-white' },
+            { id: 'bud', threshold: 30, name: '🌷 꽃봉', color: 'bg-green-500 text-white', bar: 'bg-green-500', labelColor: 'bg-green-500 text-white' },
+            { id: 'sprout', threshold: 1, name: '🌱 새싹', color: 'bg-green-100 text-green-600 border border-green-200', bar: 'bg-emerald-400', labelColor: 'bg-green-100 text-green-700 border-green-200' },
+            { id: 'seed', threshold: 0, name: '🌰 씨앗', color: 'bg-amber-100 text-amber-700 border border-amber-200', bar: 'bg-amber-400', labelColor: 'bg-amber-100 text-amber-800 border-amber-200' }
+        ];
+
+        // --- 등급 계산 로직 ---
+        const calculateRunnerGradeAtDate = (userLogs, targetDate) => {
+            const thirtyOneDaysAgo = new Date(targetDate);
+            thirtyOneDaysAgo.setDate(targetDate.getDate() - 31);
+
+            const recentLogs = userLogs.filter(l => {
+                if (!l.jsDate) return false;
+                return l.jsDate >= thirtyOneDaysAgo && l.jsDate <= targetDate;
+            });
+
+            const count = recentLogs.length;
+            let scoreCount = 0;
+            if (count >= 35) scoreCount = 40;
+            else if (count >= 30) scoreCount = 39;
+            else if (count >= 20) scoreCount = 37;
+            else if (count >= 18) scoreCount = 35;
+            else if (count >= 16) scoreCount = 30;
+            else if (count >= 12) scoreCount = 25;
+            else if (count >= 8) scoreCount = 20;
+            else if (count >= 4) scoreCount = 15;
+            else if (count >= 2) scoreCount = 10;
+            else if (count >= 1) scoreCount = 5;
+            else scoreCount = 0;
+
+            const dist = recentLogs.reduce((sum, l) => sum + Number(l.distance || 0), 0);
+            let scoreDist = 0;
+            if (dist >= 500) scoreDist = 40;
+            else if (dist >= 300) scoreDist = 39;
+            else if (dist >= 200) scoreDist = 38;
+            else if (dist >= 150) scoreDist = 35;
+            else if (dist >= 100) scoreDist = 30;
+            else if (dist >= 50) scoreDist = 25;
+            else if (dist >= 20) scoreDist = 20;
+            else if (dist >= 15) scoreDist = 15;
+            else if (dist >= 10) scoreDist = 10;
+            else if (dist >= 5) scoreDist = 5;
+            else scoreDist = 0;
+            
+            const weekActive = [false, false, false, false];
+            for(let i=0; i<4; i++) {
+                const start = new Date(targetDate);
+                start.setDate(targetDate.getDate() - (i + 1) * 7);
+                const end = new Date(targetDate);
+                end.setDate(targetDate.getDate() - i * 7);
+                const weeklyCount = userLogs.filter(l => l.jsDate >= start && l.jsDate < end).length;
+                if(weeklyCount >= 2) weekActive[i] = true;
+            }
+            const activeWeeks = weekActive.filter(x => x).length;
+            let scoreBonus = 0;
+            if (activeWeeks === 4) scoreBonus = 20;
+            else if (activeWeeks === 3) scoreBonus = 15;
+            else if (activeWeeks === 2) scoreBonus = 10;
+            else if (activeWeeks === 1) scoreBonus = 5;
+            else scoreBonus = 0;
+
+            const totalScore = scoreCount + scoreDist + scoreBonus;
+            const currentIdx = thresholds.findIndex(t => totalScore >= t.threshold);
+            
+            return { 
+                ...thresholds[currentIdx], 
+                score: totalScore,
+                details: { scoreCount, count, scoreDist, dist, scoreBonus, activeWeeks, totalScore }
+            };
+        };
+
+        const calculateGradeDuration = (userLogs) => {
+            const now = new Date();
+            const currentGrade = calculateRunnerGradeAtDate(userLogs, now);
+            let durationDays = 0;
+            let checkDate = new Date(now);
+            for (let i = 1; i <= 90; i++) {
+                checkDate.setDate(checkDate.getDate() - 1);
+                const prevGrade = calculateRunnerGradeAtDate(userLogs, checkDate);
+                if (prevGrade.name === currentGrade.name) durationDays = i;
+                else break;
+            }
+            return { ...currentGrade, durationDays };
+        };
+
+        async function initApp() {
+            const today = new Date();
+            yearSelect.value = today.getFullYear().toString();
+            monthSelect.value = (today.getMonth() + 1).toString();
+            await Promise.all([fetchMembers(), fetchLogs()]);
+            setupPolling();
+        }
+
+        async function fetchLogs() {
+            let allFetchedLogs = [];
+            let rangeStart = 0;
+            const PAGE_SIZE = 1000;
+            let isFinished = false;
+            try {
+                while (!isFinished) {
+                    const { data, error } = await _supabase
+                        .from('songmirun_logs')
+                        .select('*')
+                        .range(rangeStart, rangeStart + PAGE_SIZE - 1)
+                        .order('created_at', { ascending: false });
+                    if (error) break;
+                    if (data && data.length > 0) {
+                        const mappedData = data.map(item => ({
+                            id: item.id,
+                            userName: (item.user_name || 'Unknown').trim(),
+                            distance: parseFloat(item.distance || 0),
+                            duration: parseFloat(item.duration || 0),
+                            jsDate: new Date(item.run_date || item.created_at),
+                            updatedAt: new Date(item.updated_at || item.created_at)
+                        }));
+                        allFetchedLogs = [...allFetchedLogs, ...mappedData];
+                        if (data.length < PAGE_SIZE) isFinished = true;
+                        else rangeStart += PAGE_SIZE;
+                    } else isFinished = true;
+                }
+                allLogs = allFetchedLogs;
+                applyFilters();
+            } catch (err) { console.error(err); } 
+        }
+
+        async function fetchMembers() {
+            let allData = [];
+            let rangeStart = 0;
+            const PAGE_SIZE = 1000;
+            let isFinished = false;
+            try {
+                while (!isFinished) {
+                    const { data, error } = await _supabase
+                        .from('songmirun_members')
+                        .select('*')
+                        .range(rangeStart, rangeStart + PAGE_SIZE - 1)
+                        .order('id', { ascending: true });
+                    if (error) break;
+                    if (data && data.length > 0) {
+                        allData = [...allData, ...data];
+                        if (data.length < PAGE_SIZE) isFinished = true;
+                        else rangeStart += PAGE_SIZE;
+                    } else isFinished = true;
+                }
+                allMembers = allData;
+                applyFilters();
+            } catch (err) { console.error(err); } 
+        }
+
+        function setupPolling() {
+            // Canvas 환경에서 WebSocket 연결이 불가능하므로, 30초 간격으로 데이터를 가져오는 폴링 메커니즘을 사용합니다.
+            setInterval(async () => {
+                try {
+                    await Promise.all([fetchMembers(), fetchLogs()]);
+                } catch (err) {
+                    console.error("Polling 데이터 갱신 실패:", err);
+                }
+            }, 30000);
+        }
+
+        function applyFilters() {
+            const selectedYear = yearSelect.value;
+            const selectedMonth = monthSelect.value;
+            const sortBy = sortSelect.value;
+            const userData = {}; 
+            let totalDistSum = 0;
+            let totalCountSum = 0;
+            const gradeDistribution = {};
+            thresholds.forEach(t => gradeDistribution[t.name] = 0);
+
+            allMembers.forEach(mem => {
+                const nameKey = (mem.nickname || '').trim();
+                if (!nameKey) return;
+                userData[nameKey] = { count: 0, totalDistance: 0, totalDuration: 0, personalLogs: [] };
+            });
+            
+            allLogs.forEach(log => {
+                const nameKey = log.userName;
+                const year = log.jsDate.getFullYear().toString();
+                const month = (log.jsDate.getMonth() + 1).toString();
+                if (userData[nameKey]) userData[nameKey].personalLogs.push(log);
+                if (selectedYear !== 'all' && year !== selectedYear) return;
+                if (selectedMonth !== 'all' && month !== selectedMonth) return;
+                if (!userData[nameKey]) userData[nameKey] = { count: 0, totalDistance: 0, totalDuration: 0, personalLogs: [log] };
+                userData[nameKey].count += 1;
+                userData[nameKey].totalDistance += log.distance; 
+                userData[nameKey].totalDuration += log.duration; 
+                totalDistSum += log.distance;
+                totalCountSum += 1;
+            });
+
+            let filteredUserList = Object.entries(userData).map(([name, stats]) => {
+                stats.grade = calculateGradeDuration(stats.personalLogs);
+                if (gradeDistribution.hasOwnProperty(stats.grade.name)) gradeDistribution[stats.grade.name]++;
+                return [name, stats];
+            }).filter(([name, stats]) => {
+                const hasActivityInPeriod = stats.totalDistance > 0;
+                if (currentGradeFilter) return hasActivityInPeriod && stats.grade.name === currentGradeFilter;
+                return hasActivityInPeriod;
+            });
+
+            totalDistanceElement.innerText = totalDistSum.toFixed(2);
+            totalCountElement.innerText = totalCountSum;
+            lastGradeDistribution = gradeDistribution;
+            renderGradeStats(gradeDistribution);
+
+            currentSortedData = filteredUserList.sort((a, b) => {
+                const statsA = a[1], statsB = b[1];
+                if (sortBy === 'distance') return statsB.totalDistance - statsA.totalDistance;
+                if (sortBy === 'duration') return statsB.totalDuration - statsA.totalDuration; 
+                if (sortBy === 'count') return statsB.count - statsA.count;
+                if (sortBy === 'score') return statsB.grade.score - statsA.grade.score;
+                return a[0].localeCompare(b[0]);
+            });
+            renderUsers(currentSortedData);
+            loadingElement.classList.add('hidden');
+        }
+
+        function renderGradeStats(dist) {
+            gradeStatsContainer.innerHTML = '';
+            thresholds.filter(t => t.id !== 'seed').forEach(t => {
+                const count = dist[t.name] || 0;
+                const isSelected = currentGradeFilter === t.name;
+                const div = document.createElement('div');
+                const activeClass = isSelected ? "bg-white/20 border-white/50 scale-105" : "bg-white/5 border-white/5 opacity-70 hover:opacity-100";
+                div.className = `flex flex-col items-center justify-center p-2 rounded-lg border transition-all cursor-pointer min-w-[55px] ${activeClass}`;
+                div.innerHTML = `
+                    <span class="text-[8px] font-black text-sky-100/70 mb-1 leading-none truncate w-full text-center">${t.name.split(' ')[1]}</span>
+                    <span class="text-xs font-black text-white">${count}</span>
+                `;
+                div.onclick = () => {
+                    currentGradeFilter = (currentGradeFilter === t.name) ? null : t.name;
+                    applyFilters();
+                };
+                gradeStatsContainer.appendChild(div);
+            });
+        }
+
+        // --- 분포도 모달 렌더링 함수 ---
+        function openDistributionModal() {
+            modalContent.innerHTML = '';
+            
+            // 씨앗 등급 제외한 필터링된 등급 리스트
+            const visibleThresholds = thresholds.filter(t => t.id !== 'seed');
+            
+            // 표시되는 등급 중에서만 최대값 계산
+            const counts = visibleThresholds.map(t => lastGradeDistribution[t.name] || 0);
+            const maxCount = Math.max(...counts, 1);
+            
+            // 표시되는 등급의 총 인원 합산
+            const totalMembers = counts.reduce((a, b) => a + b, 0);
+
+            visibleThresholds.forEach(t => {
+                const count = lastGradeDistribution[t.name] || 0;
+                const widthPct = (count / maxCount) * 100;
+                
+                const row = document.createElement('div');
+                row.className = "flex items-center gap-3 text-xs mb-3";
+                row.innerHTML = `
+                    <div class="w-14 px-1 py-1 rounded-md text-[9px] font-black text-center shadow-sm border ${t.labelColor}">
+                        ${t.name}
+                    </div>
+                    <div class="flex-1 h-7 bg-slate-50 rounded-r-xl border border-slate-100 flex items-center shadow-inner overflow-visible">
+                        ${count > 0 ? `
+                            <div class="h-full ${t.bar} rounded-r-xl transition-all duration-700 ease-out shadow-sm flex items-center justify-end px-2"
+                                 style="width: ${Math.max(widthPct, 15)}%">
+                                <span class="text-white font-black text-[10px] drop-shadow-md">${count}명</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+                modalContent.appendChild(row);
+            });
+
+            modalTotalCount.innerText = totalMembers;
+            distModal.classList.remove('hidden');
+            distModal.classList.add('flex');
+        }
+
+        // --- 거리커플 모달 렌더링 함수 ---
+        function openCoupleModal() {
+            const selectedYear = yearSelect.value;
+            const selectedMonth = monthSelect.value;
+
+            // 타이틀 기간 텍스트 가공
+            let periodText = '';
+            if (selectedYear === 'all' && selectedMonth === 'all') {
+                periodText = '전체 기간';
+            } else if (selectedYear !== 'all' && selectedMonth === 'all') {
+                periodText = `${selectedYear}년 전체`;
+            } else if (selectedYear === 'all' && selectedMonth !== 'all') {
+                periodText = `매년 ${selectedMonth}월`;
+            } else {
+                periodText = `${selectedYear}년 ${selectedMonth}월`;
+            }
+            coupleModalTitle.innerHTML = `💖 ${periodText} 거리커플`;
+
+            // 회원별 선택 기간 동안의 누적 거리 구하기
+            const runnerDistances = [];
+            allMembers.forEach(mem => {
+                const nickname = (mem.nickname || '').trim();
+                if (!nickname) return;
+
+                // 유저 개인 로그 필터링
+                const userLogs = allLogs.filter(log => log.userName === nickname);
+                
+                // 선택 기간 거리 계산
+                let totalDist = 0;
+                userLogs.forEach(log => {
+                    const year = log.jsDate.getFullYear().toString();
+                    const month = (log.jsDate.getMonth() + 1).toString();
+                    
+                    if (selectedYear !== 'all' && year !== selectedYear) return;
+                    if (selectedMonth !== 'all' && month !== selectedMonth) return;
+                    
+                    totalDist += log.distance;
+                });
+
+                // 합계 거리가 50km 이상인 사람만 후보에 포함
+                if (totalDist >= 50) {
+                    runnerDistances.push({ name: nickname, distance: totalDist });
+                }
+            });
+
+            // 커플 구하기 (거리차이 1km 이내)
+            const couples = [];
+            for (let i = 0; i < runnerDistances.length; i++) {
+                for (let j = i + 1; j < runnerDistances.length; j++) {
+                    const runnerA = runnerDistances[i];
+                    const runnerB = runnerDistances[j];
+                    const diff = Math.abs(runnerA.distance - runnerB.distance);
+                    if (diff <= 1.0) {
+                        couples.push({
+                            runnerA,
+                            runnerB,
+                            diff
+                        });
+                    }
+                }
+            }
+
+            // 거리 차이가 가장 적은(가장 완벽히 겹치는) 커플부터 정렬
+            couples.sort((a, b) => a.diff - b.diff);
+
+            // 렌더링
+            coupleModalContent.innerHTML = '';
+            if (couples.length === 0) {
+                coupleModalContent.innerHTML = `
+                    <div class="text-center py-10 text-slate-400">
+                        <span class="text-3xl block mb-2">💔</span>
+                        <p class="text-xs font-black text-slate-600 leading-relaxed">
+                            선택된 조건에서 탄생한<br>거리커플이 없습니다.
+                        </p>
+                        <p class="text-[9px] text-slate-400 mt-2">
+                            서로의 러닝 페이스와 거리를 조율하여<br>아름다운 1km 차이 커플에 도전해보세요!
+                        </p>
+                    </div>
+                `;
+                return;
+            }
+
+            couples.forEach(c => {
+                const card = document.createElement('div');
+                card.className = "p-3 bg-gradient-to-r from-rose-50 to-pink-50 rounded-2xl border border-rose-100 flex items-center justify-between shadow-sm relative overflow-hidden group hover:scale-[1.02] transition-transform duration-200";
+                
+                card.innerHTML = `
+                    <div class="absolute -right-3 -bottom-3 text-rose-100 text-4xl font-bold opacity-60 pointer-events-none group-hover:scale-110 transition-transform">💝</div>
+                    <div class="flex-1 flex flex-col items-center">
+                        <span class="text-[10px] font-black text-rose-500 bg-rose-100/50 px-2 py-0.5 rounded-full mb-0.5">${c.runnerA.distance.toFixed(1)}km</span>
+                        <span class="text-xs font-bold text-slate-800">${c.runnerA.name}</span>
+                    </div>
+                    <div class="flex flex-col items-center px-2 min-w-[70px]">
+                        <span class="text-xl animate-pulse">💖</span>
+                        <span class="text-[8px] font-black text-rose-400 mt-1 tracking-tight">격차 ${c.diff.toFixed(2)}km</span>
+                    </div>
+                    <div class="flex-1 flex flex-col items-center">
+                        <span class="text-[10px] font-black text-rose-500 bg-rose-100/50 px-2 py-0.5 rounded-full mb-0.5">${c.runnerB.distance.toFixed(1)}km</span>
+                        <span class="text-xs font-bold text-slate-800">${c.runnerB.name}</span>
+                    </div>
+                `;
+                coupleModalContent.appendChild(card);
+            });
+        }
+
+        // --- 시간커플 모달 렌더링 함수 ---
+        function openTimeCoupleModal() {
+            const selectedYear = yearSelect.value;
+            const selectedMonth = monthSelect.value;
+
+            // 타이틀 기간 텍스트 가공
+            let periodText = '';
+            if (selectedYear === 'all' && selectedMonth === 'all') {
+                periodText = '전체 기간';
+            } else if (selectedYear !== 'all' && selectedMonth === 'all') {
+                periodText = `${selectedYear}년 전체`;
+            } else if (selectedYear === 'all' && selectedMonth !== 'all') {
+                periodText = `매년 ${selectedMonth}월`;
+            } else {
+                periodText = `${selectedYear}년 ${selectedMonth}월`;
+            }
+            timeCoupleModalTitle.innerHTML = `💜 ${periodText} 시간커플`;
+
+            // 회원별 선택 기간 동안의 누적 시간(분) 구하기
+            const runnerDurations = [];
+            allMembers.forEach(mem => {
+                const nickname = (mem.nickname || '').trim();
+                if (!nickname) return;
+
+                // 유저 개인 로그 필터링
+                const userLogs = allLogs.filter(log => log.userName === nickname);
+                
+                // 선택 기간 시간 계산
+                let totalDuration = 0;
+                userLogs.forEach(log => {
+                    const year = log.jsDate.getFullYear().toString();
+                    const month = (log.jsDate.getMonth() + 1).toString();
+                    
+                    if (selectedYear !== 'all' && year !== selectedYear) return;
+                    if (selectedMonth !== 'all' && month !== selectedMonth) return;
+                    
+                    totalDuration += log.duration;
+                });
+
+                // 합계 시간이 300분 이상인 사람만 후보에 포함
+                if (totalDuration >= 300) {
+                    runnerDurations.push({ name: nickname, duration: totalDuration });
+                }
+            });
+
+            // 커플 구하기 (시간차이 1분 이내)
+            const couples = [];
+            for (let i = 0; i < runnerDurations.length; i++) {
+                for (let j = i + 1; j < runnerDurations.length; j++) {
+                    const runnerA = runnerDurations[i];
+                    const runnerB = runnerDurations[j];
+                    const diff = Math.abs(runnerA.duration - runnerB.duration);
+                    if (diff <= 1.0) {
+                        couples.push({
+                            runnerA,
+                            runnerB,
+                            diff
+                        });
+                    }
+                }
+            }
+
+            // 시간 차이가 가장 적은 커플부터 정렬
+            couples.sort((a, b) => a.diff - b.diff);
+
+            // 렌더링
+            timeCoupleModalContent.innerHTML = '';
+            if (couples.length === 0) {
+                timeCoupleModalContent.innerHTML = `
+                    <div class="text-center py-10 text-slate-400">
+                        <span class="text-3xl block mb-2">💔</span>
+                        <p class="text-xs font-black text-slate-600 leading-relaxed">
+                            선택된 조건에서 탄생한<br>시간커플이 없습니다.
+                        </p>
+                        <p class="text-[9px] text-slate-400 mt-2">
+                            서로의 러닝 시간을 조율하여<br>아름다운 1분 차이 커플에 도전해보세요!
+                        </p>
+                    </div>
+                `;
+                return;
+            }
+
+            couples.forEach(c => {
+                const card = document.createElement('div');
+                card.className = "p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl border border-purple-100 flex items-center justify-between shadow-sm relative overflow-hidden group hover:scale-[1.02] transition-transform duration-200";
+                
+                card.innerHTML = `
+                    <div class="absolute -right-3 -bottom-3 text-purple-100 text-4xl font-bold opacity-60 pointer-events-none group-hover:scale-110 transition-transform">💝</div>
+                    <div class="flex-1 flex flex-col items-center">
+                        <span class="text-[10px] font-black text-purple-500 bg-purple-100/50 px-2 py-0.5 rounded-full mb-0.5">${Math.floor(c.runnerA.duration)}분</span>
+                        <span class="text-xs font-bold text-slate-800">${c.runnerA.name}</span>
+                    </div>
+                    <div class="flex flex-col items-center px-2 min-w-[70px]">
+                        <span class="text-xl animate-pulse">💜</span>
+                        <span class="text-[8px] font-black text-purple-400 mt-1 tracking-tight">격차 ${c.diff.toFixed(1)}분</span>
+                    </div>
+                    <div class="flex-1 flex flex-col items-center">
+                        <span class="text-[10px] font-black text-purple-500 bg-purple-100/50 px-2 py-0.5 rounded-full mb-0.5">${Math.floor(c.runnerB.duration)}분</span>
+                        <span class="text-xs font-bold text-slate-800">${c.runnerB.name}</span>
+                    </div>
+                `;
+                timeCoupleModalContent.appendChild(card);
+            });
+        }
+
+        function renderUsers(usersWithData) {
+            userListElement.innerHTML = '';
+            const filterInfo = currentGradeFilter ? ` [${currentGradeFilter.split(' ')[1]} 필터링 중]` : '';
+            countElement.innerText = `총 ${usersWithData.length}명${filterInfo}`;
+            if (usersWithData.length === 0) {
+                userListElement.innerHTML = '<p class="text-slate-400 text-center py-10 font-medium italic">조건에 맞는 데이터가 없습니다.</p>';
+                return;
+            }
+ 
+             usersWithData.forEach(([name, stats], i) => {
+                const li = document.createElement('li');
+                li.className = "flex items-center justify-between p-2 bg-white rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-all group";
+
+                const grade = stats.grade;
+
+                li.innerHTML = `
+                    <div class="flex items-center">
+                        <span class="text-xs font-black text-slate-500 w-6 mr-1 text-center">${i + 1}</span>
+                        <div class="flex flex-col">
+                            <div class="flex items-center space-x-1.5">
+                                <span class="text-slate-800 font-bold uppercase tracking-tight leading-tight text-xs">${name}</span>
+                            </div>
+                            <div class="flex items-center space-x-1.5">
+                                <div class="flex flex-col items-start">
+                                    <span class="px-1.5 py-0.5 rounded text-[8px] font-black ${grade.color}">
+                                        ${grade.name}
+                                    </span>
+                                </div>
+                                <div class="flex flex-col items-start">
+                                    <span class="text-[7px] text-slate-400 font-bold mt-0.5 leading-none">
+                                        ${grade.durationDays > 0 ? grade.durationDays + '일째 유지 중' : '오늘 등급 달성'}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2 mt-0.5">
+                                <span class="text-[9px] font-black text-emerald-600 bg-emerald-50 px-1 rounded">${grade.score}pt</span>
+                                <div class="flex flex-col text-[8px] font-bold text-slate-400 uppercase leading-tight">
+                                    <span>${grade.details.scoreCount}/${grade.details.scoreDist}/${grade.details.scoreBonus}</span>
+                                    <span>(${grade.details.count}회 ${grade.details.dist.toFixed(1)}km ${grade.details.activeWeeks}주)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-end space-y-1.5">
+                        <div class="flex items-center space-x-2">
+                            <div class="flex flex-col items-end">
+                                <span class="text-[10px] text-slate-400 uppercase font-black leading-none">Dist</span>
+                                <span class="text-sm font-black text-slate-700">${stats.totalDistance.toFixed(1)}<span class="text-[9px] ml-0.5">km</span></span>
+                            </div>
+                            <div class="flex flex-col items-end border-l border-slate-100 pl-2">
+                                <span class="text-[10px] text-slate-400 uppercase font-black leading-none">Time</span>
+                                <span class="text-sm font-black text-slate-700">${Math.floor(stats.totalDuration)}<span class="text-[9px] ml-0.5">min</span></span>
+                            </div>
+                            <div class="flex flex-col items-end border-l border-slate-100 pl-2">
+                                <span class="text-[10px] text-slate-400 uppercase font-black leading-none">Count</span>
+                                <span class="text-sm font-black text-emerald-600">${stats.count}<span class="text-[9px] ml-0.5">회</span></span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                userListElement.appendChild(li);
+            });
+        }
+
+        graphBtn.addEventListener('click', openDistributionModal);
+        closeModal.addEventListener('click', () => distModal.classList.add('hidden'));
+        distModal.addEventListener('click', (e) => { if(e.target === distModal) distModal.classList.add('hidden'); });
+
+        // 거리커플 버튼 및 모달 리스너
+        coupleBtn.addEventListener('click', () => {
+            openCoupleModal();
+            coupleModal.classList.remove('hidden');
+            coupleModal.classList.add('flex');
+        });
+        closeCoupleModal.addEventListener('click', () => coupleModal.classList.add('hidden'));
+        coupleModal.addEventListener('click', (e) => { if(e.target === coupleModal) coupleModal.classList.add('hidden'); });
+
+        // 시간커플 버튼 및 모달 리스너
+        timeCoupleBtn.addEventListener('click', () => {
+            openTimeCoupleModal();
+            timeCoupleModal.classList.remove('hidden');
+            timeCoupleModal.classList.add('flex');
+        });
+        closeTimeCoupleModal.addEventListener('click', () => timeCoupleModal.classList.add('hidden'));
+        timeCoupleModal.addEventListener('click', (e) => { if(e.target === timeCoupleModal) timeCoupleModal.classList.add('hidden'); });
+
+        yearSelect.addEventListener('change', applyFilters);
+        monthSelect.addEventListener('change', applyFilters);
+        sortSelect.addEventListener('change', applyFilters);
+
+        initApp();
+    </script>
+</head>
+<body class="bg-slate-50 min-h-screen p-3 md:p-10 font-sans text-slate-900">
+    <div class="max-w-md mx-auto relative">
+        <!-- Header -->
+        <div class="bg-sky-500 rounded-t-2xl p-3 shadow-lg text-white">
+            <div class="flex justify-between items-center mb-3">
+                <h1 class="text-xl font-black flex items-center tracking-tight uppercase">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                    </svg>
+                    SongMission Flower
+                </h1>
+                
+                <div class="flex items-center space-x-1.5">
+                    <!-- 거리커플 버튼 -->
+                    <button id="couple-btn" class="bg-rose-500 hover:bg-rose-600 text-white p-2 rounded-lg transition-all shadow-sm flex items-center justify-center animate-pulse" title="거리커플 확인">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+
+                    <!-- 시간커플 버튼 -->
+                    <button id="time-couple-btn" class="bg-purple-500 hover:bg-purple-600 text-white p-2 rounded-lg transition-all shadow-sm flex items-center justify-center" title="시간커플 확인">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 18 18" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+
+                    <!-- 그래프 보기 버튼 -->
+                    <button id="graph-btn" class="bg-white/20 hover:bg-white/30 text-white p-2 rounded-lg transition-all group">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-3 mb-4">
+                <div class="bg-white/10 rounded-xl p-3 border border-white/10">
+                    <p class="text-[10px] font-black uppercase text-sky-100 mb-1">Total Distance</p>
+                    <div class="flex items-baseline"><span id="total-stats-distance" class="text-xl font-black">0.00</span><span class="text-[9px] ml-1 font-bold text-sky-100 uppercase">km</span></div>
+                </div>
+                <div class="bg-white/10 rounded-xl p-3 border border-white/10">
+                    <p class="text-[10px] font-black uppercase text-sky-100 mb-1">Total Runs</p>
+                    <div class="flex items-baseline"><span id="total-stats-count" class="text-xl font-black">0</span><span class="text-[9px] ml-1 font-bold text-sky-100 uppercase">run</span></div>
+                </div>
+            </div>
+
+            <div class="mb-1 w-full overflow-hidden">
+                <div id="grade-stats-container" class="flex items-center justify-center space-x-1.5 overflow-x-auto pb-1 no-scrollbar min-w-full"></div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+                <div class="flex space-x-1">
+                    <select id="year-filter" class="flex-1 bg-sky-600 border-none rounded-lg text-[11px] font-bold p-2 text-white outline-none">
+                        <option value="all">전체</option><option value="2024">24년</option><option value="2025">25년</option><option value="2026">26년</option>
+                    </select>
+                    <select id="month-filter" class="flex-1 bg-sky-600 border-none rounded-lg text-[11px] font-bold p-2 text-white outline-none">
+                        <option value="all">전체</option><option value="1">1월</option><option value="2">2월</option><option value="3">3월</option><option value="4">4월</option><option value="5">5월</option><option value="6">6월</option><option value="7">7월</option><option value="8">8월</option><option value="9">9월</option><option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
+                    </select>
+                </div>
+                <select id="sort-filter" class="bg-sky-600 border-none rounded-lg text-[11px] font-bold p-2 text-white outline-none">
+                    <option value="score">등급 순</option><option value="distance">거리 순</option><option value="count">횟수 순</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-b-2xl shadow-xl p-5 min-h-[400px]">
+            <p id="user-count" class="text-slate-400 text-[10px] font-black mb-4 uppercase tracking-widest border-b border-slate-50 pb-2">Initializing...</p>
+            <div id="loading" class="text-center py-20">
+                <div class="animate-spin inline-block w-8 h-8 border-[3px] border-sky-600 border-t-transparent rounded-full mb-3"></div>
+            </div>
+            <ul id="user-list" class="space-y-4"></ul>
+        </div>
+
+        <!-- Grade Criteria Guide -->
+        <div class="mt-8 border-t border-sky-100 pt-3">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-gradient-to-br from-sky-500 to-blue-500 rounded-xl p-4 shadow-sm border border-sky-400/30">
+                    <p class="text-[10px] font-black text-white uppercase mb-2 flex items-center">
+                        <span class="w-1 h-3 bg-sky-200 rounded-full mr-1.5"></span>
+                        Activities (Max 40pt)
+                    </p>
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-[10px] font-bold border-b border-white/20 pb-1 text-white">
+                            <span>35회 / 30회 / 20회 / 16회</span>
+                            <span class="text-sky-100 font-black">40 / 39 / 37 / 30pt</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] font-bold border-b border-white/20 py-1 text-sky-50/80">
+                            <span>12회 / 8회 / 4회</span>
+                            <span>25 / 20 / 15pt</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] font-bold py-1 text-sky-100/60">
+                            <span>2회 / 1회 미만</span>
+                            <span>10 / 0pt</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-sky-500 to-blue-500 rounded-xl p-4 shadow-sm border border-sky-400/30">
+                    <p class="text-[10px] font-black text-white uppercase mb-2 flex items-center">
+                        <span class="w-1 h-3 bg-sky-200 rounded-full mr-1.5"></span>
+                        Distance (Max 40pt)
+                    </p>
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-[10px] font-bold border-b border-white/20 pb-1 text-white">
+                            <span>500k / 300k / 200k / 100k</span>
+                            <span class="text-sky-100 font-black">40 / 39 / 38 / 30pt</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] font-bold border-b border-white/20 py-1 text-sky-50/80">
+                            <span>50k / 20k / 10k</span>
+                            <span>25 / 20 / 10pt</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] font-bold py-1 text-sky-100/60">
+                            <span>5k / 5k 미만</span>
+                            <span>5 / 0pt</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 px-4 py-3 bg-gradient-to-r from-sky-500 to-blue-500 rounded-xl shadow-sm border border-sky-400/30">
+                <p class="text-[10px] font-black text-white uppercase mb-1 flex items-center">
+                    <span class="mr-1">✨</span> Weekly Bonus (Max 20pt)
+                </p>
+                <p class="text-[9px] font-bold text-sky-50 leading-relaxed">
+                    주 2회 이상 활동 시 1주 인정 | 4주 연속 20pt / 3주 15pt / 2주 10pt
+                </p>
+            </div>
+
+            <p class="mt-4 text-[8px] text-slate-300 text-center font-bold tracking-tight">
+                * 등급은 최근 31일간의 데이터를 기준으로 매일 갱신됩니다.
+            </p>
+        </div>
+
+
+
+    </div>
+
+    <!-- 분포도 모달 -->
+    <div id="dist-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl animate-in zoom-in duration-200">
+            <div class="bg-slate-50 px-5 py-4 flex justify-between items-center border-b border-slate-100">
+                <h3 class="text-sm font-black text-slate-700 uppercase tracking-tight">꽃 등급 구간별 분포</h3>
+                <button id="close-modal" class="text-slate-400 hover:text-slate-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div id="modal-content" class="p-5 space-y-1">
+                <!-- 막대 그래프가 렌더링되는 곳 -->
+            </div>
+            <div class="bg-slate-50 px-5 py-3 flex justify-between items-center text-[11px] font-black text-slate-400 border-t border-slate-100">
+                <span>활동 멤버 총 인원 (씨앗 제외)</span>
+                <span class="text-slate-800 text-sm"><span id="modal-total-count">0</span>명</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 거리커플 모달 -->
+    <div id="couple-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl animate-in zoom-in duration-200">
+            <div class="bg-rose-50 px-5 py-4 flex justify-between items-center border-b border-rose-100">
+                <h3 id="couple-modal-title" class="text-sm font-black text-rose-700 uppercase tracking-tight flex items-center gap-1.5">
+                    💖 거리커플
+                </h3>
+                <button id="close-couple-modal" class="text-rose-400 hover:text-rose-600 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="p-5 max-h-[350px] overflow-y-auto no-scrollbar">
+                <div class="mb-4 bg-rose-50/50 border border-rose-100 p-3 rounded-xl text-center">
+                    <p class="text-[10px] text-rose-600 font-extrabold">💕 거리커플의 자격 💕</p>
+                    <p class="text-[9px] text-slate-500 mt-1 leading-relaxed">
+                        선택된 기간 내 각각 누적 달리기 거리가 <span class="font-extrabold text-rose-500">50km 이상</span>이며,<br>
+                        두 회원의 거리 격차가 <span class="font-extrabold text-rose-500">1km 이내</span>인 달콤한 러닝 파트너!
+                    </p>
+                </div>
+                <div id="couple-modal-content" class="space-y-3">
+                    <!-- 거리 커플 카드 렌더링 영역 -->
+                </div>
+            </div>
+            <div class="bg-rose-50 px-5 py-3 text-center text-[10px] font-black text-rose-400 border-t border-rose-100">
+                두근두근, 다음 거리커플의 주인공은 누구일까요? 🏃‍♀️🏃‍♂️
+            </div>
+        </div>
+    </div>
+
+    <!-- 시간커플 모달 -->
+    <div id="time-couple-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl animate-in zoom-in duration-200">
+            <div class="bg-purple-50 px-5 py-4 flex justify-between items-center border-b border-purple-100">
+                <h3 id="time-couple-modal-title" class="text-sm font-black text-purple-700 uppercase tracking-tight flex items-center gap-1.5">
+                    💜 시간커플
+                </h3>
+                <button id="close-time-couple-modal" class="text-purple-400 hover:text-purple-600 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="p-5 max-h-[350px] overflow-y-auto no-scrollbar">
+                <div class="mb-4 bg-purple-50/50 border border-purple-100 p-3 rounded-xl text-center">
+                    <p class="text-[10px] text-purple-600 font-extrabold">💕 시간커플의 자격 💕</p>
+                    <p class="text-[9px] text-slate-500 mt-1 leading-relaxed">
+                        선택된 기간 내 각각 누적 달리기 시간이 <span class="font-extrabold text-purple-500">300분 이상</span>이며,<br>
+                        두 회원의 시간 격차가 <span class="font-extrabold text-purple-500">1분 이내</span>인 달콤한 러닝 파트너!
+                    </p>
+                </div>
+                <div id="time-couple-modal-content" class="space-y-3">
+                    <!-- 시간 커플 카드 렌더링 영역 -->
+                </div>
+            </div>
+            <div class="bg-purple-50 px-5 py-3 text-center text-[10px] font-black text-purple-400 border-t border-purple-100">
+                마음의 주파수와 러닝 시간까지 완벽 매칭! 🏃‍♀️🏃‍♂️
+            </div>
+        </div>
+    </div>
+
+
+    <style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</body>
+</html>
