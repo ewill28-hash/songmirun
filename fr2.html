@@ -364,7 +364,8 @@
                 if (!nickname) return;
 
                 // 유저 개인 로그 필터링
-                const userLogs = allLogs.filter(log => log.userName === nickname);
+                //const userLogs = allLogs.filter(log => log.userName === nickname);
+                const userLogs = allLogs.filter(log => log.userName === nickname && !log.userName.startsWith('@'));
                 
                 // 선택 기간 거리 계산
                 let totalDist = 0;
@@ -469,7 +470,8 @@
                 if (!nickname) return;
 
                 // 유저 개인 로그 필터링
-                const userLogs = allLogs.filter(log => log.userName === nickname);
+                //const userLogs = allLogs.filter(log => log.userName === nickname);
+                const userLogs = allLogs.filter(log => log.userName === nickname && !log.userName.startsWith('@'));
                 
                 // 선택 기간 시간 계산
                 let totalDuration = 0;
@@ -489,14 +491,14 @@
                 }
             });
 
-            // 커플 구하기 (시간차이 1분 이내)
+            // 커플 구하기 (시간차이 5분 이내)
             const couples = [];
             for (let i = 0; i < runnerDurations.length; i++) {
                 for (let j = i + 1; j < runnerDurations.length; j++) {
                     const runnerA = runnerDurations[i];
                     const runnerB = runnerDurations[j];
                     const diff = Math.abs(runnerA.duration - runnerB.duration);
-                    if (diff <= 1.0) {
+                    if (diff <= 5.0) {
                         couples.push({
                             runnerA,
                             runnerB,
@@ -850,7 +852,7 @@
                     <p class="text-[10px] text-purple-600 font-extrabold">💕 시간커플의 자격 💕</p>
                     <p class="text-[9px] text-slate-500 mt-1 leading-relaxed">
                         선택된 기간 내 각각 누적 달리기 시간이 <span class="font-extrabold text-purple-500">300분 이상</span>이며,<br>
-                        두 회원의 시간 격차가 <span class="font-extrabold text-purple-500">1분 이내</span>인 달콤한 러닝 파트너!
+                        두 회원의 시간 격차가 <span class="font-extrabold text-purple-500">5분 이내</span>인 달콤한 러닝 파트너!
                     </p>
                 </div>
                 <div id="time-couple-modal-content" class="space-y-3">
