@@ -2815,7 +2815,7 @@ window.openCoupleModal = () => {
                     <div class="bg-rose-50/50 border border-rose-100 p-3 rounded-2xl text-center">
                         <p class="text-[10px] text-rose-600 font-extrabold">💕 마일리지커플의 자격 💕</p>
                         <p class="text-[9px] text-slate-500 mt-1 leading-relaxed">
-                            선택된 기간 내 각각 누적 달리기 마일리지가 <span class="font-extrabold text-rose-500">50km 이상</span>이며,<br>
+                            선택된 기간 내 각각 누적 달리기 마일리지가 <span class="font-extrabold text-rose-500">70km 이상</span>이며,<br>
                             두 크루의 마일리지 격차가 <span class="font-extrabold text-rose-500">1km 이내</span>인 달콤한 러닝 파트너!
                         </p>
                     </div>
@@ -2920,7 +2920,7 @@ window.getCoupleData = () => {
         });
 
         // 총 거리가 50km 이상인 러너만 대상에 포함
-        if (totalDist >= 50) {
+        if (totalDist >= 70) {
             runnerDistances.push({ name: nickname, distance: totalDist });
         }
     });
@@ -2979,7 +2979,7 @@ window.openTimeCoupleModal = () => {
                     <div class="bg-purple-50/50 border border-purple-100 p-3 rounded-2xl text-center">
                         <p class="text-[10px] text-purple-600 font-extrabold">💕 타임커플의 자격 💕</p>
                         <p class="text-[9px] text-slate-500 mt-1 leading-relaxed">
-                            선택된 기간 내 각각 누적 달리기 시간이 <span class="font-extrabold text-purple-500">300분 이상</span>이며,<br>
+                            선택된 기간 내 각각 누적 달리기 시간이 <span class="font-extrabold text-purple-500">500분 이상</span>이며,<br>
                             두 크루의 시간 격차가 <span class="font-extrabold text-purple-500">5분 이내</span>인 달콤한 러닝 파트너!
                         </p>
                     </div>
@@ -3086,7 +3086,7 @@ window.getTimeCoupleData = () => {
             totalDuration += duration;
         });
 
-        if (totalDuration >= 300) {
+        if (totalDuration >= 500) {
             runnerDurations.push({ name: nickname, duration: totalDuration });
         }
     });
