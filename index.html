@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -672,6 +673,8 @@
                         <div class="flex items-center px-1 pt-4">
                             <h2 class="font-black text-base text-gray-800 italic">
                                 <i class="fa-solid fa-bolt text-blue-500"></i> 한 번에 제일 멀리, 오래
+                                <span onclick="openCoupleModal()"  class="text-xs font-black text-gray-700">💖</span>
+                                <span onclick="openTimeCoupleModal()"  class="text-xs font-black text-gray-700">💜</span>
                             </h2>
                         </div>
 
@@ -2685,93 +2688,428 @@
                     return a.name.localeCompare(b.name);
                 });
         };
+
+
         //시작점 제약 없음 (최근 1주 빠져도 보임)
- window.getSeqWeekData = () => {
-    const selectedYear = parseInt(document.getElementById('year-select').value);
-    const startYear = selectedYear - 2;
-    const endYear = selectedYear;
+        window.getSeqWeekData = () => {
+            const selectedYear = parseInt(document.getElementById('year-select').value);
+            const startYear = selectedYear - 2;
+            const endYear = selectedYear;
+            
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            
+            const userWeeks = {};
+            const userDatesByWeek = {}; 
+
+            allLogs.forEach(log => {
+                if (!log.user_name || !log.run_date) return;
+                
+                const runDateObj = new Date(log.run_date);
+                if (runDateObj.getFullYear() < startYear || runDateObj.getFullYear() > endYear) return;
+
+                const logDay = new Date(runDateObj.getFullYear(), runDateObj.getMonth(), runDateObj.getDate());
+                const diffDays = Math.floor((today - logDay) / (1000 * 60 * 60 * 24));
+                const weeksAgo = Math.floor(diffDays / 7);
+
+                if (weeksAgo < 0) return;
+
+                if (!userWeeks[log.user_name]) {
+                    userWeeks[log.user_name] = new Set();
+                    userDatesByWeek[log.user_name] = {};
+                }
+                userWeeks[log.user_name].add(weeksAgo);
+
+                if (!userDatesByWeek[log.user_name][weeksAgo]) {
+                    userDatesByWeek[log.user_name][weeksAgo] = [];
+                }
+                userDatesByWeek[log.user_name][weeksAgo].push(log.run_date);
+            });
+
+            const allCalculatedUsers = Object.entries(userWeeks).map(([name, weeksSet]) => {
+                const sortedWeeks = Array.from(weeksSet).sort((a, b) => a - b);
+                
+                // 0~3주 쉬었어도 상관없이 사용자의 가장 최근 기록부터 시작
+                const startPoint = sortedWeeks[0]; 
+                
+                if (startPoint === undefined) {
+                    return { name, total_active_weeks: 0, weeks_list: "", start_date: "" };
+                }
+
+                let consecutiveWeeks = [];
+                let currentExpected = startPoint;
+
+                for (let i = 0; i < sortedWeeks.length; i++) {
+                    if (sortedWeeks[i] === currentExpected) {
+                        consecutiveWeeks.push(sortedWeeks[i]);
+                        currentExpected++;
+                    } else if (sortedWeeks[i] > currentExpected) {
+                        break; // 연속이 끊기면 중단 (예: 4,5,6,7, 9 라면 7까지만 저장)
+                    }
+                }
+
+                const oldestWeekIdx = consecutiveWeeks[consecutiveWeeks.length - 1];
+                const datesInOldestWeek = userDatesByWeek[name][oldestWeekIdx];
+                const oldestDate = datesInOldestWeek.sort()[0];
+
+                return {
+                    name,
+                    total_active_weeks: consecutiveWeeks.length,
+                    weeks_list: consecutiveWeeks.join(', '),
+                    start_date: oldestDate
+                };
+            }).filter(user => user.total_active_weeks > 0);
+
+            if (allCalculatedUsers.length === 0) return [];
+
+            // --- 필터링 로직: Max 값 기준 상위 그룹 추출 ---
+            // 1. 전체 사용자 중 최대 연속 주차 계산
+            const maxActiveWeeks = Math.max(...allCalculatedUsers.map(u => u.total_active_weeks));
+            // 2. Max에서 Max-10 사이의 범위 설정
+            const minRange = Math.max(1, maxActiveWeeks - 10); 
+
+            return allCalculatedUsers
+                .filter(user => user.total_active_weeks >= minRange) // 범위 내 러너만 표시
+                .sort((a, b) => {
+                    if (b.total_active_weeks !== a.total_active_weeks) {
+                        return b.total_active_weeks - a.total_active_weeks;
+                    }
+                    return a.name.localeCompare(b.name);
+                });
+        };
+
+
+
+
+
+// =========================================================================
+// [1] 마일리지(거리) 커플 모달 및 데이터 로직
+// =========================================================================
+
+window.openCoupleModal = () => {
+    const { periodText, couples } = window.getCoupleData();
     
+    const modalHtml = `
+        <div id="couple-modal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in zoom-in-95 duration-300"
+             onclick="if(event.target === this) this.remove();">
+            <div class="bg-white w-full max-w-sm rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden border border-white/20">
+                
+                <div class="p-5 bg-gradient-to-r from-rose-500 via-pink-500 to-orange-400 flex justify-between items-center relative overflow-hidden">
+                    <div class="absolute top-0 right-0 opacity-10 transform translate-x-4 -translate-y-4">
+                        <i class="fa-solid fa-heart text-7xl text-white"></i>
+                    </div>
+                    <div class="flex items-center gap-2.5 relative z-10">
+                        <span class="text-2xl">💖</span>
+                        <div>
+                            <h3 id="couple-modal-title" class="font-black text-base text-white leading-none">${periodText} 마일리지커플</h3>
+                            <p class="text-[10px] text-white/80 mt-1 font-medium">서로의 발자국 소리가 닮아가는 러너들</p>
+                        </div>
+                    </div>
+                    <button onclick="document.getElementById('couple-modal').remove()" 
+                            class="w-8 h-8 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/40 text-white transition-all backdrop-blur-sm">
+                        <i class="fa-solid fa-xmark text-sm"></i>
+                    </button>
+                </div>
+                
+                <div class="max-h-[380px] overflow-y-auto custom-scrollbar px-4 py-4 bg-slate-50/50 space-y-3">
+                    <div class="bg-rose-50/50 border border-rose-100 p-3 rounded-2xl text-center">
+                        <p class="text-[10px] text-rose-600 font-extrabold">💕 마일리지커플의 자격 💕</p>
+                        <p class="text-[9px] text-slate-500 mt-1 leading-relaxed">
+                            선택된 기간 내 각각 누적 달리기 마일리지가 <span class="font-extrabold text-rose-500">50km 이상</span>이며,<br>
+                            두 크루의 마일리지 격차가 <span class="font-extrabold text-rose-500">1km 이내</span>인 달콤한 러닝 파트너!
+                        </p>
+                    </div>
+
+                    ${couples.length === 0 ? `
+                        <div class="text-center py-10 text-slate-400">
+                            <span class="text-3xl block mb-2">💔</span>
+                            <p class="text-xs font-black text-slate-600 leading-relaxed">
+                                선택된 조건에서 탄생한<br>마일리지커플이 없습니다.
+                            </p>
+                            <p class="text-[9px] text-slate-400 mt-2">
+                                서로의 러닝 페이스와 마일리지를 조율하여<br>아름다운 1km 차이 커플에 도전해보세요!
+                            </p>
+                        </div>
+                    ` : couples.map(c => `
+                        <div class="p-3 bg-gradient-to-r from-rose-50 to-pink-50 rounded-2xl border border-rose-100 flex items-center justify-between shadow-sm relative overflow-hidden group hover:scale-[1.02] transition-transform duration-200">
+                            <div class="absolute -right-3 -bottom-3 text-rose-100 text-4xl font-bold opacity-60 pointer-events-none group-hover:scale-110 transition-transform">💝</div>
+                            <div class="flex-1 flex flex-col items-center">
+                                <span class="text-[10px] font-black text-rose-500 bg-rose-100/50 px-2 py-0.5 rounded-full mb-0.5">${c.runnerA.distance.toFixed(1)}km</span>
+                                <span class="text-xs font-bold text-slate-800">${c.runnerA.name}</span>
+                            </div>
+                            <div class="flex flex-col items-center px-2 min-w-[70px]">
+                                <span class="text-xl animate-pulse">💖</span>
+                                <span class="text-[8px] font-black text-rose-400 mt-1 tracking-tight">격차 ${c.diff.toFixed(2)}km</span>
+                            </div>
+                            <div class="flex-1 flex flex-col items-center">
+                                <span class="text-[10px] font-black text-rose-500 bg-rose-100/50 px-2 py-0.5 rounded-full mb-0.5">${c.runnerB.distance.toFixed(1)}km</span>
+                                <span class="text-xs font-bold text-slate-800">${c.runnerB.name}</span>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <div class="p-4 bg-white border-t border-gray-100 text-center text-[10px] font-black text-rose-400">
+                    두근두근, 다음 마일리지커플의 주인공은 누구일까요? 🏃‍♀️🏃‍♂️
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+};
+
+window.getCoupleData = () => {
     const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    // ⚠️ 나중에 문자열 'all'과도 비교해야 하므로, 유연한 비교를 위해 let으로 선언
+    let selectedYear = now.getFullYear();
+    let selectedMonth = now.getMonth() + 1;
     
-    const userWeeks = {};
-    const userDatesByWeek = {}; 
+    // 버그 수정: 선언되지 않은 변수(month, year)를 올바른 변수명(selectedMonth, selectedYear)으로 수정
+    if (typeof selectedRankingPeriod !== 'undefined' && selectedRankingPeriod === 'last') {
+        selectedMonth -= 1;
+        if (selectedMonth === 0) { 
+            selectedMonth = 12; 
+            selectedYear -= 1; 
+        }
+    }
 
-    allLogs.forEach(log => {
-        if (!log.user_name || !log.run_date) return;
+    let periodText = '';
+    if (selectedYear === 'all' && selectedMonth === 'all') periodText = '전체 기간';
+    else if (selectedYear !== 'all' && selectedMonth === 'all') periodText = `${selectedYear}년 전체`;
+    else if (selectedYear === 'all' && selectedMonth !== 'all') periodText = `매년 ${selectedMonth}월`;
+    else periodText = `${selectedYear}년 ${selectedMonth}월`;
+
+    const runnerDistances = [];
+    
+    // 변수명 보완: syncMembers에서 가져오는 실제 데이터 변수인 crewMembersList와 allLogs 사용
+    const membersToProcess = typeof crewMembersList !== 'undefined' ? crewMembersList : [];
+    const logsToProcess = typeof allLogs !== 'undefined' ? allLogs : [];
+
+    membersToProcess.forEach(mem => {
+        const nickname = (mem.nickname || '').trim();
+        if (!nickname) return;
+
+        // DB 컬럼 구조에 유연하게 대응하도록 log.userName과 log.user_name 둘 다 체크
+        const userLogs = logsToProcess.filter(log => {
+            const logName = log.userName || log.user_name || '';
+            return logName === nickname && !logName.startsWith('@');
+        });
         
-        const runDateObj = new Date(log.run_date);
-        if (runDateObj.getFullYear() < startYear || runDateObj.getFullYear() > endYear) return;
+        let totalDist = 0;
+        userLogs.forEach(log => {
+            // 변수명 보완: log.jsDate가 없는 경우 log.run_date 문자열 기반으로 Date 객체 생성
+            const logDate = log.jsDate ? log.jsDate : (log.run_date ? new Date(log.run_date) : null);
+            if (!logDate || isNaN(logDate.getTime())) return;
 
-        const logDay = new Date(runDateObj.getFullYear(), runDateObj.getMonth(), runDateObj.getDate());
-        const diffDays = Math.floor((today - logDay) / (1000 * 60 * 60 * 24));
-        const weeksAgo = Math.floor(diffDays / 7);
+            const year = logDate.getFullYear();
+            const month = logDate.getMonth() + 1;
+            
+            // selectedYear, selectedMonth가 'all'일 때와 숫자일 때 모두 올바르게 매칭되도록 동등 비교(==) 사용
+            if (selectedYear !== 'all' && year == selectedYear) {
+                if (selectedMonth !== 'all' && month != selectedMonth) return;
+            } else if (selectedYear !== 'all' && year != selectedYear) {
+                return;
+            } else {
+                if (selectedMonth !== 'all' && month != selectedMonth) return;
+            }
+            
+            // log.distance 또는 DB 컬럼명에 맞춰 distance 계산
+            const distance = log.distance !== undefined ? log.distance : (log.run_distance || 0);
+            totalDist += distance;
+        });
 
-        if (weeksAgo < 0) return;
-
-        if (!userWeeks[log.user_name]) {
-            userWeeks[log.user_name] = new Set();
-            userDatesByWeek[log.user_name] = {};
+        // 총 거리가 50km 이상인 러너만 대상에 포함
+        if (totalDist >= 50) {
+            runnerDistances.push({ name: nickname, distance: totalDist });
         }
-        userWeeks[log.user_name].add(weeksAgo);
-
-        if (!userDatesByWeek[log.user_name][weeksAgo]) {
-            userDatesByWeek[log.user_name][weeksAgo] = [];
-        }
-        userDatesByWeek[log.user_name][weeksAgo].push(log.run_date);
     });
 
-    const allCalculatedUsers = Object.entries(userWeeks).map(([name, weeksSet]) => {
-        const sortedWeeks = Array.from(weeksSet).sort((a, b) => a - b);
-        
-        // 0~3주 쉬었어도 상관없이 사용자의 가장 최근 기록부터 시작
-        const startPoint = sortedWeeks[0]; 
-        
-        if (startPoint === undefined) {
-            return { name, total_active_weeks: 0, weeks_list: "", start_date: "" };
-        }
-
-        let consecutiveWeeks = [];
-        let currentExpected = startPoint;
-
-        for (let i = 0; i < sortedWeeks.length; i++) {
-            if (sortedWeeks[i] === currentExpected) {
-                consecutiveWeeks.push(sortedWeeks[i]);
-                currentExpected++;
-            } else if (sortedWeeks[i] > currentExpected) {
-                break; // 연속이 끊기면 중단 (예: 4,5,6,7, 9 라면 7까지만 저장)
+    const couples = [];
+    for (let i = 0; i < runnerDistances.length; i++) {
+        for (let j = i + 1; j < runnerDistances.length; j++) {
+            const runnerA = runnerDistances[i];
+            const runnerB = runnerDistances[j];
+            const diff = Math.abs(runnerA.distance - runnerB.distance);
+            // 두 러너의 총 거리 차이가 1.0km 이하인 경우 커플로 매칭
+            if (diff <= 1.0) {
+                couples.push({ runnerA, runnerB, diff });
             }
         }
+    }
 
-        const oldestWeekIdx = consecutiveWeeks[consecutiveWeeks.length - 1];
-        const datesInOldestWeek = userDatesByWeek[name][oldestWeekIdx];
-        const oldestDate = datesInOldestWeek.sort()[0];
+    couples.sort((a, b) => a.diff - b.diff);
 
-        return {
-            name,
-            total_active_weeks: consecutiveWeeks.length,
-            weeks_list: consecutiveWeeks.join(', '),
-            start_date: oldestDate
-        };
-    }).filter(user => user.total_active_weeks > 0);
-
-    if (allCalculatedUsers.length === 0) return [];
-
-    // --- 필터링 로직: Max 값 기준 상위 그룹 추출 ---
-    // 1. 전체 사용자 중 최대 연속 주차 계산
-    const maxActiveWeeks = Math.max(...allCalculatedUsers.map(u => u.total_active_weeks));
-    // 2. Max에서 Max-10 사이의 범위 설정
-    const minRange = Math.max(1, maxActiveWeeks - 10); 
-
-    return allCalculatedUsers
-        .filter(user => user.total_active_weeks >= minRange) // 범위 내 러너만 표시
-        .sort((a, b) => {
-            if (b.total_active_weeks !== a.total_active_weeks) {
-                return b.total_active_weeks - a.total_active_weeks;
-            }
-            return a.name.localeCompare(b.name);
-        });
+    return { periodText, couples };
 };
+
+
+
+
+// =========================================================================
+// [2] 타임(시간) 커플 모달 및 데이터 로직
+// =========================================================================
+
+window.openTimeCoupleModal = () => {
+    const { periodText, couples } = window.getTimeCoupleData();
+    
+    const modalHtml = `
+        <div id="time-couple-modal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in zoom-in-95 duration-300"
+             onclick="if(event.target === this) this.remove();">
+            <div class="bg-white w-full max-w-sm rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden border border-white/20">
+                
+                <div class="p-5 bg-gradient-to-r from-purple-600 via-fuchsia-500 to-pink-500 flex justify-between items-center relative overflow-hidden">
+                    <div class="absolute top-0 right-0 opacity-10 transform translate-x-4 -translate-y-4">
+                        <i class="fa-solid fa-clock text-7xl text-white"></i>
+                    </div>
+                    <div class="flex items-center gap-2.5 relative z-10">
+                        <span class="text-2xl">💜</span>
+                        <div>
+                            <h3 id="time-couple-modal-title" class="font-black text-base text-white leading-none">${periodText} 타임커플</h3>
+                            <p class="text-[10px] text-white/80 mt-1 font-medium">시간의 차이를 지워버린 완벽한 타이밍</p>
+                        </div>
+                    </div>
+                    <button onclick="document.getElementById('time-couple-modal').remove()" 
+                            class="w-8 h-8 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/40 text-white transition-all backdrop-blur-sm">
+                        <i class="fa-solid fa-xmark text-sm"></i>
+                    </button>
+                </div>
+                
+                <div class="max-h-[380px] overflow-y-auto custom-scrollbar px-4 py-4 bg-slate-50/50 space-y-3">
+                    <div class="bg-purple-50/50 border border-purple-100 p-3 rounded-2xl text-center">
+                        <p class="text-[10px] text-purple-600 font-extrabold">💕 타임커플의 자격 💕</p>
+                        <p class="text-[9px] text-slate-500 mt-1 leading-relaxed">
+                            선택된 기간 내 각각 누적 달리기 시간이 <span class="font-extrabold text-purple-500">300분 이상</span>이며,<br>
+                            두 크루의 시간 격차가 <span class="font-extrabold text-purple-500">5분 이내</span>인 달콤한 러닝 파트너!
+                        </p>
+                    </div>
+
+                    ${couples.length === 0 ? `
+                        <div class="text-center py-10 text-slate-400">
+                            <span class="text-3xl block mb-2">💔</span>
+                            <p class="text-xs font-black text-slate-600 leading-relaxed">
+                                선택된 조건에서 탄생한<br>타임커플이 없습니다.
+                            </p>
+                            <p class="text-[9px] text-slate-400 mt-2">
+                                서로의 러닝 시간을 조율하여<br>아름다운 5분 차이 커플에 도전해보세요!
+                            </p>
+                        </div>
+                    ` : couples.map(c => `
+                        <div class="p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl border border-purple-100 flex items-center justify-between shadow-sm relative overflow-hidden group hover:scale-[1.02] transition-transform duration-200">
+                            <div class="absolute -right-3 -bottom-3 text-purple-100 text-4xl font-bold opacity-60 pointer-events-none group-hover:scale-110 transition-transform">💝</div>
+                            <div class="flex-1 flex flex-col items-center">
+                                <span class="text-[10px] font-black text-purple-500 bg-purple-100/50 px-2 py-0.5 rounded-full mb-0.5">${Math.floor(c.runnerA.duration)}분</span>
+                                <span class="text-xs font-bold text-slate-800">${c.runnerA.name}</span>
+                            </div>
+                            <div class="flex flex-col items-center px-2 min-w-[70px]">
+                                <span class="text-xl animate-pulse">💜</span>
+                                <span class="text-[8px] font-black text-purple-400 mt-1 tracking-tight">격차 ${c.diff.toFixed(1)}분</span>
+                            </div>
+                            <div class="flex-1 flex flex-col items-center">
+                                <span class="text-[10px] font-black text-purple-500 bg-purple-100/50 px-2 py-0.5 rounded-full mb-0.5">${Math.floor(c.runnerB.duration)}분</span>
+                                <span class="text-xs font-bold text-slate-800">${c.runnerB.name}</span>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <div class="p-4 bg-white border-t border-gray-100 text-center text-[10px] font-black text-purple-400">
+                    마음의 주파수와 러닝 시간까지 완벽 매칭! 🏃‍♀️🏃‍♂️
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+};
+
+window.getTimeCoupleData = () => {
+    const now = new Date();
+    // ⚠️ 나중에 문자열 'all'과도 비교해야 하므로, 유연한 비교를 위해 let으로 선언
+    let selectedYear = now.getFullYear();
+    let selectedMonth = now.getMonth() + 1;
+    
+    // 버그 수정: 올바른 변수명(selectedMonth, selectedYear) 사용
+    if (typeof selectedRankingPeriod !== 'undefined' && selectedRankingPeriod === 'last') {
+        selectedMonth -= 1;
+        if (selectedMonth === 0) { 
+            selectedMonth = 12; 
+            selectedYear -= 1; 
+        }
+    }
+
+    let periodText = '';
+    if (selectedYear === 'all' && selectedMonth === 'all') periodText = '전체 기간';
+    else if (selectedYear !== 'all' && selectedMonth === 'all') periodText = `${selectedYear}년 전체`;
+    else if (selectedYear === 'all' && selectedMonth !== 'all') periodText = `매년 ${selectedMonth}월`;
+    else periodText = `${selectedYear}년 ${selectedMonth}월`;
+
+    const runnerDurations = [];
+    
+    // 변수명 보완: 하단 syncMembers에서 갱신하는 crewMembersList 사용
+    const membersToProcess = typeof crewMembersList !== 'undefined' ? crewMembersList : [];
+    const logsToProcess = typeof allLogs !== 'undefined' ? allLogs : [];
+
+    membersToProcess.forEach(mem => {
+        const nickname = (mem.nickname || '').trim();
+        if (!nickname) return;
+
+        // userLogs 필터링 시 log.userName 대신 Supabase의 일반적인 user_name 혹은 userName 매핑 확인 필요
+        // 하단 데이터 구조에 맞춰 log.userName 또는 log.user_name 처리 가능하도록 유연하게 적용
+        const userLogs = logsToProcess.filter(log => {
+            const logName = log.userName || log.user_name || '';
+            return logName === nickname && !logName.startsWith('@');
+        });
+        
+        let totalDuration = 0;
+        userLogs.forEach(log => {
+            // 변수명 보완: log.jsDate가 없을 경우 log.run_date 기반으로 Date 객체 생성
+            const logDate = log.jsDate ? log.jsDate : (log.run_date ? new Date(log.run_date) : null);
+            if (!logDate || isNaN(logDate.getTime())) return; // 날짜 데이터가 유효하지 않으면 패스
+
+            const year = logDate.getFullYear();
+            const month = logDate.getMonth() + 1;
+            
+            // selectedYear, selectedMonth가 'all'이 아닐 때는 숫자/문자열 모두 비교 가능하도록 동등 비교(==) 사용
+            if (selectedYear !== 'all' && year == selectedYear) {
+                // 단일 연도 선택 시, 월 비교 진행
+                if (selectedMonth !== 'all' && month != selectedMonth) return;
+            } else if (selectedYear !== 'all' && year != selectedYear) {
+                return;
+            } else {
+                // selectedYear가 'all'인 경우 월만 비교
+                if (selectedMonth !== 'all' && month != selectedMonth) return;
+            }
+            
+            // log.duration 또는 DB 컬럼명에 맞춰 duration 계산
+            const duration = log.duration !== undefined ? log.duration : (log.run_duration || 0);
+            totalDuration += duration;
+        });
+
+        if (totalDuration >= 300) {
+            runnerDurations.push({ name: nickname, duration: totalDuration });
+        }
+    });
+
+    const couples = [];
+    for (let i = 0; i < runnerDurations.length; i++) {
+        for (let j = i + 1; j < runnerDurations.length; j++) {
+            const runnerA = runnerDurations[i];
+            const runnerB = runnerDurations[j];
+            const diff = Math.abs(runnerA.duration - runnerB.duration);
+            if (diff <= 5.0) {
+                couples.push({ runnerA, runnerB, diff });
+            }
+        }
+    }
+
+    couples.sort((a, b) => a.diff - b.diff);
+
+    return { periodText, couples };
+};
+
+
+
 
         window.showRunnerDetail = (name, weeksList) => {
             const detailModalHtml = `
@@ -5218,5 +5556,6 @@
         //initRealtimeSync();
         init();
     </script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"b814c952c5d5490484f992489e1fc997","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
 </html>
