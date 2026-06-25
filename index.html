@@ -563,9 +563,9 @@
                                     <button onclick="window.setTypeFilter('번개')" id="type-b" 
                                             class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400  transition-all">⚡번개</button>
                                     <button onclick="window.setTypeFilter('대회')" id="type-d" 
-                                            class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400  transition-all">🏅</button>
-                                    <button onclick="window.setTypeFilter('모닝런')" id="type-d" 
-                                            class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400  transition-all">⏰</button>
+                                            class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400  transition-all">🏅대회</button>
+                                    <button onclick="window.setTypeFilter('모닝런')" id="type-m" 
+                                            class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400  transition-all">⏰모닝</button>
 
                                 </div>
                                 
@@ -1570,9 +1570,9 @@
 
         window.setTypeFilter = (type) => {
             selectedType = type;
-            ['type-all', 'type-j', 'type-b', 'type-d', 'type-o'].forEach(id => {
+            ['type-all', 'type-j', 'type-b', 'type-d', 'type-o', 'type-m'].forEach(id => {
                 const el = document.getElementById(id);
-                const isActive = (id === 'type-all' && type === '전체') || (id === 'type-j' && type === '정기') || (id === 'type-b' && type === '번개') || (id === 'type-d' && type === '대회') || (id === 'type-o' && type === '오운완') || (id === 'type-o' && type === '모닝런');
+                const isActive = (id === 'type-all' && type === '전체') || (id === 'type-j' && type === '정기') || (id === 'type-b' && type === '번개') || (id === 'type-d' && type === '대회') || (id === 'type-o' && type === '오운완') || (id === 'type-m' && type === '모닝런');
                 el.classList.toggle('active', isActive);
                 el.classList.toggle('inactive', !isActive);
             });
