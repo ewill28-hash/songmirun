@@ -391,6 +391,8 @@
                                 <option value="정기">📅 정기런(月)</option>
                                 <option value="번개">⚡ 번개런</option>
                                 <option value="대회">🏅 대회</option>
+                                <option value="모닝런">⏰ 모닝런</option>
+
                             </select>
                         </div>
 
@@ -555,13 +557,16 @@
                                     <button onclick="window.setTypeFilter('전체')" id="type-all" 
                                             class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black transition-all active-btn">🏃 전체</button>
                                     <button onclick="window.setTypeFilter('오운완')" id="type-o" 
-                                            class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400  transition-all">👟 오운완</button>
+                                            class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400  transition-all">👟오운완</button>
                                     <button onclick="window.setTypeFilter('정기')" id="type-j" 
-                                            class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400  transition-all">📅 정기</button>
+                                            class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400  transition-all">📅정기</button>
                                     <button onclick="window.setTypeFilter('번개')" id="type-b" 
-                                            class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400  transition-all">⚡ 번개</button>
+                                            class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400  transition-all">⚡번개</button>
                                     <button onclick="window.setTypeFilter('대회')" id="type-d" 
-                                            class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400  transition-all">🏅 대회</button>
+                                            class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400  transition-all">🏅</button>
+                                    <button onclick="window.setTypeFilter('모닝런')" id="type-d" 
+                                            class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400  transition-all">⏰</button>
+
                                 </div>
                                 
                             </div>
@@ -1501,7 +1506,8 @@
                 '오운완': { icon: '👟', label: '오운완' },
                 '정기': { icon: '📅', label: '정기' },
                 '번개': { icon: '⚡', label: '번개' },
-                '대회': { icon: '🏅', label: '대회' }
+                '대회': { icon: '🏅', label: '대회' },
+                '모닝런': { icon: '⏰', label: '모닝런' }
             };
 
             // 5. HTML 렌더링
@@ -1566,7 +1572,7 @@
             selectedType = type;
             ['type-all', 'type-j', 'type-b', 'type-d', 'type-o'].forEach(id => {
                 const el = document.getElementById(id);
-                const isActive = (id === 'type-all' && type === '전체') || (id === 'type-j' && type === '정기') || (id === 'type-b' && type === '번개') || (id === 'type-d' && type === '대회')|| (id === 'type-o' && type === '오운완');
+                const isActive = (id === 'type-all' && type === '전체') || (id === 'type-j' && type === '정기') || (id === 'type-b' && type === '번개') || (id === 'type-d' && type === '대회') || (id === 'type-o' && type === '오운완') || (id === 'type-o' && type === '모닝런');
                 el.classList.toggle('active', isActive);
                 el.classList.toggle('inactive', !isActive);
             });
