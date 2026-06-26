@@ -324,7 +324,7 @@
             <!-- Stats Summary Cards -->
             <section class="grid grid-cols-3 sm:grid-cols-3 gap-1">
                 <div class="bg-brand-500 p-3 rounded-2xl text-white shadow-lg shadow-brand-200 border border-brand-400">
-                    <p class="text-[9px] font-bold text-brand-100 uppercase tracking-tighter">Distance</p>
+                    <p onclick="openCoupleModal()" class="text-[9px] font-bold text-brand-100 uppercase tracking-tighter">Distance</p>
                     
                     <p id="stat-distm" onclick="renderChallengeModal('me','0')" class="text-[15px] font-black italic leading-none mt-1 text-center">
                         <span class="text-[10px] opacity-80 not-italic mr-1">Me:</span>0 km
@@ -335,7 +335,7 @@
                     </p>
                 </div>
                <div class="bg-orange-50 p-3 rounded-2xl border border-orange-100 shadow-sm">
-                    <p class="text-[9px] text-orange-400 font-bold uppercase tracking-tighter">Time (me/all)</p>
+                    <p onclick="openTimeCoupleModal()" class="text-[9px] text-orange-400 font-bold uppercase tracking-tighter">Time (me/all)</p>
                     
                     <p id="stat-timem" class="text-[15px] text-right font-black text-orange-600 italic leading-none mt-1 pr-2">
                         Me: 0 m
