@@ -1470,7 +1470,7 @@
             // 2. 정렬 및 개수 제한
             const sortedLogs = filteredLogs
                 .sort((a, b) => new Date(b.created_at || b.run_date) - new Date(a.created_at || a.run_date))
-                .slice(0, isSlowRun ? undefined : 35);
+                .slice(0, isSlowRun ? undefined : 100);
 
             const formatPace = (totalSeconds, totalDistance) => {
                 if (!totalDistance || totalDistance <= 0) return "0'00\"";
