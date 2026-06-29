@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -323,7 +324,7 @@
             <!-- Stats Summary Cards -->
             <section class="grid grid-cols-3 sm:grid-cols-3 gap-1">
                 <div class="bg-brand-500 p-3 rounded-2xl text-white shadow-lg shadow-brand-200 border border-brand-400">
-                    <p class="text-[9px] font-bold text-brand-100 uppercase tracking-tighter">Distance</p>
+                    <p onclick="openCoupleModal()" class="text-[9px] font-bold text-brand-100 uppercase tracking-tighter">Distance</p>
                     
                     <p id="stat-distm" onclick="renderChallengeModal('me','0')" class="text-[15px] font-black italic leading-none mt-1 text-center">
                         <span class="text-[10px] opacity-80 not-italic mr-1">Me:</span>0 km
@@ -334,7 +335,7 @@
                     </p>
                 </div>
                <div class="bg-orange-50 p-3 rounded-2xl border border-orange-100 shadow-sm">
-                    <p class="text-[9px] text-orange-400 font-bold uppercase tracking-tighter">Time (me/all)</p>
+                    <p onclick="openTimeCoupleModal()" class="text-[9px] text-orange-400 font-bold uppercase tracking-tighter">Time (me/all)</p>
                     
                     <p id="stat-timem" class="text-[15px] text-right font-black text-orange-600 italic leading-none mt-1 pr-2">
                         Me: 0 m
@@ -369,7 +370,7 @@
                     
                     <div class="grid grid-cols-2 gap-4 mb-3">
                         <div id="username-field-container" class="col-span-2 hidden">
-                            <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1">작성자 (관리자)</label>
+                            <label class="text-[11px] text-brand-700 font-black block mb-1.5 ml-1">작성자 (all)</label>
                             <input type="text" id="log-username" class="w-full bg-white border-2 border-brand-100 p-3.5 rounded-2xl text-sm font-bold outline-none shadow-sm">
                         </div>
                         
@@ -390,6 +391,8 @@
                                 <option value="정기">📅 정기런(月)</option>
                                 <option value="번개">⚡ 번개런</option>
                                 <option value="대회">🏅 대회</option>
+                                <option value="모닝런">⏰ 모닝런</option>
+
                             </select>
                         </div>
 
@@ -554,13 +557,16 @@
                                     <button onclick="window.setTypeFilter('전체')" id="type-all" 
                                             class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black transition-all active-btn">🏃 전체</button>
                                     <button onclick="window.setTypeFilter('오운완')" id="type-o" 
-                                            class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400  transition-all">👟 오운완</button>
+                                            class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400  transition-all">👟오운완</button>
                                     <button onclick="window.setTypeFilter('정기')" id="type-j" 
-                                            class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400  transition-all">📅 정기</button>
+                                            class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400  transition-all">📅정기</button>
                                     <button onclick="window.setTypeFilter('번개')" id="type-b" 
-                                            class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400  transition-all">⚡ 번개</button>
+                                            class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400  transition-all">⚡번개</button>
                                     <button onclick="window.setTypeFilter('대회')" id="type-d" 
-                                            class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400  transition-all">🏅 대회</button>
+                                            class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400  transition-all">🏅대회</button>
+                                    <button onclick="window.setTypeFilter('모닝런')" id="type-m" 
+                                            class="filter-btn flex-1 py-1.5 rounded-lg text-[10px] font-black text-emerald-400  transition-all">⏰모닝</button>
+
                                 </div>
                                 
                             </div>
@@ -672,6 +678,8 @@
                         <div class="flex items-center px-1 pt-4">
                             <h2 class="font-black text-base text-gray-800 italic">
                                 <i class="fa-solid fa-bolt text-blue-500"></i> 한 번에 제일 멀리, 오래
+                                <span onclick="openCoupleModal()"  class="text-xs font-black text-gray-700">💖</span>
+                                <span onclick="openTimeCoupleModal()"  class="text-xs font-black text-gray-700">💜</span>
                             </h2>
                         </div>
 
@@ -1462,7 +1470,7 @@
             // 2. 정렬 및 개수 제한
             const sortedLogs = filteredLogs
                 .sort((a, b) => new Date(b.created_at || b.run_date) - new Date(a.created_at || a.run_date))
-                .slice(0, isSlowRun ? undefined : 35);
+                .slice(0, isSlowRun ? undefined : 100);
 
             const formatPace = (totalSeconds, totalDistance) => {
                 if (!totalDistance || totalDistance <= 0) return "0'00\"";
@@ -1498,7 +1506,8 @@
                 '오운완': { icon: '👟', label: '오운완' },
                 '정기': { icon: '📅', label: '정기' },
                 '번개': { icon: '⚡', label: '번개' },
-                '대회': { icon: '🏅', label: '대회' }
+                '대회': { icon: '🏅', label: '대회' },
+                '모닝런': { icon: '⏰', label: '모닝런' }
             };
 
             // 5. HTML 렌더링
@@ -1561,9 +1570,9 @@
 
         window.setTypeFilter = (type) => {
             selectedType = type;
-            ['type-all', 'type-j', 'type-b', 'type-d', 'type-o'].forEach(id => {
+            ['type-all', 'type-j', 'type-b', 'type-d', 'type-o', 'type-m'].forEach(id => {
                 const el = document.getElementById(id);
-                const isActive = (id === 'type-all' && type === '전체') || (id === 'type-j' && type === '정기') || (id === 'type-b' && type === '번개') || (id === 'type-d' && type === '대회')|| (id === 'type-o' && type === '오운완');
+                const isActive = (id === 'type-all' && type === '전체') || (id === 'type-j' && type === '정기') || (id === 'type-b' && type === '번개') || (id === 'type-d' && type === '대회') || (id === 'type-o' && type === '오운완') || (id === 'type-m' && type === '모닝런');
                 el.classList.toggle('active', isActive);
                 el.classList.toggle('inactive', !isActive);
             });
@@ -2030,6 +2039,27 @@
             return `${m}:${s.toString().padStart(2, '0')}`;
         };
 
+
+// [추가] 시간 체크 및 버튼 비활성화 함수
+        function checkTimeAndDisableButton() {
+            const saveBtn = document.getElementById("btn-save-log");
+            if (!saveBtn) return; // 버튼이 없으면 예외 처리
+
+            const now = new Date();
+            const currentHour = now.getHours();
+
+            // 20시 이상(20:00 ~ 23:59)일 때 비활성화
+            if (currentHour >= 8) {
+                saveBtn.disabled = true;
+                saveBtn.classList.remove("hover:bg-brand-700", "active:scale-[0.98]", "shadow-lg");
+                saveBtn.classList.add("opacity-50", "cursor-not-allowed");
+            } else {
+                saveBtn.disabled = false;
+                saveBtn.classList.add("hover:bg-brand-700", "active:scale-[0.98]", "shadow-lg");
+                saveBtn.classList.remove("opacity-50", "cursor-not-allowed");
+            }
+        }
+        
         function renderChart(teams, myStats) {
             const canvas = document.getElementById('teamChart');
             if (!canvas) return;
@@ -2504,7 +2534,7 @@
                     }
                     return a.name.localeCompare(b.name); // 2순위: 이름 가나다순 오름차순
                 })
-                .slice(0, 7); // 상위 7명 추출
+                .slice(0, 10); // 상위 7명 추출
         };
         
         // 시작점 제약 없음 (최근 1일 빠져도 보임)
@@ -2685,93 +2715,620 @@
                     return a.name.localeCompare(b.name);
                 });
         };
+
+
         //시작점 제약 없음 (최근 1주 빠져도 보임)
- window.getSeqWeekData = () => {
-    const selectedYear = parseInt(document.getElementById('year-select').value);
-    const startYear = selectedYear - 2;
-    const endYear = selectedYear;
-    
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    
-    const userWeeks = {};
-    const userDatesByWeek = {}; 
+        window.getSeqWeekData = () => {
+            const selectedYear = parseInt(document.getElementById('year-select').value);
+            const startYear = selectedYear - 2;
+            const endYear = selectedYear;
+            
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            
+            const userWeeks = {};
+            const userDatesByWeek = {}; 
 
-    allLogs.forEach(log => {
-        if (!log.user_name || !log.run_date) return;
+            allLogs.forEach(log => {
+                if (!log.user_name || !log.run_date) return;
+                
+                const runDateObj = new Date(log.run_date);
+                if (runDateObj.getFullYear() < startYear || runDateObj.getFullYear() > endYear) return;
+
+                const logDay = new Date(runDateObj.getFullYear(), runDateObj.getMonth(), runDateObj.getDate());
+                const diffDays = Math.floor((today - logDay) / (1000 * 60 * 60 * 24));
+                const weeksAgo = Math.floor(diffDays / 7);
+
+                if (weeksAgo < 0) return;
+
+                if (!userWeeks[log.user_name]) {
+                    userWeeks[log.user_name] = new Set();
+                    userDatesByWeek[log.user_name] = {};
+                }
+                userWeeks[log.user_name].add(weeksAgo);
+
+                if (!userDatesByWeek[log.user_name][weeksAgo]) {
+                    userDatesByWeek[log.user_name][weeksAgo] = [];
+                }
+                userDatesByWeek[log.user_name][weeksAgo].push(log.run_date);
+            });
+
+            const allCalculatedUsers = Object.entries(userWeeks).map(([name, weeksSet]) => {
+                const sortedWeeks = Array.from(weeksSet).sort((a, b) => a - b);
+                
+                // 0~3주 쉬었어도 상관없이 사용자의 가장 최근 기록부터 시작
+                const startPoint = sortedWeeks[0]; 
+                
+                if (startPoint === undefined) {
+                    return { name, total_active_weeks: 0, weeks_list: "", start_date: "" };
+                }
+
+                let consecutiveWeeks = [];
+                let currentExpected = startPoint;
+
+                for (let i = 0; i < sortedWeeks.length; i++) {
+                    if (sortedWeeks[i] === currentExpected) {
+                        consecutiveWeeks.push(sortedWeeks[i]);
+                        currentExpected++;
+                    } else if (sortedWeeks[i] > currentExpected) {
+                        break; // 연속이 끊기면 중단 (예: 4,5,6,7, 9 라면 7까지만 저장)
+                    }
+                }
+
+                const oldestWeekIdx = consecutiveWeeks[consecutiveWeeks.length - 1];
+                const datesInOldestWeek = userDatesByWeek[name][oldestWeekIdx];
+                const oldestDate = datesInOldestWeek.sort()[0];
+
+                return {
+                    name,
+                    total_active_weeks: consecutiveWeeks.length,
+                    weeks_list: consecutiveWeeks.join(', '),
+                    start_date: oldestDate
+                };
+            }).filter(user => user.total_active_weeks > 0);
+
+            if (allCalculatedUsers.length === 0) return [];
+
+            // --- 필터링 로직: Max 값 기준 상위 그룹 추출 ---
+            // 1. 전체 사용자 중 최대 연속 주차 계산
+            const maxActiveWeeks = Math.max(...allCalculatedUsers.map(u => u.total_active_weeks));
+            // 2. Max에서 Max-10 사이의 범위 설정
+            const minRange = Math.max(1, maxActiveWeeks - 10); 
+
+            return allCalculatedUsers
+                .filter(user => user.total_active_weeks >= minRange) // 범위 내 러너만 표시
+                .sort((a, b) => {
+                    if (b.total_active_weeks !== a.total_active_weeks) {
+                        return b.total_active_weeks - a.total_active_weeks;
+                    }
+                    return a.name.localeCompare(b.name);
+                });
+        };
+
+
+
+
+
+// =========================================================================
+// [1] 마일리지(거리) 커플 모달 및 데이터 로직
+// =========================================================================
+        window.openCoupleModal = () => {
+            // getCoupleData에서 dynamicDistLimit도 함께 반환받도록 수정
+            const { periodText, couples, dynamicDistLimit } = window.getCoupleData();
+            
+            const modalHtml = `
+                <div id="couple-modal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in zoom-in-95 duration-300"
+                     onclick="if(event.target === this) this.remove();">
+                    <div class="bg-white w-full max-w-sm rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden border border-white/20">
+                        
+                        <div class="p-5 bg-gradient-to-r from-rose-500 via-pink-500 to-orange-400 flex justify-between items-center relative overflow-hidden">
+                            <div class="absolute top-0 right-0 opacity-10 transform translate-x-4 -translate-y-4">
+                                <i class="fa-solid fa-heart text-7xl text-white"></i>
+                            </div>
+                            <div class="flex items-center gap-2.5 relative z-10">
+                                <span onclick="openTimeCoupleModal(); document.getElementById('couple-modal').remove();" class="text-2xl cursor-pointer">💖</span>
+                                <div>
+                                    <h3 id="couple-modal-title" class="font-black text-base text-white leading-none">${periodText} 마일리지커플</h3>
+                                    <p class="text-[10px] text-white/80 mt-1 font-medium">서로의 발자국 소리가 닮아가는 러너들</p>
+                                </div>
+                            </div>
+                            <span onclick="openTimeCoupleModal(); document.getElementById('couple-modal').remove();" class="text-xs font-black text-gray-700 cursor-pointer">💜</span>
+                            <button onclick="document.getElementById('couple-modal').remove()" 
+                                    class="w-8 h-8 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/40 text-white transition-all backdrop-blur-sm">
+                                <i class="fa-solid fa-xmark text-sm"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="max-h-[380px] overflow-y-auto custom-scrollbar px-4 py-4 bg-slate-50/50 space-y-3">
+                            <div class="bg-rose-50/50 border border-rose-100 p-3 rounded-2xl text-center">
+                                <p class="text-[10px] text-rose-600 font-extrabold">💕 마일리지커플의 자격 💕</p>
+                                <p class="text-[9px] text-slate-500 mt-1 leading-relaxed">
+                                    이번 달 누적 <span class="font-extrabold text-rose-500">${dynamicDistLimit}km</span> 이상 달린 크루 중,<br>
+                                    두 크루의 마일리지 격차가 <span class="font-extrabold text-rose-500">1km 이내</span>인 달콤한 러닝 파트너!
+                                </p>
+                            </div>
         
-        const runDateObj = new Date(log.run_date);
-        if (runDateObj.getFullYear() < startYear || runDateObj.getFullYear() > endYear) return;
+                            ${couples.length === 0 ? `
+                                <div class="text-center py-10 text-slate-400">
+                                    <span class="text-3xl block mb-2">💔</span>
+                                    <p class="text-xs font-black text-slate-600 leading-relaxed">
+                                        선택된 조건에서 탄생한<br>마일리지커플이 없습니다.
+                                    </p>
+                                    <p class="text-[9px] text-slate-400 mt-2">
+                                        서로의 러닝 페이스와 마일리지를 조율하여<br>아름다운 1km 차이 커플에 도전해보세요!
+                                    </p>
+                                </div>
+                            ` : couples.map(c => `
+                                <div class="p-3 bg-gradient-to-r from-rose-50 to-pink-50 rounded-2xl border border-rose-100 flex items-center justify-between shadow-sm relative overflow-hidden group hover:scale-[1.02] transition-transform duration-200">
+                                    <div class="absolute -right-3 -bottom-3 text-rose-100 text-4xl font-bold opacity-60 pointer-events-none group-hover:scale-110 transition-transform">💝</div>
+                                    <div class="flex-1 flex flex-col items-center">
+                                        <span class="text-[10px] font-black text-rose-500 bg-rose-100/50 px-2 py-0.5 rounded-full mb-0.5">${c.runnerA.distance.toFixed(1)}km</span>
+                                        <span class="text-xs font-bold text-slate-800">${c.runnerA.name}</span>
+                                    </div>
+                                    <div class="flex flex-col items-center px-2 min-w-[70px]">
+                                        <span class="text-xl animate-pulse">💖</span>
+                                        <span class="text-[8px] font-black text-rose-400 mt-1 tracking-tight">격차 ${c.diff.toFixed(2)}km</span>
+                                    </div>
+                                    <div class="flex-1 flex flex-col items-center">
+                                        <span class="text-[10px] font-black text-rose-500 bg-rose-100/50 px-2 py-0.5 rounded-full mb-0.5">${c.runnerB.distance.toFixed(1)}km</span>
+                                        <span class="text-xs font-bold text-slate-800">${c.runnerB.name}</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+        
+                        <div   onclick="openPerfectCoupleModal()"  class="p-4 bg-white border-t border-gray-100 text-center text-[10px] font-black text-rose-400">
+                            👨‍❤️‍👨두근👩‍❤️‍👨두근👩‍❤️‍👩, 다음 마일리지커플의 주인공은 누구일까요? 🏃‍♀️🏃‍♂️
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        };
+        
+        window.getCoupleData = () => {
+            const now = new Date();
+            let selectedYear = now.getFullYear();
+            let selectedMonth = now.getMonth() + 1;
+            
+            if (typeof selectedRankingPeriod !== 'undefined' && selectedRankingPeriod === 'last') {
+                selectedMonth -= 1;
+                if (selectedMonth === 0) { 
+                    selectedMonth = 12; 
+                    selectedYear -= 1; 
+                }
+            }
+        
+            let periodText = '';
+            if (selectedYear === 'all' && selectedMonth === 'all') periodText = '전체 기간';
+            else if (selectedYear !== 'all' && selectedMonth === 'all') periodText = `${selectedYear}년 전체`;
+            else if (selectedYear === 'all' && selectedMonth !== 'all') periodText = `매년 ${selectedMonth}월`;
+            else periodText = `${selectedYear}년 ${selectedMonth}월`;
+        
+            // 💡 화면 표시를 위해 함수 스코프 상단에서 dynamicDistLimit을 먼저 선언하고 초기화합니다.
+            const today = now.getDate(); 
+            const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate(); 
+            
+            // 공식 적용 (1일이면 12km, 말일이면 70km로 점진적 증가)
+            let dynamicDistLimit = 12 + ((today - 1) / (lastDayOfMonth - 1)) * (70 - 12);
+            dynamicDistLimit = Math.round(dynamicDistLimit * 10) / 10;
+        
+            const runnerDistances = [];
+            const membersToProcess = typeof crewMembersList !== 'undefined' ? crewMembersList : [];
+            const logsToProcess = typeof allLogs !== 'undefined' ? allLogs : [];
+        
+            membersToProcess.forEach(mem => {
+                const nickname = (mem.nickname || '').trim();
+                if (!nickname) return;
+        
+                const userLogs = logsToProcess.filter(log => {
+                    const logName = log.userName || log.user_name || '';
+                    return logName === nickname && !logName.startsWith('@');
+                });
+                
+                let totalDist = 0;
+                userLogs.forEach(log => {
+                    const logDate = log.jsDate ? log.jsDate : (log.run_date ? new Date(log.run_date) : null);
+                    if (!logDate || isNaN(logDate.getTime())) return;
+        
+                    const year = logDate.getFullYear();
+                    const month = logDate.getMonth() + 1;
+                    
+                    if (selectedYear !== 'all' && year == selectedYear) {
+                        if (selectedMonth !== 'all' && month != selectedMonth) return;
+                    } else if (selectedYear !== 'all' && year != selectedYear) {
+                        return;
+                    } else {
+                        if (selectedMonth !== 'all' && month != selectedMonth) return;
+                    }
+                    
+                    const distance = log.distance !== undefined ? log.distance : (log.run_distance || 0);
+                    totalDist += distance;
+                });
+        
+                // 위에서 미리 계산된 dynamicDistLimit 조건을 활용하여 필터링
+                if (totalDist >= dynamicDistLimit) {
+                    runnerDistances.push({ name: nickname, distance: totalDist });
+                }
+            });
+        
+            const couples = [];
+            for (let i = 0; i < runnerDistances.length; i++) {
+                for (let j = i + 1; j < runnerDistances.length; j++) {
+                    const runnerA = runnerDistances[i];
+                    const runnerB = runnerDistances[j];
+                    const diff = Math.abs(runnerA.distance - runnerB.distance);
+                    if (diff <= 1.0) {
+                        couples.push({ runnerA, runnerB, diff });
+                    }
+                }
+            }
+        
+            couples.sort((a, b) => a.diff - b.diff);
+        
+            // 💡 리턴 객체에 dynamicDistLimit를 포함시켜 openCoupleModal에서 쓸 수 있도록 합니다.
+            return { periodText, couples, dynamicDistLimit };
+        };
 
-        const logDay = new Date(runDateObj.getFullYear(), runDateObj.getMonth(), runDateObj.getDate());
-        const diffDays = Math.floor((today - logDay) / (1000 * 60 * 60 * 24));
-        const weeksAgo = Math.floor(diffDays / 7);
 
-        if (weeksAgo < 0) return;
 
-        if (!userWeeks[log.user_name]) {
-            userWeeks[log.user_name] = new Set();
-            userDatesByWeek[log.user_name] = {};
+// =========================================================================
+// [2] 타임(시간) 커플 모달 및 데이터 로직
+// =========================================================================
+        
+        window.openTimeCoupleModal = () => {
+            // 2. 반환 객체에서 dynamicLimit를 함께 구조 분해 할당합니다.
+            const { periodText, couples, dynamicLimit } = window.getTimeCoupleData();
+            
+            const modalHtml = `
+                <div id="time-couple-modal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in zoom-in-95 duration-300"
+                     onclick="if(event.target === this) this.remove();">
+                    <div class="bg-white w-full max-w-sm rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden border border-white/20">
+                        
+                        <div class="p-5 bg-gradient-to-r from-purple-600 via-fuchsia-500 to-pink-500 flex justify-between items-center relative overflow-hidden">
+                            <div class="absolute top-0 right-0 opacity-10 transform translate-x-4 -translate-y-4">
+                                <i class="fa-solid fa-clock text-7xl text-white"></i>
+                            </div>
+                            <div class="flex items-center gap-2.5 relative z-10">
+                                <span onclick="openCoupleModal(); document.getElementById('time-couple-modal').remove();" class="text-2xl">💜</span>
+                                <div>
+                                    <h3 id="time-couple-modal-title" class="font-black text-base text-white leading-none">${periodText} 타임커플</h3>
+                                    <p class="text-[10px] text-white/80 mt-1 font-medium">시간의 차이를 지워버린 완벽한 타이밍</p>
+                                </div>
+                            </div>
+                            <span onclick="openCoupleModal(); document.getElementById('time-couple-modal').remove();" class="text-xs font-black text-gray-700">💖</span>
+                            <button onclick="document.getElementById('time-couple-modal').remove()" 
+                                    class="w-8 h-8 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/40 text-white transition-all backdrop-blur-sm">
+                                <i class="fa-solid fa-xmark text-sm"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="max-h-[380px] overflow-y-auto custom-scrollbar px-4 py-4 bg-slate-50/50 space-y-3">
+                            <div class="bg-purple-50/50 border border-purple-100 p-3 rounded-2xl text-center">
+                                <p class="text-[10px] text-purple-600 font-extrabold">💕 타임커플의 자격 💕</p>
+                                <p class="text-[9px] text-slate-500 mt-1 leading-relaxed">
+                                    누적 <span class="font-extrabold text-fuchsia-500">${dynamicLimit}분 이상</span> 달린 크루 중,<br>
+                                    두 크루의 시간 격차가 <span class="font-extrabold text-purple-500">5분 이내</span>인 달콤한 러닝 파트너!
+                                </p>
+                            </div>
+        
+                            ${couples.length === 0 ? `
+                                <div class="text-center py-10 text-slate-400">
+                                    <span class="text-3xl block mb-2">💔</span>
+                                    <p class="text-xs font-black text-slate-600 leading-relaxed">
+                                        선택된 조건에서 탄생한<br>타임커플이 없습니다.
+                                    </p>
+                                    <p class="text-[9px] text-slate-400 mt-2">
+                                        서로의 러닝 시간을 조율하여<br>아름다운 5분 차이 커플에 도전해보세요!
+                                    </p>
+                                </div>
+                            ` : couples.map(c => `
+                                <div class="p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl border border-purple-100 flex items-center justify-between shadow-sm relative overflow-hidden group hover:scale-[1.02] transition-transform duration-200">
+                                    <div class="absolute -right-3 -bottom-3 text-purple-100 text-4xl font-bold opacity-60 pointer-events-none group-hover:scale-110 transition-transform">💝</div>
+                                    <div class="flex-1 flex flex-col items-center">
+                                        <span class="text-[10px] font-black text-purple-500 bg-purple-100/50 px-2 py-0.5 rounded-full mb-0.5">${Math.floor(c.runnerA.duration)}분</span>
+                                        <span class="text-xs font-bold text-slate-800">${c.runnerA.name}</span>
+                                    </div>
+                                    <div class="flex flex-col items-center px-2 min-w-[70px]">
+                                        <span class="text-xl animate-pulse">💜</span>
+                                        <span class="text-[8px] font-black text-purple-400 mt-1 tracking-tight">격차 ${c.diff.toFixed(1)}분</span>
+                                    </div>
+                                    <div class="flex-1 flex flex-col items-center">
+                                        <span class="text-[10px] font-black text-purple-500 bg-purple-100/50 px-2 py-0.5 rounded-full mb-0.5">${Math.floor(c.runnerB.duration)}분</span>
+                                        <span class="text-xs font-bold text-slate-800">${c.runnerB.name}</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+        
+                        <div    onclick="openPerfectCoupleModal()"  class="p-4 bg-white border-t border-gray-100 text-center text-[10px] font-black text-purple-400">
+                            👨‍❤️‍👨마음의👩‍❤️‍👨 주파수와👩‍❤️‍👩 러닝 시간까지 완벽 매칭! 🏃‍♀️🏃‍♂️
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        };
+        
+        window.getTimeCoupleData = () => {
+            const now = new Date();
+            let selectedYear = now.getFullYear();
+            let selectedMonth = now.getMonth() + 1;
+            
+            if (typeof selectedRankingPeriod !== 'undefined' && selectedRankingPeriod === 'last') {
+                selectedMonth -= 1;
+                if (selectedMonth === 0) { 
+                    selectedMonth = 12; 
+                    selectedYear -= 1; 
+                }
+            }
+        
+            let periodText = '';
+            if (selectedYear === 'all' && selectedMonth === 'all') periodText = '전체 기간';
+            else if (selectedYear !== 'all' && selectedMonth === 'all') periodText = `${selectedYear}년 전체`;
+            else if (selectedYear === 'all' && selectedMonth !== 'all') periodText = `매년 ${selectedMonth}월`;
+            else periodText = `${selectedYear}년 ${selectedMonth}월`;
+        
+            // 💡 [변경] 반복문 밖에서 오늘 기준 dynamicLimit를 미리 한 번만 계산합니다.
+            const today = now.getDate(); 
+            const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate(); 
+            let dynamicLimit = 100 + ((today - 1) / (lastDayOfMonth - 1)) * (500 - 100);
+            dynamicLimit = Math.round(dynamicLimit);
+        
+            const runnerDurations = [];
+            const membersToProcess = typeof crewMembersList !== 'undefined' ? crewMembersList : [];
+            const logsToProcess = typeof allLogs !== 'undefined' ? allLogs : [];
+        
+            membersToProcess.forEach(mem => {
+                const nickname = (mem.nickname || '').trim();
+                if (!nickname) return;
+        
+                const userLogs = logsToProcess.filter(log => {
+                    const logName = log.userName || log.user_name || '';
+                    return logName === nickname && !logName.startsWith('@');
+                });
+                
+                let totalDuration = 0;
+                userLogs.forEach(log => {
+                    const logDate = log.jsDate ? log.jsDate : (log.run_date ? new Date(log.run_date) : null);
+                    if (!logDate || isNaN(logDate.getTime())) return;
+        
+                    const year = logDate.getFullYear();
+                    const month = logDate.getMonth() + 1;
+                    
+                    if (selectedYear !== 'all' && year == selectedYear) {
+                        if (selectedMonth !== 'all' && month != selectedMonth) return;
+                    } else if (selectedYear !== 'all' && year != selectedYear) {
+                        return;
+                    } else {
+                        if (selectedMonth !== 'all' && month != selectedMonth) return;
+                    }
+                    
+                    const duration = log.duration !== undefined ? log.duration : (log.run_duration || 0);
+                    totalDuration += duration;
+                });
+        
+                // 💡 [변경] 위에서 계산된 dynamicLimit 변수를 그대로 활용합니다.
+                if (totalDuration >= dynamicLimit) {
+                    runnerDurations.push({ name: nickname, duration: totalDuration });
+                }
+            });
+        
+            // 💡 기존에 질문 스니펫에 잘려 있던 couples 생성 로직 예시 (기존 코드에 맞춰 연동)
+            const couples = [];
+            for (let i = 0; i < runnerDurations.length; i++) {
+                for (let j = i + 1; j < runnerDurations.length; j++) {
+                    const diff = Math.abs(runnerDurations[i].duration - runnerDurations[j].duration);
+                    if (diff <= 5) {
+                        couples.push({
+                            runnerA: runnerDurations[i],
+                            runnerB: runnerDurations[j],
+                            diff: diff
+                        });
+                    }
+                }
+            }
+            // 격차가 적은 순으로 정렬
+            couples.sort((a, b) => a.diff - b.diff);
+        
+            // 1. return 객체에 dynamicLimit를 추가해 줍니다.
+            return { periodText, couples, dynamicLimit };
+        };
+        
+
+
+
+
+window.openPerfectCoupleModal = () => {
+    // 1. 데이터 가져오기 (거리 제한, 시간 제한, 커플 목록)
+    const { periodText, couples, dynamicDistLimit, dynamicLimit } = window.getPerfectCoupleData();
+    
+    const modalHtml = `
+        <div id="perfect-couple-modal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in zoom-in-95 duration-300"
+             onclick="if(event.target === this) this.remove();">
+            <div class="bg-white w-full max-w-sm rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden border border-white/20">
+                
+                <div class="p-5 bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-400 flex justify-between items-center relative overflow-hidden">
+                    <div class="absolute top-0 right-0 opacity-10 transform translate-x-4 -translate-y-4">
+                        <i class="fa-solid fa-bolt text-7xl text-white"></i>
+                    </div>
+                    <div class="flex items-center gap-2.5 relative z-10">
+                        <span onclick="openCoupleModal(); document.getElementById('perfect-couple-modal').remove();" class="text-2xl cursor-pointer">⚡</span>
+                        <div>
+                            <h3 id="perfect-couple-modal-title" class="font-black text-base text-white leading-none">${periodText} 찰떡커플</h3>
+                            <p class="text-[10px] text-white/80 mt-1 font-medium">거리와 시간마저 하나로 닮아버린 소울메이트</p>
+                        </div>
+                    </div>
+                    <span onclick="openTimeCoupleModal(); document.getElementById('perfect-couple-modal').remove();" class="text-xs font-black text-gray-700 cursor-pointer">🎯</span>
+                    <button onclick="document.getElementById('perfect-couple-modal').remove()" 
+                            class="w-8 h-8 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/40 text-white transition-all backdrop-blur-sm">
+                        <i class="fa-solid fa-xmark text-sm"></i>
+                    </button>
+                </div>
+                
+                <div class="max-h-[380px] overflow-y-auto custom-scrollbar px-4 py-4 bg-slate-50/50 space-y-3">
+                    <div class="bg-amber-50/50 border border-amber-100 p-3 rounded-2xl text-center">
+                        <p class="text-[10px] text-amber-600 font-extrabold">⚡ 찰떡커플의 자격 ⚡</p>
+                        <p class="text-[9px] text-slate-500 mt-1 leading-relaxed">
+                            이번 달 누적 <span class="font-extrabold text-amber-500">${dynamicDistLimit}km</span> & <span class="font-extrabold text-amber-500">${dynamicLimit}분</span> 이상 달린 크루 중,<br>
+                            마일리지 격차 <span class="font-extrabold text-amber-500">1km 이내</span>와 시간 격차 <span class="font-extrabold text-amber-500">5분 이내</span>를 동시에 달성한 영혼의 동반자!
+                        </p>
+                    </div>
+
+                    ${couples.length === 0 ? `
+                        <div class="text-center py-10 text-slate-400">
+                            <span class="text-3xl block mb-2">⚡</span>
+                            <p class="text-xs font-black text-slate-600 leading-relaxed">
+                                선택된 조건에서 탄생한<br>찰떡커플이 없습니다.
+                            </p>
+                            <p class="text-[9px] text-slate-400 mt-2">
+                                거리와 시간을 모두 조율하여<br>완벽한 케미스트리 커플에 도전해보세요!
+                            </p>
+                        </div>
+                    ` : couples.map(c => `
+                        <div class="p-3 bg-gradient-to-r from-amber-50 to-yellow-50 rounded-2xl border border-amber-100 flex items-center justify-between shadow-sm relative overflow-hidden group hover:scale-[1.02] transition-transform duration-200">
+                            <div class="absolute -right-3 -bottom-3 text-amber-100 text-4xl font-bold opacity-60 pointer-events-none group-hover:scale-110 transition-transform">⚡</div>
+                            
+                            <div class="flex-1 flex flex-col items-center">
+                                <div class="flex flex-col items-center gap-0.5 mb-1">
+                                    <span class="text-[9px] font-black text-amber-600 bg-amber-100/50 px-1.5 py-0.5 rounded-full">${c.runnerA.distance.toFixed(1)}km</span>
+                                    <span class="text-[9px] font-black text-orange-500 bg-orange-100/50 px-1.5 py-0.5 rounded-full">${Math.floor(c.runnerA.duration)}분</span>
+                                </div>
+                                <span class="text-xs font-bold text-slate-800">${c.runnerA.name}</span>
+                            </div>
+                            
+                            <div class="flex flex-col items-center px-1 min-w-[85px]">
+                                <span class="text-xl animate-pulse">⚡</span>
+                                <span class="text-[8px] font-black text-amber-500 mt-1 tracking-tight">거리차 ${c.diffDist.toFixed(2)}km</span>
+                                <span class="text-[8px] font-black text-orange-400 tracking-tight">시간차 ${c.diffTime.toFixed(1)}분</span>
+                            </div>
+                            
+                            <div class="flex-1 flex flex-col items-center">
+                                <div class="flex flex-col items-center gap-0.5 mb-1">
+                                    <span class="text-[9px] font-black text-amber-600 bg-amber-100/50 px-1.5 py-0.5 rounded-full">${c.runnerB.distance.toFixed(1)}km</span>
+                                    <span class="text-[9px] font-black text-orange-500 bg-orange-100/50 px-1.5 py-0.5 rounded-full">${Math.floor(c.runnerB.duration)}분</span>
+                                </div>
+                                <span class="text-xs font-bold text-slate-800">${c.runnerB.name}</span>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <div class="p-4 bg-white border-t border-gray-100 text-center text-[10px] font-black text-amber-500">
+                    🏃‍♂️ 거리도 시간도 찰떡궁합, 최고의 러닝 시너지를 느껴보세요! 🏃‍♀️
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+};
+
+window.getPerfectCoupleData = () => {
+    const now = new Date();
+    let selectedYear = now.getFullYear();
+    let selectedMonth = now.getMonth() + 1;
+    
+    if (typeof selectedRankingPeriod !== 'undefined' && selectedRankingPeriod === 'last') {
+        selectedMonth -= 1;
+        if (selectedMonth === 0) { 
+            selectedMonth = 12; 
+            selectedYear -= 1; 
         }
-        userWeeks[log.user_name].add(weeksAgo);
+    }
 
-        if (!userDatesByWeek[log.user_name][weeksAgo]) {
-            userDatesByWeek[log.user_name][weeksAgo] = [];
+    let periodText = '';
+    if (selectedYear === 'all' && selectedMonth === 'all') periodText = '전체 기간';
+    else if (selectedYear !== 'all' && selectedMonth === 'all') periodText = `${selectedYear}년 전체`;
+    else if (selectedYear === 'all' && selectedMonth !== 'all') periodText = `매년 ${selectedMonth}월`;
+    else periodText = `${selectedYear}년 ${selectedMonth}월`;
+
+    // dynamicDistLimit 계산 (거리용)
+    const today = now.getDate(); 
+    const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate(); 
+    let dynamicDistLimit = 12 + ((today - 1) / (lastDayOfMonth - 1)) * (70 - 12);
+    dynamicDistLimit = Math.round(dynamicDistLimit * 10) / 10;
+
+    // dynamicLimit 계산 (시간용)
+    let dynamicLimit = 100 + ((today - 1) / (lastDayOfMonth - 1)) * (500 - 100);
+    dynamicLimit = Math.round(dynamicLimit);
+
+    const runnerStats = [];
+    const membersToProcess = typeof crewMembersList !== 'undefined' ? crewMembersList : [];
+    const logsToProcess = typeof allLogs !== 'undefined' ? allLogs : [];
+
+    membersToProcess.forEach(mem => {
+        const nickname = (mem.nickname || '').trim();
+        if (!nickname) return;
+
+        const userLogs = logsToProcess.filter(log => {
+            const logName = log.userName || log.user_name || '';
+            return logName === nickname && !logName.startsWith('@');
+        });
+        
+        let totalDist = 0;
+        let totalDuration = 0;
+
+        userLogs.forEach(log => {
+            const logDate = log.jsDate ? log.jsDate : (log.run_date ? new Date(log.run_date) : null);
+            if (!logDate || isNaN(logDate.getTime())) return;
+
+            const year = logDate.getFullYear();
+            const month = logDate.getMonth() + 1;
+            
+            if (selectedYear !== 'all' && year == selectedYear) {
+                if (selectedMonth !== 'all' && month != selectedMonth) return;
+            } else if (selectedYear !== 'all' && year != selectedYear) {
+                return;
+            } else {
+                if (selectedMonth !== 'all' && month != selectedMonth) return;
+            }
+            
+            const distance = log.distance !== undefined ? log.distance : (log.run_distance || 0);
+            const duration = log.duration !== undefined ? log.duration : (log.run_duration || 0);
+            
+            totalDist += distance;
+            totalDuration += duration;
+        });
+
+        // 찰떡커플 조건: 거리 제한과 시간 제한을 '동시에' 만족하는 러너만 필터링
+        if (totalDist >= dynamicDistLimit && totalDuration >= dynamicLimit) {
+            runnerStats.push({ name: nickname, distance: totalDist, duration: totalDuration });
         }
-        userDatesByWeek[log.user_name][weeksAgo].push(log.run_date);
     });
 
-    const allCalculatedUsers = Object.entries(userWeeks).map(([name, weeksSet]) => {
-        const sortedWeeks = Array.from(weeksSet).sort((a, b) => a - b);
-        
-        // 0~3주 쉬었어도 상관없이 사용자의 가장 최근 기록부터 시작
-        const startPoint = sortedWeeks[0]; 
-        
-        if (startPoint === undefined) {
-            return { name, total_active_weeks: 0, weeks_list: "", start_date: "" };
-        }
-
-        let consecutiveWeeks = [];
-        let currentExpected = startPoint;
-
-        for (let i = 0; i < sortedWeeks.length; i++) {
-            if (sortedWeeks[i] === currentExpected) {
-                consecutiveWeeks.push(sortedWeeks[i]);
-                currentExpected++;
-            } else if (sortedWeeks[i] > currentExpected) {
-                break; // 연속이 끊기면 중단 (예: 4,5,6,7, 9 라면 7까지만 저장)
+    const couples = [];
+    for (let i = 0; i < runnerStats.length; i++) {
+        for (let j = i + 1; j < runnerStats.length; j++) {
+            const runnerA = runnerStats[i];
+            const runnerB = runnerStats[j];
+            
+            const diffDist = Math.abs(runnerA.distance - runnerB.distance);
+            const diffTime = Math.abs(runnerA.duration - runnerB.duration);
+            
+            // 두 격차 조건을 모두 충족하는 경우
+            if (diffDist <= 1.0 && diffTime <= 5.0) {
+                couples.push({ 
+                    runnerA, 
+                    runnerB, 
+                    diffDist, 
+                    diffTime,
+                    // 두 격차를 고려하여 정렬하기 위한 가중치 합산값 (정렬용)
+                    score: diffDist + (diffTime / 5.0) 
+                });
             }
         }
+    }
 
-        const oldestWeekIdx = consecutiveWeeks[consecutiveWeeks.length - 1];
-        const datesInOldestWeek = userDatesByWeek[name][oldestWeekIdx];
-        const oldestDate = datesInOldestWeek.sort()[0];
+    // 환상의 케미(격차 점수가 낮은 순) 순으로 정렬
+    couples.sort((a, b) => a.score - b.score);
 
-        return {
-            name,
-            total_active_weeks: consecutiveWeeks.length,
-            weeks_list: consecutiveWeeks.join(', '),
-            start_date: oldestDate
-        };
-    }).filter(user => user.total_active_weeks > 0);
-
-    if (allCalculatedUsers.length === 0) return [];
-
-    // --- 필터링 로직: Max 값 기준 상위 그룹 추출 ---
-    // 1. 전체 사용자 중 최대 연속 주차 계산
-    const maxActiveWeeks = Math.max(...allCalculatedUsers.map(u => u.total_active_weeks));
-    // 2. Max에서 Max-10 사이의 범위 설정
-    const minRange = Math.max(1, maxActiveWeeks - 10); 
-
-    return allCalculatedUsers
-        .filter(user => user.total_active_weeks >= minRange) // 범위 내 러너만 표시
-        .sort((a, b) => {
-            if (b.total_active_weeks !== a.total_active_weeks) {
-                return b.total_active_weeks - a.total_active_weeks;
-            }
-            return a.name.localeCompare(b.name);
-        });
+    return { periodText, couples, dynamicDistLimit, dynamicLimit };
 };
+        
+        
 
         window.showRunnerDetail = (name, weeksList) => {
             const detailModalHtml = `
@@ -2943,7 +3500,7 @@
                                 <i class="fa-solid fa-trophy text-7xl text-white"></i>
                             </div>
                             <div class="flex items-center gap-2.5 relative z-10">
-                                <span class="text-2xl">🏆</span>
+                                <span onclick="openSeqDay2RunModal(); 	   document.getElementById('seq-day-modal').remove();"  class="text-2xl">🏆</span>
                                 <div>
                                     <h3 class="font-black text-base text-white leading-none">CONTINUOUS RUNNER</h3>
                                     <p class="text-[10px] text-white/80 mt-1 font-medium">매일 멈추지 않는 러너들</p>
@@ -3026,7 +3583,7 @@
                                 <i class="fa-solid fa-trophy text-7xl text-white"></i>
                             </div>
                             <div class="flex items-center gap-2.5 relative z-10">
-                                <span class="text-2xl">💎</span>
+                                <span onclick="openSeqDayRunModal(); 	   document.getElementById('seq-day-modal').remove();"  class="text-2xl">💎</span>
                                 <div>
                                     <h3 class="font-black text-base text-white leading-none">CONTINUOUS RUNNER</h3>
                                     <p class="text-[10px] text-white/80 mt-1 font-medium">매일 멈추지 않는 러너들</p>
@@ -5217,6 +5774,9 @@
         // 앱 실행 시 호출
         //initRealtimeSync();
         init();
+        checkTimeAndDisableButton();
+        
     </script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"b814c952c5d5490484f992489e1fc997","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
 </html>
