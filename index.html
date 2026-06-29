@@ -2822,7 +2822,6 @@ window.openCoupleModal = () => {
                     <div class="bg-rose-50/50 border border-rose-100 p-3 rounded-2xl text-center">
                         <p class="text-[10px] text-rose-600 font-extrabold">💕 마일리지커플의 자격 💕</p>
                         <p class="text-[9px] text-slate-500 mt-1 leading-relaxed">
-                            선택된 기간 내 각각 누적 달리기 마일리지가 <span class="font-extrabold text-rose-500">70km 이상</span>이며,<br>
                             두 크루의 마일리지 격차가 <span class="font-extrabold text-rose-500">1km 이내</span>인 달콤한 러닝 파트너!
                         </p>
                     </div>
@@ -2926,8 +2925,19 @@ window.getCoupleData = () => {
             totalDist += distance;
         });
 
-        // 총 거리가 50km 이상인 러너만 대상에 포함
-        if (totalDist >= 70) {
+        // 1. 오늘 날짜(day) 및 이번 달의 마지막 날짜(lastDay) 가져오기
+        const today = new Date().getDate(); 
+        const lastDayOfMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate(); 
+        
+        // 2. 최소값 12, 최대값 70 연동 계산
+        // 공식: 최소값 + ((오늘 - 1) / (마지막날 - 1)) * (최대값 - 최소값)
+        let dynamicDistLimit = 12 + ((today - 1) / (lastDayOfMonth - 1)) * (70 - 12);
+        
+        // 소수점 한 자리까지 반올림 (정수를 원하시면 Math.round를 사용하세요)
+        dynamicDistLimit = Math.round(dynamicDistLimit * 10) / 10;
+        
+        // 3. 조건문 적용
+        if (totalDist >= dynamicDistLimit) {
             runnerDistances.push({ name: nickname, distance: totalDist });
         }
     });
@@ -2987,7 +2997,6 @@ window.openTimeCoupleModal = () => {
                     <div class="bg-purple-50/50 border border-purple-100 p-3 rounded-2xl text-center">
                         <p class="text-[10px] text-purple-600 font-extrabold">💕 타임커플의 자격 💕</p>
                         <p class="text-[9px] text-slate-500 mt-1 leading-relaxed">
-                            선택된 기간 내 각각 누적 달리기 시간이 <span class="font-extrabold text-purple-500">500분 이상</span>이며,<br>
                             두 크루의 시간 격차가 <span class="font-extrabold text-purple-500">5분 이내</span>인 달콤한 러닝 파트너!
                         </p>
                     </div>
@@ -3094,9 +3103,23 @@ window.getTimeCoupleData = () => {
             totalDuration += duration;
         });
 
-        if (totalDuration >= 500) {
+        // 1. 오늘 날짜(day) 가져오기 (1 ~ 31)
+        const today = new Date().getDate(); 
+        
+        // 2. 날짜를 기준으로 동적 기준값 계산 
+        // 예: 1일 = 100, 2일 = 113.3 ... 31일 = 500 (월말 일수에 따라 유연하게 대응)
+        const lastDayOfMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate(); // 이번 달의 마지막 날짜 (28~31)
+        let dynamicLimit = 100 + ((today - 1) / (lastDayOfMonth - 1)) * (500 - 100);
+        
+        // 정수로 깔끔하게 반올림
+        dynamicLimit = Math.round(dynamicLimit);
+        
+        // 3. 조건문 적용
+        if (totalDuration >= dynamicLimit) {
             runnerDurations.push({ name: nickname, duration: totalDuration });
         }
+        
+        
     });
 
     const couples = [];
