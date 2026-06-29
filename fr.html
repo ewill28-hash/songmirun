@@ -47,6 +47,14 @@
         const closeTimeCoupleModal = document.getElementById('close-time-couple-modal');
         const timeCoupleModalContent = document.getElementById('time-couple-modal-content');
         const timeCoupleModalTitle = document.getElementById('time-couple-modal-title');
+
+// 퍼펙트커플 모달 관련 요소
+        const perpectCoupleBtn = document.getElementById('perpect-couple-btn');
+        const perpectCoupleModal = document.getElementById('perfect-couple-modal');
+        const closePerpectCoupleModal = document.getElementById('close-perpect-couple-modal');
+        const perpectCoupleModalContent = document.getElementById('perpect-couple-modal-content');
+        const perpectCoupleModalTitle = document.getElementById('perfect-couple-modal-title');
+
         
         let allLogs = []; 
         let allMembers = [];
@@ -551,6 +559,128 @@
             });
         }
 
+
+// --- 찰떡(퍼펙트)커플 모달 렌더링 함수 ---
+        function openPerfectCoupleModal() {
+            const selectedYear = yearSelect.value;
+            const selectedMonth = monthSelect.value;
+
+            // 타이틀 기간 텍스트 가공
+            let periodText = '';
+            if (selectedYear === 'all' && selectedMonth === 'all') {
+                periodText = '전체 기간';
+            } else if (selectedYear !== 'all' && selectedMonth === 'all') {
+                periodText = `${selectedYear}년 전체`;
+            } else if (selectedYear === 'all' && selectedMonth !== 'all') {
+                periodText = `매년 ${selectedMonth}월`;
+            } else {
+                periodText = `${selectedYear}년 ${selectedMonth}월`;
+            }
+            perpectCoupleModalTitle.innerHTML = `⚡ ${periodText} 찰떡커플`;
+
+            // 회원별 선택 기간 동안의 누적 거리 및 시간(분) 구하기
+            const runnerStats = [];
+            allMembers.forEach(mem => {
+                const nickname = (mem.nickname || '').trim();
+                if (!nickname) return;
+
+                // 유저 개인 로그 필터링
+                const userLogs = allLogs.filter(log => log.userName === nickname && !log.userName.startsWith('@'));
+                
+                let totalDist = 0;
+                let totalDuration = 0;
+                
+                userLogs.forEach(log => {
+                    const year = log.jsDate.getFullYear().toString();
+                    const month = (log.jsDate.getMonth() + 1).toString();
+                    
+                    if (selectedYear !== 'all' && year !== selectedYear) return;
+                    if (selectedMonth !== 'all' && month !== selectedMonth) return;
+                    
+                    totalDist += log.distance;
+                    totalDuration += log.duration;
+                });
+
+                // 퍼펙트 커플 최소 자격 조건: 거리 50km 이상 '이면서' 시간 300분 이상인 러너
+                if (totalDist >= 50 && totalDuration >= 300) {
+                    runnerStats.push({ name: nickname, distance: totalDist, duration: totalDuration });
+                }
+            });
+
+            // 커플 구하기 (거리차이 1.0km 이내 AND 시간차이 5분 이내 복합 만족)
+            const couples = [];
+            for (let i = 0; i < runnerStats.length; i++) {
+                for (let j = i + 1; j < runnerStats.length; j++) {
+                    const runnerA = runnerStats[i];
+                    const runnerB = runnerStats[j];
+                    
+                    const diffDist = Math.abs(runnerA.distance - runnerB.distance);
+                    const diffTime = Math.abs(runnerA.duration - runnerB.duration);
+                    
+                    // 두 가지 격차 조건을 동시에 만족할 때만 퍼펙트 커플로 인정
+                    if (diffDist <= 1.0 && diffTime <= 5.0) {
+                        couples.push({
+                            runnerA,
+                            runnerB,
+                            diffDist,
+                            diffTime,
+                            // 두 격차의 상태적 매칭도를 평가하기 위한 점수 (정렬용)
+                            score: diffDist + (diffTime / 5.0)
+                        });
+                    }
+                }
+            }
+
+            // 거리와 시간 차이의 합산 점수가 가장 적은 순(완벽 케미)으로 정렬
+            couples.sort((a, b) => a.score - b.score);
+
+            // 렌더링 영역 비우기 및 초기화
+            perpectCoupleModalContent.innerHTML = '';
+            if (couples.length === 0) {
+                perpectCoupleModalContent.innerHTML = `
+                    <div class="text-center py-10 text-slate-400">
+                        <span class="text-3xl block mb-2">⚡</span>
+                        <p class="text-xs font-black text-slate-600 leading-relaxed">
+                            선택된 조건에서 탄생한<br>찰떡커플이 없습니다.
+                        </p>
+                        <p class="text-[9px] text-slate-400 mt-2">
+                            서로의 러닝 페이스와 시간을 조율하여<br>완벽한 케미스트리 커플에 도전해보세요!
+                        </p>
+                    </div>
+                `;
+                return;
+            }
+
+            // 커플 카드 동적 생성 및 추가
+            couples.forEach(c => {
+                const card = document.createElement('div');
+                card.className = "p-3 bg-gradient-to-r from-amber-50 to-yellow-50 rounded-2xl border border-amber-100 flex items-center justify-between shadow-sm relative overflow-hidden group hover:scale-[1.02] transition-transform duration-200";
+                
+                card.innerHTML = `
+                    <div class="absolute -right-3 -bottom-3 text-amber-100 text-4xl font-bold opacity-60 pointer-events-none group-hover:scale-110 transition-transform">⚡</div>
+                    
+                    <div class="flex-1 flex flex-col items-center">
+                        <span class="text-[9px] font-black text-amber-600 bg-amber-100/50 px-1.5 py-0.5 rounded-full mb-0.5">${c.runnerA.distance.toFixed(1)}km</span>
+                        <span class="text-[9px] font-black text-orange-500 bg-orange-100/50 px-1.5 py-0.5 rounded-full mb-1">${Math.floor(c.runnerA.duration)}분</span>
+                        <span class="text-xs font-bold text-slate-800">${c.runnerA.name}</span>
+                    </div>
+                    
+                    <div class="flex flex-col items-center px-1 min-w-[85px]">
+                        <span class="text-xl animate-pulse">⚡</span>
+                        <span class="text-[8px] font-black text-amber-500 mt-1 tracking-tight">거리차 ${c.diffDist.toFixed(2)}km</span>
+                        <span class="text-[8px] font-black text-orange-400 tracking-tight">시간차 ${c.diffTime.toFixed(1)}분</span>
+                    </div>
+                    
+                    <div class="flex-1 flex flex-col items-center">
+                        <span class="text-[9px] font-black text-amber-600 bg-amber-100/50 px-1.5 py-0.5 rounded-full mb-0.5">${c.runnerB.distance.toFixed(1)}km</span>
+                        <span class="text-[9px] font-black text-orange-500 bg-orange-100/50 px-1.5 py-0.5 rounded-full mb-1">${Math.floor(c.runnerB.duration)}분</span>
+                        <span class="text-xs font-bold text-slate-800">${c.runnerB.name}</span>
+                    </div>
+                `;
+                perpectCoupleModalContent.appendChild(card);
+            });
+        }
+        
         function renderUsers(usersWithData) {
             userListElement.innerHTML = '';
             const filterInfo = currentGradeFilter ? ` [${currentGradeFilter.split(' ')[1]} 필터링 중]` : '';
@@ -637,6 +767,16 @@
         closeTimeCoupleModal.addEventListener('click', () => timeCoupleModal.classList.add('hidden'));
         timeCoupleModal.addEventListener('click', (e) => { if(e.target === timeCoupleModal) timeCoupleModal.classList.add('hidden'); });
 
+        // 퍼펙트커플 버튼 및 모달 리스너
+        perpectCoupleBtn.addEventListener('click', () => {
+            openPerfectCoupleModal();
+            perpectCoupleModal.classList.remove('hidden');
+            perpectCoupleModal.classList.add('flex');
+        });
+        closePerpectCoupleModal.addEventListener('click', () => perpectCoupleModal.classList.add('hidden'));
+        perpectCoupleModal.addEventListener('click', (e) => { if(e.target === perpectCoupleModal) perpectCoupleModal.classList.add('hidden'); });
+
+        
         yearSelect.addEventListener('change', applyFilters);
         monthSelect.addEventListener('change', applyFilters);
         sortSelect.addEventListener('change', applyFilters);
@@ -671,6 +811,14 @@
                         </svg>
                     </button>
 
+                    <!-- 퍼펙커플 버튼 -->
+                    <button id="perpect-couple-btn" class="bg-amber-500 hover:bg-amber-600 text-white p-2 rounded-lg transition-all shadow-sm flex items-center justify-center animate-pulse" title="찰떡커플 확인">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+
+                    
                     <!-- 그래프 보기 버튼 -->
                     <button id="graph-btn" class="bg-white/20 hover:bg-white/30 text-white p-2 rounded-lg transition-all group">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
