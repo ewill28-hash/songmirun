@@ -617,8 +617,8 @@
                     const diffDist = Math.abs(runnerA.distance - runnerB.distance);
                     const diffTime = Math.abs(runnerA.duration - runnerB.duration);
                     
-                    // 두 가지 격차 조건을 동시에 만족할 때만 퍼펙트 커플로 인정
-                    if (diffDist <= 1.0 && diffTime <= 5.0) {
+                    // 두 가지 격차 조건을 동시에 만족할 때만 퍼펙트 커플로 인정  (10키로, 60분)
+                    if (diffDist <= 10.0 && diffTime <= 60.0) {
                         couples.push({
                             runnerA,
                             runnerB,
