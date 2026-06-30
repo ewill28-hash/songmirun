@@ -461,9 +461,9 @@
                         </div>                    
                     </div>
                     
-<button id="notice-end-of-month" class="hidden w-full bg-rose-500 text-white font-black py-2.5 rounded-2xl shadow-lg shadow-brand-200 active:scale-[0.98] transition-all hover:bg-rose-600 text-lg flex items-center justify-center gap-2">
-    ⚠️ 말일 23시 이후에는 기록을 저장할 수 없습니다.
-</button>
+                    <button id="notice-end-of-month" class="hidden w-full bg-rose-500 text-white font-black py-2.5 rounded-2xl shadow-lg shadow-brand-200 active:scale-[0.98] transition-all hover:bg-rose-600 text-lg flex items-center justify-center gap-2">
+                        ⚠️ 말일 23시 이후에는 기록을 저장할 수 없습니다.
+                    </button>
                     
                     <button id="btn-save-log" class="mt-2 w-full bg-brand-600 text-white font-black py-4 rounded-2xl shadow-lg shadow-brand-200 active:scale-[0.98] transition-all hover:bg-brand-700 text-lg flex items-center justify-center gap-2">
                             ☑ 기록 저장하기
@@ -2066,8 +2066,8 @@
                 }
             }
         
-            // 2. [저장 버튼 비활성화 제어] 오직 '말일'이면서 '20시 이상'일 때만 비활성화
-            if (currentDate === lastDayOfMonth && currentHour >= 9) {
+            // 2. [저장 버튼 비활성화 제어] 오직 '말일'이면서 '23시 이상'일 때만 비활성화
+            if (currentDate === lastDayOfMonth && currentHour >= 23) {
                 saveBtn.disabled = true;
                 saveBtn.classList.remove("hover:bg-brand-700", "active:scale-[0.98]", "shadow-lg");
                 saveBtn.classList.add("opacity-50", "cursor-not-allowed");
