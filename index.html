@@ -461,8 +461,8 @@
                         </div>                    
                     </div>
                     
-<button class="w-full bg-rose-500 text-white font-black py-2.5 rounded-2xl shadow-lg shadow-brand-200 active:scale-[0.98] transition-all hover:bg-rose-600 text-lg flex items-center justify-center gap-2">
-    ⚠️말일 23시 이후에는 기록을 저장할 수 없습니다.
+<button id="notice-end-of-month" class="hidden w-full bg-rose-500 text-white font-black py-2.5 rounded-2xl shadow-lg shadow-brand-200 active:scale-[0.98] transition-all hover:bg-rose-600 text-lg flex items-center justify-center gap-2">
+    ⚠️ 말일 23시 이후에는 기록을 저장할 수 없습니다.
 </button>
                     
                     <button id="btn-save-log" class="mt-2 w-full bg-brand-600 text-white font-black py-4 rounded-2xl shadow-lg shadow-brand-200 active:scale-[0.98] transition-all hover:bg-brand-700 text-lg flex items-center justify-center gap-2">
@@ -2045,22 +2045,41 @@
 // [추가] 시간 체크 및 버튼 비활성화 함수
         function checkTimeAndDisableButton() {
             const saveBtn = document.getElementById("btn-save-log");
-            if (!saveBtn) return; // 버튼이 없으면 예외 처리
-
+            const noticeBtn = document.getElementById("notice-end-of-month");
+            if (!saveBtn) return;
+        
             const now = new Date();
             const currentHour = now.getHours();
-
-            // 20시 이상(20:00 ~ 23:59)일 때 비활성화
-            if (currentHour >= 23) {
+            const currentDate = now.getDate();
+        
+            // 이번 달의 마지막 날(말일)이 몇 일인지 구하기 (예: 30 또는 31)
+            const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+            // 말일 전날 구하기
+            const dayBeforeLast = lastDayOfMonth - 1;
+        
+            // 1. [안내 버튼 표시 제어] 말일 전날이거나 말일일 때만 안내문 노출
+            if (noticeBtn) {
+                if (currentDate === dayBeforeLast || currentDate === lastDayOfMonth) {
+                    noticeBtn.classList.remove("hidden"); // 보이기
+                } else {
+                    noticeBtn.classList.add("hidden");    // 숨기기
+                }
+            }
+        
+            // 2. [저장 버튼 비활성화 제어] 오직 '말일'이면서 '20시 이상'일 때만 비활성화
+            if (currentDate === lastDayOfMonth && currentHour >= 9) {
                 saveBtn.disabled = true;
                 saveBtn.classList.remove("hover:bg-brand-700", "active:scale-[0.98]", "shadow-lg");
                 saveBtn.classList.add("opacity-50", "cursor-not-allowed");
             } else {
+                // 평소이거나, 말일이더라도 20시 전이라면 정상 작동
                 saveBtn.disabled = false;
                 saveBtn.classList.add("hover:bg-brand-700", "active:scale-[0.98]", "shadow-lg");
                 saveBtn.classList.remove("opacity-50", "cursor-not-allowed");
             }
         }
+
+
         
         function renderChart(teams, myStats) {
             const canvas = document.getElementById('teamChart');
