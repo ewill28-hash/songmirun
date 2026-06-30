@@ -2051,7 +2051,7 @@
             const currentHour = now.getHours();
 
             // 20시 이상(20:00 ~ 23:59)일 때 비활성화
-            if (currentHour >= 8) {
+            if (currentHour >= 23) {
                 saveBtn.disabled = true;
                 saveBtn.classList.remove("hover:bg-brand-700", "active:scale-[0.98]", "shadow-lg");
                 saveBtn.classList.add("opacity-50", "cursor-not-allowed");
