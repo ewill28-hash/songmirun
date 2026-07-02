@@ -627,17 +627,17 @@
                                             class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all active flex items-center justify-center gap-1">
                                         전체
                                     </button>
-                                    <button onclick="window.setTeamFilter2('개토원양')" id="filter2-ts" 
+                                    <button onclick="window.setTeamFilter2('글팍')" id="filter2-ts" 
                                             class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all inactive flex items-center justify-center gap-1">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-[#3b82f6]"></span>개토원양
+                                        <span class="w-1.5 h-1.5 rounded-full bg-[#3b82f6]"></span>글팍
                                     </button>
-                                    <button onclick="window.setTeamFilter2('돼쥐뱀말')" id="filter2-th" 
+                                    <button onclick="window.setTeamFilter2('누리')" id="filter2-th" 
                                             class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all inactive flex items-center justify-center gap-1">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-[#f87171]"></span>돼쥐뱀말
+                                        <span class="w-1.5 h-1.5 rounded-full bg-[#f87171]"></span>누리
                                     </button>
-                                    <button onclick="window.setTeamFilter2('호랑용소')" id="filter2-tl" 
+                                    <button onclick="window.setTeamFilter2('미추홀')" id="filter2-tl" 
                                             class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all inactive flex items-center justify-center gap-1">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-[#22c55e]"></span>호랑용소
+                                        <span class="w-1.5 h-1.5 rounded-full bg-[#22c55e]"></span>미추홀
                                     </button>
                                 </div>
                             </section>
@@ -736,17 +736,17 @@
                                             class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all active flex items-center justify-center gap-1">
                                         전체
                                     </button>
-                                    <button onclick="window.setTeamFilter('개토원양')" id="filter-ts" 
+                                    <button onclick="window.setTeamFilter('글팍')" id="filter-ts" 
                                             class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all inactive flex items-center justify-center gap-1">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-[#3b82f6]"></span>개토원양
+                                        <span class="w-1.5 h-1.5 rounded-full bg-[#3b82f6]"></span>글팍
                                     </button>
-                                    <button onclick="window.setTeamFilter('돼쥐뱀말')" id="filter-th" 
+                                    <button onclick="window.setTeamFilter('누리')" id="filter-th" 
                                             class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all inactive flex items-center justify-center gap-1">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-[#f87171]"></span>돼쥐뱀말
+                                        <span class="w-1.5 h-1.5 rounded-full bg-[#f87171]"></span>누리
                                     </button>
-                                    <button onclick="window.setTeamFilter('호랑용소')" id="filter-tl" 
+                                    <button onclick="window.setTeamFilter('미추홀')" id="filter-tl" 
                                             class="team-filter-btn filter-btn py-2 text-[10px] font-black rounded-xl transition-all inactive flex items-center justify-center gap-1">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-[#22c55e]"></span>호랑용소
+                                        <span class="w-1.5 h-1.5 rounded-full bg-[#22c55e]"></span>미추홀
                                     </button>
                                 </div>
                             </div>
@@ -830,9 +830,9 @@
                                 <label class="text-[10px] text-gray-400 font-bold block mb-1">소속팀 (team)</label>
                                 <select id="mem-team" class="w-full bg-white border border-green-100 p-3 rounded-xl text-sm font-bold outline-none">
                                     <option value="">선택</option>
-                                    <option value="개토원양">개토원양</option>
-                                    <option value="돼쥐뱀말">돼쥐뱀말</option>
-                                    <option value="호랑용소">호랑용소</option>
+                                    <option value="글팍">글팍</option>
+                                    <option value="누리">누리</option>
+                                    <option value="미추홀">미추홀</option>
                                     <option value="홀가분">홀가분</option>
                                 </select>
                             </div>
@@ -1433,7 +1433,7 @@
             selectedTeam = team;
             ['filter-tall', 'filter-ts', 'filter-th', 'filter-tl'].forEach(id => {
                 const el = document.getElementById(id);
-                const isActive = (id === 'filter-tall' && team === '전체') || (id === 'filter-ts' && team === '개토원양') || (id === 'filter-th' && team === '돼쥐뱀말')|| (id === 'filter-tl' && team === '호랑용소');
+                const isActive = (id === 'filter-tall' && team === '전체') || (id === 'filter-ts' && team === '글팍') || (id === 'filter-th' && team === '누리')|| (id === 'filter-tl' && team === '미추홀');
                 el.classList.toggle('active', isActive);
                 el.classList.toggle('inactive', !isActive);
             });
@@ -1444,7 +1444,7 @@
             selectedTeam2 = team;
             ['filter2-tall', 'filter2-ts', 'filter2-th', 'filter2-tl'].forEach(id => {
                 const el = document.getElementById(id);
-                const isActive = (id === 'filter2-tall' && team === '전체') || (id === 'filter2-ts' && team === '개토원양') || (id === 'filter2-th' && team === '돼쥐뱀말')|| (id === 'filter2-tl' && team === '호랑용소');
+                const isActive = (id === 'filter2-tall' && team === '전체') || (id === 'filter2-ts' && team === '글팍') || (id === 'filter2-th' && team === '누리')|| (id === 'filter2-tl' && team === '미추홀');
                 el.classList.toggle('active', isActive);
                 el.classList.toggle('inactive', !isActive);
             });
@@ -1946,9 +1946,9 @@
         };
      
         const TEAM_COLORS = { 
-            '개토원양': '#3b82f6', 
-            '돼쥐뱀말': '#f87171', 
-            '호랑용소': '#22c55e', 
+            '글팍': '#3b82f6', 
+            '누리': '#f87171', 
+            '미추홀': '#22c55e', 
             '홀가분': '#facc15'     
         };
 
