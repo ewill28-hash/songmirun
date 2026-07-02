@@ -42,19 +42,6 @@
                 }
             }
     </script>
-    <script>
-      // 1) 랜덤으로 표시할 문구 배열 생성
-      const phrases = [
-        "😈 지나친 승부욕은 🚑오케이재활의원에서 환영합니다!!!",
-        "😈 지나친 승부욕은 바람됩니다. 🍃"
-      ];
-    
-      // 2) 0 또는 1의 인덱스를 랜덤으로 선택
-      const randomIndex = Math.floor(Math.random() * phrases.length);
-    
-      // 3) 해당 id를 가진 div에 선택된 문구 삽입
-      document.getElementById("random-text").innerText = phrases[randomIndex];
-    </script>
         
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
@@ -1343,7 +1330,21 @@
             t.classList.remove('opacity-0');
             setTimeout(() => t.classList.add('opacity-0'), 3000);
         };
-
+    
+          // 1) 랜덤으로 표시할 문구 배열 생성
+          const phrases = [
+            "😈 지나친 승부욕은 🚑오케이재활의원에서 환영합니다!!!",
+            "😈 지나친 승부욕은 바람됩니다. 🍃"
+          ];
+        
+          // 2) 0 또는 1의 인덱스를 랜덤으로 선택
+          const randomIndex = Math.floor(Math.random() * phrases.length);
+        
+          // 3) 해당 id를 가진 div에 선택된 문구 삽입
+          document.getElementById("random-text").innerText = phrases[randomIndex];
+    
+        
+        
         const showModal = (msg, type = 'alert', onConfirm = null) => {
             const modal = document.getElementById('custom-modal');
             document.getElementById('modal-message').innerText = msg;
