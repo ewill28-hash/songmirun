@@ -1705,6 +1705,9 @@
                 // 정의된 팀 컬러 가져오기 (없으면 기본값 설정)
                 const themeColor = TEAM_COLORS[teamName] || '#facc15';
                 const validMembers = Array.from(teamData.members).filter(name => !name.includes('@'));
+
+
+                            
                 
                 titleEl.innerHTML = `
                     <div class="flex items-center gap-2 px-3 py-1.5 rounded-full inline-flex" 
@@ -1728,6 +1731,12 @@
                     </div>
                 `;
 
+                  const phrases = [
+                    "😈 지나친 승부욕은 🚑오케이재활의원에서 환영합니다!!!",
+                    "🔥 지나친 승부욕은 바람됩니다. 🍃 잉?"
+                  ];
+                  const randomIndex = Math.floor(Math.random() * phrases.length);
+                  document.getElementById("random-text").innerText = phrases[randomIndex];                
 
                 // 1. 선택된 년/월을 기준으로 '기준일' 객체 생성
                 // selectedMonthT가 '전체'일 경우 전월 대비가 무의미하므로 기본 처리가 필요합니다.
