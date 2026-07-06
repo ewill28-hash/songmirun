@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>쏭/미/션 - 송미런 목표 대비 달성 현황</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Supabase JS Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
+        body {
+            font-family: 'Inter', 'Noto Sans KR', sans-serif;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen pb-16">
+
+    <!-- 자체 토스트 알림창 컨테이너 -->
+    <div id="toast-container" class="fixed top-5 left-1/2 transform -translate-x-1/2 z-50 space-y-2 pointer-events-none w-full px-4 flex flex-col items-center"></div>
+
+    <!-- 메인 레이아웃 컨테이너 -->
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+        
+        <!-- 헤더 섹션 -->
+        <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-6 border-b border-slate-800 mb-8 gap-4">
+            <div>
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="px-2.5 py-1 text-xs font-semibold bg-emerald-500/10 text-emerald-400 rounded-full border border-emerald-500/20">송미런 공식 집계</span>
+                    <span id="live-indicator" class="flex h-2 w-2 relative">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+                    </span>
+                    <span class="text-xs text-slate-400">실시간 연결됨</span>
+                </div>
+                <h1 class="text-3xl font-black tracking-tight text-white">
+                    <a href="index.html" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                        <i class="fa-solid fa-person-running text-emerald-400"></i> 쏭 / 미 / 션
+                    </a>
+                </h1>
+                <p class="text-sm text-slate-400 mt-1" id="sub-header-title">목표 달성도 현황</p>
+            </div>
+            <!-- 오늘 날짜 및 환산 비율 인포 배지 -->
+            <div class="bg-slate-900 rounded-xl p-3 border border-slate-800 flex items-center gap-4 self-start sm:self-auto">
+                <div class="bg-emerald-500/10 p-2.5 rounded-lg text-emerald-400">
+                    <i class="fa-regular fa-calendar-check text-xl"></i>
+                </div>
+                <div>
+                    <div class="text-[10px] text-slate-500 font-bold uppercase tracking-wider" id="today-badge-title">오늘 날짜 환산 기준</div>
+                    <div class="text-sm font-extrabold text-slate-200" id="today-progress-text">0일 / 0일 경과 <span class="text-emerald-400 font-black ml-1.5">(0.00%)</span></div>
+                </div>
+            </div>
+        </header>
+
+        <!-- 에러 메시지 바 -->
+        <div id="error-msg" class="hidden bg-rose-500/10 border border-rose-500/20 text-rose-300 px-4 py-3 rounded-xl mb-6 text-sm flex items-center gap-2">
+            <i class="fa-solid fa-circle-exclamation text-rose-400"></i>
+            <span id="error-text">에러 메시지</span>
+        </div>
+
+        <!-- 로딩 인디케이터 -->
+        <div id="loading-spinner" class="flex flex-col items-center justify-center py-20">
+            <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500 mb-4"></div>
+            <p class="text-slate-400 text-sm animate-pulse">Supabase로부터 데이터를 동기화하는 중...</p>
+        </div>
+
+        <!-- 메인 콘텐츠 영역 (로딩 완료 시 표시) -->
+        <div id="main-content" class="hidden space-y-8">
+            
+            <!-- 종합 요약 카드 영역 -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div class="glass-card p-6 rounded-2xl relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl text-slate-400 group-hover:scale-110 transition-transform duration-300">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <div class="text-xs text-slate-400 font-semibold uppercase tracking-wider">챌린지 참가 크루</div>
+                    <div class="text-4xl font-black text-white mt-2" id="stat-total-runners">0명</div>
+                    <div class="text-xs text-slate-500 mt-1">글팍 / 누리 / 미추홀 소속 인원</div>
+                </div>
+                
+                <div class="glass-card p-6 rounded-2xl relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl text-emerald-400 group-hover:scale-110 transition-transform duration-300">
+                        <i class="fa-solid fa-route"></i>
+                    </div>
+                    <div class="text-xs text-slate-400 font-semibold uppercase tracking-wider" id="stat-title-actual-dist">누적 달성 거리</div>
+                    <div class="text-4xl font-black text-emerald-400 mt-2" id="stat-total-distance">0.00 km</div>
+                    <div class="text-xs text-slate-500 mt-1" id="stat-desc-actual-dist">실시간 누적 로그 총합</div>
+                </div>
+
+                <div class="glass-card p-6 rounded-2xl relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl text-sky-400 group-hover:scale-110 transition-transform duration-300">
+                        <i class="fa-solid fa-bullseye"></i>
+                    </div>
+                    <div class="text-xs text-slate-400 font-semibold uppercase tracking-wider">전체 월간 목표 거리</div>
+                    <div class="text-4xl font-black text-sky-400 mt-2" id="stat-total-target">0.00 km</div>
+                    <div class="text-xs text-slate-500 mt-1">송미런 이번달 목표 마일리지</div>
+                </div>
+            </div>
+
+            <!-- 그래프 시각화 구역 -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- 1-1) 전체 월 기준 그래프 카드 -->
+                <div class="bg-slate-900 rounded-2xl p-6 border border-slate-800/80 shadow-2xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-bold text-white flex items-center gap-2" id="chart-monthly-title">
+                                <span class="w-1.5 h-6 bg-emerald-500 rounded-full"></span> 월간 목표 대비 달성도
+                            </h3>
+                            <span class="text-xs text-slate-400 font-semibold bg-slate-850 px-2.5 py-1 rounded-md">월 기준</span>
+                        </div>
+                        <p class="text-xs text-slate-400 mb-6 leading-relaxed" id="chart-monthly-desc">
+                            3개 소속 팀의 월간 목표 총합 대비 현재까지 누적된 실제 러닝 거리의 달성 비율입니다.
+                        </p>
+                    </div>
+                    <div class="relative h-64 w-full">
+                        <canvas id="monthlyChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- 1-2) 현시점 환산 기준 그래프 카드 -->
+                <div class="bg-slate-900 rounded-2xl p-6 border border-slate-800/80 shadow-2xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-bold text-white flex items-center gap-2" id="chart-prorata-title">
+                                <span class="w-1.5 h-6 bg-sky-500 rounded-full"></span> 오늘 날짜 환산 대비 달성도
+                            </h3>
+                            <span class="text-xs text-sky-400 font-semibold bg-sky-950/30 border border-sky-900/30 px-2.5 py-1 rounded-md" id="chart-prorata-badge">환산 기준</span>
+                        </div>
+                        <p class="text-xs text-slate-400 mb-6 leading-relaxed" id="chart-prorata-desc">
+                            월 목표를 오늘 날짜 시점 비율로 일할 환산한 목표 대비 현재 누적 거리의 달성 속도 비율입니다.
+                        </p>
+                    </div>
+                    <div class="relative h-64 w-full">
+                        <canvas id="proRataChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 팀 상세 카드 리스트 및 직접 클릭 유도 구역 -->
+            <div>
+                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">소속 팀별 요약 정보 <span class="text-xs text-emerald-400 normal-case font-medium ml-2">(카드 클릭)</span></h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="team-cards-container">
+                    <!-- Javascript를 통해 3개 팀 카드가 동적 렌더링 됩니다. -->
+                </div>
+            </div>
+
+        </div>
+
+        <footer class="mt-16 text-center text-xs text-slate-600 tracking-wider">
+            Songmirun Challenge Management System &copy; 2026. All rights reserved.
+        </footer>
+    </div>
+
+    <!-- 팀 상세 정보 모달창 -->
+    <div id="team-detail-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 hidden backdrop-blur-md p-4 transition-all duration-300">
+        <div class="bg-slate-900 rounded-2xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl border border-slate-800 animate-in fade-in zoom-in-95 duration-150">
+            
+            <!-- Modal Header -->
+            <div class="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-950/50 rounded-t-2xl">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h3 id="modal-team-title" class="text-2xl font-black text-white">팀명</h3>
+                        <span id="modal-team-badge" class="px-2.5 py-0.5 text-xs font-semibold bg-emerald-500/10 text-emerald-400 rounded-full border border-emerald-500/20">크루 0명</span>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-1">팀원별 월간 및 오늘 환산 페이스별 달성 현황</p>
+                </div>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-800 transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Modal Tabs (월간 전체 vs 오늘 환산 비율) -->
+            <div class="px-6 py-3 bg-slate-950/20 border-b border-slate-850 flex gap-2">
+                <button id="tab-monthly" onclick="switchModalTab('monthly')" class="px-4 py-2 text-xs font-bold rounded-lg transition-all bg-emerald-600 text-white shadow-lg">
+                    <i class="fa-solid fa-calendar-days mr-1"></i> 월간 전체 기준
+                </button>
+                <button id="tab-prorata" onclick="switchModalTab('prorata')" class="px-4 py-2 text-xs font-bold rounded-lg transition-all bg-slate-800 text-slate-300 hover:bg-slate-700">
+                    <i class="fa-solid fa-clock-rotate-left mr-1"></i> 오늘 기준 환산
+                </button>
+            </div>
+
+            <!-- Modal Content (Scrollable List) -->
+            <div class="p-6 overflow-y-auto flex-1 space-y-4" id="modal-members-container">
+                <!-- 동적으로 팀원들의 리스트 및 개인별 게이지바가 생성됩니다 -->
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-5 border-t border-slate-800 bg-slate-950/50 rounded-b-2xl flex justify-between items-center">
+                <div class="text-[11px] text-slate-500 font-semibold uppercase">쏭/미/션 실시간 통계 모드</div>
+                <button onclick="closeModal()" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl text-xs transition">닫기</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // 기존 Supabase 계정 정보 및 연결 변수 완벽 유지
+        const SUPABASE_URL = 'https://bwzvgqcfydznuwugyyio.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ3enZncWNmeWR6bnV3dWd5eWlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzNzU2MjcsImV4cCI6MjA4ODk1MTYyN30.SqQJ7w-SsPnm1wN03USOaR6_Fdn0JBzLn8tPhFYJWj8';
+        const TABLE_MEMBERS = 'songmirun_members';
+        const TABLE_LOGS = 'songmirun_logs';
+
+        let supabase;
+        let membersData = [];
+        let logsData = [];
+        
+        // 3개 대상 팀 목록 고정
+        const TARGET_TEAMS = ['글팍', '누리', '미추홀'];
+        
+        // 실제 오늘 날짜 정보 구하기 (실시간 변수 연동)
+        const TODAY_DATE_OBJ = new Date();
+        const CURRENT_YEAR = TODAY_DATE_OBJ.getFullYear(); // 2026
+        const CURRENT_MONTH = TODAY_DATE_OBJ.getMonth() + 1; // 7
+        const CURRENT_DAY = TODAY_DATE_OBJ.getDate(); // 6
+        
+        // 해당 월의 전체 일 수 계산 (7월 = 31)
+        const TOTAL_DAYS = new Date(CURRENT_YEAR, CURRENT_MONTH, 0).getDate();
+        const PRO_RATA_RATIO = CURRENT_DAY / TOTAL_DAYS; 
+
+        // 대소문자 및 닉네임 내부에 들어간 모든 공백까지 제거하여 매칭 성공률을 100%로 높인 유연한 매핑 함수
+        function matchUser(nickname, username) {
+            if (!nickname || !username) return false;
+            const cleanNick = String(nickname).replace(/\s+/g, '').toLowerCase();
+            const cleanUser = String(username).replace(/\s+/g, '').toLowerCase();
+            return cleanNick === cleanUser;
+        }
+
+        // Chart.js 인스턴스 전역 저장소 (중복 드로잉 방지)
+        let monthlyChartInstance = null;
+        let proRataChartInstance = null;
+
+        // 현재 선택된 모달용 상태 관리
+        let activeModalTeam = '';
+        let activeModalTab = 'monthly'; // 'monthly' 또는 'prorata'
+
+        // UI 문구 동적 연동 세팅
+        function applyDynamicUIStrings() {
+            const dateStr = `${CURRENT_MONTH}/${CURRENT_DAY}`; // "7/6"
+            const percentage = (PRO_RATA_RATIO * 100).toFixed(2);
+
+            document.getElementById('sub-header-title').innerText = `${CURRENT_MONTH}월 거리 결과 기반 목표 달성도 통계 센터`;
+            document.getElementById('today-badge-title').innerText = `오늘 날짜 환산 기준 (${dateStr})`;
+            document.getElementById('today-progress-text').innerHTML = `${CURRENT_DAY}일 경과 <span class="text-emerald-400 font-black ml-1.5">(${percentage}%)</span>`;
+            
+            document.getElementById('stat-title-actual-dist').innerText = `전체 누적 달성 거리`;
+            document.getElementById('stat-desc-actual-dist').innerText = `${CURRENT_MONTH}월 실시간 누적 로그 총합`;
+            
+            document.getElementById('chart-monthly-title').innerHTML = `<span class="w-1.5 h-6 bg-emerald-500 rounded-full"></span> ${CURRENT_MONTH}월 전체 목표 대비 달성도`;
+            document.getElementById('chart-monthly-desc').innerText = `3개 소속 팀의 월간 전체 목표 총합 대비 현재까지 누적된 실제 러닝 거리의 달성 비율입니다.`;
+            
+            document.getElementById('chart-prorata-title').innerHTML = `<span class="w-1.5 h-6 bg-sky-500 rounded-full"></span> 오늘 날짜 환산(${dateStr}) 대비 달성도`;
+            document.getElementById('chart-prorata-badge').innerText = `${dateStr} (일할 계산)`;
+            document.getElementById('chart-prorata-desc').innerText = `월 목표를 오늘 날짜인 ${dateStr} 시점 비율(${percentage}%)로 일할 환산한 목표 대비 현재 누적 거리의 달성 속도 비율입니다.`;
+
+            document.getElementById('tab-prorata').innerHTML = `<i class="fa-solid fa-clock-rotate-left mr-1"></i> 오늘 기준 환산(${dateStr})`;
+        }
+
+        // 시스템 초기화
+        async function init() {
+            try {
+                applyDynamicUIStrings();
+
+                if (!window.supabase) {
+                    throw new Error("Supabase 라이브러리를 정상적으로 로드할 수 없습니다.");
+                }
+                const { createClient } = window.supabase;
+                supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+                await fetchAllData();
+                setupRealtimeSubscriptions();
+            } catch (err) {
+                console.error("Initialization error:", err);
+                showSystemError("시스템 초기화 도중 오류가 발생했습니다. 개발자 도구를 확인하세요.");
+            }
+        }
+
+        // 크루 및 로그 데이터 원격 fetch (7월 범위 조건을 쿼리에 명시하여 1000건 제한 우회)
+        async function fetchAllData() {
+            if (!supabase) return;
+
+            try {
+                // 시작일 및 종료일 생성 (예: "2026-07-01", "2026-07-31 23:59:59")
+                const yearStr = String(CURRENT_YEAR);
+                const monthStr = String(CURRENT_MONTH).padStart(2, '0');
+                const startDate = `${yearStr}-${monthStr}-01`;
+                const endDate = `${yearStr}-${monthStr}-${String(TOTAL_DAYS).padStart(2, '0')} 23:59:59`;
+
+                // 병렬 비동기 요청 수행 (로그는 이번 달 날짜 영역만 필터링하여 가져옴으로써 가져오기 성능 & 다중 누적 정밀도 대폭 개선)
+                const [membersResponse, logsResponse] = await Promise.all([
+                    supabase.from(TABLE_MEMBERS).select('*'),
+                    supabase.from(TABLE_LOGS)
+                        .select('*')
+                        .gte('run_date', startDate)
+                        .lte('run_date', endDate)
+                ]);
+
+                if (membersResponse.error) throw membersResponse.error;
+                if (logsResponse.error) throw logsResponse.error;
+
+                membersData = membersResponse.data || [];
+                const rawLogs = logsResponse.data || [];
+
+                // 코드 내 더블 체크: run_date 기준으로 현재 목표 년/월만 완벽 매칭
+                logsData = rawLogs.filter(log => {
+                    if (!log.run_date) return false;
+                    try {
+                        const d = new Date(log.run_date);
+                        if (!isNaN(d.getTime())) {
+                            return d.getFullYear() === CURRENT_YEAR && (d.getMonth() + 1) === CURRENT_MONTH;
+                        }
+                    } catch (e) {}
+                    // 날짜 변환 실패 대비 문자열 폴백
+                    const dateStr = String(log.run_date);
+                    return dateStr.startsWith(`${yearStr}-${monthStr}`) || dateStr.startsWith(`${yearStr}-${CURRENT_MONTH}`);
+                });
+
+                hideSystemError();
+                document.getElementById('loading-spinner').classList.add('hidden');
+                document.getElementById('main-content').classList.remove('hidden');
+
+                // 통계 및 차트 렌더링 시작
+                processAndRenderStats();
+                
+                // 모달창이 활성화되어 있을 경우 모달 내용 실시간 갱신
+                if (!document.getElementById('team-detail-modal').classList.contains('hidden') && activeModalTeam) {
+                    updateModalContent();
+                }
+
+            } catch (error) {
+                console.error("Data fetch error:", error);
+                showSystemError(`데이터를 받아오는 중 오류가 발생했습니다: ${error.message}`);
+            }
+        }
+
+        // 실시간 변경 내용 수신 채널 구독 설정
+        function setupRealtimeSubscriptions() {
+            if (!supabase) return;
+
+            // 크루 테이블 실시간 동기화
+            supabase
+                .channel('realtime-members-channel')
+                .on('postgres_changes', { event: '*', schema: 'public', table: TABLE_MEMBERS }, () => {
+                    showToast("크루 정보 실시간 변경 감지!", "success");
+                    fetchAllData();
+                })
+                .subscribe();
+
+            // 러닝 로그 테이블 실시간 동기화
+            supabase
+                .channel('realtime-logs-channel')
+                .on('postgres_changes', { event: '*', schema: 'public', table: TABLE_LOGS }, () => {
+                    showToast("거리 로그 데이터 신규 갱신됨!", "success");
+                    fetchAllData();
+                })
+                .subscribe();
+        }
+
+        // 데이터 정제 및 통계 핵심 연산
+        function processAndRenderStats() {
+            // 1. 전체 전역 지표 집계
+            // 지정 3개 팀에 소속된 크루만 카운팅
+            const filterMembers = membersData.filter(m => TARGET_TEAMS.includes(m.team));
+            const totalRunnersCount = filterMembers.length;
+            
+            // 전체 목표 합계
+            const totalTargetDistance = filterMembers.reduce((sum, m) => sum + (parseFloat(m.d_target) || 0), 0);
+            
+            // 전체 달성 거리 (로그 중 지정 3개 팀원의 닉네임과 user_name이 매치되는 것만 누적, 공백 제거 및 대소문자 매칭 완벽 처리)
+            const totalLoggedDistance = logsData
+                .filter(log => {
+                    return filterMembers.some(m => matchUser(m.nickname, log.user_name));
+                })
+                .reduce((sum, log) => {
+                    const d = log.distance || 0;
+                    return sum + (parseFloat(d) || 0);
+                }, 0);
+
+            // 상단 위젯 숫자 바인딩
+            document.getElementById('stat-total-runners').innerText = `${totalRunnersCount}명`;
+            document.getElementById('stat-total-distance').innerText = `${totalLoggedDistance.toFixed(2)} km`;
+            document.getElementById('stat-total-target').innerText = `${totalTargetDistance.toFixed(2)} km`;
+
+            // 2. 3개 팀별 누적 계산
+            const teamMetrics = {};
+            TARGET_TEAMS.forEach(team => {
+                teamMetrics[team] = {
+                    members: [],
+                    targetTotal: 0,
+                    actualTotal: 0
+                };
+            });
+
+            // 팀원 소속 분류 및 개인 목표 합산
+            membersData.forEach(m => {
+                if (TARGET_TEAMS.includes(m.team)) {
+                    teamMetrics[m.team].members.push(m);
+                    teamMetrics[m.team].targetTotal += (parseFloat(m.d_target) || 0);
+                }
+            });
+
+            // 각 로그를 순회하며 3대 팀 소속 크루들의 누적 거리를 팀별로 총합 (매칭 함수 완벽 대응)
+            logsData.forEach(log => {
+                const member = membersData.find(m => matchUser(m.nickname, log.user_name));
+                if (member && TARGET_TEAMS.includes(member.team)) {
+                    const dist = log.distance || 0;
+                    teamMetrics[member.team].actualTotal += (parseFloat(dist) || 0);
+                }
+            });
+
+            // 3. 메인 화면 차트 데이터 바인딩 및 그리기
+            renderCharts(teamMetrics);
+
+            // 4. 팀 카드 리스트 동적 렌더링
+            renderTeamCards(teamMetrics);
+        }
+
+        // 바 그래프 시각화 엔진
+        function renderCharts(teamMetrics) {
+            const labels = TARGET_TEAMS;
+            
+            // 1-1) 월간 전체 기준 데이터 준비
+            const monthlyTargets = labels.map(team => teamMetrics[team].targetTotal);
+            const actuals = labels.map(team => teamMetrics[team].actualTotal);
+            const monthlyRates = labels.map(team => {
+                const target = teamMetrics[team].targetTotal;
+                if (target === 0) return 0;
+                return parseFloat(((teamMetrics[team].actualTotal / target) * 100).toFixed(1));
+            });
+
+            // 1-2) 현시점 환산 기준 데이터 준비 (실시간 환산 비율 반영)
+            const proRataTargets = labels.map(team => teamMetrics[team].targetTotal * PRO_RATA_RATIO);
+            const proRataRates = labels.map(team => {
+                const targetProRata = teamMetrics[team].targetTotal * PRO_RATA_RATIO;
+                if (targetProRata === 0) return 0;
+                return parseFloat(((teamMetrics[team].actualTotal / targetProRata) * 100).toFixed(1));
+            });
+
+            // 기존 월간 차트 객체 폐기 후 재생성
+            if (monthlyChartInstance) monthlyChartInstance.destroy();
+            const ctxMonthly = document.getElementById('monthlyChart').getContext('2d');
+            monthlyChartInstance = new Chart(ctxMonthly, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: '월간 목표 거리 (km)',
+                            data: monthlyTargets,
+                            backgroundColor: 'rgba(148, 163, 184, 0.25)',
+                            borderColor: 'rgba(148, 163, 184, 0.7)',
+                            borderWidth: 1.5,
+                            borderRadius: 6
+                        },
+                        {
+                            label: '실제 달성 거리 (km)',
+                            data: actuals,
+                            backgroundColor: 'rgba(16, 185, 129, 0.65)',
+                            borderColor: 'rgba(16, 185, 129, 0.95)',
+                            borderWidth: 1.5,
+                            borderRadius: 6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#94a3b8', font: { family: 'Inter' } } },
+                        tooltip: {
+                            callbacks: {
+                                footer: (items) => {
+                                    const index = items[0].dataIndex;
+                                    return `평균 달성률: ${monthlyRates[index]}%`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { color: '#94a3b8' } },
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } }
+                    }
+                }
+            });
+
+            // 기존 환산 차트 객체 폐기 후 재생성
+            if (proRataChartInstance) proRataChartInstance.destroy();
+            const ctxProRata = document.getElementById('proRataChart').getContext('2d');
+            proRataChartInstance = new Chart(ctxProRata, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: `환산 목표 (km)`,
+                            data: proRataTargets,
+                            backgroundColor: 'rgba(56, 189, 248, 0.25)',
+                            borderColor: 'rgba(56, 189, 248, 0.7)',
+                            borderWidth: 1.5,
+                            borderRadius: 6
+                        },
+                        {
+                            label: '실제 달성 거리 (km)',
+                            data: actuals,
+                            backgroundColor: 'rgba(16, 185, 129, 0.65)',
+                            borderColor: 'rgba(16, 185, 129, 0.95)',
+                            borderWidth: 1.5,
+                            borderRadius: 6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#94a3b8', font: { family: 'Inter' } } },
+                        tooltip: {
+                            callbacks: {
+                                footer: (items) => {
+                                    const index = items[0].dataIndex;
+                                    return `환산 달성률: ${proRataRates[index]}%`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { color: '#94a3b8' } },
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } }
+                    }
+                }
+            });
+        }
+
+        // 팀 카드 렌더링
+        function renderTeamCards(teamMetrics) {
+            const container = document.getElementById('team-cards-container');
+            const dateStr = `${CURRENT_MONTH}/${CURRENT_DAY}`;
+
+            container.innerHTML = TARGET_TEAMS.map(team => {
+                const info = teamMetrics[team];
+                const monthlyPct = info.targetTotal > 0 ? ((info.actualTotal / info.targetTotal) * 100).toFixed(1) : '0.0';
+                const proRataTarget = info.targetTotal * PRO_RATA_RATIO;
+                const proRataPct = proRataTarget > 0 ? ((info.actualTotal / proRataTarget) * 100).toFixed(1) : '0.0';
+
+                return `
+                    <div onclick="openModal('${team}')" class="bg-slate-900 border border-slate-800 rounded-2xl p-5 hover:border-emerald-500/50 hover:shadow-lg hover:shadow-emerald-950/20 cursor-pointer transition-all duration-300 group">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h4 class="text-xl font-bold text-white group-hover:text-emerald-400 transition-colors">${team}</h4>
+                                <p class="text-xs text-slate-500 mt-0.5">러너 ${info.members.length}명 참여 중</p>
+                            </div>
+                            <span class="p-2 bg-slate-850 rounded-xl text-slate-400 group-hover:bg-emerald-500/10 group-hover:text-emerald-400 transition-colors">
+                                <i class="fa-solid fa-angles-right text-xs"></i>
+                            </span>
+                        </div>
+                        
+                        <!-- 월간 지표 미니 정보 -->
+                        <div class="space-y-3">
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="text-slate-400">월간 전체 달성률</span>
+                                    <span class="text-emerald-400 font-bold">${monthlyPct}%</span>
+                                </div>
+                                <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                                    <div class="bg-emerald-500 h-1.5 rounded-full transition-all duration-500" style="width: ${Math.min(monthlyPct, 100)}%"></div>
+                                </div>
+                            </div>
+
+                            <!-- 오늘 환산 지표 미니 정보 -->
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="text-slate-400">오늘 환산 달성률 (${dateStr})</span>
+                                    <span class="text-sky-400 font-bold">${proRataPct}%</span>
+                                </div>
+                                <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                                    <div class="bg-sky-400 h-1.5 rounded-full transition-all duration-500" style="width: ${Math.min(proRataPct, 100)}%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-center mt-4 pt-3 border-t border-slate-850 text-[10px] text-slate-500">
+                            <span>목표: ${info.targetTotal.toFixed(0)}km</span>
+                            <span>달성: ${info.actualTotal.toFixed(1)}km</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 팀 상세 모달 열기
+        function openModal(teamName) {
+            activeModalTeam = teamName;
+            document.getElementById('modal-team-title').innerText = `${teamName} 팀 상세 현황`;
+            
+            const modal = document.getElementById('team-detail-modal');
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden'; // 뒷배경 스크롤 방지
+
+            // 기본 탭은 월간전체 탭으로 초기화
+            switchModalTab('monthly');
+        }
+
+        // 모달 닫기
+        function closeModal() {
+            const modal = document.getElementById('team-detail-modal');
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+            activeModalTeam = '';
+        }
+
+        // 모달 내 탭 체인저
+        function switchModalTab(tabType) {
+            activeModalTab = tabType;
+            
+            const btnMonthly = document.getElementById('tab-monthly');
+            const btnProRata = document.getElementById('tab-prorata');
+
+            if (tabType === 'monthly') {
+                btnMonthly.className = "px-4 py-2 text-xs font-bold rounded-lg transition-all bg-emerald-600 text-white shadow-lg";
+                btnProRata.className = "px-4 py-2 text-xs font-bold rounded-lg transition-all bg-slate-800 text-slate-300 hover:bg-slate-700";
+            } else {
+                btnMonthly.className = "px-4 py-2 text-xs font-bold rounded-lg transition-all bg-slate-800 text-slate-300 hover:bg-slate-700";
+                btnProRata.className = "px-4 py-2 text-xs font-bold rounded-lg transition-all bg-sky-600 text-white shadow-lg";
+            }
+
+            updateModalContent();
+        }
+
+        // 모달 리스트 내용 동적 생성 (여러 번 등록한 회원의 모든 로그가 중첩 계산되어 완벽 총합 구현)
+        function updateModalContent() {
+            if (!activeModalTeam) return;
+
+            const container = document.getElementById('modal-members-container');
+            const badge = document.getElementById('modal-team-badge');
+            
+            // 해당 팀 크루 추출
+            const teamMembers = membersData.filter(m => m.team === activeModalTeam);
+            badge.innerText = `크루 ${teamMembers.length}명`;
+
+            if (teamMembers.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-10 text-slate-500 text-sm">
+                        <i class="fa-solid fa-user-slash text-3xl mb-2 block"></i>
+                        팀원이 등록되지 않은 소속입니다.
+                    </div>`;
+                return;
+            }
+
+            // 개별 크루의 달성 데이터를 연산하여 배열화 (공백/대소문자 제거 matchUser 기법을 사용하여 다중 로그 누계 완벽 집계)
+            const memberCalculatedList = teamMembers.map(member => {
+                // 특정 크루의 모든 7월 로그 매핑 및 합산 (동일인 다수 로그 합계 처리 완료!)
+                const memberLogs = logsData.filter(log => matchUser(member.nickname, log.user_name));
+                const actualRun = memberLogs.reduce((sum, log) => {
+                    const dist = log.distance || 0;
+                    return sum + (parseFloat(dist) || 0);
+                }, 0);
+
+                const monthlyTarget = parseFloat(member.d_target) || 0;
+                const proRataTarget = monthlyTarget * PRO_RATA_RATIO;
+
+                // 탭 타입에 맞추어 타겟팅 계산
+                const displayTarget = activeModalTab === 'monthly' ? monthlyTarget : proRataTarget;
+                const percentage = displayTarget > 0 ? ((actualRun / displayTarget) * 100).toFixed(1) : '0.0';
+
+                return {
+                    member,
+                    actualRun,
+                    monthlyTarget,
+                    proRataTarget,
+                    displayTarget,
+                    percentage: parseFloat(percentage)
+                };
+            });
+
+            // 정렬 기준: 달성률 높은 사람 순서대로 정렬
+            memberCalculatedList.sort((a, b) => b.percentage - a.percentage);
+
+            const dateStr = `${CURRENT_MONTH}/${CURRENT_DAY}`;
+
+            container.innerHTML = memberCalculatedList.map(({ member, actualRun, monthlyTarget, proRataTarget, displayTarget, percentage }) => {
+                const isMale = ['남', '남성', 'M'].includes(member.gender);
+                const isFemale = ['여', '여성', 'F'].includes(member.gender);
+                
+                let genderBadge = '';
+                if (isMale) {
+                    genderBadge = '<span class="px-2 py-0.5 text-[10px] bg-blue-500/10 text-blue-400 rounded-full font-bold border border-blue-500/20">남</span>';
+                } else if (isFemale) {
+                    genderBadge = '<span class="px-2 py-0.5 text-[10px] bg-pink-500/10 text-pink-400 rounded-full font-bold border border-pink-500/20">여</span>';
+                } else {
+                    genderBadge = '<span class="px-2 py-0.5 text-[10px] bg-slate-850 text-slate-500 rounded-full font-bold border border-slate-800">미지정</span>';
+                }
+
+                // 게이지 바 색상 선정 (진행도에 따라 반응)
+                let barColor = 'bg-emerald-500';
+                let textColor = 'text-emerald-400';
+                if (activeModalTab === 'prorata') {
+                    barColor = 'bg-sky-500';
+                    textColor = 'text-sky-400';
+                }
+
+                return `
+                    <div class="bg-slate-950/40 p-4 rounded-xl border border-slate-850 hover:bg-slate-950/80 transition-all duration-200">
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="font-extrabold text-white text-base">${member.nickname}</span>
+                                ${genderBadge}
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs text-slate-500 font-medium">달성률</span>
+                                <span class="text-base font-black ${textColor} ml-1.5">${percentage}%</span>
+                            </div>
+                        </div>
+
+                        <!-- 진행 막대 게이지 -->
+                        <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden flex mb-2.5">
+                            <div class="${barColor} h-2 rounded-full transition-all duration-500" style="width: ${Math.min(percentage, 100)}%"></div>
+                        </div>
+
+                        <!-- 세부 거리 스펙 표시 (여러 번 뛴 합계가 정확하게 표시됨) -->
+                        <div class="flex justify-between items-center text-xs text-slate-400">
+                            <div>
+                                <span class="text-slate-500 font-medium">누적 실적:</span>
+                                <span class="text-slate-200 font-bold ml-1">${actualRun.toFixed(2)} km</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-500 font-medium">
+                                    ${activeModalTab === 'monthly' ? '월 목표' : `${dateStr} 환산 목표`}:
+                                </span>
+                                <span class="text-slate-200 font-bold ml-1">${displayTarget.toFixed(2)} km</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 세련된 토스트 메시지 생성
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            toast.className = `flex items-center p-4 mb-3 text-sm rounded-xl shadow-xl border transition-all duration-300 transform translate-y-[-20px] opacity-0 pointer-events-auto max-w-sm w-full ${
+                type === 'success' 
+                ? 'bg-emerald-950/90 text-emerald-300 border-emerald-500/30' 
+                : 'bg-rose-950/90 text-rose-300 border-rose-500/30'
+            }`;
+            
+            const icon = type === 'success' 
+                ? `<i class="fa-solid fa-circle-check text-emerald-400 text-lg mr-2.5 flex-shrink-0"></i>`
+                : `<i class="fa-solid fa-triangle-exclamation text-rose-400 text-lg mr-2.5 flex-shrink-0"></i>`;
+
+            toast.innerHTML = `${icon}<div class="font-medium flex-1">${message}</div>`;
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-y-[-20px]', 'opacity-0');
+            }, 10);
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-[-20px]', 'opacity-0');
+                setTimeout(() => { toast.remove(); }, 300);
+            }, 3000);
+        }
+
+        // 시스템 레벨 에러 메시지 표출
+        function showSystemError(msg) {
+            const errorEl = document.getElementById('error-msg');
+            const errorText = document.getElementById('error-text');
+            errorText.innerText = msg;
+            errorEl.classList.remove('hidden');
+            document.getElementById('loading-spinner').classList.add('hidden');
+        }
+        
+        function hideSystemError() {
+            document.getElementById('error-msg').classList.add('hidden');
+        }
+
+        // 바깥 어두운 배경 클릭 시 모달창 닫기
+        window.onclick = function(event) {
+            const modal = document.getElementById('team-detail-modal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        // 전역 바인딩 정의 (인라인 핸들러 호출 용도)
+        window.openModal = openModal;
+        window.closeModal = closeModal;
+        window.switchModalTab = switchModalTab;
+
+        // 초기 시작
+        window.onload = init;
+    </script>
+</body>
+</html>
