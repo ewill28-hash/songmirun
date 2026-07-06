@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Supabase JS Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <script type="module">
         /**
          * [필독] 테이블 생성 안내
@@ -16,6 +17,7 @@
          * nickname text not null unique,
          * team text,
          * gender text,
+         * d_target integer, -- 목표값 저장용 컬럼 추가
          * created_at timestamp with time zone default now()
          * );
          * * -- 실시간 업데이트 활성화
@@ -27,6 +29,37 @@
         
         let supabase;
         let members = [];
+
+        // 브라우저 alert()를 대체하는 커스텀 토스트 알림 함수
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            toast.className = `flex items-center p-4 mb-3 text-sm rounded-xl shadow-xl border transition-all duration-300 transform translate-y-[-20px] opacity-0 pointer-events-auto max-w-sm w-full ${
+                type === 'success' 
+                ? 'bg-emerald-50 text-emerald-800 border-emerald-200' 
+                : 'bg-rose-50 text-rose-800 border-rose-200'
+            }`;
+            
+            const icon = type === 'success' 
+                ? `<svg class="w-5 h-5 mr-2 text-emerald-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>`
+                : `<svg class="w-5 h-5 mr-2 text-rose-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>`;
+
+            toast.innerHTML = `${icon}<div class="font-medium">${message}</div>`;
+            container.appendChild(toast);
+            
+            // 페이드인 애니메이션
+            setTimeout(() => {
+                toast.classList.remove('translate-y-[-20px]', 'opacity-0');
+            }, 10);
+            
+            // 3초 후 자동 소멸
+            setTimeout(() => {
+                toast.classList.add('translate-y-[-20px]', 'opacity-0');
+                setTimeout(() => { toast.remove(); }, 300);
+            }, 3000);
+        }
 
         async function init() {
             try {
@@ -152,9 +185,15 @@
             const nicknamesInput = document.getElementById('nickname-list').value;
             const statusMsg = document.getElementById('update-status');
 
-            if (!targetTeam) { alert("변경할 팀을 선택해주세요."); return; }
+            if (targetTeam === "-") { 
+                showToast("변경할 팀을 선택해주세요.", "error"); 
+                return; 
+            }
             const nicknames = nicknamesInput.split('\n').map(n => n.trim()).filter(n => n.length > 0);
-            if (nicknames.length === 0) { alert("변경할 닉네임을 입력해주세요."); return; }
+            if (nicknames.length === 0) { 
+                showToast("변경할 닉네임을 입력해주세요.", "error"); 
+                return; 
+            }
 
             statusMsg.classList.remove('hidden');
             try {
@@ -163,11 +202,79 @@
                     .update({ team: targetTeam })
                     .in('nickname', nicknames);
                 if (error) throw error;
-                alert(`성공적으로 변경되었습니다.`);
+                showToast("팀 정보가 성공적으로 변경되었습니다.", "success");
                 document.getElementById('nickname-list').value = "";
             } catch (error) {
                 console.error("Update Error:", error);
-                alert("업데이트 실패: " + error.message);
+                showToast("업데이트 실패: " + error.message, "error");
+            } finally {
+                statusMsg.classList.add('hidden');
+            }
+        }
+
+        async function bulkUpdateGoals() {
+            if (!supabase) return;
+            const goalListInput = document.getElementById('goal-list').value;
+            const statusMsg = document.getElementById('goal-update-status');
+
+            const lines = goalListInput.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+            if (lines.length === 0) {
+                showToast("변경할 닉네임과 목표값을 입력해주세요.", "error");
+                return;
+            }
+
+            const updates = [];
+            const invalidLines = [];
+
+            lines.forEach(line => {
+                // 공백 또는 탭으로 구분하여 분할
+                const parts = line.split(/\s+/);
+                if (parts.length >= 2) {
+                    const nickname = parts[0];
+                    const goalVal = parseInt(parts[1], 10);
+                    if (!isNaN(goalVal)) {
+                        updates.push({ nickname, d_target: goalVal });
+                    } else {
+                        invalidLines.push(line);
+                    }
+                } else {
+                    invalidLines.push(line);
+                }
+            });
+
+            if (updates.length === 0) {
+                showToast("올바른 형식(닉네임 [공백] 목표숫자)의 데이터가 없습니다.", "error");
+                return;
+            }
+
+            statusMsg.classList.remove('hidden');
+
+            try {
+                // 여러 유저의 서로 다른 값을 한 번에 업데이트하기 위해 Promise.all 로 동시 트랜잭션 수행
+                const promises = updates.map(item => {
+                    return supabase
+                        .from('songmirun_members')
+                        .update({ d_target: item.d_target })
+                        .eq('nickname', item.nickname);
+                });
+
+                const results = await Promise.all(promises);
+                const errors = results.filter(r => r.error);
+
+                if (errors.length > 0) {
+                    console.error("일부 목표 변경 오류:", errors);
+                    showToast(`${errors.length}건의 업데이트 실패가 발생했습니다.`, "error");
+                } else {
+                    let successMsg = `성공적으로 ${updates.length}명의 목표를 변경했습니다.`;
+                    if (invalidLines.length > 0) {
+                        successMsg += ` (오류 라인 ${invalidLines.length}개 제외됨)`;
+                    }
+                    showToast(successMsg, "success");
+                    document.getElementById('goal-list').value = "";
+                }
+            } catch (error) {
+                console.error("Goal Update Error:", error);
+                showToast("목표 변경 실패: " + error.message, "error");
             } finally {
                 statusMsg.classList.add('hidden');
             }
@@ -183,15 +290,21 @@
             document.getElementById('error-msg').classList.add('hidden');
         }
 
+        // 글로벌 바인딩
         window.bulkUpdateTeam = bulkUpdateTeam;
+        window.bulkUpdateGoals = bulkUpdateGoals;
         window.onload = init;
     </script>
 </head>
 <body class="bg-gray-50 min-h-screen p-4 md:p-8 font-sans">
+    
+    <!-- 자체 인앱 디자인 토스트 알림창 컨테이너 -->
+    <div id="toast-container" class="fixed top-5 left-1/2 transform -translate-x-1/2 z-50 space-y-2 pointer-events-none w-full px-4 flex flex-col items-center"></div>
+
     <div class="max-w-md mx-auto">
         <header class="mb-8">
             <h1 class="text-2xl font-bold text-gray-900">Songmirun 통계 센터 (Supabase)</h1>
-            <p class="text-gray-500">실시간 멤버 집계 및 팀 관리</p>
+            <p class="text-gray-500">실시간 멤버 집계 및 팀/목표 관리</p>
         </header>
 
         <div id="error-msg" class="hidden bg-orange-50 border border-orange-200 text-orange-700 px-4 py-3 rounded-lg mb-4 text-sm font-medium"></div>
@@ -214,24 +327,40 @@
         </div>
 
         <h2 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Team Distribution</h2>
-        <div id="stats-container" class="mb-10">
+        <div id="stats-container" class="mb-8">
             <div class="flex justify-center py-10"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>
         </div>
 
-        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 mb-6">
             <h2 class="text-lg font-bold text-gray-800 mb-4">팀 정보 일괄 변경</h2>
             <div class="space-y-4">
                 <select id="target-team" class="w-full bg-gray-50 border-gray-200 rounded-lg p-3 border outline-none focus:ring-2 focus:ring-blue-500 transition-all">
                     <option value="-">팀 선택</option>
                 </select>
                 <textarea id="nickname-list" rows="5" class="w-full bg-gray-50 border-gray-200 rounded-lg p-3 border text-sm outline-none focus:ring-2 focus:ring-blue-500 transition-all" placeholder="닉네임1&#10;닉네임2"></textarea>
-                <button onclick="bulkUpdateTeam()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition duration-200 shadow-lg">일괄 변경하기</button>
+                <button onclick="bulkUpdateTeam()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition duration-200 shadow-lg">팀 일괄 변경하기</button>
                 <p id="update-status" class="hidden text-center text-sm text-blue-600 font-medium animate-pulse">업데이트 진행 중...</p>
+            </div>
+        </div>
+
+        <!-- 신규 추가된 목표 일괄 변경 섹션 -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
+            <div class="flex items-center justify-between mb-2">
+                <h2 class="text-lg font-bold text-gray-800">팀원 목표 일괄 변경</h2>
+                <span class="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-100 font-semibold px-2 py-0.5 rounded-full">New</span>
+            </div>
+            <p class="text-xs text-gray-400 mb-4 leading-relaxed">
+                한 줄에 하나씩 <b>닉네임[공백]목표치</b> 형태로 적어주세요.
+            </p>
+            <div class="space-y-4">
+                <textarea id="goal-list" rows="5" class="w-full bg-gray-50 border-gray-200 rounded-lg p-3 border text-sm font-mono outline-none focus:ring-2 focus:ring-emerald-500 transition-all" placeholder="팔공 100&#10;이지 50"></textarea>
+                <button onclick="bulkUpdateGoals()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl transition duration-200 shadow-lg">목표 일괄 변경하기</button>
+                <p id="goal-update-status" class="hidden text-center text-sm text-emerald-600 font-medium animate-pulse">목표 업데이트 진행 중...</p>
             </div>
         </div>
         
         <footer class="mt-10 pb-10 text-center text-[10px] text-gray-300 uppercase tracking-widest">
-            Songmirun Management System v1.2
+            Songmirun Management System v1.3
         </footer>
     </div>
 </body>
