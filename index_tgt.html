@@ -260,8 +260,8 @@
             document.getElementById('chart-monthly-title').innerHTML = `<span class="w-1.5 h-6 bg-emerald-500 rounded-full"></span> ${CURRENT_MONTH}월 전체 목표 대비 달성도`;
             document.getElementById('chart-monthly-desc').innerText = `3개 소속 팀의 월간 전체 목표 총합 대비 현재까지 누적된 실제 러닝 거리의 달성 비율입니다.`;
             
-            document.getElementById('chart-prorata-title').innerHTML = `<span class="w-1.5 h-6 bg-sky-500 rounded-full"></span> 오늘 날짜 환산(${dateStr}) 대비 달성도`;
-            document.getElementById('chart-prorata-badge').innerText = `${dateStr} (일할 계산)`;
+            document.getElementById('chart-prorata-title').innerHTML = `<span class="w-1.5 h-6 bg-sky-500 rounded-full"></span> 오늘 환산 대비 달성도`;
+            document.getElementById('chart-prorata-badge').innerText = `${dateStr}`;
             document.getElementById('chart-prorata-desc').innerText = `월 목표를 오늘 날짜인 ${dateStr} 시점 비율(${percentage}%)로 일할 환산한 목표 대비 현재 누적 거리의 달성 속도 비율입니다.`;
 
             document.getElementById('tab-prorata').innerHTML = `<i class="fa-solid fa-clock-rotate-left mr-1"></i> 오늘 기준 환산(${dateStr})`;
