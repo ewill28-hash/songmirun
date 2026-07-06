@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>쏭/미/션 - 타켓챌리지 </title>
+    <title>쏭/미/션 - 송미런 목표 대비 달성 현황</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -82,7 +82,7 @@
                     <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl text-slate-400 group-hover:scale-110 transition-transform duration-300">
                         <i class="fa-solid fa-users"></i>
                     </div>
-                    <div class="text-xs text-slate-400 font-semibold uppercase tracking-wider">전체 집계 멤버</div>
+                    <div class="text-xs text-slate-400 font-semibold uppercase tracking-wider">챌린지 참가 크루</div>
                     <div class="text-4xl font-black text-white mt-2" id="stat-total-runners">0명</div>
                     <div class="text-xs text-slate-500 mt-1">글팍 / 누리 / 미추홀 소속 인원</div>
                 </div>
@@ -102,7 +102,7 @@
                     </div>
                     <div class="text-xs text-slate-400 font-semibold uppercase tracking-wider">전체 월간 목표 거리</div>
                     <div class="text-4xl font-black text-sky-400 mt-2" id="stat-total-target">0.00 km</div>
-                    <div class="text-xs text-slate-500 mt-1">멤버별 d_target 설정 값의 합</div>
+                    <div class="text-xs text-slate-500 mt-1">송미런 이번달 목표 마일리지</div>
                 </div>
             </div>
 
@@ -113,12 +113,12 @@
                     <div>
                         <div class="flex items-center justify-between mb-4">
                             <h3 class="text-lg font-bold text-white flex items-center gap-2" id="chart-monthly-title">
-                                <span class="w-1.5 h-6 bg-emerald-500 rounded-full"></span> 월간 전체 목표 대비 달성도
+                                <span class="w-1.5 h-6 bg-emerald-500 rounded-full"></span> 월간 목표 대비 달성도
                             </h3>
-                            <span class="text-xs text-slate-400 font-semibold bg-slate-850 px-2.5 py-1 rounded-md">전체 월 기준</span>
+                            <span class="text-xs text-slate-400 font-semibold bg-slate-850 px-2.5 py-1 rounded-md">월 기준</span>
                         </div>
                         <p class="text-xs text-slate-400 mb-6 leading-relaxed" id="chart-monthly-desc">
-                            3개 소속 팀의 월간 전체 목표 총합 대비 현재까지 누적된 실제 러닝 거리의 달성 비율입니다.
+                            3개 소속 팀의 월간 목표 총합 대비 현재까지 누적된 실제 러닝 거리의 달성 비율입니다.
                         </p>
                     </div>
                     <div class="relative h-64 w-full">
@@ -147,7 +147,7 @@
 
             <!-- 팀 상세 카드 리스트 및 직접 클릭 유도 구역 -->
             <div>
-                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">소속 팀별 요약 정보 <span class="text-xs text-emerald-400 normal-case font-medium ml-2">(카드를 클릭하시면 상세 팀원별 달성률 모달이 열립니다)</span></h3>
+                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">소속 팀별 요약 정보 <span class="text-xs text-emerald-400 normal-case font-medium ml-2">(카드 클릭)</span></h3>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="team-cards-container">
                     <!-- Javascript를 통해 3개 팀 카드가 동적 렌더링 됩니다. -->
                 </div>
@@ -169,7 +169,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h3 id="modal-team-title" class="text-2xl font-black text-white">팀명</h3>
-                        <span id="modal-team-badge" class="px-2.5 py-0.5 text-xs font-semibold bg-emerald-500/10 text-emerald-400 rounded-full border border-emerald-500/20">멤버 0명</span>
+                        <span id="modal-team-badge" class="px-2.5 py-0.5 text-xs font-semibold bg-emerald-500/10 text-emerald-400 rounded-full border border-emerald-500/20">크루 0명</span>
                     </div>
                     <p class="text-xs text-slate-400 mt-1">팀원별 월간 및 오늘 환산 페이스별 달성 현황</p>
                 </div>
@@ -186,7 +186,7 @@
                     <i class="fa-solid fa-calendar-days mr-1"></i> 월간 전체 기준
                 </button>
                 <button id="tab-prorata" onclick="switchModalTab('prorata')" class="px-4 py-2 text-xs font-bold rounded-lg transition-all bg-slate-800 text-slate-300 hover:bg-slate-700">
-                    <i class="fa-solid fa-clock-rotate-left mr-1"></i> 오늘 기준 환산 페이스
+                    <i class="fa-solid fa-clock-rotate-left mr-1"></i> 오늘 기준 환산
                 </button>
             </div>
 
@@ -250,19 +250,19 @@
 
             document.getElementById('sub-header-title').innerText = `${CURRENT_MONTH}월 거리 결과 기반 목표 달성도 통계 센터`;
             document.getElementById('today-badge-title').innerText = `오늘 날짜 환산 기준 (${dateStr})`;
-            document.getElementById('today-progress-text').innerHTML = `${CURRENT_DAY}일 / ${TOTAL_DAYS}일 경과 <span class="text-emerald-400 font-black ml-1.5">(${percentage}%)</span>`;
+            document.getElementById('today-progress-text').innerHTML = `${CURRENT_DAY}일 경과 <span class="text-emerald-400 font-black ml-1.5">(${percentage}%)</span>`;
             
             document.getElementById('stat-title-actual-dist').innerText = `전체 누적 달성 거리`;
             document.getElementById('stat-desc-actual-dist').innerText = `${CURRENT_MONTH}월 실시간 누적 로그 총합`;
             
-            document.getElementById('chart-monthly-title').innerHTML = `<span class="w-1.5 h-6 bg-emerald-500 rounded-full"></span> ${CURRENT_MONTH}월 월간 전체 목표 대비 달성도`;
+            document.getElementById('chart-monthly-title').innerHTML = `<span class="w-1.5 h-6 bg-emerald-500 rounded-full"></span> ${CURRENT_MONTH}월 전체 목표 대비 달성도`;
             document.getElementById('chart-monthly-desc').innerText = `3개 소속 팀의 월간 전체 목표 총합 대비 현재까지 누적된 실제 러닝 거리의 달성 비율입니다.`;
             
             document.getElementById('chart-prorata-title').innerHTML = `<span class="w-1.5 h-6 bg-sky-500 rounded-full"></span> 오늘 날짜 환산(${dateStr}) 대비 달성도`;
-            document.getElementById('chart-prorata-badge').innerText = `${dateStr} (${CURRENT_DAY}/${TOTAL_DAYS} 일할 계산)`;
+            document.getElementById('chart-prorata-badge').innerText = `${dateStr} (일할 계산)`;
             document.getElementById('chart-prorata-desc').innerText = `월 목표를 오늘 날짜인 ${dateStr} 시점 비율(${percentage}%)로 일할 환산한 목표 대비 현재 누적 거리의 달성 속도 비율입니다.`;
 
-            document.getElementById('tab-prorata').innerHTML = `<i class="fa-solid fa-clock-rotate-left mr-1"></i> 오늘 기준 환산 페이스 (${dateStr})`;
+            document.getElementById('tab-prorata').innerHTML = `<i class="fa-solid fa-clock-rotate-left mr-1"></i> 오늘 기준 환산(${dateStr})`;
         }
 
         // 시스템 초기화
@@ -284,7 +284,7 @@
             }
         }
 
-        // 멤버 및 로그 데이터 원격 fetch (7월 범위 조건을 쿼리에 명시하여 1000건 제한 우회)
+        // 크루 및 로그 데이터 원격 fetch (7월 범위 조건을 쿼리에 명시하여 1000건 제한 우회)
         async function fetchAllData() {
             if (!supabase) return;
 
@@ -346,11 +346,11 @@
         function setupRealtimeSubscriptions() {
             if (!supabase) return;
 
-            // 멤버 테이블 실시간 동기화
+            // 크루 테이블 실시간 동기화
             supabase
                 .channel('realtime-members-channel')
                 .on('postgres_changes', { event: '*', schema: 'public', table: TABLE_MEMBERS }, () => {
-                    showToast("멤버 정보 실시간 변경 감지!", "success");
+                    showToast("크루 정보 실시간 변경 감지!", "success");
                     fetchAllData();
                 })
                 .subscribe();
@@ -368,7 +368,7 @@
         // 데이터 정제 및 통계 핵심 연산
         function processAndRenderStats() {
             // 1. 전체 전역 지표 집계
-            // 지정 3개 팀에 소속된 멤버만 카운팅
+            // 지정 3개 팀에 소속된 크루만 카운팅
             const filterMembers = membersData.filter(m => TARGET_TEAMS.includes(m.team));
             const totalRunnersCount = filterMembers.length;
             
@@ -408,7 +408,7 @@
                 }
             });
 
-            // 각 로그를 순회하며 3대 팀 소속 멤버들의 누적 거리를 팀별로 총합 (매칭 함수 완벽 대응)
+            // 각 로그를 순회하며 3대 팀 소속 크루들의 누적 거리를 팀별로 총합 (매칭 함수 완벽 대응)
             logsData.forEach(log => {
                 const member = membersData.find(m => matchUser(m.nickname, log.user_name));
                 if (member && TARGET_TEAMS.includes(member.team)) {
@@ -642,9 +642,9 @@
             const container = document.getElementById('modal-members-container');
             const badge = document.getElementById('modal-team-badge');
             
-            // 해당 팀 멤버 추출
+            // 해당 팀 크루 추출
             const teamMembers = membersData.filter(m => m.team === activeModalTeam);
-            badge.innerText = `멤버 ${teamMembers.length}명`;
+            badge.innerText = `크루 ${teamMembers.length}명`;
 
             if (teamMembers.length === 0) {
                 container.innerHTML = `
@@ -655,9 +655,9 @@
                 return;
             }
 
-            // 개별 멤버의 달성 데이터를 연산하여 배열화 (공백/대소문자 제거 matchUser 기법을 사용하여 다중 로그 누계 완벽 집계)
+            // 개별 크루의 달성 데이터를 연산하여 배열화 (공백/대소문자 제거 matchUser 기법을 사용하여 다중 로그 누계 완벽 집계)
             const memberCalculatedList = teamMembers.map(member => {
-                // 특정 멤버의 모든 7월 로그 매핑 및 합산 (동일인 다수 로그 합계 처리 완료!)
+                // 특정 크루의 모든 7월 로그 매핑 및 합산 (동일인 다수 로그 합계 처리 완료!)
                 const memberLogs = logsData.filter(log => matchUser(member.nickname, log.user_name));
                 const actualRun = memberLogs.reduce((sum, log) => {
                     const dist = log.distance || 0;
