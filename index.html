@@ -2200,65 +2200,114 @@
        //window.syncAndRefresh = () => updateUI_Team();
                 
         const DESTINATIONS = [
-            { name: "송도 (미추홀)", code: "ICN", dist: 0, emoji: "👟" }, 
-            { name: "서울 (남산타워)", code: "GMP", dist: 35, emoji: "🗼" },
-            { name: "대전 (성심당)", code: "CJJ", dist: 140, emoji: "🥖" },
-            { name: "평창 (올림픽)", code: "YNY", dist: 185, emoji: "❄️" },
-            { name: "대구 (팔공산)", code: "TAE", dist: 240, emoji: "🍎" },
-            { name: "광주 (무등산)", code: "KWJ", dist: 270, emoji: "🍉" },
-            { name: "부산 (해운대)", code: "PUS", dist: 330, emoji: "🌊" },
-            { name: "제주 (한라산)", code: "CJU", dist: 450, emoji: "🗿" },
-            { name: "후쿠오카(일본)", code: "FUK", dist: 540, emoji: "🍜" },
-            { name: "칭다오 (중국)", code: "TAO", dist: 560, emoji: "🍺" },
-            { name: "히로시마 (일본)", code: "HIJ", dist: 660, emoji: "⛩️" },
-            { name: "다롄 (중국)", code: "DLC", dist: 760, emoji: "🥟" },
-            { name: "상하이 (중국)", code: "PVG", dist: 830, emoji: "🏮" },
-            { name: "베이징 (중국)", code: "PEK", dist: 950, emoji: "🏯" },
-            { name: "도쿄 (M-Mecca)", code: "HND", dist: 1160, emoji: "🗼" },
-            { name: "타이베이 (대만)", code: "TPE", dist: 1480, emoji: "🥤" },
-            { name: "타이중 (대만)", code: "RMQ", dist: 1590, emoji: "🧋" },
-            { name: "가오슝 (대만)", code: "KHH", dist: 1740, emoji: "⚓" },
-            { name: "샤먼 (중국)", code: "XMN", dist: 1840, emoji: "🏝️" },
-            { name: "산터우 (중국)", code: "SWA", dist: 1960, emoji: "🥨" },
-            { name: "심천 (중국)", code: "SZX", dist: 2060, emoji: "💻" },    
-            { name: "홍콩", code: "HKG", dist: 2100, emoji: "🏙️" },
-            { name: "방콕", code: "BKK", dist: 3650, emoji: "🛕" },
-            { name: "싱가포르", code: "SIN", dist: 4600, emoji: "🦁" },
-            { name: "발리(모히또)", code: "DPS", dist: 5300, emoji: "🏖️" },
-            { name: "퍼스(호주서부)", code: "PER", dist: 7800, emoji: "☀️" },
-            { name: "시드니(호주)", code: "SYD", dist: 8300, emoji: "🦘" },
-            { name: "베를린(M-Mecca)", code: "BER", dist: 8500, emoji: "🏰" },
-            { name: "모스크바", code: "SVO", dist: 6600, emoji: "🇷🇺" }, // 9300 -> 6600 (대권항로 시 획기적으로 단축)
-            { name: "파리(M-Iconic)", code: "CDG", dist: 8900, emoji: "🇫🇷" }, // 9650 -> 8900 조정
-            { name: "런던(M-Mecca)", code: "LHR", dist: 8850, emoji: "🎡" }, // 10400 -> 8850 (북극항로 기준)
-            { name: "아테네(M-Origin)", code: "ATH", dist: 8500, emoji: "🏛️" }, 
-            { name: "시카고(M-Mecca)", code: "ORD", dist: 10500, emoji: "🏙️" }, 
-            { name: "보스턴(M-Mecca)", code: "BOS", dist: 10850, emoji: "🏛️" }, 
-            { name: "뉴욕(M-Mecca)", code: "JFK", dist: 11100, emoji: "🗽" }, 
-            { name: "멕시코시티", code: "MEX", dist: 12100, emoji: "🌮" }, 
-            { name: "보고타(콜롬비아)", code: "BOG", dist: 14850, emoji: "☕" }, // 14500 -> 14850 소폭 조정
-            { name: "리마(페루)", code: "LIM", dist: 16300, emoji: "🦙" },
-            { name: "상파울루(브라질)", code: "GRU", dist: 18350, emoji: "⚽" }, // 18400 -> 18350
-            { name: "부엔(반바퀴)", code: "EZE", dist: 19400, emoji: "💃" }, 
-            { name: "지구 한바퀴(완주!)", code: "ICN", dist: 40075, emoji: "🌍" }
+{ name: "송도 (미추홀)", code: "ICN", dist: 0, emoji: "👟" }, 
+  { name: "서울 (남산타워)", code: "GMP", dist: 35, emoji: "🗼" },
+  { name: "대전 (성심당)", code: "CJJ", dist: 140, emoji: "🥖" },
+  { name: "평창 (올림픽)", code: "YNY", dist: 185, emoji: "❄️" },
+  { name: "대구 (팔공산)", code: "TAE", dist: 240, emoji: "🍎" },
+  { name: "광주 (무등산)", code: "KWJ", dist: 270, emoji: "🍉" },
+  { name: "부산 (해운대)", code: "PUS", dist: 330, emoji: "🌊" },
+  { name: "제주 (한라산)", code: "CJU", dist: 450, emoji: "🗿" },
+  { name: "후쿠오카 (일본)", code: "FUK", dist: 540, emoji: "🍜" },
+  { name: "칭다오 (중국)", code: "TAO", dist: 560, emoji: "🍺" },
+  { name: "히로시마 (일본)", code: "HIJ", dist: 660, emoji: "⛩️" },
+  { name: "다롄 (중국)", code: "DLC", dist: 760, emoji: "🥟" },
+  { name: "상하이 (중국)", code: "PVG", dist: 830, emoji: "🏮" },
+  { name: "베이징 (중국)", code: "PEK", dist: 950, emoji: "🏯" },
+  { name: "도쿄 (M-Mecca)", code: "HND", dist: 1160, emoji: "🗼" },
+  { name: "타이베이 (대만)", code: "TPE", dist: 1480, emoji: "🥤" },
+  { name: "타이중 (대만)", code: "RMQ", dist: 1590, emoji: "🧋" },
+  { name: "가오슝 (대만)", code: "KHH", dist: 1740, emoji: "⚓" },
+  { name: "샤먼 (중국)", code: "XMN", dist: 1840, emoji: "🏝️" },
+  { name: "산터우 (중국)", code: "SWA", dist: 1960, emoji: "🥨" },
+  { name: "심천 (중국)", code: "SZX", dist: 2060, emoji: "💻" },    
+  { name: "홍콩", code: "HKG", dist: 2100, emoji: "🏙️" },
+  { name: "방콕", code: "BKK", dist: 3650, emoji: "🛕" },
+  { name: "싱가포르", code: "SIN", dist: 4600, emoji: "🦁" },
+  { name: "발리 (모히또)", code: "DPS", dist: 5300, emoji: "🏖️" },
+  { name: "모스크바", code: "SVO", dist: 6600, emoji: "🇷🇺" }, 
+  { name: "퍼스 (호주서부)", code: "PER", dist: 7800, emoji: "☀️" },
+  { name: "시드니 (호주)", code: "SYD", dist: 8300, emoji: "🦘" },
+  { name: "아테네 (M-Origin)", code: "ATH", dist: 8500, emoji: "🏛️" }, 
+  { name: "베를린 (M-Mecca)", code: "BER", dist: 8500, emoji: "🏰" },
+  { name: "런던 (M-Mecca)", code: "LHR", dist: 8850, emoji: "🎡" }, 
+  { name: "파리 (M-Iconic)", code: "CDG", dist: 8900, emoji: "🇫🇷" }, 
+  { name: "시카고 (M-Mecca)", code: "ORD", dist: 10500, emoji: "🏙️" }, 
+  { name: "보스턴 (M-Mecca)", code: "BOS", dist: 10850, emoji: "🏛️" }, 
+  { name: "뉴욕 (M-Mecca)", code: "JFK", dist: 11100, emoji: "🗽" }, 
+  { name: "멕시코시티", code: "MEX", dist: 12100, emoji: "🌮" }, 
+  { name: "보고타 (콜롬비아)", code: "BOG", dist: 14850, emoji: "☕" }, 
+  { name: "리마 (페루)", code: "LIM", dist: 16300, emoji: "🦙" },
+  { name: "상파울루 (브라질)", code: "GRU", dist: 18350, emoji: "⚽" }, 
+  { name: "부엔 (반바퀴)", code: "EZE", dist: 19400, emoji: "💃" }, 
+  { name: "산티아고 (안데스 산맥)", code: "SCL", dist: 22500, emoji: "🏔️" }, // 아르헨티나에서 칠레로 국경 이동
+  { name: "이스터 섬 (모아이 석상)", code: "IPC", dist: 26000, emoji: "🗿" }, // 남태평양 고립 무인도 진입
+  { name: "타히티 (남태평양의 낙원)", code: "PPT", dist: 30500, emoji: "🌴" }, // 태평양 휴양지 징검다리
+  { name: "오클랜드 (뉴질랜드 남반구)", code: "AKL", dist: 34500, emoji: "🥝" }, // 오세아니아 진입
+  { name: "시드니 (귀국 전 마지막 경유)", code: "SYD", dist: 36500, emoji: "🦘" }, // 귀           
+  { name: "지구 한바퀴 (완주!)", code: "ICN", dist: 40075, emoji: "🌍" },
+
+
+  { name: "[2회차] 도쿄 재방문", code: "HND", dist: 41235, emoji: "🗼" }, 
+  { name: "[2회차] 타이베이 재방문", code: "TPE", dist: 41555, emoji: "🥤" }, 
+  { name: "[2회차] 홍콩 재방문", code: "HKG", dist: 42175, emoji: "🏙️" }, 
+  { name: "[2회차] 방콕 휴양", code: "BKK", dist: 43725, emoji: "🛕" },
+  { name: "[2회차] 싱가포르 레이오버", code: "SIN", dist: 44675, emoji: "🦁" },
+  { name: "[2회차] 몰디브 (에메랄드빛 해변)", code: "MLE", dist: 48500, emoji: "🇲🇻" },
+  { name: "[2회차] 두바이 (버즈 칼리파)", code: "DXB", dist: 52000, emoji: "🇦🇪" },
+  { name: "[2회차] 이스탄불 (동서양의 만남)", code: "IST", dist: 55000, emoji: "🇹🇷" },
+  { name: "[2회차] 로마 (콜로세움)", code: "FCO", dist: 58000, emoji: "🇮🇹" },
+  { name: "[2회차] 파리 (에펠탑 재회)", code: "CDG", dist: 59000, emoji: "🗼" },
+  { name: "[2회차] 아이슬란드 (레이캬비크 오로라)", code: "KEF", dist: 61500, emoji: "🇮🇸" },
+  { name: "[2회차] 그린란드 (누크 氷산)", code: "GOH", dist: 64000, emoji: "🇬🇱" },
+  { name: "[2회차] 토론토 (나이아가라)", code: "YYZ", dist: 68000, emoji: "🇨🇦" },
+  { name: "[2회차] 뉴욕 (타임스스퀘어)", code: "JFK", dist: 69000, emoji: "🗽" },
+  { name: "[2회차] 마이애미 (해변 드라이브)", code: "MIA", dist: 71500, emoji: "🌴" },
+  { name: "[2회차] 하와이 (호놀룰루 알로하)", code: "HNL", dist: 76500, emoji: "🌺" },
+  { name: "[2회차] 지구 두바퀴 (더블 완주!)", code: "ICN", dist: 80150, emoji: "🏆" },
+
+  // ==================== [ 3회차 세계 일주: 80,150 ~ 100,000 km+ ] ====================
+  { name: "[3회차] 오사카 타코야키", code: "KIX", dist: 81000, emoji: "🐙" },
+  { name: "[3회차] 괌 (남태평양 힐링)", code: "GUM", dist: 83500, emoji: "🥥" },
+  { name: "[3회차] 시드니 오페라하우스", code: "SYD", dist: 88500, emoji: "🦘" },
+  { name: "[3회차] 뉴질랜드 (오클랜드 자연)", code: "AKL", dist: 91500, emoji: "🇳🇿" },
+  { name: "[3회차] 피지 (지상 낙원)", code: "NAN", dist: 94000, emoji: "🏝️" },
+  { name: "[3회차] 타히티 (남태평양의 진주)", code: "PPT", dist: 97500, emoji: "🇵🇫" },
+  { name: "[꿈의 영역] 10만 km 돌파!", code: "ICN", dist: 100000, emoji: "👑" }
+            
         ];
 
 
         const FLOWER_STAGES = [
-            { day: 1, name: "씨앗", status: "준비", desc: "단단한 껍질 속에서 새로운 생명이 깨어나기를 기다립니다.", emoji: "🫘" },
-            { day: 5, name: "싹틈", status: "시작", desc: "흙을 뚫고 작은 초록색 고개가 고개를 내밀었습니다.", emoji: "🌱" },
-            { day: 10, name: "어린 잎", status: "성장", desc: "햇살을 받기 위해 잎사귀가 조금 더 넓어졌습니다.", emoji: "🌿" },
-            { day: 20, name: "줄기 확장", status: "도약", desc: "줄기가 튼튼해지며 하늘을 향해 곧게 뻗어 나갑니다.", emoji: "🪴" },
-            { day: 30, name: "잎의 무성함", status: "성숙", desc: "많은 잎들이 생겨나며 더 많은 에너지를 모으기 시작합니다.", emoji: "🍃" },
-            { day: 50, name: "꽃봉오리", status: "기대", desc: "작고 소중한 꽃봉오리가 맺혔습니다. 곧 꽃이 필 것 같아요.", emoji: "🎍" },
-            { day: 70, name: "개화 시작", status: "설렘", desc: "꽃잎이 살짝 벌어지며 고운 색깔이 드러나기 시작합니다.", emoji: "🎋" },
-            { day: 100, name: "첫 만개", status: "결실", desc: "드디어 화사한 꽃이 활짝 피어 향기를 머금었습니다.", emoji: "🌸" },
-            { day: 125, name: "향기의 확산", status: "조화", desc: "활짝 핀 꽃의 향기가 바람을 타고 멀리 퍼져나갑니다.", emoji: "🌹" },
-            { day: 150, name: "꽃밭 형성", status: "확장", desc: "주변으로 생명력이 퍼져나가며 아름다운 정원을 이룹니다.", emoji: "🌷" },
-            { day: 175, name: "생명력의 절정", status: "풍요", desc: "정원이 가장 풍성해지며 수많은 생명이 모여듭니다.", emoji: "🌼" },
-            { day: 200, name: "황금기", status: "절정", desc: "가장 찬란하고 아름다운 빛깔로 세상을 수놓습니다.", emoji: "🌺" },
-            { day: 250, name: "씨앗의 전파", status: "영원", desc: "또 다른 시작을 위해 건강한 씨앗을 세상에 남깁니다.", emoji: "🌻" }
-        ];
+{ day: 1, name: "씨앗", status: "준비", desc: "단단한 껍질 속에서 새로운 생명이 깨어나기를 기다립니다.", emoji: "🫘" },            
+  { day: 5, name: "싹틈", status: "시작", desc: "흙을 뚫고 작은 초록색 고개가 고개를 내밀었습니다.", emoji: "🌱" },            
+  { day: 10, name: "어린 잎", status: "성장", desc: "햇살을 받기 위해 잎사귀가 조금 더 넓어졌습니다.", emoji: "🌿" },            
+  { day: 20, name: "줄기 확장", status: "도약", desc: "줄기가 튼튼해지며 하늘을 향해 곧게 뻗어 나갑니다.", emoji: "🪴" },            
+  { day: 30, name: "잎의 무성함", status: "성숙", desc: "많은 잎들이 생겨나며 더 많은 에너지를 모으기 시작합니다.", emoji: "🍃" },            
+  { day: 50, name: "꽃봉오리", status: "기대", desc: "작고 소중한 꽃봉오리가 맺혔습니다. 곧 꽃이 필 것 같아요.", emoji: "🎍" },            
+  { day: 70, name: "개화 시작", status: "설렘", desc: "꽃잎이 살짝 벌어지며 고운 색깔이 드러나기 시작합니다.", emoji: "🎋" },            
+  { day: 100, name: "첫 만개", status: "결실", desc: "드디어 화사한 꽃이 활짝 피어 향기를 머금었습니다.", emoji: "🌸" },            
+
+  // --- [2단계: 군락 형성과 첫 결실] (125일 ~ 250일) ---
+  { day: 125, name: "향기의 확산", status: "조화", desc: "활짝 핀 꽃의 향기가 바람을 타고 멀리 퍼져나갑니다.", emoji: "🌹" },            
+  { day: 150, name: "꽃밭 형성", status: "확장", desc: "주변으로 생명력이 퍼져나가며 아름다운 정원을 이룹니다.", emoji: "🌷" },            
+  { day: 175, name: "생명력의 절정", status: "풍요", desc: "정원이 가장 풍성해지며 수많은 생명이 모여듭니다.", emoji: "🌼" },            
+  { day: 200, name: "황금기", status: "절정", desc: "가장 찬란하고 아름다운 빛깔로 세상을 수놓습니다.", emoji: "🌺" },            
+  { day: 250, name: "씨앗의 전파", status: "영원", desc: "또 다른 시작을 위해 건강한 씨앗을 세상에 남깁니다.", emoji: "🌻" },            
+
+  // --- [3단계: 대지로의 확장과 도약] (280일 ~ 380일) ---
+  { day: 280, name: "새로운 뿌리", status: "개척", desc: "널리 퍼진 씨앗들이 대지 곳곳에 깊고 단단한 뿌리를 내립니다.", emoji: "🌾" },
+  { day: 310, name: "푸른 새싹밭", status: "번영", desc: "하나의 꽃에서 시작된 생명이 끝없는 초록빛 물결을 만듭니다.", emoji: "🍀" },
+  { day: 340, name: "묘목의 숲", status: "강인", desc: "바람에 흔들리지 않는 든튼한 나무들이 자라나 숲의 경계를 이룹니다.", emoji: "🌲" },
+  { day: 365, name: "1년의 나이테", status: "축제", desc: "사계절을 온전히 버텨내고 자신만의 단단한 나이테를 새겼습니다.", emoji: "🪵" },
+  { day: 380, name: "풍성한 열매", status: "수확", desc: "노력의 땀방울이 단단하고 달콤한 열매가 되어 가지마다 맺힙니다.", emoji: "🍎" },
+
+  // --- [4단계: 위대한 자연과 생태계 완성] (410일 ~ 500일) ---
+  { day: 410, name: "숲의 노래", status: "공존", desc: "울창해진 나무 그늘 아래 새들과 동물들이 찾아와 둥지를 틉니다.", emoji: "🌳" },
+  { day: 440, name: "단풍과 휴식", status: "비움", desc: "아름다운 오색 빛깔로 숲을 물들이며 다음 도약을 위해 숨을 고릅니다.", emoji: "🍁" },
+  { day: 470, name: "신비로운 고목", status: "지혜", desc: "오랜 세월을 견뎌낸 거목이 되어 깊은 지혜와 신비로운 기운을 품습니다.", emoji: "🌴" },
+  { day: 500, name: "영원한 세계수", status: "신화", desc: "하늘에 닿을 듯 뻗어 오른 세계수가 되어 대지에 영원한 안식처를 선물합니다.", emoji: "🌍" }
+];
 
         window.openFlowerStageByCurrentProgress = () => {
             //const currentDay = window.currentChallengeDay || '10'; 
