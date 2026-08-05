@@ -1,0 +1,1928 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>패밀리 PAY - 우리집 스마트 용돈 & 예산 관리</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase JS Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        teenPrimary: '#6366F1',
+                        teenSecondary: '#8B5CF6',
+                        teenAccent: '#10B981',
+                        teenDark: '#0F172A',
+                        teenCard: '#1E293B',
+                        teenPink: '#EC4899',
+                        teenCyan: '#06B6D4'
+                    },
+                    fontFamily: {
+                        noto: ['Noto Sans KR', 'sans-serif'],
+                        jakarta: ['Plus Jakarta Sans', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #0b0f19;
+            color: #f1f5f9;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.15) 0px, transparent 50%),
+                radial-gradient(at 50% 50%, rgba(16, 185, 129, 0.08) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        .glass-card {
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-card-interactive {
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card-interactive:active, .glass-card-interactive:hover {
+            border-color: rgba(99, 102, 241, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #818CF8 0%, #C084FC 50%, #F472B6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .glow-button {
+            background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35);
+            transition: all 0.2s ease;
+        }
+
+        .glow-button:active {
+            transform: scale(0.97);
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="pb-28 sm:pb-20">
+
+    <header class="sticky top-0 z-40 glass-card border-b border-slate-800/80">
+        <div class="max-w-5xl mx-auto px-3 sm:px-4 py-2.5 flex items-center justify-between">
+            <div class="flex items-center space-x-2.5">
+                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-500 flex items-center justify-center text-white font-extrabold text-lg sm:text-xl shadow-lg shadow-indigo-500/30">
+                    <i class="fas fa-users-between-lines"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-1.5">
+                        <h1 class="text-lg sm:text-xl font-black font-jakarta tracking-tight gradient-text">패밀리 PAY</h1>
+                        <span class="text-[9px] sm:text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-1.5 py-0.5 rounded-full">가족 통합</span>
+                    </div>
+                    <p class="text-[10px] text-slate-400 font-medium hidden sm:block">엄마, 아빠, 첫째, 둘째 스마트 가계부 & 용돈 관리</p>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-2">
+                <button onclick="openModal('budgetModal')" class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 text-slate-300 border border-slate-700 hover:border-indigo-500 text-xs font-bold transition">
+                    <i class="fas fa-sliders-h text-indigo-400"></i>
+                    <span>한달 예산</span>
+                </button>
+
+                <button onclick="openModal('familyNameModal')" class="w-8 h-8 rounded-xl bg-slate-800/90 border border-slate-700 flex items-center justify-center text-slate-300 hover:text-white transition" title="가족 이름 설정">
+                    <i class="fas fa-cog text-xs"></i>
+                </button>
+
+                <button onclick="showLoginOverlay()" class="w-8 h-8 rounded-xl bg-indigo-600/30 border border-indigo-500/50 flex items-center justify-center text-indigo-200 hover:bg-indigo-600 hover:text-white transition" title="프로필 변경 / 로그아웃">
+                    <i class="fas fa-user-circle text-xs"></i>
+                </button>
+
+                <button onclick="toggleAudio()" id="soundBtn" class="w-8 h-8 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 transition" title="사운드 효과">
+                    <i class="fas fa-volume-up text-indigo-400 text-xs"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="max-w-5xl mx-auto px-3 sm:px-4 pb-2.5">
+            <div class="flex items-center space-x-1.5 overflow-x-auto no-scrollbar py-0.5">
+                <button id="memberBtn-child1" onclick="switchMember('child1')" class="member-pill px-3 py-1.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all text-slate-400 bg-slate-800/80 hover:text-slate-200 flex items-center gap-1.5 shrink-0">
+                    <span id="memberAvatar-child1">🐹</span>
+                    <span id="memberName-child1">첫째</span>
+                </button>
+                <button id="memberBtn-child2" onclick="switchMember('child2')" class="member-pill px-3 py-1.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all text-slate-400 bg-slate-800/80 hover:text-slate-200 flex items-center gap-1.5 shrink-0">
+                    <span id="memberAvatar-child2">⚾</span>
+                    <span id="memberName-child2">둘째</span>
+                </button>
+                <button id="memberBtn-mom" onclick="switchMember('mom')" class="member-pill px-3 py-1.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all bg-indigo-600 text-white flex items-center gap-1.5 shadow-md shrink-0">
+                    <span id="memberAvatar-mom">👩</span>
+                    <span id="memberName-mom">엄마</span>
+                </button>
+                <button id="memberBtn-dad" onclick="switchMember('dad')" class="member-pill px-3 py-1.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all text-slate-400 bg-slate-800/80 hover:text-slate-200 flex items-center gap-1.5 shrink-0">
+                    <span id="memberAvatar-dad">🎾</span>
+                    <span id="memberName-dad">아빠</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-3 sm:px-4 pt-4 space-y-4 sm:space-y-6">
+
+        <!-- Top Overview Banner Section -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
+            
+            <!-- Balance & Budget Status Card -->
+            <div class="md:col-span-2 glass-card rounded-3xl p-4 sm:p-6 relative overflow-hidden border border-slate-700/60 shadow-xl bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-indigo-950/40">
+                <div class="absolute -right-8 -bottom-8 opacity-10 text-8xl sm:text-9xl text-indigo-400 pointer-events-none font-black">
+                    <i class="fas fa-wallet"></i>
+                </div>
+
+                <div class="flex flex-col sm:flex-row justify-between sm:items-start gap-3 mb-3 sm:mb-4">
+                    <div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[11px] font-bold rounded-lg">
+                                <span id="currentMemberDisplay">👩 엄마</span> 보유 잔액
+                            </span>
+                            <span id="badgeTier" class="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">LV.1 슬기로운 입문자</span>
+                        </div>
+                        <h2 class="text-2xl sm:text-4xl font-black font-jakarta tracking-tight text-white" id="totalBalanceDisplay">0 원</h2>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex items-center gap-2">
+                        <button onclick="openModal('addModal')" class="glow-button flex-1 sm:flex-none px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-2xl text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5">
+                            <i class="fas fa-plus text-xs"></i>
+                            <span>내역 작성</span>
+                        </button>
+                        <button onclick="openModal('dutchModal')" class="px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-2xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold text-xs sm:text-sm flex items-center justify-center gap-1 transition">
+                            <i class="fas fa-calculator text-indigo-400"></i>
+                            <span>더치페이</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Monthly Budget Progress Bar -->
+                <div class="bg-slate-950/50 rounded-2xl p-3 sm:p-4 border border-slate-800/80 space-y-2">
+                    <div class="flex justify-between items-center text-xs">
+                        <div class="flex items-center gap-1">
+                            <span class="text-slate-400 font-medium text-[11px] sm:text-xs">이번 달 예산 소진률</span>
+                            <button onclick="openModal('budgetModal')" class="text-[10px] text-indigo-400 underline hover:text-indigo-300">(예산 변경)</button>
+                        </div>
+                        <span class="font-bold font-jakarta text-indigo-300 text-[11px] sm:text-xs" id="budgetProgressText">0 / 0 원 (0%)</span>
+                    </div>
+
+                    <div class="w-full bg-slate-800 rounded-full h-2.5 sm:h-3 overflow-hidden p-0.5 border border-slate-700/50">
+                        <div id="budgetProgressBar" class="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+
+                    <div class="flex justify-between items-center text-[10px] sm:text-[11px] text-slate-400 pt-0.5">
+                        <span>권장 하루 생활비: <strong class="text-emerald-400 font-bold" id="dailyRecommendText">0원</strong></span>
+                        <span id="budgetAlertMsg" class="text-slate-400 font-semibold">알뜰 관리 중⚡</span>
+                    </div>
+                </div>
+
+                <!-- Monthly Summary Grid -->
+                <div class="grid grid-cols-2 gap-2.5 sm:gap-3 mt-3 pt-1">
+                    <div class="bg-slate-800/40 rounded-2xl p-2.5 sm:p-3 border border-slate-700/40 flex items-center space-x-2.5">
+                        <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs sm:text-sm shrink-0">
+                            <i class="fas fa-arrow-down"></i>
+                        </div>
+                        <div>
+                            <div class="text-[10px] sm:text-[11px] text-slate-400 font-medium">이번 달 총 수입</div>
+                            <div class="text-xs sm:text-sm font-bold font-jakarta text-emerald-400" id="monthIncomeDisplay">+0 원</div>
+                        </div>
+                    </div>
+                    <div class="bg-slate-800/40 rounded-2xl p-2.5 sm:p-3 border border-slate-700/40 flex items-center space-x-2.5">
+                        <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center font-bold text-xs sm:text-sm shrink-0">
+                            <i class="fas fa-arrow-up"></i>
+                        </div>
+                        <div>
+                            <div class="text-[10px] sm:text-[11px] text-slate-400 font-medium">이번 달 총 지출</div>
+                            <div class="text-xs sm:text-sm font-bold font-jakarta text-rose-400" id="monthExpenseDisplay">-0 원</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Habit & Booster Widget -->
+            <div class="glass-card rounded-3xl p-4 sm:p-5 border border-slate-700/60 shadow-xl flex flex-col justify-between bg-gradient-to-br from-slate-900/90 to-purple-950/30">
+                <div class="flex justify-between items-center">
+                    <span class="text-xs font-bold text-purple-300 bg-purple-500/20 border border-purple-500/30 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full flex items-center gap-1">
+                        <i class="fas fa-fire text-amber-400"></i> 패밀리 가계 부스터
+                    </span>
+                    <span class="text-[10px] sm:text-[11px] text-slate-400 font-bold">연속 기록 중 🔥</span>
+                </div>
+
+                <div class="my-3 sm:my-4 text-center cursor-pointer group" onclick="touchBooster()" title="클릭해서 오늘의 한마디 보기">
+                    <div id="boosterIcon" class="text-4xl sm:text-5xl inline-block transition transform group-hover:scale-110 duration-200">
+                        🏡
+                    </div>
+                    <p class="text-xs font-bold text-slate-300 mt-2 group-hover:text-indigo-300 transition">
+                        부스터 터치로 스마트 팁 얻기!
+                    </p>
+                    <p class="text-[10px] text-slate-500 mt-0.5">클릭 시 알뜰 가계 생활 팁 출력</p>
+                </div>
+
+                <div class="bg-slate-800/60 rounded-2xl p-2.5 sm:p-3 border border-slate-700/50">
+                    <div class="text-[10px] sm:text-[11px] text-slate-400 font-medium mb-1">최다 지출 분야</div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-slate-200 flex items-center gap-1.5" id="topCategoryName">
+                            <i class="fas fa-shopping-bag text-indigo-400"></i> 지출 기록 없음
+                        </span>
+                        <span class="text-xs font-bold font-jakarta text-indigo-400" id="topCategoryAmount">0원</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Desktop Navigation Tabs -->
+        <div class="hidden md:flex space-x-2 overflow-x-auto pb-1 no-scrollbar">
+            <button onclick="switchTab('tab-history')" id="nav-desktop-history" class="tab-btn px-4 py-2.5 rounded-2xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all border border-indigo-500/50 bg-indigo-600 text-white shadow-lg shadow-indigo-600/20">
+                <i class="fas fa-receipt mr-1.5"></i> 용돈 장부 내역
+            </button>
+            <button onclick="switchTab('tab-challenges')" id="nav-desktop-challenges" class="tab-btn px-4 py-2.5 rounded-2xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all border border-slate-800 bg-slate-800/80 text-slate-400 hover:text-slate-200 hover:border-slate-700">
+                <i class="fas fa-bullseye mr-1.5 text-amber-400"></i> 지출 절약 챌린지
+            </button>
+            <button onclick="switchTab('tab-goals')" id="nav-desktop-goals" class="tab-btn px-4 py-2.5 rounded-2xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all border border-slate-800 bg-slate-800/80 text-slate-400 hover:text-slate-200 hover:border-slate-700">
+                <i class="fas fa-heart mr-1.5 text-pink-400"></i> 버킷리스트 목표
+            </button>
+            <button onclick="switchTab('tab-stats')" id="nav-desktop-stats" class="tab-btn px-4 py-2.5 rounded-2xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all border border-slate-800 bg-slate-800/80 text-slate-400 hover:text-slate-200 hover:border-slate-700">
+                <i class="fas fa-chart-pie mr-1.5 text-cyan-400"></i> 소비 리포트 & 분석
+            </button>
+        </div>
+
+        <!-- TAB 1: TRANSACTION HISTORY -->
+        <div id="tab-history" class="tab-content block space-y-3 sm:space-y-4">
+            <div class="glass-card rounded-2xl p-3 border border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-2.5">
+                <div class="flex items-center space-x-1.5 w-full sm:w-auto overflow-x-auto no-scrollbar">
+                    <button onclick="setFilter('all')" id="filter-all" class="filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 text-white shadow-sm shrink-0">전체</button>
+                    <button onclick="setFilter('in')" id="filter-in" class="filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-700/50 shrink-0">수입 (들어온 돈)</button>
+                    <button onclick="setFilter('out')" id="filter-out" class="filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-700/50 shrink-0">지출 (쓴 돈)</button>
+                </div>
+                <div class="w-full sm:w-60">
+                    <div class="relative w-full">
+                        <i class="fas fa-search absolute left-3 top-2.5 text-slate-500 text-xs"></i>
+                        <input type="text" id="searchInput" oninput="renderTransactions()" placeholder="내역, 카테고리 검색..." class="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl bg-slate-900 border border-slate-700 text-slate-200 placeholder-slate-500 outline-none focus:border-indigo-500 transition">
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-3xl p-4 sm:p-5 border border-slate-800 shadow-lg">
+                <div class="flex justify-between items-center mb-3 sm:mb-4">
+                    <h3 class="font-bold text-sm sm:text-base text-slate-200 flex items-center gap-2">
+                        <span>📝 최근 입출금 내역</span>
+                        <span id="transactionCountBadge" class="text-[10px] font-bold bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-md">0건</span>
+                    </h3>
+                    <button onclick="exportCSV()" class="text-xs text-slate-400 hover:text-indigo-400 font-medium flex items-center gap-1 transition">
+                        <i class="fas fa-file-csv"></i> <span class="hidden sm:inline">CSV 엑셀</span>
+                    </button>
+                </div>
+
+                <div id="transactionList" class="space-y-2 max-h-[480px] overflow-y-auto pr-0.5">
+                    <!-- Dynamic transactions -->
+                </div>
+
+                <div id="emptyTransactionState" class="hidden text-center py-10 text-slate-500">
+                    <i class="fas fa-receipt text-3xl mb-2 text-slate-600"></i>
+                    <p class="font-bold text-xs sm:text-sm text-slate-400">등록된 내역이 없습니다.</p>
+                    <p class="text-[11px] text-slate-500 mt-0.5">하단 또는 상단의 '+ 내역 작성' 버튼을 눌러 추가해보세요.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: SPENDING CHALLENGES -->
+        <div id="tab-challenges" class="tab-content hidden space-y-4">
+            <div class="glass-card rounded-3xl p-4 sm:p-6 border border-slate-800 shadow-lg">
+                <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-4 sm:mb-6">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="font-bold text-base sm:text-lg text-slate-100">🔥 지출 절약 챌린지</h3>
+                            <span class="text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full">습관 만들기</span>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-0.5">불필요한 소비를 줄이고 챌린지를 완성해보세요!</p>
+                    </div>
+                    <button onclick="openModal('addChallengeModal')" class="glow-button text-white font-bold px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5 self-start sm:self-auto">
+                        <i class="fas fa-plus"></i> 새 챌린지 생성
+                    </button>
+                </div>
+
+                <div id="challengeListGrid" class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                    <!-- Dynamic challenges -->
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: BUCKET LIST SAVINGS -->
+        <div id="tab-goals" class="tab-content hidden space-y-4">
+            <div class="glass-card rounded-3xl p-4 sm:p-6 border border-slate-800 shadow-lg">
+                <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-4 sm:mb-6">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="font-bold text-base sm:text-lg text-slate-100">🎁 버킷리스트 저금 목표</h3>
+                            <span class="text-[10px] font-bold bg-pink-500/20 text-pink-300 border border-pink-500/30 px-2 py-0.5 rounded-full">목표 모으기</span>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-0.5">사고 싶은 목표나 저축 목표를 직접 모아보세요.</p>
+                    </div>
+                    <button onclick="openModal('addGoalModal')" class="px-3.5 py-2 rounded-xl bg-pink-600 hover:bg-pink-500 text-white font-bold text-xs flex items-center gap-1.5 self-start sm:self-auto transition shadow-lg shadow-pink-600/30">
+                        <i class="fas fa-gift"></i> 목표 등록하기
+                    </button>
+                </div>
+
+                <div id="goalsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                    <!-- Dynamic goals -->
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: STATS & REPORTS -->
+        <div id="tab-stats" class="tab-content hidden space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="glass-card rounded-3xl p-4 sm:p-5 border border-slate-800 shadow-lg">
+                    <h3 class="font-bold text-xs sm:text-sm text-slate-200 mb-2 flex items-center gap-2">
+                        <i class="fas fa-chart-pie text-indigo-400"></i> 카테고리별 지출 비율
+                    </h3>
+                    <div class="relative h-56 sm:h-60 flex items-center justify-center">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-3xl p-4 sm:p-5 border border-slate-800 shadow-lg">
+                    <h3 class="font-bold text-xs sm:text-sm text-slate-200 mb-2 flex items-center gap-2">
+                        <i class="fas fa-chart-bar text-cyan-400"></i> 월별 수입 vs 지출 비교
+                    </h3>
+                    <div class="relative h-56 sm:h-60 flex items-center justify-center">
+                        <canvas id="monthlyChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-3xl p-4 sm:p-6 border border-indigo-500/30 shadow-lg bg-gradient-to-r from-indigo-950/40 via-purple-950/30 to-slate-900/60">
+                <div class="flex items-start space-x-3.5">
+                    <div class="w-10 h-10 sm:w-11 sm:h-11 bg-indigo-500/20 border border-indigo-500/40 rounded-2xl flex items-center justify-center text-indigo-400 text-lg sm:text-xl shrink-0">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-xs sm:text-sm text-indigo-200">스마트 패밀리 가계 코치 리포트</h4>
+                        <p id="financialAdviceText" class="text-xs text-slate-300 mt-1 leading-relaxed">
+                            소비 분석 데이터를 바탕으로 스마트한 피드백이 여기에 표시됩니다.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FIXED MOBILE BOTTOM NAVIGATION BAR -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-xl border-t border-slate-800 px-2 py-2">
+        <div class="max-w-md mx-auto grid grid-cols-5 text-center">
+            <button onclick="switchTab('tab-history')" id="nav-mobile-history" class="mobile-nav-btn flex flex-col items-center justify-center text-indigo-400 font-bold py-1">
+                <i class="fas fa-receipt text-base mb-1"></i>
+                <span class="text-[10px]">장부</span>
+            </button>
+            <button onclick="switchTab('tab-challenges')" id="nav-mobile-challenges" class="mobile-nav-btn flex flex-col items-center justify-center text-slate-400 font-bold py-1 hover:text-slate-200">
+                <i class="fas fa-bullseye text-base mb-1 text-amber-400"></i>
+                <span class="text-[10px]">챌린지</span>
+            </button>
+            <button onclick="openModal('addModal')" class="flex flex-col items-center justify-center py-1">
+                <div class="w-10 h-10 rounded-full glow-button text-white flex items-center justify-center text-lg -mt-4 shadow-lg shadow-indigo-600/50">
+                    <i class="fas fa-plus"></i>
+                </div>
+            </button>
+            <button onclick="switchTab('tab-goals')" id="nav-mobile-goals" class="mobile-nav-btn flex flex-col items-center justify-center text-slate-400 font-bold py-1 hover:text-slate-200">
+                <i class="fas fa-heart text-base mb-1 text-pink-400"></i>
+                <span class="text-[10px]">저금</span>
+            </button>
+            <button onclick="switchTab('tab-stats')" id="nav-mobile-stats" class="mobile-nav-btn flex flex-col items-center justify-center text-slate-400 font-bold py-1 hover:text-slate-200">
+                <i class="fas fa-chart-pie text-base mb-1 text-cyan-400"></i>
+                <span class="text-[10px]">리포트</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- MODAL 1: ADD / EDIT TRANSACTION -->
+    <div id="addModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 rounded-3xl max-w-md w-full p-5 sm:p-6 border border-slate-700 shadow-2xl">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="font-bold text-base sm:text-lg text-slate-100 flex items-center gap-2">
+                    <i class="fas fa-pen-nib text-indigo-400"></i>
+                    <span id="transactionModalTitle">입출금 내역 작성</span>
+                </h3>
+                <button onclick="closeModal('addModal')" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <form id="transactionForm" onsubmit="handleSaveTransaction(event)" class="space-y-3.5">
+                <input type="hidden" id="editingTxId" value="">
+                <div class="grid grid-cols-2 gap-2 p-1 bg-slate-950 rounded-2xl border border-slate-800">
+                    <button type="button" onclick="setFormType('out')" id="typeBtnOut" class="py-2 rounded-xl font-bold text-xs transition bg-rose-600 text-white shadow-md">
+                        <i class="fas fa-minus-circle mr-1"></i> 지출 (쓴 돈)
+                    </button>
+                    <button type="button" onclick="setFormType('in')" id="typeBtnIn" class="py-2 rounded-xl font-bold text-xs transition bg-slate-800 text-slate-400">
+                        <i class="fas fa-plus-circle mr-1"></i> 수입 (벌거나 받은 돈)
+                    </button>
+                </div>
+                <input type="hidden" id="formType" value="out">
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1">금액 (원)</label>
+                    <div class="relative">
+                        <input type="text" inputmode="numeric" id="formAmount" required placeholder="예: 20000 또는 20,000" class="w-full pl-4 pr-10 py-2.5 rounded-2xl bg-slate-950 border border-slate-700 text-slate-100 font-bold text-base outline-none focus:border-indigo-500">
+                        <span class="absolute right-4 top-3 font-bold text-slate-500 text-xs">원</span>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1">카테고리</label>
+                    <select id="formCategory" class="w-full py-2.5 px-4 rounded-2xl bg-slate-950 border border-slate-700 text-slate-200 text-xs font-bold outline-none focus:border-indigo-500">
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1">적요 / 상세 내용</label>
+                    <input type="text" id="formMemo" required placeholder="예: 삼각김밥, 버스 충전, 장보기" class="w-full py-2.5 px-4 rounded-2xl bg-slate-950 border border-slate-700 text-slate-200 text-xs outline-none focus:border-indigo-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1">날짜</label>
+                    <input type="date" id="formDate" required class="w-full py-2.5 px-4 rounded-2xl bg-slate-950 border border-slate-700 text-slate-200 text-xs outline-none focus:border-indigo-500">
+                </div>
+
+                <div class="pt-2 flex space-x-2">
+                    <button type="button" onclick="closeModal('addModal')" class="w-1/3 py-2.5 rounded-2xl border border-slate-700 text-slate-400 font-bold text-xs hover:bg-slate-800">취소</button>
+                    <button type="submit" class="w-2/3 py-2.5 rounded-2xl glow-button text-white font-bold text-xs shadow-lg">저장하기</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 2: DUTCH PAY CALCULATOR -->
+    <div id="dutchModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 rounded-3xl max-w-md w-full p-5 sm:p-6 border border-slate-700 shadow-2xl">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="font-bold text-base sm:text-lg text-slate-100 flex items-center gap-2">
+                    <i class="fas fa-calculator text-indigo-400"></i>
+                    <span>스마트 더치페이 정산기</span>
+                </h3>
+                <button onclick="closeModal('dutchModal')" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="space-y-3.5">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1">총 결제 금액 (원)</label>
+                    <input type="number" id="dutchTotal" placeholder="예: 32000" oninput="calculateDutch()" class="w-full py-2.5 px-4 rounded-2xl bg-slate-950 border border-slate-700 text-slate-100 font-bold text-base outline-none focus:border-indigo-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1">함께 한 인원 수 (명)</label>
+                    <input type="number" id="dutchPeople" min="1" value="2" oninput="calculateDutch()" class="w-full py-2.5 px-4 rounded-2xl bg-slate-950 border border-slate-700 text-slate-100 font-bold text-base outline-none focus:border-indigo-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1">모임 / 정산 내용</label>
+                    <input type="text" id="dutchMemo" placeholder="예: 외식 및 디저트 카페" class="w-full py-2.5 px-4 rounded-2xl bg-slate-950 border border-slate-700 text-slate-200 text-xs outline-none focus:border-indigo-500">
+                </div>
+
+                <div class="bg-indigo-950/50 rounded-2xl p-3 border border-indigo-500/30 text-center">
+                    <div class="text-xs text-indigo-300 font-medium">1인당 부담 금액</div>
+                    <div class="text-xl sm:text-2xl font-black font-jakarta text-indigo-200 mt-0.5" id="dutchPerPersonResult">0 원</div>
+                </div>
+
+                <div class="pt-1 flex space-x-2">
+                    <button type="button" onclick="closeModal('dutchModal')" class="w-1/3 py-2.5 rounded-2xl border border-slate-700 text-slate-400 font-bold text-xs">닫기</button>
+                    <button type="button" onclick="applyDutchToTransaction()" class="w-2/3 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30">
+                        내 지출로 추가하기
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: MONTHLY BUDGET SETUP -->
+    <div id="budgetModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 rounded-3xl max-w-sm w-full p-5 sm:p-6 border border-slate-700 shadow-2xl">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="font-bold text-base text-slate-100">🎯 한 달 목표 예산 설정</h3>
+                <button onclick="closeModal('budgetModal')" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form onsubmit="handleSaveBudget(event)" class="space-y-3.5">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1">한 달 한도 예산 (원)</label>
+                    <input type="number" id="budgetInput" required min="1000" step="1000" placeholder="예: 300000" class="w-full py-2.5 px-4 rounded-2xl bg-slate-950 border border-slate-700 text-slate-100 font-bold text-base outline-none focus:border-indigo-500">
+                    <p class="text-[11px] text-slate-500 mt-1">지출이 예산에 가까워지면 실시간 경고 메시지를 보여줍니다.</p>
+                </div>
+                <div class="flex space-x-2 pt-1">
+                    <button type="button" onclick="closeModal('budgetModal')" class="w-1/3 py-2.5 rounded-2xl border border-slate-700 text-slate-400 font-bold text-xs">취소</button>
+                    <button type="submit" class="w-2/3 py-2.5 rounded-2xl bg-indigo-600 text-white font-bold text-xs">예산 저장</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 4: ADD / EDIT CHALLENGE -->
+    <div id="addChallengeModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 rounded-3xl max-w-md w-full p-5 sm:p-6 border border-slate-700 shadow-2xl">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="font-bold text-base text-slate-100" id="challengeModalTitle">🔥 새 지출 절약 챌린지</h3>
+                <button onclick="closeModal('addChallengeModal')" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form onsubmit="handleSaveChallenge(event)" class="space-y-3.5">
+                <input type="hidden" id="editingChallengeId" value="">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1">챌린지 목표 이름</label>
+                    <input type="text" id="challengeTitle" required placeholder="예: 주말 외식/카페 1만원 이하, 3일 무지출" class="w-full py-2.5 px-4 rounded-2xl bg-slate-950 border border-slate-700 text-slate-200 text-xs outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1">아끼려는 예상 금액 / 보상 (원)</label>
+                    <input type="number" id="challengeReward" required min="500" step="500" placeholder="10000" class="w-full py-2.5 px-4 rounded-2xl bg-slate-950 border border-slate-700 text-slate-100 font-bold text-base outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1">아이콘 선택</label>
+                    <div class="flex space-x-2 text-xl py-1">
+                        <label class="cursor-pointer"><input type="radio" name="challengeIcon" value="🏪" checked class="hidden peer"><span class="p-2 rounded-xl bg-slate-950 border border-slate-700 peer-checked:border-indigo-500 peer-checked:bg-indigo-950/50 inline-block">🏪</span></label>
+                        <label class="cursor-pointer"><input type="radio" name="challengeIcon" value="☕" class="hidden peer"><span class="p-2 rounded-xl bg-slate-950 border border-slate-700 peer-checked:border-indigo-500 peer-checked:bg-indigo-950/50 inline-block">☕</span></label>
+                        <label class="cursor-pointer"><input type="radio" name="challengeIcon" value="🎮" class="hidden peer"><span class="p-2 rounded-xl bg-slate-950 border border-slate-700 peer-checked:border-indigo-500 peer-checked:bg-indigo-950/50 inline-block">🎮</span></label>
+                        <label class="cursor-pointer"><input type="radio" name="challengeIcon" value="🚌" class="hidden peer"><span class="p-2 rounded-xl bg-slate-950 border border-slate-700 peer-checked:border-indigo-500 peer-checked:bg-indigo-950/50 inline-block">🚌</span></label>
+                        <label class="cursor-pointer"><input type="radio" name="challengeIcon" value="🛍️" class="hidden peer"><span class="p-2 rounded-xl bg-slate-950 border border-slate-700 peer-checked:border-indigo-500 peer-checked:bg-indigo-950/50 inline-block">🛍️</span></label>
+                    </div>
+                </div>
+                <div class="pt-1 flex space-x-2">
+                    <button type="button" onclick="closeModal('addChallengeModal')" class="w-1/3 py-2.5 rounded-2xl border border-slate-700 text-slate-400 font-bold text-xs">취소</button>
+                    <button type="submit" class="w-2/3 py-2.5 rounded-2xl bg-indigo-600 text-white font-bold text-xs">챌린지 저장</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 5: ADD SAVINGS GOAL -->
+    <div id="addGoalModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 rounded-3xl max-w-md w-full p-5 sm:p-6 border border-slate-700 shadow-2xl">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="font-bold text-base text-slate-100">🎁 버킷리스트 목표 등록</h3>
+                <button onclick="closeModal('addGoalModal')" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form onsubmit="handleSaveGoal(event)" class="space-y-3.5">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1">위시리스트 물건 / 목표</label>
+                    <input type="text" id="goalTitle" required placeholder="예: 가족 여행 적금, 전자기기, 콘서트 티켓" class="w-full py-2.5 px-4 rounded-2xl bg-slate-950 border border-slate-700 text-slate-200 text-xs outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1">목표 가격 (원)</label>
+                    <input type="number" id="goalTarget" required min="1000" step="1000" placeholder="200000" class="w-full py-2.5 px-4 rounded-2xl bg-slate-950 border border-slate-700 text-slate-100 font-bold text-base outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1">아이콘 선택</label>
+                    <div class="flex space-x-2 text-xl py-1">
+                        <label class="cursor-pointer"><input type="radio" name="goalIcon" value="🎧" checked class="hidden peer"><span class="p-2 rounded-xl bg-slate-950 border border-slate-700 peer-checked:border-pink-500 peer-checked:bg-pink-950/50 inline-block">🎧</span></label>
+                        <label class="cursor-pointer"><input type="radio" name="goalIcon" value="👟" class="hidden peer"><span class="p-2 rounded-xl bg-slate-950 border border-slate-700 peer-checked:border-pink-500 peer-checked:bg-pink-950/50 inline-block">👟</span></label>
+                        <label class="cursor-pointer"><input type="radio" name="goalIcon" value="✈️" class="hidden peer"><span class="p-2 rounded-xl bg-slate-950 border border-slate-700 peer-checked:border-pink-500 peer-checked:bg-pink-950/50 inline-block">✈️</span></label>
+                        <label class="cursor-pointer"><input type="radio" name="goalIcon" value="📱" class="hidden peer"><span class="p-2 rounded-xl bg-slate-950 border border-slate-700 peer-checked:border-pink-500 peer-checked:bg-pink-950/50 inline-block">📱</span></label>
+                        <label class="cursor-pointer"><input type="radio" name="goalIcon" value="🎮" class="hidden peer"><span class="p-2 rounded-xl bg-slate-950 border border-slate-700 peer-checked:border-pink-500 peer-checked:bg-pink-950/50 inline-block">🎮</span></label>
+                    </div>
+                </div>
+                <div class="pt-1 flex space-x-2">
+                    <button type="button" onclick="closeModal('addGoalModal')" class="w-1/3 py-2.5 rounded-2xl border border-slate-700 text-slate-400 font-bold text-xs">취소</button>
+                    <button type="submit" class="w-2/3 py-2.5 rounded-2xl bg-pink-600 text-white font-bold text-xs">저금 시작하기</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 6: EDIT FAMILY MEMBER NAMES -->
+    <div id="familyNameModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 rounded-3xl max-w-sm w-full p-5 sm:p-6 border border-slate-700 shadow-2xl">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="font-bold text-base text-slate-100">👨‍👩‍👧‍👦 가족 프로필 설정</h3>
+                <button onclick="closeModal('familyNameModal')" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form onsubmit="handleSaveFamilyNames(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1">🐹 첫째 이름</label>
+                    <input type="text" id="child1NameInput" required placeholder="첫째" class="w-full py-2 px-3 rounded-xl bg-slate-950 border border-slate-700 text-slate-200 text-xs font-bold outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1">⚾ 둘째 이름</label>
+                    <input type="text" id="child2NameInput" required placeholder="둘째" class="w-full py-2 px-3 rounded-xl bg-slate-950 border border-slate-700 text-slate-200 text-xs font-bold outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1">👩 엄마 이름</label>
+                    <input type="text" id="momNameInput" required placeholder="엄마" class="w-full py-2 px-3 rounded-xl bg-slate-950 border border-slate-700 text-slate-200 text-xs font-bold outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1">🎾 아빠 이름</label>
+                    <input type="text" id="dadNameInput" required placeholder="아빠" class="w-full py-2 px-3 rounded-xl bg-slate-950 border border-slate-700 text-slate-200 text-xs font-bold outline-none focus:border-indigo-500">
+                </div>
+
+                <div class="pt-2 flex space-x-2">
+                    <button type="button" onclick="closeModal('familyNameModal')" class="w-1/3 py-2.5 rounded-2xl border border-slate-700 text-slate-400 font-bold text-xs">취소</button>
+                    <button type="submit" class="w-2/3 py-2.5 rounded-2xl bg-indigo-600 text-white font-bold text-xs">저장하기</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- INITIAL LOGIN SCREEN OVERLAY -->
+    <div id="loginOverlay" class="fixed inset-0 bg-slate-950/95 backdrop-blur-xl z-50 flex items-center justify-center p-4">
+        <div class="glass-card rounded-3xl max-w-md w-full p-6 sm:p-8 border border-indigo-500/30 shadow-2xl text-center space-y-6 relative overflow-hidden">
+            <div class="absolute -right-12 -top-12 w-40 h-40 bg-indigo-600/10 rounded-full blur-2xl pointer-events-none"></div>
+            
+            <div>
+                <div class="w-14 h-14 mx-auto rounded-3xl bg-gradient-to-tr from-indigo-600 to-purple-500 flex items-center justify-center text-white font-extrabold text-2xl shadow-xl shadow-indigo-500/30 mb-3">
+                    <i class="fas fa-users-between-lines"></i>
+                </div>
+                <h2 class="text-2xl font-black font-jakarta tracking-tight gradient-text">패밀리 PAY</h2>
+                <p class="text-xs text-slate-400 font-medium mt-1">로그인할 가족 프로필을 선택해주세요</p>
+            </div>
+
+            <!-- Profile Selection Grid -->
+            <div id="loginProfileGrid" class="grid grid-cols-2 gap-3 pt-2">
+                <button onclick="loginMember('mom')" class="glass-card-interactive p-4 rounded-2xl border border-slate-700/80 hover:border-indigo-500/80 flex flex-col items-center justify-center space-y-2 group transition">
+                    <span class="text-3xl group-hover:scale-110 transition duration-200" id="loginAvatar-mom">👩</span>
+                    <span class="font-bold text-xs text-slate-200 group-hover:text-indigo-300" id="loginName-mom">엄마</span>
+                    <span class="text-[9px] text-slate-500 bg-slate-800/80 px-2 py-0.5 rounded-full border border-slate-700">mom</span>
+                </button>
+                <button onclick="loginMember('dad')" class="glass-card-interactive p-4 rounded-2xl border border-slate-700/80 hover:border-indigo-500/80 flex flex-col items-center justify-center space-y-2 group transition">
+                    <span class="text-3xl group-hover:scale-110 transition duration-200" id="loginAvatar-dad">🎾</span>
+                    <span class="font-bold text-xs text-slate-200 group-hover:text-indigo-300" id="loginName-dad">아빠</span>
+                    <span class="text-[9px] text-slate-500 bg-slate-800/80 px-2 py-0.5 rounded-full border border-slate-700">dad</span>
+                </button>
+                <button onclick="loginMember('child1')" class="glass-card-interactive p-4 rounded-2xl border border-slate-700/80 hover:border-indigo-500/80 flex flex-col items-center justify-center space-y-2 group transition">
+                    <span class="text-3xl group-hover:scale-110 transition duration-200" id="loginAvatar-child1">🐹</span>
+                    <span class="font-bold text-xs text-slate-200 group-hover:text-indigo-300" id="loginName-child1">첫째</span>
+                    <span class="text-[9px] text-slate-500 bg-slate-800/80 px-2 py-0.5 rounded-full border border-slate-700">child1</span>
+                </button>
+                <button onclick="loginMember('child2')" class="glass-card-interactive p-4 rounded-2xl border border-slate-700/80 hover:border-indigo-500/80 flex flex-col items-center justify-center space-y-2 group transition">
+                    <span class="text-3xl group-hover:scale-110 transition duration-200" id="loginAvatar-child2">⚾</span>
+                    <span class="font-bold text-xs text-slate-200 group-hover:text-indigo-300" id="loginName-child2">둘째</span>
+                    <span class="text-[9px] text-slate-500 bg-slate-800/80 px-2 py-0.5 rounded-full border border-slate-700">child2</span>
+                </button>
+            </div>
+
+            <div class="pt-2 text-[11px] text-slate-500 flex items-center justify-center gap-1">
+                <i class="fas fa-shield-alt text-indigo-400"></i>
+                <span>다음 접속 시 선택한 프로필로 자동 로그인됩니다.</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="toastContainer" class="fixed bottom-20 sm:bottom-6 right-4 sm:right-6 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+
+    <script>
+        const SUPABASE_URL = 'https://bwzvgqcfydznuwugyyio.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ3enZncWNmeWR6bnV3dWd5eWlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzNzU2MjcsImV4cCI6MjA4ODk1MTYyN30.SqQJ7w-SsPnm1wN03USOaR6_Fdn0JBzLn8tPhFYJWj8';
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        const IN_CATEGORIES = [
+            { name: '정기 용돈/월급', icon: '💵' },
+            { name: '상여금/부업', icon: '✨' },
+            { name: '명절/친척 용돈', icon: '🧧' },
+            { name: '중고거래(당근)', icon: '🥕' },
+            { name: '더치페이 정산', icon: '🤝' },
+            { name: '기타 수입', icon: '🎁' }
+        ];
+
+        const OUT_CATEGORIES = [
+            { name: '편의점/간식', icon: '🏪' },
+            { name: '외식/회식', icon: '🍕' },
+            { name: '생활비/장보기', icon: '🛒' },
+            { name: '교통비/주유', icon: '🚌' },
+            { name: '주거/통신비', icon: '🏠' },
+            { name: '쇼핑/패션', icon: '👕' },
+            { name: '문화/취미/PC방', icon: '🎮' },
+            { name: '구독/스트리밍', icon: '🎧' },
+            { name: '더치페이/모임', icon: '☕' },
+            { name: '경조사비/선물', icon: '💐' },
+            { name: '공부/교육/교재', icon: '📚' },
+            { name: '병원/약국', icon: '💊' },            
+            { name: '저금/투자', icon: '📈' },
+            { name: '기타 지출', icon: '🛍️' }
+        ];
+
+        const FAMILY_FORTUNES = [
+            "오늘 불필요한 카페/간식 소비 방어로 알뜰 가계 달성! ☕",
+            "가족과 함께하는 더치페이는 신뢰와 정직의 시작입니다 🤝",
+            "지금 사고 싶은 것, 24시간 뒤에 한번 더 생각하기 ⏱️",
+            "정기 구독 서비스 중 안 쓰는 것이 있다면 오늘 정리해보세요! 🎧",
+            "꾸준히 모은 작은 돈이 가족 버킷리스트를 현실로 만듭니다! 🚀",
+            "할인율에 속지 마세요. 사지 않으면 100% 할인입니다! 🏷️",
+            "배달 앱을 열기 전, 냉장고 속 잊혀진 재료부터 구조해주세요! 🍳",
+            "오늘 아낀 커핏값 한 잔, 미래의 나에게 보내는 선물입니다! 🎁",
+            "장바구니에 넣고 3일 뒤에도 생각나면 그때 결제해도 늦지 않아요! 🛒",
+            "기분 전환용 소소한 지출이 모이면 커다란 통장 구멍이 됩니다! 🕳️",
+            "서로의 지출을 정직하게 공유할 때 건강한 가계가 완성됩니다 🏡",
+            "이번 주 고정 지출 명세서를 점검하고 샌 돈을 찾아보세요! 🕵️",
+            "지출을 기록하는 습관만으로도 불필요한 소비의 절반이 줄어듭니다 📝",
+            "택시 타기 전, 대중교통 시간을 한 번만 더 확인해볼까요? 🚌",
+            "우리 가족의 다음 여행지, 매일 모으는 작은 저축에서 시작됩니다 ✈️",
+            "통장 잔고의 여유가 마음의 여유와 선택의 자유를 만들어줍니다 🌿",
+            "Point는 덤이 아니라 내 돈입니다. 자투리 포인트까지 야무지게 사용하세요! 🎯",
+            "스트레스받을 때 쇼핑몰 앱을 켜는 대신 산책을 다녀와 보세요! 👟",
+            "지출을 줄이는 것은 소득을 올리는 가장 빠르고 확실한 방법입니다 📈"
+        ];
+
+        const DEFAULT_FAMILY_MEMBERS = [
+            { key: 'child1', name: '첫째', avatar: '🐹', defaultBudget: 150000 },
+            { key: 'child2', name: '둘째', avatar: '⚾', defaultBudget: 150000 },
+            { key: 'mom', name: '엄마', avatar: '👩', defaultBudget: 300000 },
+            { key: 'dad', name: '아빠', avatar: '🎾', defaultBudget: 300000 }
+        ];
+
+        let appData = {
+            activeMemberKey: 'mom',
+            audioEnabled: true,
+            members: {}
+        };
+        let currentFilter = 'all';
+        let categoryChartInstance = null;
+        let monthlyChartInstance = null;
+        const STORAGE_KEY_LOGIN = 'family_pay_active_member';
+
+        function getCurrentMember() {
+            if (!appData.members || !appData.members[appData.activeMemberKey]) {
+                const keys = Object.keys(appData.members || {});
+                if (keys.length > 0) appData.activeMemberKey = keys[0];
+            }
+            return appData.members ? appData.members[appData.activeMemberKey] : null;
+        }
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            if (!appData.audioEnabled) return;
+            try {
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                const now = audioCtx.currentTime;
+
+                if (type === 'pop') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(800, now);
+                    osc.frequency.exponentialRampToValueAtTime(1200, now + 0.1);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+                    osc.start(now);
+                    osc.stop(now + 0.12);
+                } else if (type === 'success') {
+                    const notes = [523.25, 659.25, 783.99, 1046.50];
+                    notes.forEach((freq, idx) => {
+                        const subOsc = audioCtx.createOscillator();
+                        const subGain = audioCtx.createGain();
+                        subOsc.connect(subGain);
+                        subGain.connect(audioCtx.destination);
+                        subOsc.type = 'triangle';
+                        subOsc.frequency.setValueAtTime(freq, now + idx * 0.06);
+                        subGain.gain.setValueAtTime(0.2, now + idx * 0.06);
+                        subGain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.06 + 0.2);
+                        subOsc.start(now + idx * 0.06);
+                        subOsc.stop(now + idx * 0.06 + 0.2);
+                    });
+                }
+            } catch(e) {
+                console.log('Audio error/suspended');
+            }
+        }
+
+        function toggleAudio() {
+            appData.audioEnabled = !appData.audioEnabled;
+            const btn = document.getElementById('soundBtn');
+            if (appData.audioEnabled) {
+                btn.innerHTML = `<i class="fas fa-volume-up text-indigo-400 text-xs"></i>`;
+                showToast('🔊 효과음 활성화');
+            } else {
+                btn.innerHTML = `<i class="fas fa-volume-mute text-slate-500 text-xs"></i>`;
+                showToast('🔇 음소거 설정');
+            }
+        }
+
+        function showLoginOverlay() {
+            updateLoginOverlayUI();
+            const overlay = document.getElementById('loginOverlay');
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+            playSound('pop');
+        }
+
+        function hideLoginOverlay() {
+            const overlay = document.getElementById('loginOverlay');
+            overlay.classList.add('hidden');
+            overlay.classList.remove('flex');
+        }
+
+        function loginMember(key) {
+            if (!appData.members || !appData.members[key]) {
+                showToast('⚠️ 선택한 프로필을 로드할 수 없습니다.');
+                return;
+            }
+
+            appData.activeMemberKey = key;
+            localStorage.setItem(STORAGE_KEY_LOGIN, key);
+
+            updateFamilySwitcherUI();
+            updateDashboard();
+            hideLoginOverlay();
+
+            const member = appData.members[key];
+            if (member) {
+                document.getElementById('budgetInput').value = member.budgetTarget || 300000;
+            }
+
+            playSound('success');
+            showToast(`👋 '${member.name}' 님으로 로그인되었습니다!`);
+        }
+
+        function updateLoginOverlayUI() {
+            ['mom', 'dad', 'child1', 'child2'].forEach(key => {
+                const member = (appData.members && appData.members[key]) ? appData.members[key] : { name: key, avatar: '👤' };
+                const nameEl = document.getElementById(`loginName-${key}`);
+                const avatarEl = document.getElementById(`loginAvatar-${key}`);
+                if (nameEl) nameEl.textContent = member.name;
+                if (avatarEl) avatarEl.textContent = member.avatar;
+            });
+        }
+
+        async function loadData() {
+            showToast('🔄 Supabase DB에서 가계 데이터 읽어오는 중...');
+            try {
+                let { data: childrenData, error: childErr } = await supabaseClient.from('children').select('*');
+                if (childErr) throw childErr;
+
+                const existingKeys = (childrenData || []).map(c => c.child_key);
+                const missingMembers = DEFAULT_FAMILY_MEMBERS.filter(m => !existingKeys.includes(m.key));
+
+                if (missingMembers.length > 0) {
+                    const insertPayload = missingMembers.map(m => ({
+                        child_key: m.key,
+                        name: m.name,
+                        avatar: m.avatar,
+                        budget_target: m.defaultBudget
+                    }));
+                    const { data: newMembers } = await supabaseClient.from('children').insert(insertPayload).select();
+                    if (newMembers) {
+                        childrenData = [...(childrenData || []), ...newMembers];
+                    }
+                }
+
+                appData.members = {};
+
+                for (const c of childrenData) {
+                    const memberKey = c.child_key || 'mom';
+
+                    const { data: txData } = await supabaseClient.from('transactions').select('*').eq('child_id', c.id).order('date', { ascending: false });
+                    const { data: chData } = await supabaseClient.from('challenges').select('*').eq('child_id', c.id);
+                    const { data: gData } = await supabaseClient.from('goals').select('*').eq('child_id', c.id);
+
+                    appData.members[memberKey] = {
+                        dbId: c.id,
+                        key: memberKey,
+                        name: c.name,
+                        avatar: c.avatar || '👤',
+                        budgetTarget: Number(c.budget_target) || 300000,
+                        transactions: (txData || []).map(t => ({
+                            id: t.id,
+                            type: t.type,
+                            amount: Number(t.amount),
+                            category: t.category,
+                            memo: t.memo,
+                            date: t.date
+                        })),
+                        challenges: (chData || []).map(ch => ({
+                            id: ch.id,
+                            title: ch.title,
+                            reward: Number(ch.reward),
+                            icon: ch.icon,
+                            status: ch.status
+                        })),
+                        goals: (gData || []).map(g => ({
+                            id: g.id,
+                            title: g.title,
+                            target: Number(g.target_amount),
+                            current: Number(g.current_amount),
+                            icon: g.icon
+                        }))
+                    };
+                }
+
+                document.getElementById('formDate').value = new Date().toISOString().substring(0, 10);
+                updateFamilySwitcherUI();
+                updateLoginOverlayUI();
+
+                const savedActiveMember = localStorage.getItem(STORAGE_KEY_LOGIN);
+
+                if (savedActiveMember && appData.members[savedActiveMember]) {
+                    appData.activeMemberKey = savedActiveMember;
+                    hideLoginOverlay();
+                    
+                    const member = getCurrentMember();
+                    if (member) {
+                        document.getElementById('budgetInput').value = member.budgetTarget || 300000;
+                    }
+                    updateDashboard();
+                    showToast(`⚡ '${appData.members[savedActiveMember].name}' 님으로 자동 로그인되었습니다.`);
+                } else {
+                    showLoginOverlay();
+                    updateDashboard();
+                }
+
+            } catch (e) {
+                console.error('Supabase connection error:', e);
+                showToast('⚠️ DB 연동 실패. Supabase 설정을 확인하세요.');
+            }
+        }
+
+        function saveData() {
+            updateDashboard();
+        }
+
+        function showToast(msg) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'glass-card bg-slate-900/95 text-slate-100 border border-slate-700 px-3.5 py-2 rounded-2xl shadow-2xl text-xs font-bold flex items-center gap-2 transform transition-all duration-300 translate-y-4 opacity-0 pointer-events-auto';
+            toast.innerHTML = `<span class="text-indigo-400">⚡</span> <span>${msg}</span>`;
+            container.appendChild(toast);
+
+            setTimeout(() => toast.classList.remove('translate-y-4', 'opacity-0'), 10);
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-4');
+                setTimeout(() => toast.remove(), 300);
+            }, 2500);
+        }
+
+        function switchMember(key) {
+            appData.activeMemberKey = key;
+            localStorage.setItem(STORAGE_KEY_LOGIN, key);
+            updateFamilySwitcherUI();
+            updateDashboard();
+            const member = getCurrentMember();
+            if (member) {
+                document.getElementById('budgetInput').value = member.budgetTarget || 300000;
+                showToast(`👤 '${member.name}' 님의 가계부로 전환되었습니다.`);
+            }
+            playSound('pop');
+        }
+
+        function updateFamilySwitcherUI() {
+            ['mom', 'dad', 'child1', 'child2'].forEach(key => {
+                const member = appData.members[key] || { name: key, avatar: '👤' };
+                const nameEl = document.getElementById(`memberName-${key}`);
+                const avatarEl = document.getElementById(`memberAvatar-${key}`);
+                const btnEl = document.getElementById(`memberBtn-${key}`);
+
+                if (nameEl) nameEl.textContent = member.name;
+                if (avatarEl) avatarEl.textContent = member.avatar;
+
+                if (btnEl) {
+                    if (appData.activeMemberKey === key) {
+                        btnEl.className = "member-pill px-3 py-1.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all bg-indigo-600 text-white flex items-center gap-1.5 shadow-md shrink-0";
+                    } else {
+                        btnEl.className = "member-pill px-3 py-1.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all text-slate-400 bg-slate-800/80 hover:text-slate-200 flex items-center gap-1.5 shrink-0";
+                    }
+                }
+            });
+
+            if (appData.members.mom) document.getElementById('momNameInput').value = appData.members.mom.name;
+            if (appData.members.dad) document.getElementById('dadNameInput').value = appData.members.dad.name;
+            if (appData.members.child1) document.getElementById('child1NameInput').value = appData.members.child1.name;
+            if (appData.members.child2) document.getElementById('child2NameInput').value = appData.members.child2.name;
+        }
+
+        async function handleSaveFamilyNames(e) {
+            e.preventDefault();
+            const names = {
+                mom: document.getElementById('momNameInput').value.trim(),
+                dad: document.getElementById('dadNameInput').value.trim(),
+                child1: document.getElementById('child1NameInput').value.trim(),
+                child2: document.getElementById('child2NameInput').value.trim()
+            };
+
+            try {
+                for (const key of ['mom', 'dad', 'child1', 'child2']) {
+                    if (names[key] && appData.members[key]) {
+                        await supabaseClient.from('children').update({ name: names[key] }).eq('id', appData.members[key].dbId);
+                        appData.members[key].name = names[key];
+                    }
+                }
+                saveData();
+                updateFamilySwitcherUI();
+                closeModal('familyNameModal');
+                showToast('👨‍👩‍👧‍👦 가족 이름 설정이 DB에 저장되었습니다.');
+            } catch(err) {
+                showToast('⚠️ DB 업데이트 중 오류 발생');
+            }
+        }
+
+        async function handleSaveTransaction(e) {
+            e.preventDefault();
+            const member = getCurrentMember();
+            if (!member) return;
+
+            const editingId = document.getElementById('editingTxId').value;
+            const type = document.getElementById('formType').value;
+            const rawAmount = document.getElementById('formAmount').value.replace(/[^0-9]/g, '');
+            const amount = Number(rawAmount);
+
+            if (!amount || amount <= 0) {
+                showToast('⚠️ 올바른 금액을 입력해주세요.');
+                return;
+            }
+
+            const category = document.getElementById('formCategory').value;
+            const memo = document.getElementById('formMemo').value;
+            const date = document.getElementById('formDate').value;
+
+            try {
+                if (editingId) {
+                    const { error } = await supabaseClient.from('transactions').update({
+                        type,
+                        amount,
+                        category,
+                        memo,
+                        date
+                    }).eq('id', editingId);
+
+                    if (error) throw error;
+
+                    const targetTx = member.transactions.find(t => t.id === editingId);
+                    if (targetTx) {
+                        targetTx.type = type;
+                        targetTx.amount = amount;
+                        targetTx.category = category;
+                        targetTx.memo = memo;
+                        targetTx.date = date;
+                    }
+
+                    saveData();
+                    closeModal('addModal');
+                    playSound('pop');
+                    showToast('✏️ 입출금 내역이 수정되었습니다!');
+                } else {
+                    const { data, error } = await supabaseClient.from('transactions').insert([{
+                        child_id: member.dbId,
+                        type,
+                        amount,
+                        category,
+                        memo,
+                        date
+                    }]).select();
+
+                    if (error) throw error;
+
+                    if (data && data[0]) {
+                        member.transactions.unshift({
+                            id: data[0].id,
+                            type,
+                            amount,
+                            category,
+                            memo,
+                            date
+                        });
+                    }
+
+                    saveData();
+                    closeModal('addModal');
+                    playSound('pop');
+                    showToast(type === 'in' ? '🎉 수입 내역 DB 저장 완료!' : '🛍️ 지출 내역 DB 저장 완료!');
+                }
+
+                document.getElementById('formAmount').value = '';
+                document.getElementById('formMemo').value = '';
+                document.getElementById('editingTxId').value = '';
+            } catch (err) {
+                console.error(err);
+                showToast('⚠️ DB 처리에 실패했습니다.');
+            }
+        }
+
+        function openEditTransactionModal(id) {
+            const member = getCurrentMember();
+            if (!member) return;
+
+            const t = member.transactions.find(item => item.id === id);
+            if (!t) return;
+
+            document.getElementById('editingTxId').value = t.id;
+            document.getElementById('transactionModalTitle').textContent = '입출금 내역 수정';
+            setFormType(t.type);
+            document.getElementById('formAmount').value = t.amount;
+            document.getElementById('formMemo').value = t.memo;
+            document.getElementById('formDate').value = t.date;
+            
+            setTimeout(() => {
+                document.getElementById('formCategory').value = t.category;
+            }, 0);
+
+            openModal('addModal');
+        }
+
+        async function deleteTransaction(id) {
+            const member = getCurrentMember();
+            if (!member) return;
+
+            try {
+                const { error } = await supabaseClient.from('transactions').delete().eq('id', id);
+                if (error) throw error;
+
+                member.transactions = member.transactions.filter(t => t.id !== id);
+                saveData();
+                showToast('🗑️ 내역이 DB에서 삭제되었습니다.');
+            } catch (err) {
+                showToast('⚠️ 삭제 중 오류가 발생했습니다.');
+            }
+        }
+
+        async function applyDutchToTransaction() {
+            const member = getCurrentMember();
+            if (!member) return;
+
+            const total = Number(document.getElementById('dutchTotal').value) || 0;
+            const people = Math.max(1, Number(document.getElementById('dutchPeople').value) || 1);
+            const memo = document.getElementById('dutchMemo').value || '더치페이 정산';
+
+            if (!total || total <= 0) {
+                showToast('총 결제 금액을 입력해주세요!');
+                return;
+            }
+
+            const perPerson = Math.ceil((total / people) / 10) * 10;
+            const date = new Date().toISOString().substring(0, 10);
+
+            try {
+                const { data, error } = await supabaseClient.from('transactions').insert([{
+                    child_id: member.dbId,
+                    type: 'out',
+                    amount: perPerson,
+                    category: '더치페이/모임',
+                    memo: `[더치페이] ${memo}`,
+                    date
+                }]).select();
+
+                if (error) throw error;
+
+                if (data && data[0]) {
+                    member.transactions.unshift({
+                        id: data[0].id,
+                        type: 'out',
+                        amount: perPerson,
+                        category: '더치페이/모임',
+                        memo: `[더치페이] ${memo}`,
+                        date
+                    });
+                }
+
+                saveData();
+                closeModal('dutchModal');
+                playSound('pop');
+                showToast(`🤝 1인당 ${perPerson.toLocaleString()}원 지출 DB 추가 완료!`);
+            } catch (err) {
+                showToast('⚠️ 더치페이 내역 저장 중 오류 발생');
+            }
+        }
+
+        async function handleSaveBudget(e) {
+            e.preventDefault();
+            const member = getCurrentMember();
+            if (!member) return;
+
+            const budget = Number(document.getElementById('budgetInput').value);
+            if (budget && budget > 0) {
+                try {
+                    const { error } = await supabaseClient.from('children').update({ budget_target: budget }).eq('id', member.dbId);
+                    if (error) throw error;
+
+                    member.budgetTarget = budget;
+                    saveData();
+                    closeModal('budgetModal');
+                    showToast(`🎯 목표 예산(${budget.toLocaleString()}원)이 반영되었습니다.`);
+                } catch(err) {
+                    showToast('⚠️ 예산 변경 중 오류 발생');
+                }
+            }
+        }
+
+        async function claimChallenge(id) {
+            const member = getCurrentMember();
+            if (!member) return;
+
+            const c = member.challenges.find(x => x.id === id);
+            if (!c) return;
+
+            try {
+                const { error } = await supabaseClient.from('challenges').update({ status: 'completed' }).eq('id', id);
+                if (error) throw error;
+
+                c.status = 'completed';
+                saveData();
+                playSound('success');
+                showToast(`🔥 '${c.title}' 챌린지 성공 완료!`);
+            } catch (err) {
+                showToast('⚠️ 챌린지 상태 업데이트 오류');
+            }
+        }
+
+        async function deleteChallenge(id) {
+            const member = getCurrentMember();
+            if (!member) return;
+
+            try {
+                const { error } = await supabaseClient.from('challenges').delete().eq('id', id);
+                if (error) throw error;
+
+                member.challenges = member.challenges.filter(c => c.id !== id);
+                saveData();
+                showToast('🗑️ 챌린지가 DB에서 삭제되었습니다.');
+            } catch (err) {
+                showToast('⚠️ 챌린지 삭제 중 오류가 발생했습니다.');
+            }
+        }
+
+        async function handleSaveChallenge(e) {
+            e.preventDefault();
+            const member = getCurrentMember();
+            if (!member) return;
+
+            const editingId = document.getElementById('editingChallengeId').value;
+            const title = document.getElementById('challengeTitle').value;
+            const reward = Number(document.getElementById('challengeReward').value);
+            const iconRadio = document.querySelector('input[name="challengeIcon"]:checked');
+            const icon = iconRadio ? iconRadio.value : '🏪';
+
+            try {
+                if (editingId) {
+                    const { error } = await supabaseClient.from('challenges').update({
+                        title,
+                        reward,
+                        icon
+                    }).eq('id', editingId);
+
+                    if (error) throw error;
+
+                    const targetCh = member.challenges.find(c => c.id === editingId);
+                    if (targetCh) {
+                        targetCh.title = title;
+                        targetCh.reward = reward;
+                        targetCh.icon = icon;
+                    }
+
+                    saveData();
+                    closeModal('addChallengeModal');
+                    showToast('✏️ 챌린지가 수정되었습니다!');
+                } else {
+                    const { data, error } = await supabaseClient.from('challenges').insert([{
+                        child_id: member.dbId,
+                        title,
+                        reward,
+                        icon,
+                        status: 'active'
+                    }]).select();
+
+                    if (error) throw error;
+
+                    if (data && data[0]) {
+                        member.challenges.push({
+                            id: data[0].id,
+                            title,
+                            reward,
+                            icon,
+                            status: 'active'
+                        });
+                    }
+
+                    saveData();
+                    closeModal('addChallengeModal');
+                    showToast('🔥 새 절약 챌린지가 DB에 등록되었습니다!');
+                }
+
+                document.getElementById('editingChallengeId').value = '';
+            } catch (err) {
+                showToast('⚠️ 챌린지 저장 중 오류 발생');
+            }
+        }
+
+        function openEditChallengeModal(id) {
+            const member = getCurrentMember();
+            if (!member) return;
+
+            const c = member.challenges.find(item => item.id === id);
+            if (!c) return;
+
+            document.getElementById('editingChallengeId').value = c.id;
+            document.getElementById('challengeModalTitle').textContent = '✏️ 챌린지 수정';
+            document.getElementById('challengeTitle').value = c.title;
+            document.getElementById('challengeReward').value = c.reward;
+
+            const iconRadio = document.querySelector(`input[name="challengeIcon"][value="${c.icon}"]`);
+            if (iconRadio) iconRadio.checked = true;
+
+            openModal('addChallengeModal');
+        }
+
+        async function depositGoal(goalId) {
+            const member = getCurrentMember();
+            if (!member) return;
+
+            const g = member.goals.find(x => x.id === goalId);
+            if (!g) return;
+
+            const depositAmt = prompt(`'${g.title}' 목표에 추가로 모은 돈을 입력하세요:`, "10000");
+            const amt = Number(depositAmt);
+            if (amt && amt > 0) {
+                const newCurrent = Number(g.current) + amt;
+                const today = new Date().toISOString().substring(0, 10);
+
+                try {
+                    await supabaseClient.from('goals').update({ current_amount: newCurrent }).eq('id', goalId);
+                    
+                    const { data: txData } = await supabaseClient.from('transactions').insert([{
+                        child_id: member.dbId,
+                        type: 'out',
+                        amount: amt,
+                        category: '저금/투자',
+                        memo: `[목표저금] ${g.title}`,
+                        date: today
+                    }]).select();
+
+                    g.current = newCurrent;
+                    if (txData && txData[0]) {
+                        member.transactions.unshift({
+                            id: txData[0].id,
+                            type: 'out',
+                            amount: amt,
+                            category: '저금/투자',
+                            memo: `[목표저금] ${g.title}`,
+                            date: today
+                        });
+                    }
+
+                    saveData();
+                    playSound('pop');
+                    showToast(`💖 ${g.title} 저금통에 ${amt.toLocaleString()}원 적립 완료!`);
+                } catch (err) {
+                    showToast('⚠️ 저금 적립 중 DB 오류 발생');
+                }
+            }
+        }
+
+        async function deleteGoal(goalId) {
+            const member = getCurrentMember();
+            if (!member) return;
+
+            try {
+                const { error } = await supabaseClient.from('goals').delete().eq('id', goalId);
+                if (error) throw error;
+
+                member.goals = member.goals.filter(g => g.id !== goalId);
+                saveData();
+                showToast('🗑️ 저금 목표가 DB에서 삭제되었습니다.');
+            } catch (err) {
+                showToast('⚠️ 저금 목표 삭제 중 오류가 발생했습니다.');
+            }
+        }
+
+        async function handleSaveGoal(e) {
+            e.preventDefault();
+            const member = getCurrentMember();
+            if (!member) return;
+
+            const title = document.getElementById('goalTitle').value;
+            const target = Number(document.getElementById('goalTarget').value);
+            const iconRadio = document.querySelector('input[name="goalIcon"]:checked');
+            const icon = iconRadio ? iconRadio.value : '🎧';
+
+            try {
+                const { data, error } = await supabaseClient.from('goals').insert([{
+                    child_id: member.dbId,
+                    title,
+                    target_amount: target,
+                    current_amount: 0,
+                    icon
+                }]).select();
+
+                if (error) throw error;
+
+                if (data && data[0]) {
+                    member.goals.push({
+                        id: data[0].id,
+                        title,
+                        target,
+                        current: 0,
+                        icon
+                    });
+                }
+
+                saveData();
+                closeModal('addGoalModal');
+                showToast('🎁 버킷리스트 목표가 DB에 추가되었습니다!');
+            } catch (err) {
+                showToast('⚠️ 목표 등록 중 오류 발생');
+            }
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(tabId).classList.remove('hidden');
+
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.className = "tab-btn px-4 py-2.5 rounded-2xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all border border-slate-800 bg-slate-800/80 text-slate-400 hover:text-slate-200 hover:border-slate-700";
+            });
+            const activeDesktopBtn = document.getElementById('nav-desktop-' + tabId.replace('tab-', ''));
+            if (activeDesktopBtn) {
+                activeDesktopBtn.className = "tab-btn px-4 py-2.5 rounded-2xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all border border-indigo-500/50 bg-indigo-600 text-white shadow-lg shadow-indigo-600/20";
+            }
+
+            document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
+                btn.classList.remove('text-indigo-400');
+                btn.classList.add('text-slate-400');
+            });
+            const activeMobileBtn = document.getElementById('nav-mobile-' + tabId.replace('tab-', ''));
+            if (activeMobileBtn) {
+                activeMobileBtn.classList.remove('text-slate-400');
+                activeMobileBtn.classList.add('text-indigo-400');
+            }
+
+            if (tabId === 'tab-stats') {
+                renderCharts();
+            }
+        }
+
+        function updateDashboard() {
+            const member = getCurrentMember();
+            if (!member) return;
+
+            document.getElementById('currentMemberDisplay').textContent = `${member.avatar} ${member.name}`;
+
+            let totalIn = 0;
+            let totalOut = 0;
+
+            const now = new Date();
+            const currentMonthStr = now.toISOString().substring(0, 7);
+            let monthIn = 0;
+            let monthOut = 0;
+
+            const categoryExpenseMap = {};
+
+            member.transactions.forEach(t => {
+                const amt = Number(t.amount);
+                if (t.type === 'in') {
+                    totalIn += amt;
+                    if (t.date.startsWith(currentMonthStr)) monthIn += amt;
+                } else {
+                    totalOut += amt;
+                    if (t.date.startsWith(currentMonthStr)) monthOut += amt;
+                    
+                    if (t.date.startsWith(currentMonthStr)) {
+                        categoryExpenseMap[t.category] = (categoryExpenseMap[t.category] || 0) + amt;
+                    }
+                }
+            });
+
+            const balance = totalIn - totalOut;
+            document.getElementById('totalBalanceDisplay').textContent = balance.toLocaleString() + ' 원';
+            document.getElementById('monthIncomeDisplay').textContent = '+' + monthIn.toLocaleString() + ' 원';
+            document.getElementById('monthExpenseDisplay').textContent = '-' + monthOut.toLocaleString() + ' 원';
+
+            let topCat = null;
+            let maxCatAmt = 0;
+            for (const [cat, amt] of Object.entries(categoryExpenseMap)) {
+                if (amt > maxCatAmt) {
+                    maxCatAmt = amt;
+                    topCat = cat;
+                }
+            }
+
+            if (topCat) {
+                const iconObj = OUT_CATEGORIES.find(c => c.name === topCat) || { icon: '🛍️' };
+                document.getElementById('topCategoryName').innerHTML = `<span class="mr-1">${iconObj.icon}</span> ${topCat}`;
+                document.getElementById('topCategoryAmount').textContent = maxCatAmt.toLocaleString() + '원';
+            } else {
+                document.getElementById('topCategoryName').innerHTML = `<i class="fas fa-shopping-bag text-indigo-400"></i> 지출 기록 없음`;
+                document.getElementById('topCategoryAmount').textContent = '0원';
+            }
+
+            const targetBudget = member.budgetTarget || 300000;
+            const budgetPercent = targetBudget > 0 ? Math.min(100, Math.round((monthOut / targetBudget) * 100)) : 0;
+            
+            document.getElementById('budgetProgressText').textContent = `${monthOut.toLocaleString()} / ${targetBudget.toLocaleString()} 원 (${budgetPercent}%)`;
+            document.getElementById('budgetProgressBar').style.width = budgetPercent + '%';
+
+            const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+            const remainingDays = Math.max(1, daysInMonth - now.getDate() + 1);
+            const remainingBudget = Math.max(0, targetBudget - monthOut);
+            const dailyRecommend = Math.floor(remainingBudget / remainingDays);
+
+            document.getElementById('dailyRecommendText').textContent = dailyRecommend.toLocaleString() + '원/일';
+
+            const budgetMsg = document.getElementById('budgetAlertMsg');
+            if (budgetPercent >= 100) {
+                budgetMsg.textContent = '🚨 목표 예산 초과!';
+                budgetMsg.className = 'text-rose-400 font-bold animate-pulse text-[10px] sm:text-xs';
+            } else if (budgetPercent >= 80) {
+                budgetMsg.textContent = '⚠️ 예산 80% 경고!';
+                budgetMsg.className = 'text-amber-400 font-bold text-[10px] sm:text-xs';
+            } else {
+                budgetMsg.textContent = '알뜰 관리 중⚡';
+                budgetMsg.className = 'text-slate-400 font-semibold text-[10px] sm:text-xs';
+            }
+
+            const tierEl = document.getElementById('badgeTier');
+            if (balance >= 1000000) {
+                tierEl.textContent = 'LV.4 패밀리 자산가 👑';
+            } else if (balance >= 500000) {
+                tierEl.textContent = 'LV.3 스마트 세이버 💎';
+            } else if (balance >= 100000) {
+                tierEl.textContent = 'LV.2 알뜰 가계부 ⭐';
+            } else {
+                tierEl.textContent = 'LV.1 슬기로운 입문자 🌱';
+            }
+
+            renderTransactions();
+            renderChallenges();
+            renderGoals();
+            updateFinancialAdvice(balance, monthOut, targetBudget);
+        }
+
+        function setFilter(filterType) {
+            currentFilter = filterType;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.className = "filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-700/50 shrink-0";
+            });
+            const activeBtn = document.getElementById('filter-' + filterType);
+            if (activeBtn) {
+                activeBtn.className = "filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 text-white shadow-sm shrink-0";
+            }
+            renderTransactions();
+        }
+
+        function renderTransactions() {
+            const member = getCurrentMember();
+            if (!member) return;
+
+            const listEl = document.getElementById('transactionList');
+            const emptyEl = document.getElementById('emptyTransactionState');
+            const search = document.getElementById('searchInput').value.trim().toLowerCase();
+
+            let items = member.transactions;
+
+            if (currentFilter === 'in') items = items.filter(t => t.type === 'in');
+            else if (currentFilter === 'out') items = items.filter(t => t.type === 'out');
+
+            if (search) {
+                items = items.filter(t => t.memo.toLowerCase().includes(search) || t.category.toLowerCase().includes(search));
+            }
+
+            items.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            document.getElementById('transactionCountBadge').textContent = items.length + '건';
+
+            if (items.length === 0) {
+                listEl.innerHTML = '';
+                emptyEl.classList.remove('hidden');
+                return;
+            }
+            emptyEl.classList.add('hidden');
+
+            listEl.innerHTML = items.map(t => {
+                const isIn = t.type === 'in';
+                const catObj = (isIn ? IN_CATEGORIES : OUT_CATEGORIES).find(c => c.name === t.category) || { icon: isIn ? '💵' : '🛍️' };
+                
+                return `
+                    <div class="glass-card-interactive rounded-2xl p-3 flex items-center justify-between">
+                        <div class="flex items-center space-x-2.5">
+                            <div class="w-9 h-9 rounded-2xl ${isIn ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'} flex items-center justify-center text-base shrink-0">
+                                ${catObj.icon}
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="font-bold text-slate-100 text-xs sm:text-sm line-clamp-1">${t.memo}</span>
+                                    <span class="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded-md ${isIn ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-300 border border-rose-500/20'} shrink-0">${t.category}</span>
+                                </div>
+                                <div class="text-[10px] sm:text-[11px] text-slate-500 mt-0.5">${t.date}</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-1.5 shrink-0">
+                            <span class="font-bold font-jakarta text-xs sm:text-sm ${isIn ? 'text-emerald-400' : 'text-rose-400'}">
+                                ${isIn ? '+' : '-'}${Number(t.amount).toLocaleString()}원
+                            </span>
+                            <button onclick="openEditTransactionModal('${t.id}')" class="text-slate-500 hover:text-indigo-400 text-xs p-1 transition" title="수정">
+                                <i class="fas fa-pen"></i>
+                            </button>
+                            <button onclick="deleteTransaction('${t.id}')" class="text-slate-600 hover:text-rose-400 text-xs p-1 transition" title="삭제">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+            if (modalId === 'addModal') {
+                if (!document.getElementById('editingTxId').value) {
+                    document.getElementById('transactionModalTitle').textContent = '입출금 내역 작성';
+                    setFormType('out');
+                }
+            } else if (modalId === 'addChallengeModal') {
+                if (!document.getElementById('editingChallengeId').value) {
+                    document.getElementById('challengeModalTitle').textContent = '🔥 새 지출 절약 챌린지';
+                    document.getElementById('challengeTitle').value = '';
+                    document.getElementById('challengeReward').value = '';
+                }
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+            if (modalId === 'addModal') {
+                document.getElementById('editingTxId').value = '';
+            } else if (modalId === 'addChallengeModal') {
+                document.getElementById('editingChallengeId').value = '';
+            }
+        }
+
+        function setFormType(type) {
+            document.getElementById('formType').value = type;
+            const btnIn = document.getElementById('typeBtnIn');
+            const btnOut = document.getElementById('typeBtnOut');
+            const catSelect = document.getElementById('formCategory');
+
+            if (type === 'in') {
+                btnIn.className = "py-2 rounded-xl font-bold text-xs transition bg-emerald-600 text-white shadow-md";
+                btnOut.className = "py-2 rounded-xl font-bold text-xs transition bg-slate-800 text-slate-400";
+                catSelect.innerHTML = IN_CATEGORIES.map(c => `<option value="${c.name}">${c.icon} ${c.name}</option>`).join('');
+            } else {
+                btnOut.className = "py-2 rounded-xl font-bold text-xs transition bg-rose-600 text-white shadow-md";
+                btnIn.className = "py-2 rounded-xl font-bold text-xs transition bg-slate-800 text-slate-400";
+                catSelect.innerHTML = OUT_CATEGORIES.map(c => `<option value="${c.name}">${c.icon} ${c.name}</option>`).join('');
+            }
+        }
+
+        function calculateDutch() {
+            const total = Number(document.getElementById('dutchTotal').value) || 0;
+            const people = Math.max(1, Number(document.getElementById('dutchPeople').value) || 1);
+            const perPerson = Math.ceil((total / people) / 10) * 10;
+            document.getElementById('dutchPerPersonResult').textContent = perPerson.toLocaleString() + ' 원';
+        }
+
+        function renderChallenges() {
+            const member = getCurrentMember();
+            if (!member) return;
+
+            const grid = document.getElementById('challengeListGrid');
+            grid.innerHTML = member.challenges.map(c => {
+                const isDone = c.status === 'completed';
+                return `
+                    <div class="glass-card-interactive rounded-2xl p-3.5 flex items-center justify-between border border-slate-800">
+                        <div class="flex items-center space-x-2.5">
+                            <div class="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center justify-center text-lg shrink-0">
+                                ${c.icon}
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-200 text-xs sm:text-sm ${isDone ? 'line-through text-slate-500' : ''}">${c.title}</h4>
+                                <div class="text-[10px] text-amber-400 font-bold font-jakarta mt-0.5">
+                                    절약 목표: +${Number(c.reward).toLocaleString()}원
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center space-x-1">
+                            ${isDone ? `
+                                <span class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold px-2 py-1 rounded-xl flex items-center gap-1">
+                                    <i class="fas fa-check-circle"></i> 성공!
+                                </span>
+                            ` : `
+                                <button onclick="claimChallenge('${c.id}')" class="glow-button text-white font-bold px-2.5 py-1.5 rounded-xl text-xs active:scale-95 transition">
+                                    완수
+                                </button>
+                            `}
+                            <button onclick="openEditChallengeModal('${c.id}')" class="text-slate-500 hover:text-indigo-400 text-xs p-1 transition" title="수정">
+                                <i class="fas fa-pen"></i>
+                            </button>
+                            <button onclick="deleteChallenge('${c.id}')" class="text-slate-600 hover:text-rose-400 text-xs p-1 transition" title="삭제">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderGoals() {
+            const member = getCurrentMember();
+            if (!member) return;
+
+            const container = document.getElementById('goalsContainer');
+            container.innerHTML = member.goals.map(g => {
+                const target = Number(g.target);
+                const current = Number(g.current);
+                const percent = Math.min(100, Math.round((current / target) * 100));
+                const isComplete = current >= target;
+
+                return `
+                    <div class="glass-card-interactive rounded-2xl p-3.5 border border-slate-800">
+                        <div class="flex justify-between items-start mb-2.5">
+                            <div class="flex items-center space-x-2.5">
+                                <div class="w-10 h-10 rounded-2xl bg-pink-500/20 text-pink-300 border border-pink-500/30 flex items-center justify-center text-lg shrink-0">
+                                    ${g.icon}
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-100 text-xs sm:text-sm">${g.title}</h4>
+                                    <div class="text-[10px] text-slate-400">목표: ${target.toLocaleString()}원</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-1.5">
+                                <span class="text-[9px] font-bold px-2 py-0.5 rounded-full ${isComplete ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-pink-500/20 text-pink-300 border border-pink-500/30'}">
+                                    ${isComplete ? '🎉 목표 달성!' : percent + '% 모음'}
+                                </span>
+                                <button onclick="deleteGoal('${g.id}')" class="text-slate-600 hover:text-rose-400 text-xs p-1 transition" title="삭제">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="w-full bg-slate-950 rounded-full h-2 mb-2.5 overflow-hidden p-0.5 border border-slate-800">
+                            <div class="bg-gradient-to-r from-pink-500 to-purple-500 h-full rounded-full transition-all duration-500" style="width: ${percent}%"></div>
+                        </div>
+
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="font-bold text-slate-300 font-jakarta text-[11px]">모은 돈: ${current.toLocaleString()}원</span>
+                            <button onclick="depositGoal('${g.id}')" class="px-2 py-1 rounded-xl bg-pink-600 hover:bg-pink-500 text-white font-bold text-xs shadow-sm transition">
+                                + 저금
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function touchBooster() {
+            const icon = document.getElementById('boosterIcon');
+            icon.classList.add('scale-125');
+            setTimeout(() => icon.classList.remove('scale-125'), 200);
+
+            playSound('pop');
+            const randomSaying = FAMILY_FORTUNES[Math.floor(Math.random() * FAMILY_FORTUNES.length)];
+            showToast(randomSaying);
+        }
+
+        function renderCharts() {
+            const member = getCurrentMember();
+            if (!member) return;
+            
+            const catTotals = {};
+            member.transactions.filter(t => t.type === 'out').forEach(t => {
+                catTotals[t.category] = (catTotals[t.category] || 0) + Number(t.amount);
+            });
+
+            const catLabels = Object.keys(catTotals);
+            const catValues = Object.values(catTotals);
+
+            const ctxCategory = document.getElementById('categoryChart').getContext('2d');
+            if (categoryChartInstance) categoryChartInstance.destroy();
+
+            categoryChartInstance = new Chart(ctxCategory, {
+                type: 'doughnut',
+                data: {
+                    labels: catLabels.length > 0 ? catLabels : ['지출 없음'],
+                    datasets: [{
+                        data: catValues.length > 0 ? catValues : [1],
+                        backgroundColor: [
+                            '#6366F1', '#8B5CF6', '#EC4899', '#10B981', '#06B6D4', '#F59E0B', '#EF4444', '#64748B', '#3B82F6'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 } } }
+                    }
+                }
+            });
+
+            const monthMap = {};
+            member.transactions.forEach(t => {
+                const m = t.date.substring(0, 7);
+                if (!monthMap[m]) monthMap[m] = { in: 0, out: 0 };
+                if (t.type === 'in') monthMap[m].in += Number(t.amount);
+                else monthMap[m].out += Number(t.amount);
+            });
+
+            const months = Object.keys(monthMap).sort();
+            const inValues = months.map(m => monthMap[m].in);
+            const outValues = months.map(m => monthMap[m].out);
+
+            const ctxMonthly = document.getElementById('monthlyChart').getContext('2d');
+            if (monthlyChartInstance) monthlyChartInstance.destroy();
+
+            monthlyChartInstance = new Chart(ctxMonthly, {
+                type: 'bar',
+                data: {
+                    labels: months,
+                    datasets: [
+                        { label: '수입', data: inValues, backgroundColor: '#10B981', borderRadius: 6 },
+                        { label: '지출', data: outValues, backgroundColor: '#EC4899', borderRadius: 6 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 } } }
+                    },
+                    scales: {
+                        x: { ticks: { color: '#64748b' }, grid: { display: false } },
+                        y: { ticks: { color: '#64748b' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                    }
+                }
+            });
+        }
+
+        function updateFinancialAdvice(balance, monthOut, targetBudget) {
+            const adviceEl = document.getElementById('financialAdviceText');
+            if (monthOut > targetBudget) {
+                adviceEl.textContent = "이번 달 목표 예산을 초과했습니다! 외식/회식 및 기타 가계 지출 항목부터 점검해보세요.";
+            } else if (monthOut > targetBudget * 0.8) {
+                adviceEl.textContent = "목표 예산의 80%에 도달했습니다. 남은 기간 동안 1일 권장 생활비를 지키면 알뜰하게 마감할 수 있습니다.";
+            } else if (balance > 300000) {
+                adviceEl.textContent = "가계 잔액 관리가 안정적입니다! 일부 금액을 가족 버킷리스트 목표에 적립해보세요.";
+            } else {
+                adviceEl.textContent = "슬기로운 패밀리 가계부 관리의 첫걸음! 꾸준한 기록이 행복하고 탄탄한 자산의 시작입니다.";
+            }
+        }
+
+        function exportCSV() {
+            const member = getCurrentMember();
+            if (!member) return;
+
+            let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+            csvContent += "날짜,구분,카테고리,적요,금액\n";
+
+            member.transactions.forEach(t => {
+                const typeText = t.type === 'in' ? '수입' : '지출';
+                csvContent += `"${t.date}","${typeText}","${t.category}","${t.memo}",${t.amount}\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `패밀리PAY_가계부_${member.name}_${new Date().toISOString().substring(0, 10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast("📊 CSV 가계부 다운로드 완료!");
+        }
+
+        window.onload = function() {
+            loadData();
+        };
+    </script>
+</body>
+</html>
