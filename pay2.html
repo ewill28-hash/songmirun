@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>패밀리 PAY - 우리집 스마트 용돈 & 예산 관리</title>
+    <title>하루네 PAY</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Supabase JS Library -->
@@ -145,7 +145,8 @@
                     <span id="memberAvatar-child2">⚾</span>
                     <span id="memberName-child2">둘째</span>
                 </button>
-                <button id="memberBtn-mom" onclick="switchMember('mom')" class="member-pill px-3 py-1.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all bg-indigo-600 text-white flex items-center gap-1.5 shadow-md shrink-0">
+                <!-- 엄마 버튼의 고정 active 클래스 제거 -->
+                <button id="memberBtn-mom" onclick="switchMember('mom')" class="member-pill px-3 py-1.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all text-slate-400 bg-slate-800/80 hover:text-slate-200 flex items-center gap-1.5 shrink-0">
                     <span id="memberAvatar-mom">👩</span>
                     <span id="memberName-mom">엄마</span>
                 </button>
@@ -155,6 +156,7 @@
                 </button>
             </div>
         </div>
+
     </header>
 
     <main class="max-w-5xl mx-auto px-3 sm:px-4 pt-4 space-y-4 sm:space-y-6">
@@ -995,19 +997,7 @@
             }, 2500);
         }
 
-        function switchMember(key) {
-            appData.activeMemberKey = key;
-            localStorage.setItem(STORAGE_KEY_LOGIN, key);
-            updateFamilySwitcherUI();
-            updateDashboard();
-            const member = getCurrentMember();
-            if (member) {
-                document.getElementById('budgetInput').value = member.budgetTarget || 300000;
-                showToast(`👤 '${member.name}' 님의 가계부로 전환되었습니다.`);
-            }
-            playSound('pop');
-        }
-
+        // 현재 선택된 멤버의 필(Pill) 버튼 UI 및 정보 업데이트
         function updateFamilySwitcherUI() {
             ['mom', 'dad', 'child1', 'child2'].forEach(key => {
                 const member = appData.members[key] || { name: key, avatar: '👤' };
@@ -1031,6 +1021,23 @@
             if (appData.members.dad) document.getElementById('dadNameInput').value = appData.members.dad.name;
             if (appData.members.child1) document.getElementById('child1NameInput').value = appData.members.child1.name;
             if (appData.members.child2) document.getElementById('child2NameInput').value = appData.members.child2.name;
+        }
+
+        // 멤버 전환 처리 함수
+        function switchMember(memberKey) {
+            if (!appData.members || !appData.members[memberKey]) return;
+
+            appData.activeMemberKey = memberKey;
+            localStorage.setItem(STORAGE_KEY_LOGIN, memberKey);
+
+            const member = getCurrentMember();
+            if (member) {
+                document.getElementById('budgetInput').value = member.budgetTarget || 300000;
+            }
+
+            updateFamilySwitcherUI();
+            updateDashboard();
+            playSound('pop');
         }
 
         async function handleSaveFamilyNames(e) {
