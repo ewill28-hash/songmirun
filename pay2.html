@@ -772,15 +772,16 @@
             { key: 'dad', name: '아빠', avatar: '🎾', defaultBudget: 300000 }
         ];
 
+        const STORAGE_KEY_LOGIN = 'family_pay_active_member';
+
         let appData = {
-            activeMemberKey: 'mom',
+            activeMemberKey: localStorage.getItem(STORAGE_KEY_LOGIN) || 'mom',
             audioEnabled: true,
             members: {}
         };
         let currentFilter = 'all';
         let categoryChartInstance = null;
         let monthlyChartInstance = null;
-        const STORAGE_KEY_LOGIN = 'family_pay_active_member';
 
         function getCurrentMember() {
             if (!appData.members || !appData.members[appData.activeMemberKey]) {
