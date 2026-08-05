@@ -615,6 +615,10 @@
                     <input type="number" id="goalTarget" required min="1000" step="1000" placeholder="200000" class="w-full py-2.5 px-4 rounded-2xl bg-slate-950 border border-slate-700 text-slate-100 font-bold text-base outline-none focus:border-indigo-500">
                 </div>
                 <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1">현재 모은 금액 (원)</label>
+                    <input type="number" id="goalCurrent" required min="0" step="100" placeholder="0" class="w-full py-2.5 px-4 rounded-2xl bg-slate-950 border border-slate-700 text-slate-100 font-bold text-base outline-none focus:border-indigo-500">
+                </div>
+                <div>
                     <label class="block text-xs font-bold text-slate-400 mb-1">아이콘 선택</label>
                     <div class="flex space-x-2 text-xl py-1">
                         <label class="cursor-pointer"><input type="radio" name="goalIcon" value="🎧" checked class="hidden peer"><span class="p-2 rounded-xl bg-slate-950 border border-slate-700 peer-checked:border-pink-500 peer-checked:bg-pink-950/50 inline-block">🎧</span></label>
@@ -1688,6 +1692,7 @@
                     document.getElementById('goalModalTitle').textContent = '🎁 버킷리스트 목표 등록';
                     document.getElementById('goalTitle').value = '';
                     document.getElementById('goalTarget').value = '';
+                    document.getElementById('goalCurrent').value = '0';
                 }
             }
         }
@@ -1729,6 +1734,7 @@
             document.getElementById('goalModalTitle').textContent = '✏️ 버킷리스트 목표 수정';
             document.getElementById('goalTitle').value = g.title;
             document.getElementById('goalTarget').value = g.target;
+            document.getElementById('goalCurrent').value = g.current;
 
             const iconRadio = document.querySelector(`input[name="goalIcon"][value="${g.icon}"]`);
             if (iconRadio) iconRadio.checked = true;
@@ -1744,6 +1750,7 @@
             const editingId = document.getElementById('editingGoalId').value;
             const title = document.getElementById('goalTitle').value;
             const target = Number(document.getElementById('goalTarget').value);
+            const current = Number(document.getElementById('goalCurrent').value) || 0;
             const iconRadio = document.querySelector('input[name="goalIcon"]:checked');
             const icon = iconRadio ? iconRadio.value : '🎧';
 
@@ -1752,6 +1759,7 @@
                     const { error } = await supabaseClient.from('goals').update({
                         title,
                         target_amount: target,
+                        current_amount: current,
                         icon
                     }).eq('id', editingId);
 
@@ -1761,6 +1769,7 @@
                     if (targetGoal) {
                         targetGoal.title = title;
                         targetGoal.target = target;
+                        targetGoal.current = current;
                         targetGoal.icon = icon;
                     }
 
@@ -1772,7 +1781,7 @@
                         child_id: member.dbId,
                         title,
                         target_amount: target,
-                        current_amount: 0,
+                        current_amount: current,
                         icon
                     }]).select();
 
@@ -1783,7 +1792,7 @@
                             id: data[0].id,
                             title,
                             target,
-                            current: 0,
+                            current,
                             icon
                         });
                     }
