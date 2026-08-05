@@ -599,12 +599,13 @@
     <div id="addGoalModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
         <div class="bg-slate-900 rounded-3xl max-w-md w-full p-5 sm:p-6 border border-slate-700 shadow-2xl">
             <div class="flex justify-between items-center mb-3">
-                <h3 class="font-bold text-base text-slate-100">🎁 버킷리스트 목표 등록</h3>
+                <h3 class="font-bold text-base text-slate-100" id="goalModalTitle">🎁 버킷리스트 목표 등록</h3>
                 <button onclick="closeModal('addGoalModal')" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             <form onsubmit="handleSaveGoal(event)" class="space-y-3.5">
+                <input type="hidden" id="editingGoalId" value="">
                 <div>
                     <label class="block text-xs font-bold text-slate-400 mb-1">위시리스트 물건 / 목표</label>
                     <input type="text" id="goalTitle" required placeholder="예: 가족 여행 적금, 전자기기, 콘서트 티켓" class="w-full py-2.5 px-4 rounded-2xl bg-slate-950 border border-slate-700 text-slate-200 text-xs outline-none focus:border-indigo-500">
@@ -612,6 +613,10 @@
                 <div>
                     <label class="block text-xs font-bold text-slate-400 mb-1">목표 가격 (원)</label>
                     <input type="number" id="goalTarget" required min="1000" step="1000" placeholder="200000" class="w-full py-2.5 px-4 rounded-2xl bg-slate-950 border border-slate-700 text-slate-100 font-bold text-base outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1">현재 모은 금액 (원)</label>
+                    <input type="number" id="goalCurrent" required min="0" step="100" placeholder="0" class="w-full py-2.5 px-4 rounded-2xl bg-slate-950 border border-slate-700 text-slate-100 font-bold text-base outline-none focus:border-indigo-500">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-400 mb-1">아이콘 선택</label>
@@ -675,7 +680,7 @@
                 <div class="w-14 h-14 mx-auto rounded-3xl bg-gradient-to-tr from-indigo-600 to-purple-500 flex items-center justify-center text-white font-extrabold text-2xl shadow-xl shadow-indigo-500/30 mb-3">
                     <i class="fas fa-users-between-lines"></i>
                 </div>
-                <h2 class="text-2xl font-black font-jakarta tracking-tight gradient-text">하루 패밀리 PAY</h2>
+                <h2 class="text-2xl font-black font-jakarta tracking-tight gradient-text">패밀리 PAY</h2>
                 <p class="text-xs text-slate-400 font-medium mt-1">로그인할 가족 프로필을 선택해주세요</p>
             </div>
 
@@ -1682,6 +1687,13 @@
                     document.getElementById('challengeTitle').value = '';
                     document.getElementById('challengeReward').value = '';
                 }
+            } else if (modalId === 'addGoalModal') {
+                if (!document.getElementById('editingGoalId').value) {
+                    document.getElementById('goalModalTitle').textContent = '🎁 버킷리스트 목표 등록';
+                    document.getElementById('goalTitle').value = '';
+                    document.getElementById('goalTarget').value = '';
+                    document.getElementById('goalCurrent').value = '0';
+                }
             }
         }
 
@@ -1691,6 +1703,108 @@
                 document.getElementById('editingTxId').value = '';
             } else if (modalId === 'addChallengeModal') {
                 document.getElementById('editingChallengeId').value = '';
+            } else if (modalId === 'addGoalModal') {
+                document.getElementById('editingGoalId').value = '';
+            }
+        }
+        async function deleteGoal(goalId) {
+            const member = getCurrentMember();
+            if (!member) return;
+
+            try {
+                const { error } = await supabaseClient.from('goals').delete().eq('id', goalId);
+                if (error) throw error;
+
+                member.goals = member.goals.filter(g => g.id !== goalId);
+                saveData();
+                showToast('🗑️ 저금 목표가 DB에서 삭제되었습니다.');
+            } catch (err) {
+                showToast('⚠️ 저금 목표 삭제 중 오류가 발생했습니다.');
+            }
+        }
+
+        function openEditGoalModal(id) {
+            const member = getCurrentMember();
+            if (!member) return;
+
+            const g = member.goals.find(item => item.id === id);
+            if (!g) return;
+
+            document.getElementById('editingGoalId').value = g.id;
+            document.getElementById('goalModalTitle').textContent = '✏️ 버킷리스트 목표 수정';
+            document.getElementById('goalTitle').value = g.title;
+            document.getElementById('goalTarget').value = g.target;
+            document.getElementById('goalCurrent').value = g.current;
+
+            const iconRadio = document.querySelector(`input[name="goalIcon"][value="${g.icon}"]`);
+            if (iconRadio) iconRadio.checked = true;
+
+            openModal('addGoalModal');
+        }
+
+        async function handleSaveGoal(e) {
+            e.preventDefault();
+            const member = getCurrentMember();
+            if (!member) return;
+
+            const editingId = document.getElementById('editingGoalId').value;
+            const title = document.getElementById('goalTitle').value;
+            const target = Number(document.getElementById('goalTarget').value);
+            const current = Number(document.getElementById('goalCurrent').value) || 0;
+            const iconRadio = document.querySelector('input[name="goalIcon"]:checked');
+            const icon = iconRadio ? iconRadio.value : '🎧';
+
+            try {
+                if (editingId) {
+                    const { error } = await supabaseClient.from('goals').update({
+                        title,
+                        target_amount: target,
+                        current_amount: current,
+                        icon
+                    }).eq('id', editingId);
+
+                    if (error) throw error;
+
+                    const targetGoal = member.goals.find(g => g.id === editingId);
+                    if (targetGoal) {
+                        targetGoal.title = title;
+                        targetGoal.target = target;
+                        targetGoal.current = current;
+                        targetGoal.icon = icon;
+                    }
+
+                    saveData();
+                    closeModal('addGoalModal');
+                    showToast('✏️ 버킷리스트 목표가 수정되었습니다!');
+                } else {
+                    const { data, error } = await supabaseClient.from('goals').insert([{
+                        child_id: member.dbId,
+                        title,
+                        target_amount: target,
+                        current_amount: current,
+                        icon
+                    }]).select();
+
+                    if (error) throw error;
+
+                    if (data && data[0]) {
+                        member.goals.push({
+                            id: data[0].id,
+                            title,
+                            target,
+                            current,
+                            icon
+                        });
+                    }
+
+                    saveData();
+                    closeModal('addGoalModal');
+                    showToast('🎁 버킷리스트 목표가 DB에 추가되었습니다!');
+                }
+
+                document.getElementById('editingGoalId').value = '';
+            } catch (err) {
+                showToast('⚠️ 목표 저장 중 오류 발생');
             }
         }
 
@@ -1788,6 +1902,9 @@
                                 <span class="text-[9px] font-bold px-2 py-0.5 rounded-full ${isComplete ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-pink-500/20 text-pink-300 border border-pink-500/30'}">
                                     ${isComplete ? '🎉 목표 달성!' : percent + '% 모음'}
                                 </span>
+                                <button onclick="openEditGoalModal('${g.id}')" class="text-slate-500 hover:text-pink-400 text-xs p-1 transition" title="수정">
+                                    <i class="fas fa-pen"></i>
+                                </button>
                                 <button onclick="deleteGoal('${g.id}')" class="text-slate-600 hover:text-rose-400 text-xs p-1 transition" title="삭제">
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
