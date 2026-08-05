@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>패밀리 PAY - 우리집 스마트 용돈 & 예산 관리</title>
+    <title>하루네 PAY</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Supabase JS Library -->
@@ -100,7 +100,6 @@
 </head>
 <body class="pb-28 sm:pb-20">
 
-    <!-- Header Navigation -->
     <header class="sticky top-0 z-40 glass-card border-b border-slate-800/80">
         <div class="max-w-5xl mx-auto px-3 sm:px-4 py-2.5 flex items-center justify-between">
             <div class="flex items-center space-x-2.5">
@@ -126,13 +125,16 @@
                     <i class="fas fa-cog text-xs"></i>
                 </button>
 
+                <button onclick="showLoginOverlay()" class="w-8 h-8 rounded-xl bg-indigo-600/30 border border-indigo-500/50 flex items-center justify-center text-indigo-200 hover:bg-indigo-600 hover:text-white transition" title="프로필 변경 / 로그아웃">
+                    <i class="fas fa-user-circle text-xs"></i>
+                </button>
+
                 <button onclick="toggleAudio()" id="soundBtn" class="w-8 h-8 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 transition" title="사운드 효과">
                     <i class="fas fa-volume-up text-indigo-400 text-xs"></i>
                 </button>
             </div>
         </div>
 
-        <!-- Family Member Switcher Pill Carousel -->
         <div class="max-w-5xl mx-auto px-3 sm:px-4 pb-2.5">
             <div class="flex items-center space-x-1.5 overflow-x-auto no-scrollbar py-0.5">
                 <button id="memberBtn-child1" onclick="switchMember('child1')" class="member-pill px-3 py-1.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all text-slate-400 bg-slate-800/80 hover:text-slate-200 flex items-center gap-1.5 shrink-0">
@@ -143,7 +145,8 @@
                     <span id="memberAvatar-child2">⚾</span>
                     <span id="memberName-child2">둘째</span>
                 </button>
-                <button id="memberBtn-mom" onclick="switchMember('mom')" class="member-pill px-3 py-1.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all bg-indigo-600 text-white flex items-center gap-1.5 shadow-md shrink-0">
+                <!-- 엄마 버튼의 고정 active 클래스 제거 -->
+                <button id="memberBtn-mom" onclick="switchMember('mom')" class="member-pill px-3 py-1.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all text-slate-400 bg-slate-800/80 hover:text-slate-200 flex items-center gap-1.5 shrink-0">
                     <span id="memberAvatar-mom">👩</span>
                     <span id="memberName-mom">엄마</span>
                 </button>
@@ -151,12 +154,11 @@
                     <span id="memberAvatar-dad">🎾</span>
                     <span id="memberName-dad">아빠</span>
                 </button>
-
             </div>
         </div>
+
     </header>
 
-    <!-- Main Content Container -->
     <main class="max-w-5xl mx-auto px-3 sm:px-4 pt-4 space-y-4 sm:space-y-6">
 
         <!-- Top Overview Banner Section -->
@@ -235,7 +237,7 @@
                 </div>
             </div>
 
-            <!-- Quick Habit & Lucky Booster Widget -->
+            <!-- Quick Habit & Booster Widget -->
             <div class="glass-card rounded-3xl p-4 sm:p-5 border border-slate-700/60 shadow-xl flex flex-col justify-between bg-gradient-to-br from-slate-900/90 to-purple-950/30">
                 <div class="flex justify-between items-center">
                     <span class="text-xs font-bold text-purple-300 bg-purple-500/20 border border-purple-500/30 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full flex items-center gap-1">
@@ -244,7 +246,6 @@
                     <span class="text-[10px] sm:text-[11px] text-slate-400 font-bold">연속 기록 중 🔥</span>
                 </div>
 
-                <!-- Interactive Booster -->
                 <div class="my-3 sm:my-4 text-center cursor-pointer group" onclick="touchBooster()" title="클릭해서 오늘의 한마디 보기">
                     <div id="boosterIcon" class="text-4xl sm:text-5xl inline-block transition transform group-hover:scale-110 duration-200">
                         🏡
@@ -255,7 +256,6 @@
                     <p class="text-[10px] text-slate-500 mt-0.5">클릭 시 알뜰 가계 생활 팁 출력</p>
                 </div>
 
-                <!-- Top Expense Category Widget -->
                 <div class="bg-slate-800/60 rounded-2xl p-2.5 sm:p-3 border border-slate-700/50">
                     <div class="text-[10px] sm:text-[11px] text-slate-400 font-medium mb-1">최다 지출 분야</div>
                     <div class="flex justify-between items-center">
@@ -269,7 +269,7 @@
 
         </div>
 
-        <!-- Desktop Navigation Tabs (Hidden on Mobile) -->
+        <!-- Desktop Navigation Tabs -->
         <div class="hidden md:flex space-x-2 overflow-x-auto pb-1 no-scrollbar">
             <button onclick="switchTab('tab-history')" id="nav-desktop-history" class="tab-btn px-4 py-2.5 rounded-2xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all border border-indigo-500/50 bg-indigo-600 text-white shadow-lg shadow-indigo-600/20">
                 <i class="fas fa-receipt mr-1.5"></i> 용돈 장부 내역
@@ -287,7 +287,6 @@
 
         <!-- TAB 1: TRANSACTION HISTORY -->
         <div id="tab-history" class="tab-content block space-y-3 sm:space-y-4">
-            <!-- Filter & Search Bar -->
             <div class="glass-card rounded-2xl p-3 border border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-2.5">
                 <div class="flex items-center space-x-1.5 w-full sm:w-auto overflow-x-auto no-scrollbar">
                     <button onclick="setFilter('all')" id="filter-all" class="filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 text-white shadow-sm shrink-0">전체</button>
@@ -302,7 +301,6 @@
                 </div>
             </div>
 
-            <!-- Transaction List Container -->
             <div class="glass-card rounded-3xl p-4 sm:p-5 border border-slate-800 shadow-lg">
                 <div class="flex justify-between items-center mb-3 sm:mb-4">
                     <h3 class="font-bold text-sm sm:text-base text-slate-200 flex items-center gap-2">
@@ -315,7 +313,7 @@
                 </div>
 
                 <div id="transactionList" class="space-y-2 max-h-[480px] overflow-y-auto pr-0.5">
-                    <!-- Transactions dynamically injected here -->
+                    <!-- Dynamic transactions -->
                 </div>
 
                 <div id="emptyTransactionState" class="hidden text-center py-10 text-slate-500">
@@ -343,7 +341,7 @@
                 </div>
 
                 <div id="challengeListGrid" class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-                    <!-- Challenges injected dynamically -->
+                    <!-- Dynamic challenges -->
                 </div>
             </div>
         </div>
@@ -365,7 +363,7 @@
                 </div>
 
                 <div id="goalsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-                    <!-- Goals injected dynamically -->
+                    <!-- Dynamic goals -->
                 </div>
             </div>
         </div>
@@ -373,7 +371,6 @@
         <!-- TAB 4: STATS & REPORTS -->
         <div id="tab-stats" class="tab-content hidden space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Category Expense Doughnut Chart -->
                 <div class="glass-card rounded-3xl p-4 sm:p-5 border border-slate-800 shadow-lg">
                     <h3 class="font-bold text-xs sm:text-sm text-slate-200 mb-2 flex items-center gap-2">
                         <i class="fas fa-chart-pie text-indigo-400"></i> 카테고리별 지출 비율
@@ -383,7 +380,6 @@
                     </div>
                 </div>
 
-                <!-- Monthly Income vs Expense Bar Chart -->
                 <div class="glass-card rounded-3xl p-4 sm:p-5 border border-slate-800 shadow-lg">
                     <h3 class="font-bold text-xs sm:text-sm text-slate-200 mb-2 flex items-center gap-2">
                         <i class="fas fa-chart-bar text-cyan-400"></i> 월별 수입 vs 지출 비교
@@ -394,7 +390,6 @@
                 </div>
             </div>
 
-            <!-- Financial Advice Report Card -->
             <div class="glass-card rounded-3xl p-4 sm:p-6 border border-indigo-500/30 shadow-lg bg-gradient-to-r from-indigo-950/40 via-purple-950/30 to-slate-900/60">
                 <div class="flex items-start space-x-3.5">
                     <div class="w-10 h-10 sm:w-11 sm:h-11 bg-indigo-500/20 border border-indigo-500/40 rounded-2xl flex items-center justify-center text-indigo-400 text-lg sm:text-xl shrink-0">
@@ -439,13 +434,13 @@
         </div>
     </nav>
 
-    <!-- MODAL 1: ADD TRANSACTION -->
+    <!-- MODAL 1: ADD / EDIT TRANSACTION -->
     <div id="addModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
         <div class="bg-slate-900 rounded-3xl max-w-md w-full p-5 sm:p-6 border border-slate-700 shadow-2xl">
             <div class="flex justify-between items-center mb-3">
                 <h3 class="font-bold text-base sm:text-lg text-slate-100 flex items-center gap-2">
                     <i class="fas fa-pen-nib text-indigo-400"></i>
-                    <span>입출금 내역 작성</span>
+                    <span id="transactionModalTitle">입출금 내역 작성</span>
                 </h3>
                 <button onclick="closeModal('addModal')" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
                     <i class="fas fa-times"></i>
@@ -453,7 +448,7 @@
             </div>
 
             <form id="transactionForm" onsubmit="handleSaveTransaction(event)" class="space-y-3.5">
-                <!-- Type Selector -->
+                <input type="hidden" id="editingTxId" value="">
                 <div class="grid grid-cols-2 gap-2 p-1 bg-slate-950 rounded-2xl border border-slate-800">
                     <button type="button" onclick="setFormType('out')" id="typeBtnOut" class="py-2 rounded-xl font-bold text-xs transition bg-rose-600 text-white shadow-md">
                         <i class="fas fa-minus-circle mr-1"></i> 지출 (쓴 돈)
@@ -464,30 +459,25 @@
                 </div>
                 <input type="hidden" id="formType" value="out">
 
-                <!-- Amount Input -->
                 <div>
                     <label class="block text-xs font-bold text-slate-400 mb-1">금액 (원)</label>
                     <div class="relative">
-                        <input type="text" inputmode="numeric" id="formAmount" required placeholder="예: 20000" class="w-full pl-4 pr-10 py-2.5 rounded-2xl bg-slate-950 border border-slate-700 text-slate-100 font-bold text-base outline-none focus:border-indigo-500">
+                        <input type="text" inputmode="numeric" id="formAmount" required placeholder="예: 20000 또는 20,000" class="w-full pl-4 pr-10 py-2.5 rounded-2xl bg-slate-950 border border-slate-700 text-slate-100 font-bold text-base outline-none focus:border-indigo-500">
                         <span class="absolute right-4 top-3 font-bold text-slate-500 text-xs">원</span>
                     </div>
                 </div>
 
-                <!-- Category -->
                 <div>
                     <label class="block text-xs font-bold text-slate-400 mb-1">카테고리</label>
                     <select id="formCategory" class="w-full py-2.5 px-4 rounded-2xl bg-slate-950 border border-slate-700 text-slate-200 text-xs font-bold outline-none focus:border-indigo-500">
-                        <!-- Populated by JS -->
                     </select>
                 </div>
 
-                <!-- Memo / Details -->
                 <div>
                     <label class="block text-xs font-bold text-slate-400 mb-1">적요 / 상세 내용</label>
                     <input type="text" id="formMemo" required placeholder="예: 삼각김밥, 버스 충전, 장보기" class="w-full py-2.5 px-4 rounded-2xl bg-slate-950 border border-slate-700 text-slate-200 text-xs outline-none focus:border-indigo-500">
                 </div>
 
-                <!-- Date -->
                 <div>
                     <label class="block text-xs font-bold text-slate-400 mb-1">날짜</label>
                     <input type="date" id="formDate" required class="w-full py-2.5 px-4 rounded-2xl bg-slate-950 border border-slate-700 text-slate-200 text-xs outline-none focus:border-indigo-500">
@@ -530,7 +520,6 @@
                     <input type="text" id="dutchMemo" placeholder="예: 외식 및 디저트 카페" class="w-full py-2.5 px-4 rounded-2xl bg-slate-950 border border-slate-700 text-slate-200 text-xs outline-none focus:border-indigo-500">
                 </div>
 
-                <!-- Dutch Result Box -->
                 <div class="bg-indigo-950/50 rounded-2xl p-3 border border-indigo-500/30 text-center">
                     <div class="text-xs text-indigo-300 font-medium">1인당 부담 금액</div>
                     <div class="text-xl sm:text-2xl font-black font-jakarta text-indigo-200 mt-0.5" id="dutchPerPersonResult">0 원</div>
@@ -569,16 +558,17 @@
         </div>
     </div>
 
-    <!-- MODAL 4: ADD CHALLENGE -->
+    <!-- MODAL 4: ADD / EDIT CHALLENGE -->
     <div id="addChallengeModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
         <div class="bg-slate-900 rounded-3xl max-w-md w-full p-5 sm:p-6 border border-slate-700 shadow-2xl">
             <div class="flex justify-between items-center mb-3">
-                <h3 class="font-bold text-base text-slate-100">🔥 새 지출 절약 챌린지</h3>
+                <h3 class="font-bold text-base text-slate-100" id="challengeModalTitle">🔥 새 지출 절약 챌린지</h3>
                 <button onclick="closeModal('addChallengeModal')" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             <form onsubmit="handleSaveChallenge(event)" class="space-y-3.5">
+                <input type="hidden" id="editingChallengeId" value="">
                 <div>
                     <label class="block text-xs font-bold text-slate-400 mb-1">챌린지 목표 이름</label>
                     <input type="text" id="challengeTitle" required placeholder="예: 주말 외식/카페 1만원 이하, 3일 무지출" class="w-full py-2.5 px-4 rounded-2xl bg-slate-950 border border-slate-700 text-slate-200 text-xs outline-none focus:border-indigo-500">
@@ -599,7 +589,7 @@
                 </div>
                 <div class="pt-1 flex space-x-2">
                     <button type="button" onclick="closeModal('addChallengeModal')" class="w-1/3 py-2.5 rounded-2xl border border-slate-700 text-slate-400 font-bold text-xs">취소</button>
-                    <button type="submit" class="w-2/3 py-2.5 rounded-2xl bg-indigo-600 text-white font-bold text-xs">챌린지 시작</button>
+                    <button type="submit" class="w-2/3 py-2.5 rounded-2xl bg-indigo-600 text-white font-bold text-xs">챌린지 저장</button>
                 </div>
             </form>
         </div>
@@ -676,7 +666,50 @@
         </div>
     </div>
 
-    <!-- Toast Notification Overlay -->
+    <!-- INITIAL LOGIN SCREEN OVERLAY -->
+    <div id="loginOverlay" class="fixed inset-0 bg-slate-950/95 backdrop-blur-xl z-50 flex items-center justify-center p-4">
+        <div class="glass-card rounded-3xl max-w-md w-full p-6 sm:p-8 border border-indigo-500/30 shadow-2xl text-center space-y-6 relative overflow-hidden">
+            <div class="absolute -right-12 -top-12 w-40 h-40 bg-indigo-600/10 rounded-full blur-2xl pointer-events-none"></div>
+            
+            <div>
+                <div class="w-14 h-14 mx-auto rounded-3xl bg-gradient-to-tr from-indigo-600 to-purple-500 flex items-center justify-center text-white font-extrabold text-2xl shadow-xl shadow-indigo-500/30 mb-3">
+                    <i class="fas fa-users-between-lines"></i>
+                </div>
+                <h2 class="text-2xl font-black font-jakarta tracking-tight gradient-text">패밀리 PAY</h2>
+                <p class="text-xs text-slate-400 font-medium mt-1">로그인할 가족 프로필을 선택해주세요</p>
+            </div>
+
+            <!-- Profile Selection Grid -->
+            <div id="loginProfileGrid" class="grid grid-cols-2 gap-3 pt-2">
+                <button onclick="loginMember('mom')" class="glass-card-interactive p-4 rounded-2xl border border-slate-700/80 hover:border-indigo-500/80 flex flex-col items-center justify-center space-y-2 group transition">
+                    <span class="text-3xl group-hover:scale-110 transition duration-200" id="loginAvatar-mom">👩</span>
+                    <span class="font-bold text-xs text-slate-200 group-hover:text-indigo-300" id="loginName-mom">엄마</span>
+                    <span class="text-[9px] text-slate-500 bg-slate-800/80 px-2 py-0.5 rounded-full border border-slate-700">mom</span>
+                </button>
+                <button onclick="loginMember('dad')" class="glass-card-interactive p-4 rounded-2xl border border-slate-700/80 hover:border-indigo-500/80 flex flex-col items-center justify-center space-y-2 group transition">
+                    <span class="text-3xl group-hover:scale-110 transition duration-200" id="loginAvatar-dad">🎾</span>
+                    <span class="font-bold text-xs text-slate-200 group-hover:text-indigo-300" id="loginName-dad">아빠</span>
+                    <span class="text-[9px] text-slate-500 bg-slate-800/80 px-2 py-0.5 rounded-full border border-slate-700">dad</span>
+                </button>
+                <button onclick="loginMember('child1')" class="glass-card-interactive p-4 rounded-2xl border border-slate-700/80 hover:border-indigo-500/80 flex flex-col items-center justify-center space-y-2 group transition">
+                    <span class="text-3xl group-hover:scale-110 transition duration-200" id="loginAvatar-child1">🐹</span>
+                    <span class="font-bold text-xs text-slate-200 group-hover:text-indigo-300" id="loginName-child1">첫째</span>
+                    <span class="text-[9px] text-slate-500 bg-slate-800/80 px-2 py-0.5 rounded-full border border-slate-700">child1</span>
+                </button>
+                <button onclick="loginMember('child2')" class="glass-card-interactive p-4 rounded-2xl border border-slate-700/80 hover:border-indigo-500/80 flex flex-col items-center justify-center space-y-2 group transition">
+                    <span class="text-3xl group-hover:scale-110 transition duration-200" id="loginAvatar-child2">⚾</span>
+                    <span class="font-bold text-xs text-slate-200 group-hover:text-indigo-300" id="loginName-child2">둘째</span>
+                    <span class="text-[9px] text-slate-500 bg-slate-800/80 px-2 py-0.5 rounded-full border border-slate-700">child2</span>
+                </button>
+            </div>
+
+            <div class="pt-2 text-[11px] text-slate-500 flex items-center justify-center gap-1">
+                <i class="fas fa-shield-alt text-indigo-400"></i>
+                <span>다음 접속 시 선택한 프로필로 자동 로그인됩니다.</span>
+            </div>
+        </div>
+    </div>
+
     <div id="toastContainer" class="fixed bottom-20 sm:bottom-6 right-4 sm:right-6 z-50 flex flex-col space-y-2 pointer-events-none"></div>
 
     <script>
@@ -684,7 +717,6 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ3enZncWNmeWR6bnV3dWd5eWlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzNzU2MjcsImV4cCI6MjA4ODk1MTYyN30.SqQJ7w-SsPnm1wN03USOaR6_Fdn0JBzLn8tPhFYJWj8';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Extended Categories tailored for Family Members (Parents + Teens)
         const IN_CATEGORIES = [
             { name: '정기 용돈/월급', icon: '💵' },
             { name: '상여금/부업', icon: '✨' },
@@ -712,14 +744,11 @@
         ];
 
         const FAMILY_FORTUNES = [
-            // 기존 포춘
             "오늘 불필요한 카페/간식 소비 방어로 알뜰 가계 달성! ☕",
             "가족과 함께하는 더치페이는 신뢰와 정직의 시작입니다 🤝",
             "지금 사고 싶은 것, 24시간 뒤에 한번 더 생각하기 ⏱️",
             "정기 구독 서비스 중 안 쓰는 것이 있다면 오늘 정리해보세요! 🎧",
             "꾸준히 모은 작은 돈이 가족 버킷리스트를 현실로 만듭니다! 🚀",
-
-            // 추가된 포춘
             "할인율에 속지 마세요. 사지 않으면 100% 할인입니다! 🏷️",
             "배달 앱을 열기 전, 냉장고 속 잊혀진 재료부터 구조해주세요! 🍳",
             "오늘 아낀 커핏값 한 잔, 미래의 나에게 보내는 선물입니다! 🎁",
@@ -732,10 +761,10 @@
             "우리 가족의 다음 여행지, 매일 모으는 작은 저축에서 시작됩니다 ✈️",
             "통장 잔고의 여유가 마음의 여유와 선택의 자유를 만들어줍니다 🌿",
             "Point는 덤이 아니라 내 돈입니다. 자투리 포인트까지 야무지게 사용하세요! 🎯",
-            "사용하지 않는 안쓰는 쿠폰이나 기프티콘은 오늘 꼭 만료 전에 사용하세요! 🎟️",
             "스트레스받을 때 쇼핑몰 앱을 켜는 대신 산책을 다녀와 보세요! 👟",
             "지출을 줄이는 것은 소득을 올리는 가장 빠르고 확실한 방법입니다 📈"
         ];
+
         const DEFAULT_FAMILY_MEMBERS = [
             { key: 'child1', name: '첫째', avatar: '🐹', defaultBudget: 150000 },
             { key: 'child2', name: '둘째', avatar: '⚾', defaultBudget: 150000 },
@@ -743,8 +772,10 @@
             { key: 'dad', name: '아빠', avatar: '🎾', defaultBudget: 300000 }
         ];
 
+        const STORAGE_KEY_LOGIN = 'family_pay_active_member';
+
         let appData = {
-            activeMemberKey: 'mom',
+            activeMemberKey: localStorage.getItem(STORAGE_KEY_LOGIN) || 'mom',
             audioEnabled: true,
             members: {}
         };
@@ -798,7 +829,7 @@
                     });
                 }
             } catch(e) {
-                console.log('Audio suspended');
+                console.log('Audio error/suspended');
             }
         }
 
@@ -814,13 +845,58 @@
             }
         }
 
+        function showLoginOverlay() {
+            updateLoginOverlayUI();
+            const overlay = document.getElementById('loginOverlay');
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+            playSound('pop');
+        }
+
+        function hideLoginOverlay() {
+            const overlay = document.getElementById('loginOverlay');
+            overlay.classList.add('hidden');
+            overlay.classList.remove('flex');
+        }
+
+        function loginMember(key) {
+            if (!appData.members || !appData.members[key]) {
+                showToast('⚠️ 선택한 프로필을 로드할 수 없습니다.');
+                return;
+            }
+
+            appData.activeMemberKey = key;
+            localStorage.setItem(STORAGE_KEY_LOGIN, key);
+
+            updateFamilySwitcherUI();
+            updateDashboard();
+            hideLoginOverlay();
+
+            const member = appData.members[key];
+            if (member) {
+                document.getElementById('budgetInput').value = member.budgetTarget || 300000;
+            }
+
+            playSound('success');
+            showToast(`👋 '${member.name}' 님으로 로그인되었습니다!`);
+        }
+
+        function updateLoginOverlayUI() {
+            ['mom', 'dad', 'child1', 'child2'].forEach(key => {
+                const member = (appData.members && appData.members[key]) ? appData.members[key] : { name: key, avatar: '👤' };
+                const nameEl = document.getElementById(`loginName-${key}`);
+                const avatarEl = document.getElementById(`loginAvatar-${key}`);
+                if (nameEl) nameEl.textContent = member.name;
+                if (avatarEl) avatarEl.textContent = member.avatar;
+            });
+        }
+
         async function loadData() {
             showToast('🔄 Supabase DB에서 가계 데이터 읽어오는 중...');
             try {
                 let { data: childrenData, error: childErr } = await supabaseClient.from('children').select('*');
                 if (childErr) throw childErr;
 
-                // Ensure default 4 family members exist in DB
                 const existingKeys = (childrenData || []).map(c => c.child_key);
                 const missingMembers = DEFAULT_FAMILY_MEMBERS.filter(m => !existingKeys.includes(m.key));
 
@@ -879,13 +955,25 @@
 
                 document.getElementById('formDate').value = new Date().toISOString().substring(0, 10);
                 updateFamilySwitcherUI();
-                
-                const member = getCurrentMember();
-                if (member) {
-                    document.getElementById('budgetInput').value = member.budgetTarget || 300000;
+                updateLoginOverlayUI();
+
+                const savedActiveMember = localStorage.getItem(STORAGE_KEY_LOGIN);
+
+                if (savedActiveMember && appData.members[savedActiveMember]) {
+                    appData.activeMemberKey = savedActiveMember;
+                    hideLoginOverlay();
+                    
+                    const member = getCurrentMember();
+                    if (member) {
+                        document.getElementById('budgetInput').value = member.budgetTarget || 300000;
+                    }
+                    updateDashboard();
+                    showToast(`⚡ '${appData.members[savedActiveMember].name}' 님으로 자동 로그인되었습니다.`);
+                } else {
+                    showLoginOverlay();
+                    updateDashboard();
                 }
-                updateDashboard();
-                showToast('⚡ 패밀리 PAY DB 동기화 완료!');
+
             } catch (e) {
                 console.error('Supabase connection error:', e);
                 showToast('⚠️ DB 연동 실패. Supabase 설정을 확인하세요.');
@@ -910,18 +998,7 @@
             }, 2500);
         }
 
-        function switchMember(key) {
-            appData.activeMemberKey = key;
-            updateFamilySwitcherUI();
-            updateDashboard();
-            const member = getCurrentMember();
-            if (member) {
-                document.getElementById('budgetInput').value = member.budgetTarget || 300000;
-                showToast(`👤 '${member.name}' 님의 가계부로 전환되었습니다.`);
-            }
-            playSound('pop');
-        }
-
+        // 현재 선택된 멤버의 필(Pill) 버튼 UI 및 정보 업데이트
         function updateFamilySwitcherUI() {
             ['mom', 'dad', 'child1', 'child2'].forEach(key => {
                 const member = appData.members[key] || { name: key, avatar: '👤' };
@@ -945,6 +1022,23 @@
             if (appData.members.dad) document.getElementById('dadNameInput').value = appData.members.dad.name;
             if (appData.members.child1) document.getElementById('child1NameInput').value = appData.members.child1.name;
             if (appData.members.child2) document.getElementById('child2NameInput').value = appData.members.child2.name;
+        }
+
+        // 멤버 전환 처리 함수
+        function switchMember(memberKey) {
+            if (!appData.members || !appData.members[memberKey]) return;
+
+            appData.activeMemberKey = memberKey;
+            localStorage.setItem(STORAGE_KEY_LOGIN, memberKey);
+
+            const member = getCurrentMember();
+            if (member) {
+                document.getElementById('budgetInput').value = member.budgetTarget || 300000;
+            }
+
+            updateFamilySwitcherUI();
+            updateDashboard();
+            playSound('pop');
         }
 
         async function handleSaveFamilyNames(e) {
@@ -977,8 +1071,8 @@
             const member = getCurrentMember();
             if (!member) return;
 
+            const editingId = document.getElementById('editingTxId').value;
             const type = document.getElementById('formType').value;
-            // 숫자 외 모든 문자(콤마, 원 등)를 제거 후 수치화
             const rawAmount = document.getElementById('formAmount').value.replace(/[^0-9]/g, '');
             const amount = Number(rawAmount);
 
@@ -992,39 +1086,87 @@
             const date = document.getElementById('formDate').value;
 
             try {
-                const { data, error } = await supabaseClient.from('transactions').insert([{
-                    child_id: member.dbId,
-                    type,
-                    amount,
-                    category,
-                    memo,
-                    date
-                }]).select();
-
-                if (error) throw error;
-
-                if (data && data[0]) {
-                    member.transactions.unshift({
-                        id: data[0].id,
+                if (editingId) {
+                    const { error } = await supabaseClient.from('transactions').update({
                         type,
                         amount,
                         category,
                         memo,
                         date
-                    });
-                }
+                    }).eq('id', editingId);
 
-                saveData();
-                closeModal('addModal');
-                playSound('pop');
-                showToast(type === 'in' ? '🎉 수입 내역 DB 저장 완료!' : '🛍️ 지출 내역 DB 저장 완료!');
+                    if (error) throw error;
+
+                    const targetTx = member.transactions.find(t => t.id === editingId);
+                    if (targetTx) {
+                        targetTx.type = type;
+                        targetTx.amount = amount;
+                        targetTx.category = category;
+                        targetTx.memo = memo;
+                        targetTx.date = date;
+                    }
+
+                    saveData();
+                    closeModal('addModal');
+                    playSound('pop');
+                    showToast('✏️ 입출금 내역이 수정되었습니다!');
+                } else {
+                    const { data, error } = await supabaseClient.from('transactions').insert([{
+                        child_id: member.dbId,
+                        type,
+                        amount,
+                        category,
+                        memo,
+                        date
+                    }]).select();
+
+                    if (error) throw error;
+
+                    if (data && data[0]) {
+                        member.transactions.unshift({
+                            id: data[0].id,
+                            type,
+                            amount,
+                            category,
+                            memo,
+                            date
+                        });
+                    }
+
+                    saveData();
+                    closeModal('addModal');
+                    playSound('pop');
+                    showToast(type === 'in' ? '🎉 수입 내역 DB 저장 완료!' : '🛍️ 지출 내역 DB 저장 완료!');
+                }
 
                 document.getElementById('formAmount').value = '';
                 document.getElementById('formMemo').value = '';
+                document.getElementById('editingTxId').value = '';
             } catch (err) {
                 console.error(err);
-                showToast('⚠️ DB 저장에 실패했습니다.');
+                showToast('⚠️ DB 처리에 실패했습니다.');
             }
+        }
+
+        function openEditTransactionModal(id) {
+            const member = getCurrentMember();
+            if (!member) return;
+
+            const t = member.transactions.find(item => item.id === id);
+            if (!t) return;
+
+            document.getElementById('editingTxId').value = t.id;
+            document.getElementById('transactionModalTitle').textContent = '입출금 내역 수정';
+            setFormType(t.type);
+            document.getElementById('formAmount').value = t.amount;
+            document.getElementById('formMemo').value = t.memo;
+            document.getElementById('formDate').value = t.date;
+            
+            setTimeout(() => {
+                document.getElementById('formCategory').value = t.category;
+            }, 0);
+
+            openModal('addModal');
         }
 
         async function deleteTransaction(id) {
@@ -1153,38 +1295,80 @@
             const member = getCurrentMember();
             if (!member) return;
 
+            const editingId = document.getElementById('editingChallengeId').value;
             const title = document.getElementById('challengeTitle').value;
             const reward = Number(document.getElementById('challengeReward').value);
             const iconRadio = document.querySelector('input[name="challengeIcon"]:checked');
             const icon = iconRadio ? iconRadio.value : '🏪';
 
             try {
-                const { data, error } = await supabaseClient.from('challenges').insert([{
-                    child_id: member.dbId,
-                    title,
-                    reward,
-                    icon,
-                    status: 'active'
-                }]).select();
+                if (editingId) {
+                    const { error } = await supabaseClient.from('challenges').update({
+                        title,
+                        reward,
+                        icon
+                    }).eq('id', editingId);
 
-                if (error) throw error;
+                    if (error) throw error;
 
-                if (data && data[0]) {
-                    member.challenges.push({
-                        id: data[0].id,
+                    const targetCh = member.challenges.find(c => c.id === editingId);
+                    if (targetCh) {
+                        targetCh.title = title;
+                        targetCh.reward = reward;
+                        targetCh.icon = icon;
+                    }
+
+                    saveData();
+                    closeModal('addChallengeModal');
+                    showToast('✏️ 챌린지가 수정되었습니다!');
+                } else {
+                    const { data, error } = await supabaseClient.from('challenges').insert([{
+                        child_id: member.dbId,
                         title,
                         reward,
                         icon,
                         status: 'active'
-                    });
+                    }]).select();
+
+                    if (error) throw error;
+
+                    if (data && data[0]) {
+                        member.challenges.push({
+                            id: data[0].id,
+                            title,
+                            reward,
+                            icon,
+                            status: 'active'
+                        });
+                    }
+
+                    saveData();
+                    closeModal('addChallengeModal');
+                    showToast('🔥 새 절약 챌린지가 DB에 등록되었습니다!');
                 }
 
-                saveData();
-                closeModal('addChallengeModal');
-                showToast('🔥 새 절약 챌린지가 DB에 등록되었습니다!');
+                document.getElementById('editingChallengeId').value = '';
             } catch (err) {
-                showToast('⚠️ 챌린지 등록 중 오류 발생');
+                showToast('⚠️ 챌린지 저장 중 오류 발생');
             }
+        }
+
+        function openEditChallengeModal(id) {
+            const member = getCurrentMember();
+            if (!member) return;
+
+            const c = member.challenges.find(item => item.id === id);
+            if (!c) return;
+
+            document.getElementById('editingChallengeId').value = c.id;
+            document.getElementById('challengeModalTitle').textContent = '✏️ 챌린지 수정';
+            document.getElementById('challengeTitle').value = c.title;
+            document.getElementById('challengeReward').value = c.reward;
+
+            const iconRadio = document.querySelector(`input[name="challengeIcon"][value="${c.icon}"]`);
+            if (iconRadio) iconRadio.checked = true;
+
+            openModal('addChallengeModal');
         }
 
         async function depositGoal(goalId) {
@@ -1292,7 +1476,6 @@
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.getElementById(tabId).classList.remove('hidden');
 
-            // Update Desktop Nav Buttons
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.className = "tab-btn px-4 py-2.5 rounded-2xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all border border-slate-800 bg-slate-800/80 text-slate-400 hover:text-slate-200 hover:border-slate-700";
             });
@@ -1301,7 +1484,6 @@
                 activeDesktopBtn.className = "tab-btn px-4 py-2.5 rounded-2xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all border border-indigo-500/50 bg-indigo-600 text-white shadow-lg shadow-indigo-600/20";
             }
 
-            // Update Mobile Nav Buttons
             document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
                 btn.classList.remove('text-indigo-400');
                 btn.classList.add('text-slate-400');
@@ -1353,7 +1535,6 @@
             document.getElementById('monthIncomeDisplay').textContent = '+' + monthIn.toLocaleString() + ' 원';
             document.getElementById('monthExpenseDisplay').textContent = '-' + monthOut.toLocaleString() + ' 원';
 
-            // Top Expense Category
             let topCat = null;
             let maxCatAmt = 0;
             for (const [cat, amt] of Object.entries(categoryExpenseMap)) {
@@ -1372,14 +1553,12 @@
                 document.getElementById('topCategoryAmount').textContent = '0원';
             }
 
-            // Budget Calculation Engine
             const targetBudget = member.budgetTarget || 300000;
             const budgetPercent = targetBudget > 0 ? Math.min(100, Math.round((monthOut / targetBudget) * 100)) : 0;
             
             document.getElementById('budgetProgressText').textContent = `${monthOut.toLocaleString()} / ${targetBudget.toLocaleString()} 원 (${budgetPercent}%)`;
             document.getElementById('budgetProgressBar').style.width = budgetPercent + '%';
 
-            // Daily Recommended Spend
             const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
             const remainingDays = Math.max(1, daysInMonth - now.getDate() + 1);
             const remainingBudget = Math.max(0, targetBudget - monthOut);
@@ -1399,7 +1578,6 @@
                 budgetMsg.className = 'text-slate-400 font-semibold text-[10px] sm:text-xs';
             }
 
-            // Tier Level Badge
             const tierEl = document.getElementById('badgeTier');
             if (balance >= 1000000) {
                 tierEl.textContent = 'LV.4 패밀리 자산가 👑';
@@ -1475,10 +1653,13 @@
                                 <div class="text-[10px] sm:text-[11px] text-slate-500 mt-0.5">${t.date}</div>
                             </div>
                         </div>
-                        <div class="flex items-center space-x-2 shrink-0">
+                        <div class="flex items-center space-x-1.5 shrink-0">
                             <span class="font-bold font-jakarta text-xs sm:text-sm ${isIn ? 'text-emerald-400' : 'text-rose-400'}">
                                 ${isIn ? '+' : '-'}${Number(t.amount).toLocaleString()}원
                             </span>
+                            <button onclick="openEditTransactionModal('${t.id}')" class="text-slate-500 hover:text-indigo-400 text-xs p-1 transition" title="수정">
+                                <i class="fas fa-pen"></i>
+                            </button>
                             <button onclick="deleteTransaction('${t.id}')" class="text-slate-600 hover:text-rose-400 text-xs p-1 transition" title="삭제">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
@@ -1491,12 +1672,26 @@
         function openModal(modalId) {
             document.getElementById(modalId).classList.remove('hidden');
             if (modalId === 'addModal') {
-                setFormType('out');
+                if (!document.getElementById('editingTxId').value) {
+                    document.getElementById('transactionModalTitle').textContent = '입출금 내역 작성';
+                    setFormType('out');
+                }
+            } else if (modalId === 'addChallengeModal') {
+                if (!document.getElementById('editingChallengeId').value) {
+                    document.getElementById('challengeModalTitle').textContent = '🔥 새 지출 절약 챌린지';
+                    document.getElementById('challengeTitle').value = '';
+                    document.getElementById('challengeReward').value = '';
+                }
             }
         }
 
         function closeModal(modalId) {
             document.getElementById(modalId).classList.add('hidden');
+            if (modalId === 'addModal') {
+                document.getElementById('editingTxId').value = '';
+            } else if (modalId === 'addChallengeModal') {
+                document.getElementById('editingChallengeId').value = '';
+            }
         }
 
         function setFormType(type) {
@@ -1544,7 +1739,7 @@
                             </div>
                         </div>
 
-                        <div class="flex items-center space-x-1.5">
+                        <div class="flex items-center space-x-1">
                             ${isDone ? `
                                 <span class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold px-2 py-1 rounded-xl flex items-center gap-1">
                                     <i class="fas fa-check-circle"></i> 성공!
@@ -1554,6 +1749,9 @@
                                     완수
                                 </button>
                             `}
+                            <button onclick="openEditChallengeModal('${c.id}')" class="text-slate-500 hover:text-indigo-400 text-xs p-1 transition" title="수정">
+                                <i class="fas fa-pen"></i>
+                            </button>
                             <button onclick="deleteChallenge('${c.id}')" class="text-slate-600 hover:text-rose-400 text-xs p-1 transition" title="삭제">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
@@ -1596,7 +1794,6 @@
                             </div>
                         </div>
 
-                        <!-- Progress Bar -->
                         <div class="w-full bg-slate-950 rounded-full h-2 mb-2.5 overflow-hidden p-0.5 border border-slate-800">
                             <div class="bg-gradient-to-r from-pink-500 to-purple-500 h-full rounded-full transition-all duration-500" style="width: ${percent}%"></div>
                         </div>
@@ -1626,7 +1823,6 @@
             const member = getCurrentMember();
             if (!member) return;
             
-            // Category Doughnut
             const catTotals = {};
             member.transactions.filter(t => t.type === 'out').forEach(t => {
                 catTotals[t.category] = (catTotals[t.category] || 0) + Number(t.amount);
@@ -1659,7 +1855,6 @@
                 }
             });
 
-            // Monthly Bar Chart
             const monthMap = {};
             member.transactions.forEach(t => {
                 const m = t.date.substring(0, 7);
@@ -1733,7 +1928,6 @@
             showToast("📊 CSV 가계부 다운로드 완료!");
         }
 
-        // Initialize application on window load
         window.onload = function() {
             loadData();
         };
